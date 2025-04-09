@@ -35,7 +35,7 @@ export class LoginPage {
       });
 
       if (response.status == AuthStatus.authenticated) {
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       } else {
         this.errorMessage = 'Authentication token not received';
       }
