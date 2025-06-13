@@ -1,4 +1,34 @@
 <div class="side-nav" [class.visible]="isVisible">
-  hello
+  <div class="nav-content">
+    <!-- Logo Section -->
+    <div class="logo-section">
+      <a routerLink="/home">
+        <img src="/machine-logo.jpg" alt="Machine Logo" class="site-logo">
+      </a>
+    </div>
+
+    <!-- Navigation Items -->
+    <div class="nav-items">
+      <a [routerLink]="item.route" class="nav-item" *ngFor="let item of navItems" data-bs-toggle="tooltip" [attr.data-bs-title]="item.title" data-bs-placement="right">
+        <div class="icon-box">
+          <i [class]="item.icon"></i>
+        </div>
+      </a>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="profile-section">
+      <a routerLink="/profile" class="nav-item" data-bs-toggle="tooltip" data-bs-title="Profile" data-bs-placement="right">
+        <div class="icon-box">
+          <i class="bi bi-person-circle"></i>
+        </div>
+      </a>
+      <div class="nav-item" data-bs-toggle="tooltip" data-bs-title="Logout" data-bs-placement="right" (click)="logout()">
+        <div class="icon-box">
+          <i class="bi bi-box-arrow-right"></i>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 <div class="nav-indicator" [class.hidden]="isVisible"></div>
