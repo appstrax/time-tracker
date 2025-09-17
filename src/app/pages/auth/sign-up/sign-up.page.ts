@@ -13,20 +13,7 @@ import { AuthResult } from '@appstrax/services/auth/models/auth_result';
   imports: [CommonModule, FormsModule],
 })
 export class SignupPage {
-  showClientForm: boolean = false;
-  showProviderForm: boolean = false;
-
   constructor(private router: Router) {}
-
-  public onSelectRole(role: 'client' | 'provider') {
-    if (role === 'client') {
-      this.showClientForm = true;
-      this.showProviderForm = false;
-    } else {
-      this.showClientForm = false;
-      this.showProviderForm = true;
-    }
-  }
 
   public async register() {
     try {
