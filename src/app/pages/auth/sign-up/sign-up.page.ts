@@ -1,6 +1,8 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+
+import { User } from '../../../models/user.model';
 import { Router } from '@angular/router';
 import { appstraxAuth, AuthErrors } from '@appstrax/services/auth';
 import { AuthResult } from '@appstrax/services/auth/models/auth_result';
@@ -13,22 +15,36 @@ import { AuthResult } from '@appstrax/services/auth/models/auth_result';
   imports: [CommonModule, FormsModule],
 })
 export class SignupPage {
+  user: User = new User();
+
   constructor(private router: Router) {}
 
   public async register() {
-    try {
-      const result: AuthResult = await appstraxAuth.register({
-        email: '',
-        password: '',
-        data: {
-          'firstName': '',
-          'lastName': '',
-        }
-      });
-      console.log('Successfully Registered: ', result.user?.email);
-    } catch (err) {
-      this.getErrorMessage(err);
-    }
+    console.log('Registering user: ', this.user);
+    // try {
+      // const result: AuthResult = await appstraxAuth.register({
+      //   email: this.user.email,
+      //   password: this.user.password,
+      //   data: {
+      //     'firstName': this.user.firstName,
+      //     'lastName': this.user.lastName,
+
+      //     // PROFILE FIELDS
+      //     'profilePictureUrl': this.user.profilePictureUrl,
+      //     'cvPdfUrl': this.user.cvPdfUrl,
+      //     'linkedinUrl': this.user.linkedinUrl,
+      //     'githubUrl': this.user.githubUrl,
+      //     'twitterUrl': this.user.twitterUrl,
+      //     'facebookUrl': this.user.facebookUrl,
+      //     'instagramUrl': this.user.instagramUrl,
+      //     'youtubeUrl': this.user.youtubeUrl,
+      //     'tiktokUrl': this.user.tiktokUrl,
+      //   }
+      // });
+      // console.log('Successfully Registered: ', result.user?.email);
+    // } catch (err) {
+    //   this.getErrorMessage(err);
+    // }
   }
   
 

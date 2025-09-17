@@ -10,4 +10,5 @@ export class Organization extends BaseModel {
   phone: string = '';
   email: string = '';
   website: string = '';
+  logoUrl: string = '';
 }

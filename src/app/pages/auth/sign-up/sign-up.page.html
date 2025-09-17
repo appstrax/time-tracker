@@ -1,0 +1,96 @@
+
+<div class="login-page-container">
+  <div class="login-container">
+    <div class="login-content">
+      <div class="left-panel">
+        <h1 class="main-title">Sign up</h1>
+        <p class="subtitle">to get started</p>
+      </div>
+
+      <div class="right-panel">
+        <h2 class="welcome-text">Welcome!</h2>
+        <p class="login-instruction">Create your account</p>
+
+        <form (ngSubmit)="register()" #form="ngForm" autocomplete="off">
+          <div class="form-group">
+            <label for="firstName" class="visually-hidden">First name</label>
+            <div class="input-with-icon">
+              <i class="bi bi-person"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="firstName"
+                name="firstName"
+                [(ngModel)]="user.firstName"
+                placeholder="First name"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="lastName" class="visually-hidden">Last name</label>
+            <div class="input-with-icon">
+              <i class="bi bi-person"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="lastName"
+                name="lastName"
+                [(ngModel)]="user.lastName"
+                placeholder="Last name"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="email" class="visually-hidden">Email</label>
+            <div class="input-with-icon">
+              <i class="bi bi-envelope"></i>
+              <input
+                type="email"
+                class="form-control"
+                id="email"
+                name="email"
+                [(ngModel)]="user.email"
+                placeholder="Email address"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="visually-hidden">Password</label>
+            <div class="input-with-icon">
+              <i class="bi bi-lock"></i>
+              <input
+                type="password"
+                class="form-control"
+                id="password"
+                name="password"
+                [(ngModel)]="user.password"
+                placeholder="Password"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary login-btn"
+            [disabled]="form.invalid"
+          >
+            Create account
+          </button>
+        </form>
+
+        <p class="signup-link">
+          Already have an account? <a href="/login">Log in</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+
