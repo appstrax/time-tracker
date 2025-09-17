@@ -2,9 +2,11 @@ import { Routes } from '@angular/router';
 
 import { appstraxAuth } from '@appstrax/services/auth';
 
+import { LoginPage } from './pages/auth/login/login.page';
+import { SignupPage } from './pages/auth/sign-up/sign-up.page';
+
 import { HomePage } from './pages/home/home.page';
 import { DocsPage } from './pages/docs/docs.page';
-import { LoginPage } from './pages/login/login.page';
 import { ReposPage } from './pages/repos/repos.page';
 import { UsersPage } from './pages/users/users.page';
 import { AuditPage } from './pages/audit/audit.page';
@@ -35,7 +37,9 @@ export const routes: Routes = [
   { path: 'project', component: ProjectPage },
   { path: 'stats', component: StatsPage },
   { path: 'profile', component: ProfilePage },
+  // AUTH
   { path: 'login', component: LoginPage },
+  { path: 'sign-up', component: SignupPage },
   { 
     path: 'home', 
     component: HomePage,

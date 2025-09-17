@@ -1,0 +1,37 @@
+<div class="signup-page-container">
+  <div class="signup-container">
+    <div class="signup-content">
+      <div class="left-panel">
+        <h1 class="main-title">Sign up</h1>
+        <p class="subtitle">choose your role</p>
+      </div>
+
+      <div class="right-panel">
+        <h2 class="welcome-text">Create your account</h2>
+        <p class="signup-instruction">Select the option that best describes you</p>
+
+        <div class="role-cards">
+          <button class="role-card" type="button" (click)="onSelectRole('client')">
+            <div class="icon-wrapper">
+              <i class="bi bi-person"></i>
+            </div>
+            <h3 class="role-title">Client</h3>
+            <p class="role-description">I want software built for my business or idea.</p>
+          </button>
+
+          <button class="role-card" type="button" (click)="onSelectRole('provider')">
+            <div class="icon-wrapper">
+              <i class="bi bi-tools"></i>
+            </div>
+            <h3 class="role-title">Provider</h3>
+            <p class="role-description">I design, build, and deliver software solutions.</p>
+          </button>
+
+          <p class="signup-link">
+            Already have an account? <a href="/login">Log in</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
