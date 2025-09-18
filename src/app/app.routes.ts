@@ -11,6 +11,7 @@ import { CreateProjectPage } from './pages/auth/create-project/create-project.pa
 
 import { HomePage } from './pages/home/home.page';
 import { DocsPage } from './pages/docs/docs.page';
+import { BasePage } from './pages/base-page/base-page.page';
 import { ReposPage } from './pages/repos/repos.page';
 import { UsersPage } from './pages/users/users.page';
 import { AuditPage } from './pages/audit/audit.page';
@@ -26,21 +27,7 @@ import { GuardrailsPage } from './pages/guardrails/guardrails.page';
 import { CompliancePage } from './pages/compliance/compliance.page';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
-  { path: 'define', component: DefinePage },
-  { path: 'tickets', component: TicketsPage },
-  { path: 'repos', component: ReposPage },
-  { path: 'billing', component: BillingPage },
-  { path: 'users', component: UsersPage },
-  { path: 'docs', component: DocsPage },
-  { path: 'compliance', component: CompliancePage },
-  { path: 'devops', component: DevopsPage },
-  { path: 'guardrails', component: GuardrailsPage },
-  { path: 'quality', component: QualityPage },
-  { path: 'audit', component: AuditPage },
-  { path: 'project', component: ProjectPage },
-  { path: 'stats', component: StatsPage },
-  { path: 'profile', component: ProfilePage },
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
   
   // AUTH
   { path: 'login', component: LoginPage },
@@ -49,10 +36,31 @@ export const routes: Routes = [
   { path: 'forgot-password', component: ForgotPasswordPage },
   { path: 'create-organization', component: CreateOrganizationPage },
   { path: 'create-project', component: CreateProjectPage },
-  { 
-    path: 'home', 
-    component: HomePage,
-    canActivate: [() => appstraxAuth.isAuthenticated()]
+  {
+    path: '',
+    component: BasePage,
+    children: [
+      {
+        path: 'home',
+        component: HomePage,
+        canActivate: [() => appstraxAuth.isAuthenticated()]
+      },
+      { path: 'docs', component: DocsPage },
+      { path: 'define', component: DefinePage },
+      { path: 'tickets', component: TicketsPage },
+      { path: 'repos', component: ReposPage },
+      { path: 'billing', component: BillingPage },
+      { path: 'users', component: UsersPage },
+      { path: 'docs', component: DocsPage },
+      { path: 'compliance', component: CompliancePage },
+      { path: 'devops', component: DevopsPage },
+      { path: 'guardrails', component: GuardrailsPage },
+      { path: 'quality', component: QualityPage },
+      { path: 'audit', component: AuditPage },
+      { path: 'project', component: ProjectPage },
+      { path: 'stats', component: StatsPage },
+      { path: 'profile', component: ProfilePage },
+    ]
   },
   { path: '**', redirectTo: '/home' }
 ];
