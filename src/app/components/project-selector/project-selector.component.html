@@ -1,0 +1,31 @@
+<div class="btn-group top-right" [class.show]="isMenuOpen">
+  <button
+    type="button"
+    class="btn btn-outline-dark dropdown-toggle d-flex align-items-center gap-2"
+    (click)="toggleMenu()"
+    aria-expanded="isMenuOpen"
+  >
+    <ng-container *ngIf="selectedProject as proj; else placeholder">
+      <img *ngIf="proj.logoUrl; else fallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
+      <ng-template #fallbackIcon>
+        <i class="bi bi-image proj-thumb-fallback"></i>
+      </ng-template>
+      <span class="proj-name">{{ proj.name }}</span>
+    </ng-container>
+    <ng-template #placeholder>
+      <i class="bi bi-image proj-thumb-fallback"></i>
+      <span class="proj-name">Select project</span>
+    </ng-template>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end" [class.show]="isMenuOpen" [attr.data-bs-popper]="isMenuOpen ? 'static' : null">
+    <li *ngFor="let p of projects">
+      <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="selectProject(p)">
+        <img *ngIf="p.logoUrl; else itemFallback" [src]="p.logoUrl" alt="logo" class="proj-thumb" />
+        <ng-template #itemFallback>
+          <i class="bi bi-image proj-thumb-fallback"></i>
+        </ng-template>
+        <span class="proj-name">{{ p.name }}</span>
+      </button>
+    </li>
+  </ul>
+</div>

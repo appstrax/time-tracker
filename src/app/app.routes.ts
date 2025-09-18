@@ -11,7 +11,6 @@ import { CreateProjectPage } from './pages/auth/create-project/create-project.pa
 
 import { HomePage } from './pages/home/home.page';
 import { DocsPage } from './pages/docs/docs.page';
-import { BasePage } from './pages/base-page/base-page.page';
 import { ReposPage } from './pages/repos/repos.page';
 import { UsersPage } from './pages/users/users.page';
 import { AuditPage } from './pages/audit/audit.page';
@@ -23,11 +22,12 @@ import { BillingPage } from './pages/billing/billing.page';
 import { QualityPage } from './pages/quality/quality.page';
 import { ProjectPage } from './pages/project/project.page';
 import { ProfilePage } from './pages/profile/profile.page';
+import { BasePage } from './pages/base-page/base-page.page';
 import { GuardrailsPage } from './pages/guardrails/guardrails.page';
 import { CompliancePage } from './pages/compliance/compliance.page';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: '', redirectTo: '/login', pathMatch: 'full' },
   
   // AUTH
   { path: 'login', component: LoginPage },
