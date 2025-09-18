@@ -21,17 +21,17 @@ export enum ProjectOrgRoles {
 export class OrganizationUsers {
   organizationId: string = '';
   userId: string = '';
-  role: OrgUserRoles = OrgUserRoles.USER;
+  role: OrgUserRoles = OrgUserRoles.ADMIN;
 }
 
 export class ProjectUsers {
   projectId: string = '';
   userId: string = '';
-  role: ProjectUserRoles = ProjectUserRoles.SOLUTIONS_ARCHITECT;
+  role: ProjectUserRoles = ProjectUserRoles.ADMIN;
 }
 
 export class ProjectOrganizations {
   projectId: string = '';
   organizationId: string = '';
-  role: ProjectOrgRoles = ProjectOrgRoles.CLIENT;
+  role: ProjectOrgRoles = ProjectOrgRoles.PROVIDER;
 }

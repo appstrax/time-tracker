@@ -5,9 +5,8 @@ export class User extends BaseModel {
     public password: string = '';
 
     // DATA FIELDS
-    public firstName: string = '';
-    public lastName: string = '';
-    public confirmPassword: string = '';
+    public name: string = '';
+    public surname: string = '';
     public profilePictureUrl: string = '';
     public cvPdfUrl: string = '';
     public linkedinUrl: string = '';

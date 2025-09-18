@@ -4,6 +4,8 @@ import { appstraxAuth } from '@appstrax/services/auth';
 
 import { LoginPage } from './pages/auth/login/login.page';
 import { SignupPage } from './pages/auth/sign-up/sign-up.page';
+import { VerifyEmailPage } from './pages/auth/verify-email/verify-email.page';
+import { ForgotPasswordPage } from './pages/auth/forgot-password/forgot-password.page';
 import { CreateOrganizationPage } from './pages/auth/create-organization/create-organization.page';
 import { CreateProjectPage } from './pages/auth/create-project/create-project.page';
 
@@ -43,6 +45,8 @@ export const routes: Routes = [
   // AUTH
   { path: 'login', component: LoginPage },
   { path: 'sign-up', component: SignupPage },
+  { path: 'verify-email', component: VerifyEmailPage },
+  { path: 'forgot-password', component: ForgotPasswordPage },
   { path: 'create-organization', component: CreateOrganizationPage },
   { path: 'create-project', component: CreateProjectPage },
   { 

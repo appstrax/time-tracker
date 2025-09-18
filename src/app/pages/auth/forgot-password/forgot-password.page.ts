@@ -1,27 +1,31 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import { appstraxAuth, AuthErrors, AuthStatus } from '@appstrax/services/auth';
+
+import { Router, RouterModule } from '@angular/router';
+import { AuthErrors } from '@appstrax/services/auth/models/auth_result';
+import { appstraxAuth, MessageDto } from '@appstrax/services/auth';
 
 @Component({
-  selector: 'app-login',
-  templateUrl: './login.page.html',
-  styleUrls: ['./login.page.scss'],
+  selector: 'app-forgot-password',
+  templateUrl: './forgot-password.page.html',
+  styleUrls: ['./forgot-password.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [CommonModule, FormsModule, RouterModule],
 })
-export class LoginPage {
-  email: string = '';
-  password: string = '';
-  isLoading: boolean = false;
+export class ForgotPasswordPage {
   errorMessage: string = '';
+  isLoading: boolean = false;
+  showResetPassword: boolean = false;
+  email: string = '';
+  code: string = '';
+  password: string = '';
 
   constructor(private router: Router) {}
 
-  async onSubmit(): Promise<void> {
-    if (!this.isFormValid()) {
-      this.errorMessage = 'Please enter both email and password';
+  public async sendEmail() {
+    if (!this.isSendEmailFormValid()) {
+      this.errorMessage = 'Please enter your email';
       return;
     }
 
@@ -29,15 +33,9 @@ export class LoginPage {
     this.errorMessage = '';
 
     try {
-      const response = await appstraxAuth.login({
-        email: this.email,
-        password: this.password,
-      });
-
-      if (response.status == AuthStatus.authenticated) {
-        this.router.navigate(['/home']);
-      } else {
-        this.errorMessage = 'Authentication token not received';
+      const response: MessageDto = await appstraxAuth.forgotPassword({ email: this.email });
+      if (response) {
+        this.showResetPassword = true;
       }
     } catch (error: any) {
       this.errorMessage = this.getErrorMessage(error);
@@ -46,8 +44,33 @@ export class LoginPage {
     }
   }
 
-  public isFormValid() {
-    return this.email != '' && this.password != '';
+  public isSendEmailFormValid() {
+    return this.email != '';
+  }
+
+  public async resetPassword() {
+    if (!this.isResetPasswordFormValid()) {
+      this.errorMessage = 'Please enter your email, code and password';
+      return;
+    }
+
+    this.isLoading = true;
+    this.errorMessage = '';
+
+    try {
+      const response: MessageDto = await appstraxAuth.resetPassword({ email: this.email, code: this.code, password: this.password });
+      if (response) {
+        this.router.navigate(['/login']);
+      }
+    } catch (error: any) {
+      this.errorMessage = this.getErrorMessage(error);
+    } finally {
+      this.isLoading = false;
+    }
+  }
+
+  public isResetPasswordFormValid() {
+    return this.email != '' && this.code != '' && this.password != '';
   }
 
   public getErrorMessage(err: any) {

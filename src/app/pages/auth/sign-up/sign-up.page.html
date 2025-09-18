@@ -12,15 +12,15 @@
 
         <form (ngSubmit)="register()" #form="ngForm" autocomplete="off">
           <div class="form-group">
-            <label for="firstName" class="visually-hidden">First name</label>
+            <label for="name" class="visually-hidden">First name</label>
             <div class="input-with-icon">
               <i class="bi bi-person"></i>
               <input
                 type="text"
                 class="form-control"
-                id="firstName"
-                name="firstName"
-                [(ngModel)]="user.firstName"
+                id="name"
+                name="name"
+                [(ngModel)]="user.name"
                 placeholder="First name"
                 required
               />
@@ -28,15 +28,15 @@
           </div>
 
           <div class="form-group">
-            <label for="lastName" class="visually-hidden">Last name</label>
+            <label for="surname" class="visually-hidden">Last name</label>
             <div class="input-with-icon">
               <i class="bi bi-person"></i>
               <input
                 type="text"
                 class="form-control"
-                id="lastName"
-                name="lastName"
-                [(ngModel)]="user.lastName"
+                id="surname"
+                name="surname"
+                [(ngModel)]="user.surname"
                 placeholder="Last name"
                 required
               />
@@ -75,11 +75,22 @@
             </div>
           </div>
 
+          <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+            {{ errorMessage }}
+          </div>
+
           <button
-            type="submit"
             class="btn btn-primary signup-btn"
+            type="submit"
+            [disabled]="!isFormValid()"
+            [ngClass]="{ 'disabled': isLoading }"
           >
-            Create account
+            <span
+              *ngIf="isLoading"
+              class="spinner-border spinner-border-sm"
+              aria-hidden="true"
+            ></span>
+            <span class="ms-2" role="status">Create account</span>
           </button>
         </form>
 
@@ -90,5 +101,3 @@
     </div>
   </div>
 </div>
-
-

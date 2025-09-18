@@ -47,10 +47,14 @@
             {{ errorMessage }}
           </div>
 
+          <p class="signup-link">
+            Forgot your password? <a href="/forgot-password">Reset password</a>
+          </p>
+
           <button
             type="submit"
             class="btn btn-primary login-btn"
-            [disabled]="isLoading"
+            [disabled]="!isFormValid()"
           >
             <span
               *ngIf="isLoading"
