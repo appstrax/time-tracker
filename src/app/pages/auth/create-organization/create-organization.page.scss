@@ -1,4 +1,4 @@
-.signup-page-container {
+.create-organization-page-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,22 +9,23 @@
   background-position: center;
 }
 
-.signup-container {
+.create-organization-container {
   width: 100%;
   max-width: 1000px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  position: relative;
 }
 
-.signup-content {
+.create-organization-content {
   display: flex;
   min-height: 500px;
 }
 
 .left-panel {
-  width: 40%;
+  width: 45%;
   padding: 4rem 3rem;
   display: flex;
   flex-direction: column;
@@ -57,7 +58,7 @@
   margin-bottom: 0.5rem;
 }
 
-.signup-instruction {
+.create-organization-instruction {
   font-size: 1.1rem;
   color: #6c757d;
   margin-bottom: 2rem;
@@ -81,12 +82,12 @@
 
 .form-control {
   height: 52px;
-  padding-left: 45px;
+  padding-left: 60px;
   border-radius: 6px;
   border: 1px solid #ced4da;
 }
 
-.signup-btn {
+.create-organization-btn {
   height: 52px;
   background-color: #4169e1;
   border-color: #4169e1;
@@ -95,19 +96,40 @@
   width: 100%;
 }
 
-.signup-link {
+.create-organization-link {
   text-align: center;
   color: #6c757d;
 }
 
-.signup-link a {
+.create-organization-link a {
   color: #4169e1;
   text-decoration: none;
   font-weight: 500;
 }
 
+.back-button {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  color: #4169e1;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+}
+
+.form-col {
+  width: 50%;
+}
+
 @media (max-width: 768px) {
-  .signup-content {
+  .create-organization-content {
     flex-direction: column;
   }
 
@@ -120,6 +142,15 @@
   .left-panel {
     text-align: center;
     min-height: 180px;
+  }
+
+  .form-row {
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .form-col {
+    width: 100%;
   }
 }
 

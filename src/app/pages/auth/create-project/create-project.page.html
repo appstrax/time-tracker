@@ -1,0 +1,78 @@
+<div class="create-project-page-container">
+  <div class="create-project-container">
+    <a class="back-button" routerLink="/create-organization">
+      <i class="bi bi-arrow-left"></i>
+      Back
+    </a>
+    <div class="create-project-content">
+      <div class="left-panel">
+        <h1 class="main-title">Create Project</h1>
+        <p class="subtitle">to get started</p>
+      </div>
+
+      <div class="right-panel">
+        <h2 class="welcome-text">Welcome!</h2>
+        <p class="create-project-instruction">Create your project</p>
+
+        <form (ngSubmit)="submit()" #form="ngForm" autocomplete="off">
+          <div class="form-group">
+            <label for="name" class="visually-hidden">Project Name</label>
+            <div class="input-with-icon">
+              <i class="bi bi-building"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                [(ngModel)]="project.name"
+                placeholder="Project Name"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description" class="visually-hidden">Project Description</label>
+            <div class="input-with-icon">
+              <i class="bi bi-file-earmark-text"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="description"
+                name="description"
+                [(ngModel)]="project.description"
+                placeholder="Project Description"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="logoUrl" class="visually-hidden">Logo URL</label>
+            <div class="input-with-icon">
+              <i class="bi bi-envelope"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="logoUrl"
+                name="logoUrl"
+                [(ngModel)]="project.logoUrl"
+                placeholder="Logo URL"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary create-project-btn"
+          >
+            Create Project
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+

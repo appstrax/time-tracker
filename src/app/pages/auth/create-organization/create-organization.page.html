@@ -1,0 +1,184 @@
+<div class="create-organization-page-container">
+  <div class="create-organization-container">
+    <a class="back-button" routerLink="/sign-up">
+      <i class="bi bi-arrow-left"></i>
+      Back
+    </a>
+    <div class="create-organization-content">
+      <div class="left-panel">
+        <h1 class="main-title">Create Organization</h1>
+        <p class="subtitle">to get started</p>
+      </div>
+
+      <div class="right-panel">
+        <h2 class="welcome-text">Welcome!</h2>
+        <p class="create-organization-instruction">Register your Organization</p>
+
+        <form (ngSubmit)="submit()" #form="ngForm" autocomplete="off">
+          <div class="form-group">
+            <label for="name" class="visually-hidden">Organization Name</label>
+            <div class="input-with-icon">
+              <i class="bi bi-building"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="name"
+                name="name"
+                [(ngModel)]="organization.name"
+                placeholder="Organization Name"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="description" class="visually-hidden"
+              >Organization Description</label
+            >
+            <div class="input-with-icon">
+              <i class="bi bi-file-earmark-text"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="description"
+                name="description"
+                [(ngModel)]="organization.description"
+                placeholder="Organization Description"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="address" class="visually-hidden">Address</label>
+            <div class="input-with-icon">
+              <i class="bi bi-house"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="address"
+                name="address"
+                [(ngModel)]="organization.address"
+                placeholder="Address"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <div class="form-group">
+                <label for="city" class="visually-hidden">City</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-building"></i>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="city"
+                    name="city"
+                    [(ngModel)]="organization.city"
+                    placeholder="City"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-group">
+                <label for="state" class="visually-hidden">State</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-globe"></i>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="state"
+                    name="state"
+                    [(ngModel)]="organization.state"
+                    placeholder="State"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-col">
+              <div class="form-group">
+                <label for="zip" class="visually-hidden">Zip</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-house"></i>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="zip"
+                    name="zip"
+                    [(ngModel)]="organization.zip"
+                    placeholder="Zip"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+            <div class="form-col">
+              <div class="form-group">
+                <label for="phone" class="visually-hidden">Phone</label>
+                <div class="input-with-icon">
+                  <i class="bi bi-phone"></i>
+                  <input
+                    type="text"
+                    class="form-control"
+                    id="phone"
+                    name="phone"
+                    [(ngModel)]="organization.phone"
+                    placeholder="Phone"
+                    required
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="website" class="visually-hidden">Website</label>
+            <div class="input-with-icon">
+              <i class="bi bi-globe"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="website"
+                name="website"
+                [(ngModel)]="organization.website"
+                placeholder="Website"
+                required
+              />
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="logoUrl" class="visually-hidden">Logo URL</label>
+            <div class="input-with-icon">
+              <i class="bi bi-image"></i>
+              <input
+                type="text"
+                class="form-control"
+                id="logoUrl"
+                name="logoUrl"
+                [(ngModel)]="organization.logoUrl"
+                placeholder="Logo URL"
+                required
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            class="btn btn-primary create-organization-btn"
+          >
+            Create Organization
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

@@ -4,6 +4,8 @@ import { appstraxAuth } from '@appstrax/services/auth';
 
 import { LoginPage } from './pages/auth/login/login.page';
 import { SignupPage } from './pages/auth/sign-up/sign-up.page';
+import { CreateOrganizationPage } from './pages/auth/create-organization/create-organization.page';
+import { CreateProjectPage } from './pages/auth/create-project/create-project.page';
 
 import { HomePage } from './pages/home/home.page';
 import { DocsPage } from './pages/docs/docs.page';
@@ -37,13 +39,16 @@ export const routes: Routes = [
   { path: 'project', component: ProjectPage },
   { path: 'stats', component: StatsPage },
   { path: 'profile', component: ProfilePage },
+  
   // AUTH
   { path: 'login', component: LoginPage },
   { path: 'sign-up', component: SignupPage },
+  { path: 'create-organization', component: CreateOrganizationPage },
+  { path: 'create-project', component: CreateProjectPage },
   { 
     path: 'home', 
     component: HomePage,
-    canActivate: [() => appstraxAuth.isAuthenticated()]
+    // canActivate: [() => appstraxAuth.isAuthenticated()]
   },
   { path: '**', redirectTo: '/home' }
 ];

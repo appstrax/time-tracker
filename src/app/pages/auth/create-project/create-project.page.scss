@@ -1,4 +1,4 @@
-.signup-page-container {
+.create-project-page-container {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -9,16 +9,17 @@
   background-position: center;
 }
 
-.signup-container {
+.create-project-container {
   width: 100%;
   max-width: 1000px;
   background-color: #fff;
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
   overflow: hidden;
+  position: relative;
 }
 
-.signup-content {
+.create-project-content {
   display: flex;
   min-height: 500px;
 }
@@ -57,7 +58,7 @@
   margin-bottom: 0.5rem;
 }
 
-.signup-instruction {
+.create-project-instruction {
   font-size: 1.1rem;
   color: #6c757d;
   margin-bottom: 2rem;
@@ -86,7 +87,7 @@
   border: 1px solid #ced4da;
 }
 
-.signup-btn {
+.create-project-btn {
   height: 52px;
   background-color: #4169e1;
   border-color: #4169e1;
@@ -95,19 +96,31 @@
   width: 100%;
 }
 
-.signup-link {
+.create-project-link {
   text-align: center;
   color: #6c757d;
 }
 
-.signup-link a {
+.create-project-link a {
+  color: #4169e1;
+  text-decoration: none;
+  font-weight: 500;
+}
+
+.back-button {
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   color: #4169e1;
   text-decoration: none;
   font-weight: 500;
 }
 
 @media (max-width: 768px) {
-  .signup-content {
+  .create-project-content {
     flex-direction: column;
   }
 

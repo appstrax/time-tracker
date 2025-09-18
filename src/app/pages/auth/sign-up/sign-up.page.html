@@ -1,7 +1,6 @@
-
-<div class="login-page-container">
-  <div class="login-container">
-    <div class="login-content">
+<div class="signup-page-container">
+  <div class="signup-container">
+    <div class="signup-content">
       <div class="left-panel">
         <h1 class="main-title">Sign up</h1>
         <p class="subtitle">to get started</p>
@@ -9,7 +8,7 @@
 
       <div class="right-panel">
         <h2 class="welcome-text">Welcome!</h2>
-        <p class="login-instruction">Create your account</p>
+        <p class="signup-instruction">Create your account</p>
 
         <form (ngSubmit)="register()" #form="ngForm" autocomplete="off">
           <div class="form-group">
@@ -78,8 +77,7 @@
 
           <button
             type="submit"
-            class="btn btn-primary login-btn"
-            [disabled]="form.invalid"
+            class="btn btn-primary signup-btn"
           >
             Create account
           </button>
