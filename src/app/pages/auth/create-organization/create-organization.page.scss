@@ -40,6 +40,17 @@
   flex-direction: column;
 }
 
+.header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.welcome-block {
+  flex: 1;
+}
+
 .main-title {
   font-size: 2rem;
   font-weight: 700;
@@ -145,6 +156,24 @@ form.ng-submitted .form-control.ng-invalid {
   width: 50%;
 }
 
+.file-input-with-preview input[type='file'] {
+  display: block;
+}
+
+.logo-preview {
+  margin-top: 0.5rem;
+}
+
+.logo-preview img {
+  display: block;
+  max-width: 120px;
+  max-height: 120px;
+  border-radius: 8px;
+  border: 1px solid #e9ecef;
+}
+
+/* hidden file input approach uses button UI */
+
 @media (max-width: 768px) {
   .create-organization-content {
     flex-direction: column;
@@ -159,6 +188,11 @@ form.ng-submitted .form-control.ng-invalid {
   .left-panel {
     text-align: center;
     min-height: 180px;
+  }
+
+  .header-row {
+    flex-direction: column;
+    align-items: stretch;
   }
 
   .form-row {

@@ -8,13 +8,21 @@
       <div class="left-panel">
         <h1 class="main-title">Create Organization</h1>
         <p class="subtitle">to get started</p>
+
+        <div class="logo-preview" *ngIf="logoPreviewUrl">
+          <img [src]="logoPreviewUrl" alt="Logo preview" />
+        </div>
       </div>
 
       <div class="right-panel">
-        <h2 class="welcome-text">Welcome!</h2>
-        <p class="create-organization-instruction">
-          Register your Organization
-        </p>
+        <div class="header-row">
+          <div class="welcome-block">
+            <h2 class="welcome-text">Welcome!</h2>
+            <p class="create-organization-instruction">
+              Register your Organization
+            </p>
+          </div>
+        </div>
 
         <form
           (ngSubmit)="createOrganization()"
@@ -74,9 +82,7 @@
           <div class="form-row">
             <div class="form-col">
               <div class="form-group">
-                <label for="country" class="visually-hidden"
-                  >Country</label
-                >
+                <label for="country" class="visually-hidden">Country</label>
                 <div class="input-with-icon">
                   <i class="bi bi-globe"></i>
                   <input
@@ -199,20 +205,19 @@
             </div>
           </div>
 
-          <div class="form-group">
-            <label for="logoUrl" class="visually-hidden">Logo URL</label>
-            <div class="input-with-icon">
-              <i class="bi bi-image"></i>
-              <input
-                type="text"
-                class="form-control"
-                id="logoUrl"
-                name="logoUrl"
-                [(ngModel)]="organization.logoUrl"
-                placeholder="Logo URL"
-              />
-            </div>
-          </div>
+          <button type="button" class="btn btn-outline-secondary mb-4" (click)="logoFileInput.click()">
+            <i class="bi bi-image me-2"></i>
+            Choose Logo
+          </button>
+          <input
+            #logoFileInput
+            type="file"
+            id="logoFile"
+            name="logoFile"
+            accept="image/*"
+            class="d-none"
+            (change)="onLogoSelected($event)"
+          />
 
           <div *ngIf="errorMessage" class="alert alert-danger mb-3">
             {{ errorMessage }}

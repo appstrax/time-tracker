@@ -9,6 +9,7 @@ import {
   OrganizationUsersService,
 } from '../../../services/organization.service';
 import { appstraxAuth, User } from '@appstrax/services/auth';
+import { appstraxStorage } from '@appstrax/services/storage';
 import {
   OrganizationUsers,
   OrgUserRoles,
@@ -24,6 +25,8 @@ import {
 export class CreateOrganizationPage {
   isLoading: boolean = false;
   errorMessage: string = '';
+  logoFile: File | null = null;
+  logoPreviewUrl: string | null = null;
   organization: Organization = new Organization();
   orgUser: OrganizationUsers = new OrganizationUsers();
 
@@ -44,9 +47,12 @@ export class CreateOrganizationPage {
 
     try {
       const user: User = await appstraxAuth.getUser();
-      this.organization = await this.organizationService.save(
-        this.organization
-      );
+
+      if (this.logoFile) {
+        await this.uploadOrganizationLogo(this.logoFile);
+      }
+
+      this.organization = await this.organizationService.save(this.organization);
 
       this.orgUser.organizationId = this.organization.id;
       this.orgUser.userId = user.id;
@@ -62,6 +68,29 @@ export class CreateOrganizationPage {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  public async uploadOrganizationLogo(file: File) {
+    const response = await appstraxStorage.uploadFile(file, 'organizationLogos');
+    this.organization.logoUrl = response.downloadUrl;
+  }
+
+  public onLogoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      this.logoFile = null;
+      this.logoPreviewUrl = null;
+      return;
+    }
+
+    const file = input.files[0];
+    this.logoFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.logoPreviewUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   public isFormValid() {

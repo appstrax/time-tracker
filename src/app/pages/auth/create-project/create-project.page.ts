@@ -13,6 +13,7 @@ import {
   ProjectUserRoles,
   ProjectUsers,
 } from '../../../models/many-to-many.model';
+import { appstraxStorage } from '@appstrax/services/storage';
 
 @Component({
   selector: 'app-create-project',
@@ -28,6 +29,8 @@ export class CreateProjectPage {
   allFeaturesEnabled: boolean = false;
   errorMessage: string = '';
   isLoading: boolean = false;
+  logoFile: File | null = null;
+  logoPreviewUrl: string | null = null;
 
   constructor(
     private router: Router,
@@ -129,6 +132,10 @@ export class CreateProjectPage {
 
     try {
       const user: User = await appstraxAuth.getUser();
+      if (this.logoFile) {
+        await this.uploadProjectLogo(this.logoFile);
+      }
+
       this.project = await this.projectService.save(this.project);
 
       this.projectUser.projectId = this.project.id;
@@ -145,6 +152,29 @@ export class CreateProjectPage {
     } finally {
       this.isLoading = false;
     }
+  }
+
+  public async uploadProjectLogo(file: File) {
+    const response = await appstraxStorage.uploadFile(file, 'projectLogos');
+    this.project.logoUrl = response.downloadUrl;
+  }
+
+  public onLogoSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) {
+      this.logoFile = null;
+      this.logoPreviewUrl = null;
+      return;
+    }
+
+    const file = input.files[0];
+    this.logoFile = file;
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.logoPreviewUrl = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   }
 
   public isNoFieldsToggled() {
