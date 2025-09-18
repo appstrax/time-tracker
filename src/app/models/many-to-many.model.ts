@@ -1,3 +1,5 @@
+import { Model } from "@appstrax/services/database";
+
 export enum OrgUserRoles {
   USER = 'user',
   ADMIN = 'admin',
@@ -18,19 +20,19 @@ export enum ProjectOrgRoles {
   PROVIDER = 'provider',
 }
 
-export class OrganizationUsers {
+export class OrganizationUsers extends Model {
   organizationId: string = '';
   userId: string = '';
   role: OrgUserRoles = OrgUserRoles.ADMIN;
 }
 
-export class ProjectUsers {
+export class ProjectUsers extends Model {
   projectId: string = '';
   userId: string = '';
   role: ProjectUserRoles = ProjectUserRoles.ADMIN;
 }
 
-export class ProjectOrganizations {
+export class ProjectOrganizations extends Model {
   projectId: string = '';
   organizationId: string = '';
   role: ProjectOrgRoles = ProjectOrgRoles.PROVIDER;

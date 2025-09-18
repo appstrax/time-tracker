@@ -1,6 +1,6 @@
-import { BaseModel } from './base-model';
+import { Model } from '@appstrax/services/shared/models/model';
 
-export class User extends BaseModel {
+export class User extends Model {
     public email: string = '';
     public password: string = '';
 

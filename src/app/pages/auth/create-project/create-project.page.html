@@ -12,63 +12,141 @@
 
       <div class="right-panel">
         <h2 class="welcome-text">Welcome!</h2>
-        <p class="create-project-instruction">Create your project</p>
+        <div class="progress-indicator">
+          <div class="step" [class.active]="step === 1">1</div>
+          <div class="divider"></div>
+          <div class="step" [class.active]="step === 2">2</div>
+        </div>
+        <p class="create-project-instruction" *ngIf="step === 1">Create your project</p>
+        <p class="create-project-instruction" *ngIf="step === 2">Enable project features</p>
 
-        <form (ngSubmit)="submit()" #form="ngForm" autocomplete="off">
-          <div class="form-group">
-            <label for="name" class="visually-hidden">Project Name</label>
-            <div class="input-with-icon">
-              <i class="bi bi-building"></i>
-              <input
-                type="text"
-                class="form-control"
-                id="name"
-                name="name"
-                [(ngModel)]="project.name"
-                placeholder="Project Name"
-                required
-              />
+        <form (ngSubmit)="createProject()" #form="ngForm" autocomplete="off">
+          <ng-container *ngIf="step === 1">
+            <div class="form-group">
+              <label for="name" class="visually-hidden">Project Name</label>
+              <div class="input-with-icon">
+                <i class="bi bi-building"></i>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="name"
+                  name="name"
+                  [(ngModel)]="project.name"
+                  placeholder="* Project Name"
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="description" class="visually-hidden">Project Description</label>
-            <div class="input-with-icon">
-              <i class="bi bi-file-earmark-text"></i>
-              <input
-                type="text"
-                class="form-control"
-                id="description"
-                name="description"
-                [(ngModel)]="project.description"
-                placeholder="Project Description"
-                required
-              />
+            <div class="form-group">
+              <label for="description" class="visually-hidden">Project Description</label>
+              <div class="input-with-icon">
+                <i class="bi bi-file-earmark-text"></i>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="description"
+                  name="description"
+                  [(ngModel)]="project.description"
+                  placeholder="* Project Description"
+                  required
+                />
+              </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="logoUrl" class="visually-hidden">Logo URL</label>
-            <div class="input-with-icon">
-              <i class="bi bi-envelope"></i>
-              <input
-                type="text"
-                class="form-control"
-                id="logoUrl"
-                name="logoUrl"
-                [(ngModel)]="project.logoUrl"
-                placeholder="Logo URL"
-                required
-              />
+            <div class="form-group">
+              <label for="logoUrl" class="visually-hidden">Logo URL</label>
+              <div class="input-with-icon">
+                <i class="bi bi-envelope"></i>
+                <input
+                  type="text"
+                  class="form-control"
+                  id="logoUrl"
+                  name="logoUrl"
+                  [(ngModel)]="project.logoUrl"
+                  placeholder="Logo URL"
+                />
+              </div>
             </div>
-          </div>
 
-          <button
-            type="submit"
-            class="btn btn-primary create-project-btn"
-          >
-            Create Project
-          </button>
+            <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+              {{ errorMessage }}
+            </div>
+
+            <button
+              type="button"
+              class="btn btn-primary create-project-btn"
+              (click)="nextStep()"
+            >
+              Go To Step 2
+            </button>
+          </ng-container>
+
+          <ng-container *ngIf="step === 2">
+            <label class="toggle-item master-toggle">
+              <input type="checkbox" [(ngModel)]="allFeaturesEnabled" name="allFeaturesEnabled" (ngModelChange)="setAllFeatures($event)" />
+              Enable all features
+            </label>
+            <div class="toggle-grid">
+              <label class="toggle-item">
+                <input type="checkbox" name="ticketManagement" [(ngModel)]="project.ticketManagement" (change)="updateAllFeaturesFlag()" />
+                Ticket Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="repoManagement" [(ngModel)]="project.repoManagement" (change)="updateAllFeaturesFlag()" />
+                Repo Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="billingManagement" [(ngModel)]="project.billingManagement" (change)="updateAllFeaturesFlag()" />
+                Billing Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="userManagement" [(ngModel)]="project.userManagement" (change)="updateAllFeaturesFlag()" />
+                User Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="documentationManagement" [(ngModel)]="project.documentationManagement" (change)="updateAllFeaturesFlag()" />
+                Documentation Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="complianceManagement" [(ngModel)]="project.complianceManagement" (change)="updateAllFeaturesFlag()" />
+                Compliance Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="devOpsManagement" [(ngModel)]="project.devOpsManagement" (change)="updateAllFeaturesFlag()" />
+                DevOps Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="guardrailsManagement" [(ngModel)]="project.guardrailsManagement" (change)="updateAllFeaturesFlag()" />
+                Guardrails Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="qualityManagement" [(ngModel)]="project.qualityManagement" (change)="updateAllFeaturesFlag()" />
+                Quality Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="auditManagement" [(ngModel)]="project.auditManagement" (change)="updateAllFeaturesFlag()" />
+                Audit Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="projectStateManagement" [(ngModel)]="project.projectStateManagement" (change)="updateAllFeaturesFlag()" />
+                Project State Management
+              </label>
+              <label class="toggle-item">
+                <input type="checkbox" name="statsManagement" [(ngModel)]="project.statsManagement" (change)="updateAllFeaturesFlag()" />
+                Stats Management
+              </label>
+            </div>
+
+            <div *ngIf="errorMessage" class="alert alert-danger mb-3">
+              {{ errorMessage }}
+            </div>
+
+            <div class="button-row">
+              <button type="button" class="btn btn-outline-secondary" (click)="prevStep()">Back</button>
+              <button type="submit" class="btn btn-primary">Create Project</button>
+            </div>
+          </ng-container>
         </form>
       </div>
     </div>

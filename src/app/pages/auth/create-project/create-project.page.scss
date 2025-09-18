@@ -64,6 +64,37 @@
   margin-bottom: 2rem;
 }
 
+.progress-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 1rem;
+}
+
+.progress-indicator .step {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #e9ecef;
+  color: #6c757d;
+  font-weight: 600;
+}
+
+.progress-indicator .step.active {
+  background: #4169e1;
+  color: #fff;
+}
+
+.progress-indicator .divider {
+  flex: 1;
+  height: 2px;
+  background: #e9ecef;
+  margin: 0 4px;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -94,6 +125,30 @@
   font-weight: 500;
   margin-bottom: 2rem;
   width: 100%;
+}
+
+.toggle-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.75rem 1rem;
+  margin-bottom: 1.5rem;
+}
+
+.toggle-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.95rem;
+}
+
+.master-toggle {
+  margin-bottom: 0.75rem;
+}
+
+.button-row {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
 }
 
 .create-project-link {
@@ -133,6 +188,10 @@
   .left-panel {
     text-align: center;
     min-height: 180px;
+  }
+
+  .toggle-grid {
+    grid-template-columns: 1fr;
   }
 }
 

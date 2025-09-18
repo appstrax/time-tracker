@@ -64,6 +64,23 @@
   margin-bottom: 2rem;
 }
 
+.required-note {
+  margin-top: -0.5rem;
+  margin-bottom: 1rem;
+  color: #6c757d;
+  font-size: 0.9rem;
+}
+
+.required-note .asterisk {
+  color: #dc3545;
+  margin-right: 4px;
+}
+
+/* Subtle invalid highlighting after submit */
+form.ng-submitted .form-control.ng-invalid {
+  border-color: #dc3545;
+}
+
 .form-group {
   margin-bottom: 1.5rem;
 }
@@ -82,7 +99,7 @@
 
 .form-control {
   height: 52px;
-  padding-left: 60px;
+  padding-left: 45px;
   border-radius: 6px;
   border: 1px solid #ced4da;
 }
