@@ -1,0 +1,11 @@
+<div class="text-muted fw-light">
+  <i class="bi" [class]="icon"></i>
+  {{ type }}
+</div>
+@if(url){
+<a class="fw-500 link-text" [href]="url" target="_blank">
+  {{ url }}
+</a>
+} @else {
+<div class="text-muted fst-italic">Unlinked</div>
+}

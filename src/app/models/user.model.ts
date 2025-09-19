@@ -7,13 +7,15 @@ export class User extends Model {
     // DATA FIELDS
     public name: string = '';
     public surname: string = '';
-    public profilePictureUrl: string = '';
+    
     public cvPdfUrl: string = '';
-    public linkedinUrl: string = '';
-    public githubUrl: string = '';
-    public twitterUrl: string = '';
+    public profilePictureUrl: string = '';
+
     public facebookUrl: string = '';
+    public githubUrl: string = '';
     public instagramUrl: string = '';
-    public youtubeUrl: string = '';
+    public linkedinUrl: string = '';
     public tiktokUrl: string = '';
+    public twitterUrl: string = '';
+    public youtubeUrl: string = '';
 }

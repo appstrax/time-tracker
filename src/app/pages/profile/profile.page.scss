@@ -1,0 +1,76 @@
+.page-title, .user-name, .section-title {
+  color: var(--primary-color-dark);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.profile-section {
+  border-radius: 20px;
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding: 2rem 3rem;
+  margin: 3rem 0;
+  background-color: #ffffff;
+
+  text-align: left;
+}
+
+.link-text {
+  color: var(--primary-color-dark);
+  text-decoration: none;
+}
+
+.btn-primary {
+  background-color: var(--primary-color-light);
+  border-color: var(--primary-color);
+  color: var(--primary-color);
+}
+
+.btn-primary:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 10px 0 #8a00b459;
+  color: #ffffff;
+}
+
+.profile-picture img {
+  box-shadow: 0 0 20px 0 lightgrey;
+  object-fit: cover;
+  width: 10rem;
+  height: 10rem;
+  transition: box-shadow 0.3s ease;
+
+  &:hover {
+    box-shadow: 0 0 10px 0 #8a00b459;
+  }
+}
+
+.user-name {
+  color: var(--primary-color-dark);
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.camera-icon {
+  cursor: pointer;
+  color: var(--primary-color-dark);
+  background-color: var(--primary-color-light);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  height: 2rem;
+  width: 2rem;
+  bottom: 0.5rem;
+  right: 0.5rem;
+  background-color: #ffffff;
+  border-radius: 50%;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
+
+  transition: background-color 0.2s ease, color 0.2s ease;
+
+  &:hover {
+    background-color: var(--primary-color);
+    color: #ffffff;
+  }
+}
