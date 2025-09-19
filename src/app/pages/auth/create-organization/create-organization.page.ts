@@ -93,17 +93,17 @@ export class CreateOrganizationPage {
     reader.readAsDataURL(file);
   }
 
-  public isFormValid() {
+  public isFormValid(): boolean {
     return (
-      this.organization.name &&
-      this.organization.description &&
-      this.organization.country &&
-      this.organization.email &&
-      this.organization.address &&
-      this.organization.city &&
-      this.organization.state &&
-      this.organization.zip &&
-      this.organization.phone
+      this.organization.name != '' &&
+      this.organization.description != '' &&
+      this.organization.country != '' &&
+      this.organization.email != '' &&
+      this.organization.address != '' &&
+      this.organization.city != '' &&
+      this.organization.state != '' &&
+      this.organization.zip != '' &&
+      this.organization.phone != ''
     );
   }
 }

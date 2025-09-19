@@ -32,7 +32,7 @@ export class ProjectUsers extends Model {
   role: ProjectUserRoles = ProjectUserRoles.ADMIN;
 }
 
-export class ProjectOrganizations extends Model {
+export class OrganizationProjects extends Model {
   projectId: string = '';
   organizationId: string = '';
   role: ProjectOrgRoles = ProjectOrgRoles.PROVIDER;

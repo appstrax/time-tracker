@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { CrudService } from '@appstrax/services/database';
 
 import { Organization } from '../models/organization.model';
-import { OrganizationUsers } from '../models/many-to-many.model';
+import { OrganizationUsers, OrganizationProjects } from '../models/many-to-many.model';
 
 @Injectable({ providedIn: 'root' })
 export class OrganizationService extends CrudService<Organization> {
@@ -15,5 +15,12 @@ export class OrganizationService extends CrudService<Organization> {
 export class OrganizationUsersService extends CrudService<OrganizationUsers> {
   constructor() {
     super('organization-users', OrganizationUsers);
+  }
+}
+
+@Injectable({ providedIn: 'root' })
+export class OrganizationProjectsService extends CrudService<OrganizationProjects> {
+  constructor() {
+    super('organization-projects', OrganizationProjects);
   }
 }

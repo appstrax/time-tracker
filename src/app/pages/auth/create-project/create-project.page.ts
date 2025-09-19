@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
@@ -10,10 +10,19 @@ import {
   ProjectUsersService,
 } from '../../../services/project.service';
 import {
+  OrganizationUsers,
+  OrganizationProjects,
+  ProjectOrgRoles,
   ProjectUserRoles,
   ProjectUsers,
 } from '../../../models/many-to-many.model';
 import { appstraxStorage } from '@appstrax/services/storage';
+import {
+  OrganizationProjectsService,
+  OrganizationService,
+  OrganizationUsersService,
+} from '../../../services/organization.service';
+import { Organization } from '../../../models/organization.model';
 
 @Component({
   selector: 'app-create-project',
@@ -22,36 +31,67 @@ import { appstraxStorage } from '@appstrax/services/storage';
   standalone: true,
   imports: [CommonModule, FormsModule, RouterModule],
 })
-export class CreateProjectPage {
+export class CreateProjectPage implements OnInit {
   project: Project = new Project();
   projectUser: ProjectUsers = new ProjectUsers();
+  organization: Organization = new Organization();
+  orgUser: OrganizationUsers = new OrganizationUsers();
+  orgProject: OrganizationProjects = new OrganizationProjects();
+
   step: number = 1;
-  allFeaturesEnabled: boolean = false;
   errorMessage: string = '';
+
   isLoading: boolean = false;
+  allFeaturesEnabled: boolean = false;
+
   logoFile: File | null = null;
   logoPreviewUrl: string | null = null;
 
   constructor(
     private router: Router,
     private projectService: ProjectService,
-    private projectUsersService: ProjectUsersService
+    private organizationService: OrganizationService,
+    private projectUsersService: ProjectUsersService,
+    private orgUsersService: OrganizationUsersService,
+    private orgProjectsService: OrganizationProjectsService
   ) {}
+
+  ngOnInit(): void {
+    this.getUsersOrganization();
+  }
+
+  public async getUsersOrganization() {
+    this.isLoading = true;
+    try {
+      const user: User = await appstraxAuth.getUser();
+      const orgUsers = await this.orgUsersService.find({
+        where: { userId: user.id },
+      });
+      this.orgUser = orgUsers.data[0];
+      if (!this.orgUser) {
+        this.router.navigate(['/create-organization']);
+      }
+      const org = await this.organizationService.find({
+        where: { id: this.orgUser.organizationId },
+      });
+      this.organization = org.data[0];
+    } catch (error: any) {
+      this.errorMessage = error.message;
+    } finally {
+      this.isLoading = false;
+    }
+  }
 
   public nextStep() {
     if (!this.isFormValid()) {
       this.errorMessage = 'Please enter all required fields';
       return;
     }
-    if (this.step < 2) {
-      this.step = 2;
-    }
+    if (this.step < 2) this.step = 2;
   }
 
   public prevStep() {
-    if (this.step > 1) {
-      this.step = 1;
-    }
+    if (this.step > 1) this.step = 1;
   }
 
   public setAllFeatures(enable: boolean) {
@@ -122,7 +162,7 @@ export class CreateProjectPage {
   }
 
   async createProject(): Promise<void> {
-    if (!this.isNoFieldsToggled()) {
+    if (!this.noFieldsToggled()) {
       this.errorMessage = 'Really...A project with no features?';
       return;
     }
@@ -132,9 +172,7 @@ export class CreateProjectPage {
 
     try {
       const user: User = await appstraxAuth.getUser();
-      if (this.logoFile) {
-        await this.uploadProjectLogo(this.logoFile);
-      }
+      if (this.logoFile) await this.uploadProjectLogo(this.logoFile);
 
       this.project = await this.projectService.save(this.project);
 
@@ -144,7 +182,13 @@ export class CreateProjectPage {
 
       this.projectUser = await this.projectUsersService.save(this.projectUser);
 
-      if (this.project && this.projectUser) {
+      this.orgProject.projectId = this.project.id;
+      this.orgProject.organizationId = this.organization.id;
+      this.orgProject.role = ProjectOrgRoles.PROVIDER;
+
+      this.orgProject = await this.orgProjectsService.save(this.orgProject);
+
+      if (this.project && this.projectUser && this.orgProject) {
         this.router.navigate(['/home']);
       }
     } catch (error: any) {
@@ -177,7 +221,7 @@ export class CreateProjectPage {
     reader.readAsDataURL(file);
   }
 
-  public isNoFieldsToggled() {
+  public noFieldsToggled(): boolean {
     return (
       this.project.ticketManagement &&
       this.project.repoManagement &&
@@ -194,7 +238,7 @@ export class CreateProjectPage {
     );
   }
 
-  public isFormValid() {
-    return this.project.name && this.project.description;
+  public isFormValid(): boolean {
+    return (this.project.name != '' && this.project.description != '');
   }
 }
