@@ -10,8 +10,8 @@
         />
         <i
           class="bi bi-camera-fill camera-icon"
-          (click)="onUploadProfilePicture()"
-        ></i>
+          (click)="onUploadProfilePicture()">
+      </i>
       </div>
 
       <div>
@@ -34,18 +34,35 @@
       <div class="row mb-4">
         <div class="col-md-4">
           <div class="text-muted fw-light">First Name</div>
-          <div class="fw-600">{{user.name}}</div>
+          <div class="fw-500">{{user.name}}</div>
         </div>
         <div class="col-md-4">
           <div class="text-muted fw-light">Last Name</div>
-          <div class="fw-600">{{user.surname}}</div>
+          <div class="fw-500">{{user.surname}}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted fw-light">CV/Resume</div>
+          @if(user.cvPdfUrl){
+            <a class="fw-500 link-text" [href]="user.cvPdfUrl" target="_blank">
+              {{ user.cvPdfUrl }}
+            </a>
+          } @else {
+            <button (click)="onUploadCV()" class="btn btn-primary d-flex align-items-center gap-3">
+              Upload
+              <i class="bi bi-upload"></i>
+            </button>
+          }
         </div>
       </div>
 
       <div class="row">
         <div class="col-md-4">
           <div class="text-muted fw-light">Email</div>
-          <div class="fw-600">{{user.email}}</div>
+          <div class="fw-500">{{user.email}}</div>
+        </div>
+        <div class="col-md-4">
+          <div class="text-muted fw-light">Password</div>
+          <div class="fw-500">********</div>
         </div>
       </div>
     </div>
@@ -64,31 +81,59 @@
     <div class="d-grid">
       <div class="row mb-4">
         <div class="col-md-4">
-          <app-social-link [url]="user.linkedinUrl"></app-social-link>
+          <app-social-link
+            [url]="user.linkedinUrl"
+            icon="bi-linkedin"
+            type="LinkedIn"
+          ></app-social-link>
         </div>
         <div class="col-md-4">
-          <app-social-link [url]="user.githubUrl"></app-social-link>
+          <app-social-link
+            [url]="user.githubUrl"
+            icon="bi-github"
+            type="GitHub"
+          ></app-social-link>
         </div>
         <div class="col-md-4">
-          <app-social-link [url]="user.twitterUrl"></app-social-link>
+          <app-social-link
+            [url]="user.twitterUrl"
+            icon="bi-twitter"
+            type="Twitter"
+          ></app-social-link>
         </div>
       </div>
 
       <div class="row mb-4">
         <div class="col-md-4">
-          <app-social-link [url]="user.facebookUrl"></app-social-link>
+          <app-social-link
+            [url]="user.facebookUrl"
+            icon="bi-facebook"
+            type="Facebook"
+          ></app-social-link>
         </div>
         <div class="col-md-4">
-          <app-social-link [url]="user.instagramUrl"></app-social-link>
+          <app-social-link
+            [url]="user.instagramUrl"
+            icon="bi-instagram"
+            type="Instagram"
+          ></app-social-link>
         </div>
         <div class="col-md-4">
-          <app-social-link [url]="user.youtubeUrl"></app-social-link>
+          <app-social-link
+            [url]="user.youtubeUrl"
+            icon="bi-youtube"
+            type="YouTube"
+          ></app-social-link>
         </div>
       </div>
 
       <div class="row mb-4">
         <div class="col-md-4">
-          <app-social-link [url]="user.tiktokUrl"></app-social-link>
+          <app-social-link
+            [url]="user.tiktokUrl"
+            icon="bi-tiktok"
+            type="TikTok"
+          ></app-social-link>
         </div>
         <div class="col-md-4">
           <div class="text-muted fw-light">&nbsp;</div>

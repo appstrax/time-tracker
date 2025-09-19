@@ -9,4 +9,6 @@ import { Component, Input } from '@angular/core';
 })
 export class SocialLinkComponent {
   @Input() url: string = '';
+  @Input() icon: string = '';
+  @Input() type: string = '';
 }
