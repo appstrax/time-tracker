@@ -27,6 +27,36 @@
         <form (ngSubmit)="createProject()" #form="ngForm" autocomplete="off">
           <ng-container *ngIf="step === 1">
             <div class="form-group">
+              <div class="org-dropdown" [class.show]="isOrgMenuOpen">
+                <button
+                  type="button"
+                  class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+                  (click)="toggleOrgMenu()"
+                  aria-expanded="isOrgMenuOpen"
+                >
+                  <span class="d-flex align-items-center gap-2">
+                    <img *ngIf="organization.logoUrl; else orgFallbackIcon" [src]="organization.logoUrl" alt="logo" class="org-thumb" />
+                    <ng-template #orgFallbackIcon>
+                      <i class="bi bi-briefcase org-thumb-fallback"></i>
+                    </ng-template>
+                    <span>{{ organization.id ? organization.name : '* Select Organization' }}</span>
+                  </span>
+                  <i class="bi bi-chevron-down"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end w-100" [class.show]="isOrgMenuOpen" [attr.data-bs-popper]="isOrgMenuOpen ? 'static' : null">
+                  <li *ngFor="let org of organizations">
+                    <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="selectOrganization(org)">
+                      <img *ngIf="org.logoUrl; else itemOrgFallback" [src]="org.logoUrl" alt="logo" class="org-thumb" />
+                      <ng-template #itemOrgFallback>
+                        <i class="bi bi-briefcase org-thumb-fallback"></i>
+                      </ng-template>
+                      <span>{{ org.name }}</span>
+                    </button>
+                  </li>
+                </ul>
+              </div>
+            </div>
+            <div class="form-group">
               <label for="name" class="visually-hidden">Project Name</label>
               <div class="input-with-icon">
                 <i class="bi bi-building"></i>

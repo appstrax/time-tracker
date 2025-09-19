@@ -23,6 +23,7 @@ import {
   OrganizationUsersService,
 } from '../../../services/organization.service';
 import { Organization } from '../../../models/organization.model';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-create-project',
@@ -33,10 +34,12 @@ import { Organization } from '../../../models/organization.model';
 })
 export class CreateProjectPage implements OnInit {
   project: Project = new Project();
+  organizations: Organization[] = [];
   projectUser: ProjectUsers = new ProjectUsers();
   organization: Organization = new Organization();
   orgUser: OrganizationUsers = new OrganizationUsers();
   orgProject: OrganizationProjects = new OrganizationProjects();
+  isOrgMenuOpen: boolean = false;
 
   step: number = 1;
   errorMessage: string = '';
@@ -49,6 +52,7 @@ export class CreateProjectPage implements OnInit {
 
   constructor(
     private router: Router,
+    private userService: UserService,
     private projectService: ProjectService,
     private organizationService: OrganizationService,
     private projectUsersService: ProjectUsersService,
@@ -56,30 +60,45 @@ export class CreateProjectPage implements OnInit {
     private orgProjectsService: OrganizationProjectsService
   ) {}
 
-  ngOnInit(): void {
-    this.getUsersOrganization();
+  async ngOnInit(): Promise<void> {
+    await this.getUserOrganizations();
+    if (this.organizations.length === 1) {
+      this.organization = this.organizations[0];
+    }
   }
 
-  public async getUsersOrganization() {
+  public async getUserOrganizations(): Promise<void> {
     this.isLoading = true;
     try {
       const user: User = await appstraxAuth.getUser();
-      const orgUsers = await this.orgUsersService.find({
-        where: { userId: user.id },
-      });
-      this.orgUser = orgUsers.data[0];
-      if (!this.orgUser) {
-        this.router.navigate(['/create-organization']);
+      const result = await this.userService.getUserOrganizations(user.id);
+      this.organizations = result;
+      if (this.organizations.length === 1) {
+        this.organization = this.organizations[0];
       }
-      const org = await this.organizationService.find({
-        where: { id: this.orgUser.organizationId },
-      });
-      this.organization = org.data[0];
     } catch (error: any) {
       this.errorMessage = error.message;
     } finally {
       this.isLoading = false;
     }
+  }
+
+  public onOrganizationChanged(organizationId: string) {
+    const found = this.organizations.find((o) => o.id === organizationId);
+    if (found) {
+      this.organization = found;
+    } else {
+      this.organization = new Organization();
+    }
+  }
+
+  public toggleOrgMenu(): void {
+    this.isOrgMenuOpen = !this.isOrgMenuOpen;
+  }
+
+  public selectOrganization(org: Organization): void {
+    this.organization = org;
+    this.isOrgMenuOpen = false;
   }
 
   public nextStep() {
@@ -239,6 +258,10 @@ export class CreateProjectPage implements OnInit {
   }
 
   public isFormValid(): boolean {
-    return (this.project.name != '' && this.project.description != '');
+    return (
+      this.project.name != '' &&
+      this.project.description != '' &&
+      this.organization.id != ''
+    );
   }
 }

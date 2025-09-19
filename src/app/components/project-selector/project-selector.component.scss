@@ -7,6 +7,16 @@
 /* Make dropdown same width as button and open directly below */
 .top-right .dropdown-menu {
     width: 100%;
+    min-width: 180px;
+}
+
+.top-right .dropdown-toggle {
+    min-width: 200px;
+    width: 100%;
+}
+
+.top-right .dropdown-toggle::after {
+    display: none;
 }
 
 .proj-thumb {
@@ -27,4 +37,58 @@
 
 .proj-name {
     line-height: 1;
+    max-width: 160px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Nested org-project list styles */
+.org-project-list {
+    padding-left: 0.5rem;
+}
+
+.dropdown-header .btn-link {
+    color: #212529;
+    text-decoration: none;
+}
+
+.dropdown-header .btn-link:hover,
+.dropdown-header .btn-link:focus {
+    color: #212529;
+}
+
+.dropdown-header .bi {
+    cursor: pointer;
+}
+
+/* Keep light hover styles */
+.top-right .dropdown-toggle:hover,
+.top-right .dropdown-toggle:focus,
+.top-right .dropdown-toggle:active {
+    background-color: #fff;
+    color: #212529;
+    border-color: #ced4da;
+    box-shadow: none;
+}
+
+.dropdown-menu .dropdown-item:hover,
+.dropdown-menu .dropdown-item:focus,
+.dropdown-menu .dropdown-item:active,
+.dropdown-menu .dropdown-item.active {
+    background-color: #f8f9fa;
+    color: #212529;
+}
+
+/* Do not change color for inner project items on hover */
+.org-project-list .dropdown-item {
+    color: #212529;
+}
+
+.org-project-list .dropdown-item:hover,
+.org-project-list .dropdown-item:focus,
+.org-project-list .dropdown-item:active,
+.org-project-list .dropdown-item.active {
+    background-color: transparent;
+    color: #212529;
 }

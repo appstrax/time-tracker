@@ -1,30 +1,63 @@
 <div class="btn-group top-right" [class.show]="isMenuOpen">
   <button
     type="button"
-    class="btn btn-outline-dark dropdown-toggle d-flex align-items-center gap-2"
+    class="btn btn-outline-dark dropdown-toggle d-flex align-items-center justify-content-between w-100"
     (click)="toggleMenu()"
     aria-expanded="isMenuOpen"
   >
-    <ng-container *ngIf="selectedProject as proj; else placeholder">
-      <img *ngIf="proj.logoUrl; else fallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
-      <ng-template #fallbackIcon>
-        <i class="bi bi-image proj-thumb-fallback"></i>
-      </ng-template>
-      <span class="proj-name">{{ proj.name }}</span>
-    </ng-container>
-    <ng-template #placeholder>
-      <i class="bi bi-image proj-thumb-fallback"></i>
-      <span class="proj-name">Select project</span>
-    </ng-template>
-  </button>
-  <ul class="dropdown-menu dropdown-menu-end" [class.show]="isMenuOpen" [attr.data-bs-popper]="isMenuOpen ? 'static' : null">
-    <li *ngFor="let p of projects">
-      <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="selectProject(p)">
-        <img *ngIf="p.logoUrl; else itemFallback" [src]="p.logoUrl" alt="logo" class="proj-thumb" />
-        <ng-template #itemFallback>
+    <span class="d-flex align-items-center gap-2">
+      <ng-container *ngIf="selectedProject as proj; else placeholder">
+        <img *ngIf="proj.logoUrl; else fallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
+        <ng-template #fallbackIcon>
           <i class="bi bi-image proj-thumb-fallback"></i>
         </ng-template>
-        <span class="proj-name">{{ p.name }}</span>
+        <span class="proj-name">{{ proj.name }}</span>
+      </ng-container>
+      <ng-template #placeholder>
+        <i class="bi bi-image proj-thumb-fallback"></i>
+        <span class="proj-name">Select project</span>
+      </ng-template>
+    </span>
+    <i class="bi" [ngClass]="isMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+  </button>
+  <ul class="dropdown-menu dropdown-menu-end" [class.show]="isMenuOpen" [attr.data-bs-popper]="isMenuOpen ? 'static' : null">
+    <ng-container *ngFor="let org of userProjectOrgs.organizations">
+      <li class="dropdown-header d-flex align-items-center justify-content-between">
+        <button type="button" class="btn btn-link p-0 d-flex align-items-center gap-2" (click)="toggleOrg(org.id)">
+          <img *ngIf="org.logoUrl; else orgFallback" [src]="org.logoUrl" alt="logo" class="proj-thumb" />
+          <ng-template #orgFallback>
+            <i class="bi bi-briefcase proj-thumb-fallback"></i>
+          </ng-template>
+          <span class="proj-name">{{ org.name }}</span>
+        </button>
+        <i class="bi" [ngClass]="isOrgExpanded(org.id) ? 'bi-chevron-up' : 'bi-chevron-down'" (click)="toggleOrg(org.id)"></i>
+      </li>
+      <li *ngIf="isOrgExpanded(org.id)">
+        <ul class="list-unstyled mb-2 org-project-list">
+          <li *ngFor="let p of getProjectsForOrganization(org.id)">
+            <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="selectProject(p)">
+              <img *ngIf="p.logoUrl; else itemFallback" [src]="p.logoUrl" alt="logo" class="proj-thumb" />
+              <ng-template #itemFallback>
+                <i class="bi bi-image proj-thumb-fallback"></i>
+              </ng-template>
+              <span class="proj-name">{{ p.name }}</span>
+            </button>
+          </li>
+        </ul>
+      </li>
+      <li *ngIf="org !== userProjectOrgs.organizations[userProjectOrgs.organizations.length - 1]"><hr class="dropdown-divider" /></li>
+    </ng-container>
+    <li *ngIf="userProjectOrgs.organizations.length > 0"><hr class="dropdown-divider" /></li>
+    <li>
+      <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="navToNewOrganization()">
+        <i class="bi bi-plus-circle"></i>
+        <span>New Organization</span>
+      </button>
+    </li>
+    <li>
+      <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="navToNewProject()">
+        <i class="bi bi-plus-circle"></i>
+        <span>New Project</span>
       </button>
     </li>
   </ul>

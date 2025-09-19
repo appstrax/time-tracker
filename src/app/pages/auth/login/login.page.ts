@@ -2,7 +2,13 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { appstraxAuth, AuthErrors, AuthStatus } from '@appstrax/services/auth';
+import {
+  appstraxAuth,
+  AuthErrors,
+  AuthStatus,
+  User,
+} from '@appstrax/services/auth';
+import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-login',
@@ -14,10 +20,13 @@ import { appstraxAuth, AuthErrors, AuthStatus } from '@appstrax/services/auth';
 export class LoginPage {
   email: string = '';
   password: string = '';
-  isLoading: boolean = false;
   errorMessage: string = '';
 
-  constructor(private router: Router) {}
+  isLoading: boolean = false;
+  hasProject: boolean = false;
+  hasOrganization: boolean = false;
+
+  constructor(private router: Router, private userService: UserService) {}
 
   async onSubmit(): Promise<void> {
     if (!this.isFormValid()) {
@@ -34,10 +43,20 @@ export class LoginPage {
         password: this.password,
       });
 
-      if (response.status == AuthStatus.authenticated) {
+      const user: User = await appstraxAuth.getUser();
+      this.hasProject = await this.userService.hasProject(user.id);
+      this.hasOrganization = await this.userService.hasOrganization(user.id);
+
+      if (
+        response.status == AuthStatus.authenticated &&
+        this.hasOrganization &&
+        this.hasProject 
+      ) {
         this.router.navigate(['/home']);
-      } else {
-        this.errorMessage = 'Authentication token not received';
+      } else if (!this.hasOrganization) {
+        this.router.navigate(['/create-organization']);
+      } else if (this.hasProject) {
+        this.router.navigate(['/create-project']);
       }
     } catch (error: any) {
       this.errorMessage = this.getErrorMessage(error);

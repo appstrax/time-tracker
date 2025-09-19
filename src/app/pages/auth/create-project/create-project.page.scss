@@ -118,6 +118,83 @@
   border: 1px solid #ced4da;
 }
 
+/* Organization dropdown styles to match project-selector */
+.org-dropdown {
+  position: relative;
+}
+
+.org-dropdown .dropdown-toggle {
+  height: 52px;
+  width: 100%;
+  border-radius: 6px;
+  border: 1px solid #ced4da;
+  background-color: #fff;
+  color: #212529;
+}
+
+.org-dropdown .dropdown-toggle::after {
+  display: none;
+}
+
+.org-dropdown .dropdown-toggle:hover,
+.org-dropdown .dropdown-toggle:focus,
+.org-dropdown .dropdown-toggle:active {
+  background-color: #fff;
+  color: #212529;
+  border-color: #ced4da;
+  box-shadow: none;
+}
+
+.org-dropdown .dropdown-toggle i {
+  color: #212529;
+}
+
+.org-dropdown .dropdown-toggle:hover i,
+.org-dropdown .dropdown-toggle:focus i,
+.org-dropdown .dropdown-toggle:active i {
+  color: #212529;
+}
+
+.org-dropdown .dropdown-menu {
+  width: 100%;
+}
+
+.org-thumb {
+  width: 20px;
+  height: 20px;
+  object-fit: cover;
+  border-radius: 4px;
+}
+
+.org-thumb-fallback {
+  font-size: 20px;
+  width: 20px;
+  height: 20px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Keep dropdown item text/icons dark on hover/focus/active */
+.org-dropdown .dropdown-item {
+  color: #212529;
+}
+
+.org-dropdown .dropdown-item:hover,
+.org-dropdown .dropdown-item:focus,
+.org-dropdown .dropdown-item:active,
+.org-dropdown .dropdown-item.active {
+  color: #212529;
+  background-color: #f8f9fa;
+}
+
+.org-dropdown .dropdown-item:hover i,
+.org-dropdown .dropdown-item:focus i,
+.org-dropdown .dropdown-item:active i,
+.org-dropdown .dropdown-item.active i {
+  color: #212529;
+}
+
 .create-project-btn {
   height: 52px;
   background-color: #4169e1;
