@@ -1,13 +1,9 @@
 .page-content {
-  padding: 0 2rem;
-  margin: 4rem 6rem; 
-  // display: flex;
-  // flex-direction: column;
-  // justify-content: center;
-  // align-items: center;
-  // text-align: center;
-  // height: 100vh;
-  // background-color: #f8f9fa;
+  position: relative;
+  padding: 1rem;
+  height: calc(100vh);
+  width: calc(100vw);
+  overflow-y: auto;
 }
 
 
