@@ -51,6 +51,17 @@
     text-decoration: none;
     color: inherit;
 
+    &.active {
+      .icon-box {
+        background-color: var(--primary-color);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+        i {
+          color: #ffffff;
+        }
+      }
+    }
+
     .icon-box {
       width: 40px;
       height: 40px;
@@ -101,7 +112,7 @@
   border-radius: 0 3px 3px 0;
   z-index: 999;
   transition: opacity 0.3s ease;
-  
+
   &.hidden {
     opacity: 0;
   }

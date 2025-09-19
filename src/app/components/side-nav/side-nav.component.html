@@ -9,7 +9,7 @@
 
     <!-- Navigation Items -->
     <div class="nav-items">
-      <a [routerLink]="item.route" class="nav-item" *ngFor="let item of navItems" data-bs-toggle="tooltip" [attr.data-bs-title]="item.title" data-bs-placement="right">
+      <a [routerLink]="item.route" routerLinkActive="active" class="nav-item" *ngFor="let item of navItems" data-bs-toggle="tooltip" [attr.data-bs-title]="item.title" data-bs-placement="right">
         <div class="icon-box">
           <i [class]="item.icon"></i>
         </div>
@@ -18,7 +18,7 @@
 
     <!-- Profile Section -->
     <div class="profile-section">
-      <a routerLink="/profile" class="nav-item" data-bs-toggle="tooltip" data-bs-title="Profile" data-bs-placement="right">
+      <a routerLink="/profile" routerLinkActive="active" class="nav-item" data-bs-toggle="tooltip" data-bs-title="Profile" data-bs-placement="right">
         <div class="icon-box">
           <i class="bi bi-person-circle"></i>
         </div>
