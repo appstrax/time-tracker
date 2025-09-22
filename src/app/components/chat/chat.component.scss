@@ -71,6 +71,40 @@ h3 {
   }
 }
 
+.suggestions-container {
+  width: 60%;
+  margin-top: 3rem;
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 1rem;
+}
+
+.suggestion-item {
+  border: 1px solid lightgrey;
+  border-radius: 20px;
+  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
+  padding: 0.25rem 0.75rem;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+
+  i {
+    color: var(--primary-color);
+    transition: all 0.3s ease;
+  }
+
+  &:hover {
+    background-color: var(--primary-color);
+    color: #ffffff;
+    i {
+      color: #ffffff;
+    }
+  }
+}
+
 @media (max-width: 575.98px) {
   
   h1 {

@@ -18,4 +18,13 @@
       </div>
     </div>
   </div>
+
+  <div class="suggestions-container">
+    @for (suggestion of suggestions; track suggestion.prompt) {
+      <div class="suggestion-item small" (click)="onSuggestionClick(suggestion)">
+        <i class="bi" [class]="suggestion.icon"></i>
+        <span>{{ suggestion.prompt }}</span>
+      </div>
+    }
+  </div>
 </div>
