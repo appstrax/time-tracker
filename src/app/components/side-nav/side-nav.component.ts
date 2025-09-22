@@ -77,8 +77,10 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
       this.tooltips = [...tooltipTriggerList].map(tooltipTriggerEl => {
         return new Tooltip(tooltipTriggerEl, {
           placement: 'right',
-          trigger: 'hover',
-          delay: { show: 300, hide: 100 }
+          trigger: 'hover focus',
+          delay: { show: 300, hide: 100 },
+          container: 'body',
+          boundary: document.body as any
         });
       });
     }, 100);
