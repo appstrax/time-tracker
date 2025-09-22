@@ -1,24 +1,4 @@
 .page-content {
-  padding: 0 1rem;
-  margin: 2rem 1rem;
-  
-  @media (min-width: 576px) {
-    padding: 0 1.5rem;
-    margin: 3rem 2rem;
-  }
-  
-  @media (min-width: 768px) {
-    padding: 0 2rem;
-    margin: 4rem 3rem;
-  }
-  
-  @media (min-width: 992px) {
-    margin: 4rem 4rem;
-  }
-  
-  @media (min-width: 1200px) {
-    margin: 4rem 6rem;
-  }
+  padding: 0 2rem;
+  margin: 4rem 6rem; 
 }
-
-
