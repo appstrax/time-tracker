@@ -21,7 +21,7 @@
     <i class="bi" [ngClass]="isMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end" [class.show]="isMenuOpen" [attr.data-bs-popper]="isMenuOpen ? 'static' : null">
-    <ng-container *ngFor="let org of userProjectOrgs.organizations">
+    <ng-container *ngFor="let org of organizations()">
       <li class="dropdown-header d-flex align-items-center justify-content-between">
         <button type="button" class="btn btn-link p-0 d-flex align-items-center gap-2" (click)="toggleOrg(org.id)">
           <img *ngIf="org.logoUrl; else orgFallback" [src]="org.logoUrl" alt="logo" class="proj-thumb" />
@@ -45,9 +45,9 @@
           </li>
         </ul>
       </li>
-      <li *ngIf="org !== userProjectOrgs.organizations[userProjectOrgs.organizations.length - 1]"><hr class="dropdown-divider" /></li>
+      <li *ngIf="org !== organizations()[organizations().length - 1]"><hr class="dropdown-divider" /></li>
     </ng-container>
-    <li *ngIf="userProjectOrgs.organizations.length > 0"><hr class="dropdown-divider" /></li>
+    <li *ngIf="organizations.length > 0"><hr class="dropdown-divider" /></li>
     <li>
       <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="navToNewOrganization()">
         <i class="bi bi-plus-circle"></i>

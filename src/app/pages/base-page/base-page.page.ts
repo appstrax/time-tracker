@@ -3,14 +3,22 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SideNavComponent } from '../../components/side-nav/side-nav.component';
 import { ProjectSelectorComponent } from '../../components/project-selector/project-selector.component';
+import { Store } from '../../state/init.store';
 
 @Component({
   selector: 'app-base-page',
   templateUrl: './base-page.page.html',
   styleUrls: ['./base-page.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, SideNavComponent, ProjectSelectorComponent]
+  imports: [
+    CommonModule,
+    RouterModule,
+    SideNavComponent,
+    ProjectSelectorComponent,
+  ],
 })
-export class BasePage {}
-
-
+export class BasePage {
+  constructor(private store: Store) {
+    this.store.init();
+  }
+}
