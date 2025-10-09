@@ -22,7 +22,7 @@ export class ProjectSelectorComponent implements OnInit, OnDestroy {
   isCollapsed = false;
 
   private idleTimeoutId: any = null;
-  private readonly collapseDelayMs = 2000; 
+  private readonly collapseDelayMs = 3000; 
 
   projects: Signal<Project[]>;
   organizations: Signal<Organization[]>;
