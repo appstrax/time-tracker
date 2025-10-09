@@ -1,11 +1,12 @@
-import { Component, HostListener, ElementRef, Signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
-import { Project } from '../../models/project.model';
+import { Component, HostListener, ElementRef, Signal, effect } from '@angular/core';
+import { OnInit, OnDestroy } from '@angular/core';
+
 import { Router } from '@angular/router';
-import { Store } from '../../state/init.store';
-import { Organization } from '../../models/organization.model';
-import { OrganizationProjects } from '../../models/many-to-many.model';
-import { effect } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { Store } from '@state';
+import { Project, Organization, OrganizationProjects } from '@models';
+
 
 @Component({
   selector: 'app-project-selector',
@@ -14,13 +15,17 @@ import { effect } from '@angular/core';
   templateUrl: './project-selector.component.html',
   styleUrls: ['./project-selector.component.scss'],
 })
-export class ProjectSelectorComponent {
-  selectedProject: Project | null = null;
+export class ProjectSelectorComponent implements OnInit, OnDestroy {
   isMenuOpen = false;
   expandedOrgIds = new Set<string>();
+  selectedProject: Project | null = null;
+  isCollapsed = false;
 
-  organizations: Signal<Organization[]>;
+  private idleTimeoutId: any = null;
+  private readonly collapseDelayMs = 2000; 
+
   projects: Signal<Project[]>;
+  organizations: Signal<Organization[]>;
   orgProjects: Signal<OrganizationProjects[]>;
 
   constructor(
@@ -28,11 +33,19 @@ export class ProjectSelectorComponent {
     private router: Router,
     private elementRef: ElementRef
   ) {
-    this.organizations = this.store.organizations.all;
     this.projects = this.store.projects.all;
     this.orgProjects = this.store.orgProjects.all;
+    this.organizations = this.store.organizations.all;
 
     this.setInitialProject();
+  }
+
+  ngOnInit(): void {
+    this.startIdleTimer();
+  }
+
+  ngOnDestroy(): void {
+    this.clearIdleTimer();
   }
 
   setInitialProject() {
@@ -47,11 +60,19 @@ export class ProjectSelectorComponent {
 
   toggleMenu(): void {
     this.isMenuOpen = !this.isMenuOpen;
+    this.expand();
+    if (this.isMenuOpen) {
+      this.clearIdleTimer();
+    } else {
+      this.startIdleTimer();
+    }
   }
 
   selectProject(project: Project): void {
     this.selectedProject = project;
     this.isMenuOpen = false;
+    this.expand();
+    this.startIdleTimer();
   }
 
   getProjectsForOrganization(orgId: string): Project[] {
@@ -67,6 +88,8 @@ export class ProjectSelectorComponent {
     } else {
       this.expandedOrgIds.add(orgId);
     }
+    this.expand();
+    this.startIdleTimer();
   }
 
   isOrgExpanded(orgId: string): boolean {
@@ -79,6 +102,8 @@ export class ProjectSelectorComponent {
     const target = event.target as HTMLElement;
     if (target && !this.elementRef.nativeElement.contains(target)) {
       this.isMenuOpen = false;
+      this.expand();
+      this.startIdleTimer();
     }
   }
 
@@ -86,14 +111,48 @@ export class ProjectSelectorComponent {
   onEscape(): void {
     if (this.isMenuOpen) {
       this.isMenuOpen = false;
+      this.expand();
+      this.startIdleTimer();
+    }
+  }
+
+  onMouseEnterButton(): void {
+    this.expand();
+    this.clearIdleTimer();
+  }
+
+  onMouseLeaveButton(): void {
+    if (!this.isMenuOpen) this.startIdleTimer();
+  }
+
+  private expand(): void {
+    this.isCollapsed = false;
+  }
+
+  private collapse(): void {
+    if (this.isMenuOpen) return;
+    this.isCollapsed = true;
+  }
+
+  private startIdleTimer(): void {
+    this.clearIdleTimer();
+    this.idleTimeoutId = setTimeout(() => {
+      this.collapse();
+    }, this.collapseDelayMs);
+  }
+
+  private clearIdleTimer(): void {
+    if (this.idleTimeoutId) {
+      clearTimeout(this.idleTimeoutId);
+      this.idleTimeoutId = null;
     }
   }
 
   navToNewProject(): void {
-    this.router.navigate(['/create-project']);
+    this.router.navigate(['/create-project'], { queryParams: { from: 'home' } });
   }
 
   navToNewOrganization(): void {
-    this.router.navigate(['/create-organization']);
+    this.router.navigate(['/create-organization'], { queryParams: { from: 'home' } });
   }
 }

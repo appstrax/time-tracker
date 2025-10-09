@@ -1,46 +1,66 @@
 <div class="btn-group top-right" [class.show]="isMenuOpen">
   <button
     type="button"
-    class="btn btn-outline-dark dropdown-toggle d-flex align-items-center justify-content-between w-100"
+    class="btn btn-outline-dark dropdown-toggle selector-toggle d-flex align-items-center justify-content-between"
+    [class.w-100]="!isCollapsed"
+    [class.collapsed]="isCollapsed"
     (click)="toggleMenu()"
+    (mouseenter)="onMouseEnterButton()"
+    (mouseleave)="onMouseLeaveButton()"
+    (focus)="onMouseEnterButton()"
+    (blur)="onMouseLeaveButton()"
     aria-expanded="isMenuOpen"
   >
-    <span class="d-flex align-items-center gap-2">
-      <ng-container *ngIf="selectedProject as proj; else placeholder">
-        <img *ngIf="proj.logoUrl; else fallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
-        <ng-template #fallbackIcon>
+    <span class="layer expanded-layer d-flex align-items-center justify-content-between w-100" [attr.aria-hidden]="isCollapsed">
+      <span class="d-flex align-items-center gap-2 selector-content">
+        <ng-container *ngIf="selectedProject as proj; else placeholder">
+          <img *ngIf="proj.logoUrl; else fallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
+          <ng-template #fallbackIcon>
+            <i class="bi bi-image proj-thumb-fallback"></i>
+          </ng-template>
+          <span class="proj-name ms-2">{{ proj.name }}</span>
+        </ng-container>
+        <ng-template #placeholder>
+          <i class="bi bi-image proj-thumb-fallback"></i>
+          <span class="proj-name ms-2">Select project</span>
+        </ng-template>
+      </span>
+      <i class="bi selector-chevron" [ngClass]="isMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
+    </span>
+
+    <span class="layer collapsed-layer d-flex align-items-center justify-content-center" [attr.aria-hidden]="!isCollapsed">
+      <ng-container *ngIf="selectedProject as proj; else collapsedPlaceholder">
+        <img *ngIf="proj.logoUrl; else collapsedFallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
+        <ng-template #collapsedFallbackIcon>
           <i class="bi bi-image proj-thumb-fallback"></i>
         </ng-template>
-        <span class="proj-name">{{ proj.name }}</span>
       </ng-container>
-      <ng-template #placeholder>
+      <ng-template #collapsedPlaceholder>
         <i class="bi bi-image proj-thumb-fallback"></i>
-        <span class="proj-name">Select project</span>
       </ng-template>
     </span>
-    <i class="bi" [ngClass]="isMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
   </button>
   <ul class="dropdown-menu dropdown-menu-end" [class.show]="isMenuOpen" [attr.data-bs-popper]="isMenuOpen ? 'static' : null">
     <ng-container *ngFor="let org of organizations()">
-      <li class="dropdown-header d-flex align-items-center justify-content-between">
-        <button type="button" class="btn btn-link p-0 d-flex align-items-center gap-2" (click)="toggleOrg(org.id)">
+      <li class="dropdown-header d-flex align-items-center justify-content-between" (click)="toggleOrg(org.id)">
+        <button type="button" class="btn btn-link p-0 d-flex align-items-center gap-2">
           <img *ngIf="org.logoUrl; else orgFallback" [src]="org.logoUrl" alt="logo" class="proj-thumb" />
           <ng-template #orgFallback>
             <i class="bi bi-briefcase proj-thumb-fallback"></i>
           </ng-template>
-          <span class="proj-name">{{ org.name }}</span>
+          <span class="proj-name ms-2">{{ org.name }}</span>
         </button>
-        <i class="bi" [ngClass]="isOrgExpanded(org.id) ? 'bi-chevron-up' : 'bi-chevron-down'" (click)="toggleOrg(org.id)"></i>
+        <i class="bi" [ngClass]="isOrgExpanded(org.id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
       </li>
       <li *ngIf="isOrgExpanded(org.id)">
-        <ul class="list-unstyled mb-2 org-project-list">
+        <ul class="list-unstyled">
           <li *ngFor="let p of getProjectsForOrganization(org.id)">
-            <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="selectProject(p)">
+            <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="selectProject(p)" [class.active]="selectedProject?.id === p.id">
               <img *ngIf="p.logoUrl; else itemFallback" [src]="p.logoUrl" alt="logo" class="proj-thumb" />
               <ng-template #itemFallback>
                 <i class="bi bi-image proj-thumb-fallback"></i>
               </ng-template>
-              <span class="proj-name">{{ p.name }}</span>
+              <span class="proj-name ms-2">{{ p.name }}</span>
             </button>
           </li>
         </ul>
@@ -51,13 +71,13 @@
     <li>
       <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="navToNewOrganization()">
         <i class="bi bi-plus-circle"></i>
-        <span>New Organization</span>
+        <span class="ms-2">New Organization</span>
       </button>
     </li>
     <li>
       <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="navToNewProject()">
         <i class="bi bi-plus-circle"></i>
-        <span>New Project</span>
+        <span class="ms-2">New Project</span>
       </button>
     </li>
   </ul>

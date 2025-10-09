@@ -1,29 +1,17 @@
-import { Component, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { Component, OnInit } from '@angular/core';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
-import { Router, RouterModule } from '@angular/router';
-import { Project } from '../../../models/project.model';
+import { ProjectService, ProjectUsersService } from '@services';
+import { UserService, OrganizationProjectsService } from '@services';
+
+import { Project, ProjectUsers } from '@models';
+import { Organization, OrganizationProjects } from '@models';
+import { OrganizationUsers, ProjectOrgRoles, ProjectUserRoles } from '@models';
+
 import { appstraxAuth, User } from '@appstrax/services/auth';
-import {
-  ProjectService,
-  ProjectUsersService,
-} from '../../../services/project.service';
-import {
-  OrganizationUsers,
-  OrganizationProjects,
-  ProjectOrgRoles,
-  ProjectUserRoles,
-  ProjectUsers,
-} from '../../../models/many-to-many.model';
 import { appstraxStorage } from '@appstrax/services/storage';
-import {
-  OrganizationProjectsService,
-  OrganizationService,
-  OrganizationUsersService,
-} from '../../../services/organization.service';
-import { Organization } from '../../../models/organization.model';
-import { UserService } from '../../../services/user.service';
 
 @Component({
   selector: 'app-create-project',
@@ -43,24 +31,26 @@ export class CreateProjectPage implements OnInit {
 
   step: number = 1;
   errorMessage: string = '';
-
+ 
   isLoading: boolean = false;
   allFeaturesEnabled: boolean = false;
 
   logoFile: File | null = null;
   logoPreviewUrl: string | null = null;
+  backLink: string = '/create-organization';
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private userService: UserService,
     private projectService: ProjectService,
-    private organizationService: OrganizationService,
     private projectUsersService: ProjectUsersService,
-    private orgUsersService: OrganizationUsersService,
     private orgProjectsService: OrganizationProjectsService
   ) {}
 
   async ngOnInit(): Promise<void> {
+    const from = this.route.snapshot.queryParamMap.get('from');
+    this.backLink = from === 'home' ? '/home' : '/create-organization';
     await this.getUserOrganizations();
     if (this.organizations.length === 1) {
       this.organization = this.organizations[0];

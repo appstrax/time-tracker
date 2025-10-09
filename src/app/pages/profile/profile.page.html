@@ -1,149 +1,155 @@
-<div class="w-100" *ngIf="user">
-  <h1 class="page-title">My Profile</h1>
-  <section class="profile-section">
-    <div class="d-flex align-items-center gap-4">
-      <div class="profile-picture rounded-circle position-relative">
-        <img
-          [src]="user.profilePictureUrl"
-          alt="Profile Picture"
-          class="rounded-circle"
-        />
-        <i
-          class="bi bi-camera-fill camera-icon"
-          (click)="onUploadProfilePicture()">
-      </i>
-      </div>
-
-      <div>
-        <div class="fw-bold user-name">{{user.name}} {{user.surname}}</div>
-        <div>{{user.email}}</div>
-      </div>
-    </div>
-  </section>
-
-  <section class="profile-section">
-    <div class="d-flex align-items-center justify-content-between">
-      <h2 class="section-title">Personal Information</h2>
-      <button class="btn btn-primary d-flex align-items-center gap-3">
-        Edit
-        <i class="bi bi-pencil"></i>
-      </button>
-    </div>
-    <hr />
-    <div class="d-grid">
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <div class="text-muted fw-light">First Name</div>
-          <div class="fw-500">{{user.name}}</div>
+<div class="container">
+  <div class="w-100" *ngIf="user">
+    <h1 class="page-title">My Profile</h1>
+    <section class="profile-section">
+      <div class="d-flex align-items-center gap-4">
+        <div class="profile-picture rounded-circle position-relative">
+          <img
+            [src]="user.profilePictureUrl"
+            alt="Profile Picture"
+            class="rounded-circle"
+          />
+          <i
+            class="bi bi-camera-fill camera-icon"
+            (click)="onUploadProfilePicture()"
+          >
+          </i>
         </div>
-        <div class="col-md-4">
-          <div class="text-muted fw-light">Last Name</div>
-          <div class="fw-500">{{user.surname}}</div>
+
+        <div>
+          <div class="fw-bold user-name">{{user.name}} {{user.surname}}</div>
+          <div>{{user.email}}</div>
         </div>
-        <div class="col-md-4">
-          <div class="text-muted fw-light">CV/Resume</div>
-          @if(user.cvPdfUrl){
+      </div>
+    </section>
+
+    <section class="profile-section">
+      <div class="d-flex align-items-center justify-content-between">
+        <h2 class="section-title">Personal Information</h2>
+        <button class="btn btn-primary d-flex align-items-center gap-3">
+          Edit
+          <i class="bi bi-pencil"></i>
+        </button>
+      </div>
+      <hr />
+      <div class="d-grid">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-muted fw-light">First Name</div>
+            <div class="fw-500">{{user.name}}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">Last Name</div>
+            <div class="fw-500">{{user.surname}}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">CV/Resume</div>
+            @if(user.cvPdfUrl){
             <a class="fw-500 link-text" [href]="user.cvPdfUrl" target="_blank">
               {{ user.cvPdfUrl }}
             </a>
-          } @else {
-            <button (click)="onUploadCV()" class="btn btn-primary d-flex align-items-center gap-3">
+            } @else {
+            <button
+              (click)="onUploadCV()"
+              class="btn btn-primary d-flex align-items-center gap-3"
+            >
               Upload
               <i class="bi bi-upload"></i>
             </button>
-          }
+            }
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-4">
+            <div class="text-muted fw-light">Email</div>
+            <div class="fw-500">{{user.email}}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">Password</div>
+            <div class="fw-500">********</div>
+          </div>
         </div>
       </div>
+    </section>
 
-      <div class="row">
-        <div class="col-md-4">
-          <div class="text-muted fw-light">Email</div>
-          <div class="fw-500">{{user.email}}</div>
+    <section class="profile-section">
+      <div class="d-flex align-items-center justify-content-between">
+        <h2 class="section-title">Social Links</h2>
+        <button class="btn btn-primary d-flex align-items-center gap-3">
+          Edit
+          <i class="bi bi-pencil"></i>
+        </button>
+      </div>
+      <hr />
+
+      <div class="d-grid">
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <app-social-link
+              [url]="user.linkedinUrl"
+              icon="bi-linkedin"
+              type="LinkedIn"
+            ></app-social-link>
+          </div>
+          <div class="col-md-4">
+            <app-social-link
+              [url]="user.githubUrl"
+              icon="bi-github"
+              type="GitHub"
+            ></app-social-link>
+          </div>
+          <div class="col-md-4">
+            <app-social-link
+              [url]="user.twitterUrl"
+              icon="bi-twitter"
+              type="Twitter"
+            ></app-social-link>
+          </div>
         </div>
-        <div class="col-md-4">
-          <div class="text-muted fw-light">Password</div>
-          <div class="fw-500">********</div>
+
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <app-social-link
+              [url]="user.facebookUrl"
+              icon="bi-facebook"
+              type="Facebook"
+            ></app-social-link>
+          </div>
+          <div class="col-md-4">
+            <app-social-link
+              [url]="user.instagramUrl"
+              icon="bi-instagram"
+              type="Instagram"
+            ></app-social-link>
+          </div>
+          <div class="col-md-4">
+            <app-social-link
+              [url]="user.youtubeUrl"
+              icon="bi-youtube"
+              type="YouTube"
+            ></app-social-link>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <app-social-link
+              [url]="user.tiktokUrl"
+              icon="bi-tiktok"
+              type="TikTok"
+            ></app-social-link>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">&nbsp;</div>
+            <div></div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">&nbsp;</div>
+            <div></div>
+          </div>
         </div>
       </div>
-    </div>
-  </section>
-
-  <section class="profile-section">
-    <div class="d-flex align-items-center justify-content-between">
-      <h2 class="section-title">Social Links</h2>
-      <button class="btn btn-primary d-flex align-items-center gap-3">
-        Edit
-        <i class="bi bi-pencil"></i>
-      </button>
-    </div>
-    <hr />
-
-    <div class="d-grid">
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <app-social-link
-            [url]="user.linkedinUrl"
-            icon="bi-linkedin"
-            type="LinkedIn"
-          ></app-social-link>
-        </div>
-        <div class="col-md-4">
-          <app-social-link
-            [url]="user.githubUrl"
-            icon="bi-github"
-            type="GitHub"
-          ></app-social-link>
-        </div>
-        <div class="col-md-4">
-          <app-social-link
-            [url]="user.twitterUrl"
-            icon="bi-twitter"
-            type="Twitter"
-          ></app-social-link>
-        </div>
-      </div>
-
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <app-social-link
-            [url]="user.facebookUrl"
-            icon="bi-facebook"
-            type="Facebook"
-          ></app-social-link>
-        </div>
-        <div class="col-md-4">
-          <app-social-link
-            [url]="user.instagramUrl"
-            icon="bi-instagram"
-            type="Instagram"
-          ></app-social-link>
-        </div>
-        <div class="col-md-4">
-          <app-social-link
-            [url]="user.youtubeUrl"
-            icon="bi-youtube"
-            type="YouTube"
-          ></app-social-link>
-        </div>
-      </div>
-
-      <div class="row mb-4">
-        <div class="col-md-4">
-          <app-social-link
-            [url]="user.tiktokUrl"
-            icon="bi-tiktok"
-            type="TikTok"
-          ></app-social-link>
-        </div>
-        <div class="col-md-4">
-          <div class="text-muted fw-light">&nbsp;</div>
-          <div></div>
-        </div>
-        <div class="col-md-4">
-          <div class="text-muted fw-light">&nbsp;</div>
-          <div></div>
-        </div>
-      </div>
-    </div>
-  </section>
+    </section>
+  </div>
 </div>

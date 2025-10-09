@@ -1,19 +1,13 @@
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
+import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
-import { Router, RouterModule } from '@angular/router';
-import { Organization } from '../../../models/organization.model';
-import {
-  OrganizationService,
-  OrganizationUsersService,
-} from '../../../services/organization.service';
+import { Organization, OrganizationUsers, OrgUserRoles } from '@models';
+import { OrganizationService, OrganizationUsersService } from '@services';
+
 import { appstraxAuth, User } from '@appstrax/services/auth';
 import { appstraxStorage } from '@appstrax/services/storage';
-import {
-  OrganizationUsers,
-  OrgUserRoles,
-} from '../../../models/many-to-many.model';
 
 @Component({
   selector: 'app-create-organization',
@@ -29,12 +23,17 @@ export class CreateOrganizationPage {
   logoPreviewUrl: string | null = null;
   organization: Organization = new Organization();
   orgUser: OrganizationUsers = new OrganizationUsers();
+  backLink: string = '/sign-up';
 
   constructor(
     private router: Router,
+    private route: ActivatedRoute,
     private organizationService: OrganizationService,
     private organizationUsersService: OrganizationUsersService
-  ) {}
+  ) {
+    const from = this.route.snapshot.queryParamMap.get('from');
+    this.backLink = from === 'home' ? '/home' : '/sign-up';
+  }
 
   async createOrganization(): Promise<void> {
     if (!this.isFormValid()) {
@@ -52,7 +51,9 @@ export class CreateOrganizationPage {
         await this.uploadOrganizationLogo(this.logoFile);
       }
 
-      this.organization = await this.organizationService.save(this.organization);
+      this.organization = await this.organizationService.save(
+        this.organization
+      );
 
       this.orgUser.organizationId = this.organization.id;
       this.orgUser.userId = user.id;
@@ -61,7 +62,7 @@ export class CreateOrganizationPage {
       this.orgUser = await this.organizationUsersService.save(this.orgUser);
 
       if (this.organization && this.orgUser) {
-        this.router.navigate(['/create-project']);
+        this.router.navigate(['/create-project'], { queryParams: { from: 'create-organization' } });
       }
     } catch (error: any) {
       this.errorMessage = error.message;
@@ -71,7 +72,10 @@ export class CreateOrganizationPage {
   }
 
   public async uploadOrganizationLogo(file: File) {
-    const response = await appstraxStorage.uploadFile(file, 'organizationLogos');
+    const response = await appstraxStorage.uploadFile(
+      file,
+      'organizationLogos'
+    );
     this.organization.logoUrl = response.downloadUrl;
   }
 

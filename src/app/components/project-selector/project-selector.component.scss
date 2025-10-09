@@ -11,11 +11,67 @@
 .top-right .dropdown-menu {
     width: 100%;
     min-width: 180px;
+    border-radius: 20px;
 }
 
 .top-right .dropdown-toggle {
     min-width: 200px;
     width: 100%;
+    border-color: rgba(0, 0, 0, 0.175);
+    background-color: #ffffff;
+    border-radius: 20px; 
+}
+
+.top-right .selector-toggle {
+    transition: width 250ms ease, min-width 250ms ease, border-radius 250ms ease, padding 200ms ease, margin 200ms ease;
+    overflow: hidden;
+    margin-left: auto;
+    position: relative; 
+}
+
+
+.top-right .selector-toggle .layer {
+    position: static; 
+    opacity: 1;
+    transition: opacity 180ms ease;
+}
+
+.top-right .selector-toggle .collapsed-layer {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    pointer-events: none;
+}
+
+.top-right .selector-toggle.collapsed {
+    border-radius: 9999px; 
+    width: 40px;
+    min-width: 40px; 
+    height: 40px;
+    padding: 2px;
+    justify-content: center !important; 
+}
+
+.top-right .selector-toggle.collapsed .expanded-layer { opacity: 0; pointer-events: none; }
+.top-right .selector-toggle.collapsed .collapsed-layer { opacity: 1; pointer-events: auto; }
+
+.top-right .selector-toggle.collapsed .selector-content { gap: 0 !important; }
+
+.top-right .selector-toggle.collapsed .proj-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+}
+
+.top-right .selector-toggle.collapsed .proj-thumb-fallback {
+    width: 100%;
+    height: 100%;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
 }
 
 .top-right .dropdown-toggle::after {
@@ -23,32 +79,30 @@
 }
 
 .proj-thumb {
-    width: 20px;
-    height: 20px;
+    width: 24px;
+    height: 24px;
     object-fit: cover;
-    border-radius: 4px;
+    border-radius: 15px;
 }
 
 .proj-thumb-fallback {
-    font-size: 20px;
-    width: 20px;
-    height: 20px;
+    font-size: 16px;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background-color: #e9ecef;
     display: inline-flex;
     align-items: center;
     justify-content: center;
 }
 
 .proj-name {
-    line-height: 1;
-    max-width: 160px;
+    line-height: 1.2;
+    max-width: 180px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-}
-
-/* Nested org-project list styles */
-.org-project-list {
-    padding-left: 0.5rem;
+    padding-right: 10px;
 }
 
 .dropdown-header .btn-link {
@@ -61,18 +115,22 @@
     color: #212529;
 }
 
-.dropdown-header .bi {
+.dropdown-header {
     cursor: pointer;
 }
 
-/* Keep light hover styles */
 .top-right .dropdown-toggle:hover,
 .top-right .dropdown-toggle:focus,
 .top-right .dropdown-toggle:active {
     background-color: #fff;
     color: #212529;
-    border-color: #ced4da;
+    border-color: rgba(0, 0, 0, 0.175);
     box-shadow: none;
+}
+
+.dropdown-menu .dropdown-item {
+    padding-top: 0.375rem; 
+    padding-bottom: 0.375rem;
 }
 
 .dropdown-menu .dropdown-item:hover,
@@ -83,7 +141,6 @@
     color: #212529;
 }
 
-/* Do not change color for inner project items on hover */
 .org-project-list .dropdown-item {
     color: #212529;
 }
@@ -92,6 +149,10 @@
 .org-project-list .dropdown-item:focus,
 .org-project-list .dropdown-item:active,
 .org-project-list .dropdown-item.active {
-    background-color: transparent;
+    background-color: #f8f9fa;
     color: #212529;
+}
+
+.btn {
+    --bs-btn-padding-x: 0.55rem;
 }

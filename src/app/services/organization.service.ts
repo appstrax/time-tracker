@@ -1,8 +1,7 @@
 import { Injectable } from '@angular/core';
 import { CrudService } from '@appstrax/services/database';
 
-import { Organization } from '../models/organization.model';
-import { OrganizationUsers, OrganizationProjects } from '../models/many-to-many.model';
+import { Organization, OrganizationUsers, OrganizationProjects } from '@models';
 
 @Injectable({ providedIn: 'root' })
 export class OrganizationService extends CrudService<Organization> {
