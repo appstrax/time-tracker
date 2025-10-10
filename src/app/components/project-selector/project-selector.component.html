@@ -11,34 +11,24 @@
     (blur)="onMouseLeaveButton()"
     aria-expanded="isMenuOpen"
   >
-    <span class="layer expanded-layer d-flex align-items-center justify-content-between w-100" [attr.aria-hidden]="isCollapsed">
+    <span class="layer expanded-layer d-flex align-items-center justify-content-between w-100">
       <span class="d-flex align-items-center gap-2 selector-content">
         <ng-container *ngIf="selectedProject as proj; else placeholder">
           <img *ngIf="proj.logoUrl; else fallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
           <ng-template #fallbackIcon>
             <i class="bi bi-image proj-thumb-fallback"></i>
           </ng-template>
-          <span class="proj-name ms-2">{{ proj.name }}</span>
+          <span class="proj-name">{{ proj.name }}</span>
         </ng-container>
         <ng-template #placeholder>
           <i class="bi bi-image proj-thumb-fallback"></i>
-          <span class="proj-name ms-2">Select project</span>
+          <span class="proj-name">Select project</span>
         </ng-template>
       </span>
       <i class="bi selector-chevron" [ngClass]="isMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
     </span>
 
-    <span class="layer collapsed-layer d-flex align-items-center justify-content-center" [attr.aria-hidden]="!isCollapsed">
-      <ng-container *ngIf="selectedProject as proj; else collapsedPlaceholder">
-        <img *ngIf="proj.logoUrl; else collapsedFallbackIcon" [src]="proj.logoUrl" alt="logo" class="proj-thumb" />
-        <ng-template #collapsedFallbackIcon>
-          <i class="bi bi-image proj-thumb-fallback"></i>
-        </ng-template>
-      </ng-container>
-      <ng-template #collapsedPlaceholder>
-        <i class="bi bi-image proj-thumb-fallback"></i>
-      </ng-template>
-    </span>
+    
   </button>
   <ul class="dropdown-menu dropdown-menu-end" [class.show]="isMenuOpen" [attr.data-bs-popper]="isMenuOpen ? 'static' : null">
     <ng-container *ngFor="let org of organizations()">
@@ -48,7 +38,7 @@
           <ng-template #orgFallback>
             <i class="bi bi-briefcase proj-thumb-fallback"></i>
           </ng-template>
-          <span class="proj-name ms-2">{{ org.name }}</span>
+          <span class="proj-name">{{ org.name }}</span>
         </button>
         <i class="bi" [ngClass]="isOrgExpanded(org.id) ? 'bi-chevron-up' : 'bi-chevron-down'"></i>
       </li>
@@ -60,7 +50,7 @@
               <ng-template #itemFallback>
                 <i class="bi bi-image proj-thumb-fallback"></i>
               </ng-template>
-              <span class="proj-name ms-2">{{ p.name }}</span>
+              <span class="proj-name">{{ p.name }}</span>
             </button>
           </li>
         </ul>
@@ -69,13 +59,13 @@
     </ng-container>
     <li *ngIf="organizations.length > 0"><hr class="dropdown-divider" /></li>
     <li>
-      <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="navToNewOrganization()">
+      <button class="dropdown-item add-button d-flex align-items-center gap-2 mt-2" type="button" (click)="navToNewOrganization()">
         <i class="bi bi-plus-circle"></i>
         <span class="ms-2">New Organization</span>
       </button>
     </li>
     <li>
-      <button class="dropdown-item d-flex align-items-center gap-2" type="button" (click)="navToNewProject()">
+      <button class="dropdown-item add-button d-flex align-items-center gap-2" type="button" (click)="navToNewProject()">
         <i class="bi bi-plus-circle"></i>
         <span class="ms-2">New Project</span>
       </button>
