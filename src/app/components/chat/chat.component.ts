@@ -8,6 +8,7 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
   styleUrl: './chat.component.scss'
 })
 export class ChatComponent {
+  @Input() placeholder: string = '';
   @ViewChild('promptInput') promptInput!: ElementRef;
 
   @Input() suggestions: any[] = [];

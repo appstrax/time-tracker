@@ -1,1 +1,21 @@
-<app-chat [suggestions]="ticketsSuggestions"> </app-chat>
+<app-split-pane
+  storageKey="split.define"
+  [initialLeftRatio]="0.7"
+  [minLeftPx]="480"
+  [minRightPx]="320"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-chat
+      [suggestions]="ticketsSuggestions"
+      placeholder="Describe your tickets..."
+    ></app-chat>
+  </ng-container>
+
+  <ng-container right>
+    <div class="container">
+        We will have the tickets page responses here
+     </div>
+  </ng-container>
+</app-split-pane>

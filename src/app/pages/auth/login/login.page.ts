@@ -49,7 +49,7 @@ export class LoginPage {
         this.hasOrganization &&
         this.hasProject
       ) {
-        this.router.navigate(['/home']);
+        this.router.navigate(['/define']);
       } else if (!this.hasOrganization) {
         this.router.navigate(['/create-organization']);
       } else if (this.hasProject) {

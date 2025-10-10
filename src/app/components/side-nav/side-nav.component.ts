@@ -30,7 +30,10 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   private readonly BUFFER_ZONE = 100;
   private tooltips: Tooltip[] = [];
 
-  constructor(private router: Router, private settings: SettingsService) {}
+  constructor(private router: Router, private settings: SettingsService) {
+    // Load persisted mode
+    this.mode = this.settings.getSideNavMode();
+  }
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
@@ -114,5 +117,6 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   toggleNav() {
     // Expand/collapse mode toggle via double chevrons
     this.mode = this.mode === 'collapsed' ? 'expanded' : 'collapsed';
+    this.settings.setSideNavMode(this.mode);
   }
 }

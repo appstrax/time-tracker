@@ -9,7 +9,7 @@ import { Component, ElementRef, EventEmitter, HostListener, Input, OnInit, Outpu
   styleUrls: ['./split-pane.component.scss'],
 })
 export class SplitPaneComponent implements OnInit {
-  @Input() initialLeftRatio = 0.6;
+  @Input() initialLeftRatio = 0.7;
   @Input() minLeftPx = 480;
   @Input() minRightPx = 320;
   @Input() collapseBreakpointPx = 1024;

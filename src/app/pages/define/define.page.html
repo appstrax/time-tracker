@@ -1,16 +1,18 @@
 <app-split-pane
   storageKey="split.define"
-  [initialLeftRatio]="0.6"
+  [initialLeftRatio]="0.7"
   [minLeftPx]="480"
   [minRightPx]="320"
   [collapseBreakpointPx]="1024"
   [collapsedOnSmallScreens]="true"
 >
   <ng-container left>
-    <app-chat [suggestions]="defineSuggestions"></app-chat>
+    <app-chat [suggestions]="defineSuggestions" placeholder="Start describing your project..."></app-chat>
   </ng-container>
 
   <ng-container right>
-    <router-outlet></router-outlet>
+     <div class="container">
+        We will have the define page responses here, these windows are resizable and collapsible
+     </div>
   </ng-container>
 </app-split-pane>

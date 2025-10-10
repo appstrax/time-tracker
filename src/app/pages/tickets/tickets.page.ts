@@ -2,13 +2,14 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ChatComponent } from '../../components/chat/chat.component';
+import { SplitPaneComponent } from '../../components/split-pane/split-pane.component';
 
 @Component({
   selector: 'app-tickets',
   templateUrl: './tickets.page.html',
   styleUrls: ['./tickets.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, ChatComponent],
+  imports: [CommonModule, RouterModule, ChatComponent, SplitPaneComponent],
 })
 export class TicketsPage {
   public ticketsSuggestions: any[] = [
