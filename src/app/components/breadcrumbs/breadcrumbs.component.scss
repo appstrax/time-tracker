@@ -1,0 +1,26 @@
+.breadcrumb {
+  display: flex;
+  list-style: none;
+  font-size: 18px;
+  margin-bottom: 0;
+
+  .breadcrumb-item {
+    color: #6c757d;
+    cursor: pointer;
+    &.active {
+      cursor: default;
+    }
+  }
+}
+
+a {
+  text-decoration: none;
+  color: var(--mat-sidenav-content-text-color);
+}
+
+.breadcrumb-title {
+  margin: 0 0 4px 0;
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: var(--primary-color-dark);
+}

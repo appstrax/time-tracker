@@ -1,0 +1,19 @@
+<nav aria-label="breadcrumb">
+  @if (breadcrumbs.length) {
+    <h1 class="breadcrumb-title">{{ breadcrumbs[0].label }}</h1>
+  }
+  <div class="breadcrumb">
+    @for (breadcrumb of breadcrumbs; track $index; let last = $last; let i = $index) {
+      @if (i > 0) {
+        <div class="breadcrumb-item" [ngClass]="{ active: last }">
+          @if(!last) {
+          <a [routerLink]="breadcrumb.url">{{ breadcrumb.label }}</a>
+          <span class="mx-2">/</span>
+          } @if(last) {
+          <span>{{ breadcrumb.label }}</span>
+          }
+        </div>
+      }
+    }
+  </div>
+</nav>
