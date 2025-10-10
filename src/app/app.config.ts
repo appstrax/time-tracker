@@ -5,7 +5,6 @@ import { environment } from '../environments/environment';
 
 import { routes } from './app.routes';
 
-// Initialize Appstrax Services
 AppstraxServices.init({
   apiUrl: environment.appstraxServicesUrl,
   apiKey: environment.appstraxServicesApiKey

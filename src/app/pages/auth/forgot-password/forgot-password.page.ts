@@ -3,8 +3,8 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
 import { Router, RouterModule } from '@angular/router';
-import { AuthErrors } from '@appstrax/services/auth/models/auth_result';
 import { appstraxAuth, MessageDto } from '@appstrax/services/auth';
+import { AuthErrors } from '@appstrax/services/auth/models/auth_result';
 
 @Component({
   selector: 'app-forgot-password',

@@ -1,9 +1,10 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { SideNavComponent } from '../../components/side-nav/side-nav.component';
-import { ProjectSelectorComponent } from '../../components/project-selector/project-selector.component';
-import { Store } from '../../state/init.store';
+
+import { Store } from '@state';
+import { SideNavComponent } from '@components';
+import { ProjectSelectorComponent } from '@components';
 
 @Component({
   selector: 'app-base-page',

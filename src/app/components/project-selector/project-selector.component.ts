@@ -1,12 +1,12 @@
-import { Component, HostListener, ElementRef, Signal, effect } from '@angular/core';
 import { OnInit, OnDestroy } from '@angular/core';
+import { ElementRef, HostListener } from '@angular/core';
+import { Signal, effect, Component } from '@angular/core';
 
 import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 
 import { Store } from '@state';
 import { Project, Organization, OrganizationProjects } from '@models';
-
 
 @Component({
   selector: 'app-project-selector',
@@ -22,7 +22,7 @@ export class ProjectSelectorComponent implements OnInit, OnDestroy {
   isCollapsed = false;
 
   private idleTimeoutId: any = null;
-  private readonly collapseDelayMs = 3000; 
+  private readonly collapseDelayMs = 3000;
 
   projects: Signal<Project[]>;
   organizations: Signal<Organization[]>;
@@ -149,10 +149,14 @@ export class ProjectSelectorComponent implements OnInit, OnDestroy {
   }
 
   navToNewProject(): void {
-    this.router.navigate(['/create-project'], { queryParams: { from: 'home' } });
+    this.router.navigate(['/create-project'], {
+      queryParams: { from: 'home' },
+    });
   }
 
   navToNewOrganization(): void {
-    this.router.navigate(['/create-organization'], { queryParams: { from: 'home' } });
+    this.router.navigate(['/create-organization'], {
+      queryParams: { from: 'home' },
+    });
   }
 }

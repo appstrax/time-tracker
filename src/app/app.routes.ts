@@ -2,33 +2,19 @@ import { Routes } from '@angular/router';
 
 import { appstraxAuth } from '@appstrax/services/auth';
 
-import { LoginPage } from './pages/auth/login/login.page';
-import { SignupPage } from './pages/auth/sign-up/sign-up.page';
-import { VerifyEmailPage } from './pages/auth/verify-email/verify-email.page';
-import { ForgotPasswordPage } from './pages/auth/forgot-password/forgot-password.page';
-import { CreateOrganizationPage } from './pages/auth/create-organization/create-organization.page';
-import { CreateProjectPage } from './pages/auth/create-project/create-project.page';
+import { LoginPage, SignupPage } from '@pages';
+import { CreateProjectPage, VerifyEmailPage } from '@pages';
+import { ForgotPasswordPage, CreateOrganizationPage } from '@pages';
 
-import { HomePage } from './pages/home/home.page';
-import { DocsPage } from './pages/docs/docs.page';
-import { ReposPage } from './pages/repos/repos.page';
-import { UsersPage } from './pages/users/users.page';
-import { AuditPage } from './pages/audit/audit.page';
-import { StatsPage } from './pages/stats/stats.page';
-import { DefinePage } from './pages/define/define.page';
-import { DevopsPage } from './pages/devops/devops.page';
-import { TicketsPage } from './pages/tickets/tickets.page';
-import { BillingPage } from './pages/billing/billing.page';
-import { QualityPage } from './pages/quality/quality.page';
-import { ProjectPage } from './pages/project/project.page';
-import { ProfilePage } from './pages/profile/profile.page';
-import { BasePage } from './pages/base-page/base-page.page';
-import { GuardrailsPage } from './pages/guardrails/guardrails.page';
-import { CompliancePage } from './pages/compliance/compliance.page';
+import { CompliancePage, GuardrailsPage } from '@pages';
+import { BasePage, ProjectPage, ProfilePage } from '@pages';
+import { TicketsPage, BillingPage, QualityPage } from '@pages';
+import { HomePage, DocsPage, ReposPage, UsersPage } from '@pages';
+import { AuditPage, StatsPage, DefinePage, DevopsPage } from '@pages';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
-  
+
   // AUTH
   { path: 'login', component: LoginPage },
   { path: 'sign-up', component: SignupPage },
@@ -43,7 +29,7 @@ export const routes: Routes = [
       {
         path: 'home',
         component: HomePage,
-        canActivate: [() => appstraxAuth.isAuthenticated()]
+        canActivate: [() => appstraxAuth.isAuthenticated()],
       },
       { path: 'audit', component: AuditPage },
       { path: 'billing', component: BillingPage },
@@ -60,7 +46,7 @@ export const routes: Routes = [
       { path: 'stats', component: StatsPage },
       { path: 'tickets', component: TicketsPage },
       { path: 'users', component: UsersPage },
-    ]
+    ],
   },
-  { path: '**', redirectTo: '/home' }
+  { path: '**', redirectTo: '/home' },
 ];

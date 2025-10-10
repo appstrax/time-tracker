@@ -1,10 +1,8 @@
 import { Injectable, signal, inject } from '@angular/core';
-import { UserStore } from './user.store';
-import { OrganizationUsersStore } from './organization-users.store';
-import { ProjectUsersStore } from './project-users.store';
-import { OrganizationProjectsStore } from './organization-projects.store';
-import { OrganizationsStore } from './organizations.store';
-import { ProjectsStore } from './projects.store';
+
+import { UserStore, OrganizationUsersStore } from '@state';
+import { OrganizationsStore, ProjectsStore } from '@state';
+import { ProjectUsersStore, OrganizationProjectsStore } from '@state';
 
 @Injectable({ providedIn: 'root' })
 export class Store {

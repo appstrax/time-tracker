@@ -1,9 +1,12 @@
 import { computed, inject } from '@angular/core';
+
 import { signalStore, withState, withMethods, withComputed, patchState } from '@ngrx/signals';
-import { EntityState, createEmptyEntityState, upsertMany, upsertOne, removeOne } from './entity-state';
-import { OrganizationProjects } from '../models/many-to-many.model';
-import { OrganizationProjectsService } from '../services/organization.service';
+
 import { Operator } from '@appstrax/services/database';
+
+import { OrganizationProjects } from '@models';
+import { OrganizationProjectsService } from '@services';
+import { EntityState, createEmptyEntityState, upsertMany, upsertOne, removeOne } from '@state';
 
 interface OrganizationProjectsState extends EntityState<OrganizationProjects> {}
 

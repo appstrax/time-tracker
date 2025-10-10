@@ -1,14 +1,11 @@
+import { Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-import {
-  appstraxAuth,
-  AuthErrors,
-  AuthStatus,
-  User,
-} from '@appstrax/services/auth';
-import { UserService } from '../../../services/user.service';
+
+import { UserService } from '@services';
+import { User, AuthErrors } from '@appstrax/services/auth';
+import { AuthStatus, appstraxAuth } from '@appstrax/services/auth';
 
 @Component({
   selector: 'app-login',
@@ -50,7 +47,7 @@ export class LoginPage {
       if (
         response.status == AuthStatus.authenticated &&
         this.hasOrganization &&
-        this.hasProject 
+        this.hasProject
       ) {
         this.router.navigate(['/home']);
       } else if (!this.hasOrganization) {

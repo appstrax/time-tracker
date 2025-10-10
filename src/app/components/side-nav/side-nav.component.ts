@@ -1,6 +1,8 @@
-import { Component, AfterViewInit, HostListener, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { Component, OnDestroy } from '@angular/core';
 import { RouterModule, Router } from '@angular/router';
+import { HostListener, AfterViewInit } from '@angular/core';
+
 import { Tooltip } from 'bootstrap';
 import { appstraxAuth } from '@appstrax/services/auth';
 
@@ -15,7 +17,7 @@ interface NavItem {
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule]
+  imports: [CommonModule, RouterModule],
 })
 export class SideNavComponent implements AfterViewInit, OnDestroy {
   isVisible = false;
@@ -28,29 +30,24 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
-    // Clear any existing timeout
     if (this.closeTimeout) {
       clearTimeout(this.closeTimeout);
     }
 
-    // If mouse is in the threshold zone, show the nav
     if (event.clientX <= this.THRESHOLD) {
       this.isVisible = true;
       return;
     }
 
-    // If mouse is in the buffer zone, keep the nav open
     if (event.clientX <= this.BUFFER_ZONE && this.isVisible) {
       return;
     }
 
-    // If mouse is outside buffer zone and nav is open, set timeout to close
     if (event.clientX > this.BUFFER_ZONE && this.isVisible) {
       this.closeTimeout = setTimeout(() => {
         this.isVisible = false;
-        // Hide all tooltips when nav closes
         this.hideAllTooltips();
-      }, 500); // 500ms delay before closing
+      }, 500);
     }
   }
 
@@ -67,32 +64,32 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
     { title: 'Quality', icon: 'bi bi-check-circle', route: '/quality' },
     { title: 'Audit Trails', icon: 'bi bi-clock-history', route: '/audit' },
     { title: 'Project State', icon: 'bi bi-kanban', route: '/project' },
-    { title: 'Stats', icon: 'bi bi-graph-up', route: '/stats' }
+    { title: 'Stats', icon: 'bi bi-graph-up', route: '/stats' },
   ];
 
   ngAfterViewInit() {
-    // Initialize tooltips with proper configuration
     setTimeout(() => {
-      const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
-      this.tooltips = [...tooltipTriggerList].map(tooltipTriggerEl => {
+      const tooltipTriggerList = document.querySelectorAll(
+        '[data-bs-toggle="tooltip"]'
+      );
+      this.tooltips = [...tooltipTriggerList].map((tooltipTriggerEl) => {
         return new Tooltip(tooltipTriggerEl, {
           placement: 'right',
           trigger: 'hover focus',
           delay: { show: 300, hide: 100 },
           container: 'body',
-          boundary: document.body as any
+          boundary: document.body as any,
         });
       });
     }, 100);
   }
 
   ngOnDestroy() {
-    // Clean up tooltips
-    this.tooltips.forEach(tooltip => tooltip.dispose());
+    this.tooltips.forEach((tooltip) => tooltip.dispose());
   }
 
   private hideAllTooltips() {
-    this.tooltips.forEach(tooltip => tooltip.hide());
+    this.tooltips.forEach((tooltip) => tooltip.hide());
   }
 
   async logout() {
@@ -101,7 +98,6 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
       this.router.navigate(['/login']);
     } catch (error) {
       console.error('Logout error:', error);
-      // Even if logout fails, redirect to login page
       this.router.navigate(['/login']);
     }
   }

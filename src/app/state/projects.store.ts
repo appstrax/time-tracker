@@ -1,21 +1,14 @@
 import { computed, inject } from '@angular/core';
-import {
-  signalStore,
-  withState,
-  withMethods,
-  withComputed,
-  patchState,
-} from '@ngrx/signals';
-import {
-  EntityState,
-  createEmptyEntityState,
-  upsertMany,
-  upsertOne,
-  removeOne,
-} from './entity-state';
-import { Project } from '../models/project.model';
-import { ProjectService } from '../services/project.service';
+
+import { withComputed, patchState } from '@ngrx/signals';
+import { signalStore, withState, withMethods } from '@ngrx/signals';
+
 import { Operator } from '@appstrax/services/database';
+
+import { Project } from '@models';
+import { ProjectService } from '@services';
+import { upsertOne, removeOne, upsertMany } from '@state';
+import { EntityState, createEmptyEntityState } from '@state';
 
 interface ProjectsState extends EntityState<Project> {}
 

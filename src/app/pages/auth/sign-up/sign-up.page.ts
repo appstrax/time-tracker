@@ -2,14 +2,11 @@ import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 
-import { User } from '../../../models/user.model';
+import { User } from '@models';
 import { Router } from '@angular/router';
-import {
-  AuthErrors,
-  AuthResult,
-  AuthStatus,
-} from '@appstrax/services/auth/models/auth_result';
-import { appstraxAuth } from '@appstrax/services/auth';
+import { appstraxAuth, AuthStatus } from '@appstrax/services/auth';
+import { AuthResult } from '@appstrax/services/auth/models/auth_result';
+import { AuthErrors } from '@appstrax/services/auth/models/auth_result';
 
 @Component({
   selector: 'app-sign-up',

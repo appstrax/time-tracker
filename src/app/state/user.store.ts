@@ -1,6 +1,6 @@
 import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
 import { appstraxAuth } from '@appstrax/services/auth';
-import { User } from '../models/user.model';
+import { User } from '@models';
 
 interface UserState {
   current: User | null;
@@ -23,7 +23,6 @@ export const UserStore = signalStore(
       try {
         const authUser = await appstraxAuth.getUser();
         const user = new User();
-        // Map minimal fields
         (user as any).id = (authUser as any).id;
         user.email = (authUser as any).email ?? '';
         patchState(store, { current: user });

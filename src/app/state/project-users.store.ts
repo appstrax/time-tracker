@@ -1,8 +1,10 @@
 import { computed, inject } from '@angular/core';
+
 import { signalStore, withState, withMethods, withComputed, patchState } from '@ngrx/signals';
-import { EntityState, createEmptyEntityState, upsertMany, upsertOne, removeOne } from './entity-state';
-import { ProjectUsers } from '../models/many-to-many.model';
-import { ProjectUsersService } from '../services/project.service';
+
+import { ProjectUsers } from '@models';
+import { ProjectUsersService } from '@services';
+import { EntityState, createEmptyEntityState, upsertMany, upsertOne, removeOne } from '@state';
 
 interface ProjectUsersState extends EntityState<ProjectUsers> {}
 
