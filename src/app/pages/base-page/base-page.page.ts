@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 
 import { Store } from '@state';
 import { SideNavComponent } from '@components';
-import { ProjectSelectorComponent } from '@components';
+import { HeaderComponent } from '@components';
 
 @Component({
   selector: 'app-base-page',
@@ -15,7 +15,7 @@ import { ProjectSelectorComponent } from '@components';
     CommonModule,
     RouterModule,
     SideNavComponent,
-    ProjectSelectorComponent,
+    HeaderComponent,
   ],
 })
 export class BasePage {
