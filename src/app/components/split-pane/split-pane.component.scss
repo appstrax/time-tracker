@@ -1,0 +1,49 @@
+.split-container {
+  display: flex;
+  width: 100%;
+  height: calc(100vh - 100px); 
+  min-height: 300px;
+}
+
+.left-pane,
+.right-pane {
+  min-width: 0; 
+  overflow: auto;
+}
+
+.divider {
+  width: 8px;
+  cursor: col-resize;
+  background: transparent;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 3px;
+  right: 3px;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.06);
+  transition: background 0.2s ease;
+}
+
+.divider:hover::before {
+  background: rgba(0, 0, 0, 0.12);
+}
+
+.split-container.collapsed .left-pane {
+  display: none;
+}
+
+.split-container.collapsed .divider {
+  display: none;
+}
+
+body.noselect {
+  user-select: none;
+}
+
+

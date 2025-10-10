@@ -1,0 +1,17 @@
+<div #container class="split-container" [class.collapsed]="isCollapsed">
+  <div class="left-pane" [style.flex-basis.%]="isCollapsed ? 0 : leftRatio * 100">
+    <ng-content select="[left]"></ng-content>
+  </div>
+  <div
+    #divider
+    class="divider"
+    role="separator"
+    aria-orientation="vertical"
+    tabindex="0"
+    (mousedown)="onDividerMouseDown($event)"
+  ></div>
+  <div class="right-pane" [style.flex-basis.%]="isCollapsed ? 100 : (100 - leftRatio * 100)">
+    <ng-content select="[right]"></ng-content>
+  </div>
+</div>
+

@@ -1,5 +1,16 @@
-<app-chat 
-  title="Feed The Machine." 
-  subtitle="Watch your project take shape."
-  [suggestions]="defineSuggestions">
-</app-chat>
+<app-split-pane
+  storageKey="split.define"
+  [initialLeftRatio]="0.6"
+  [minLeftPx]="480"
+  [minRightPx]="320"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-chat [suggestions]="defineSuggestions"></app-chat>
+  </ng-container>
+
+  <ng-container right>
+    <router-outlet></router-outlet>
+  </ng-container>
+</app-split-pane>
