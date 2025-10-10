@@ -5,6 +5,9 @@ import { HostListener, AfterViewInit } from '@angular/core';
 
 import { Tooltip } from 'bootstrap';
 import { appstraxAuth } from '@appstrax/services/auth';
+import { SideNavCollapsedComponent } from './collapsed/side-nav-collapsed.component';
+import { SideNavExpandedComponent } from './expanded/side-nav-expanded.component';
+import { SettingsService } from '@services';
 
 interface NavItem {
   title: string;
@@ -17,16 +20,17 @@ interface NavItem {
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SideNavCollapsedComponent, SideNavExpandedComponent],
 })
 export class SideNavComponent implements AfterViewInit, OnDestroy {
-  isVisible = false;
+  isVisible = true;
+  mode: 'collapsed' | 'expanded' = 'collapsed';
   private closeTimeout: any;
   private readonly THRESHOLD = 50;
   private readonly BUFFER_ZONE = 100;
   private tooltips: Tooltip[] = [];
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private settings: SettingsService) {}
 
   @HostListener('document:mousemove', ['$event'])
   onMouseMove(event: MouseEvent) {
@@ -43,11 +47,16 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    if (!this.settings.getAutoCollapse()) {
+      this.isVisible = true;
+      return;
+    }
+
     if (event.clientX > this.BUFFER_ZONE && this.isVisible) {
       this.closeTimeout = setTimeout(() => {
         this.isVisible = false;
         this.hideAllTooltips();
-      }, 500);
+      }, 2500);
     }
   }
 
@@ -103,9 +112,7 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   }
 
   toggleNav() {
-    this.isVisible = !this.isVisible;
-    if (!this.isVisible) {
-      this.hideAllTooltips();
-    }
+    // Expand/collapse mode toggle via double chevrons
+    this.mode = this.mode === 'collapsed' ? 'expanded' : 'collapsed';
   }
 }

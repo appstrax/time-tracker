@@ -1,33 +1,8 @@
-<div class="side-nav" [class.visible]="isVisible">
-  <div class="nav-content">
-    <!-- Logo Section -->
-    <div class="logo-section">
-      <a routerLink="/home">
-        <img src="/machine-logo.jpg" alt="Machine Logo" class="site-logo">
-      </a>
-    </div>
-
-    <!-- Navigation Items -->
-    <div class="nav-items">
-      <a [routerLink]="item.route" routerLinkActive="active" class="nav-item" *ngFor="let item of navItems" data-bs-toggle="tooltip" [attr.data-bs-title]="item.title" data-bs-placement="right">
-        <div class="icon-box">
-          <i [class]="item.icon"></i>
-        </div>
-      </a>
-    </div>
-
-    <!-- Profile Section -->
-    <div class="profile-section">
-      <a routerLink="/profile" routerLinkActive="active" class="nav-item" data-bs-toggle="tooltip" data-bs-title="Profile" data-bs-placement="right">
-        <div class="icon-box">
-          <i class="bi bi-person-circle"></i>
-        </div>
-      </a>
-      <div class="nav-item" data-bs-toggle="tooltip" data-bs-title="Logout" data-bs-placement="right" (click)="logout()">
-        <div class="icon-box">
-          <i class="bi bi-box-arrow-right"></i>
-        </div>
-      </div>
-    </div>
-  </div>
+<div class="side-nav" [class.visible]="isVisible" [class.expanded]="mode === 'expanded'" [class.collapsed]="mode === 'collapsed'">
+  <ng-container *ngIf="mode === 'collapsed'; else expandedTpl">
+    <app-side-nav-collapsed [navItems]="navItems" (logout)="logout()" (toggle)="toggleNav()"></app-side-nav-collapsed>
+  </ng-container>
+  <ng-template #expandedTpl>
+    <app-side-nav-expanded [navItems]="navItems" (logout)="logout()" (toggle)="toggleNav()"></app-side-nav-expanded>
+  </ng-template>
 </div>

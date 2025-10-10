@@ -1,0 +1,37 @@
+<div class="expanded-nav">
+  <div class="logo-row">
+    <a routerLink="/home" class="brand">
+      <img src="/machine-logo.jpg" alt="Machine Logo" class="site-logo">
+      <span class="brand-name">Machine</span>
+    </a>
+    <button class="toggle-btn" type="button" (click)="toggle.emit()" aria-label="Collapse side navigation">
+      <i class="bi bi-chevron-double-left"></i>
+    </button>
+  </div>
+
+  <div class="menu">
+    <div class="group pt-4">
+      <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" *ngFor="let item of navItems">
+        <i [class]="item.icon"></i>
+        <span class="label">{{ item.title }}</span>
+      </a>
+    </div>
+  </div>
+
+  <div class="footer">
+    <a routerLink="/settings" routerLinkActive="active" class="menu-item">
+      <i class="bi bi-gear"></i>
+      <span class="label">Settings</span>
+    </a>
+    <a routerLink="/profile" routerLinkActive="active" class="menu-item">
+      <i class="bi bi-person-circle"></i>
+      <span class="label">Profile</span>
+    </a>
+    <button class="menu-item" type="button" (click)="logout.emit()">
+      <i class="bi bi-box-arrow-right"></i>
+      <span class="label">Logout</span>
+    </button>
+  </div>
+</div>
+
+

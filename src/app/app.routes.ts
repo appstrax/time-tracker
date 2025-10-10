@@ -11,6 +11,7 @@ import { BasePage, ProjectPage, ProfilePage } from '@pages';
 import { TicketsPage, BillingPage, QualityPage } from '@pages';
 import { HomePage, DocsPage, ReposPage, UsersPage } from '@pages';
 import { AuditPage, StatsPage, DefinePage, DevopsPage } from '@pages';
+import { SettingsPage } from '@pages';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -46,6 +47,7 @@ export const routes: Routes = [
       { path: 'stats', component: StatsPage },
       { path: 'tickets', component: TicketsPage },
       { path: 'users', component: UsersPage },
+      { path: 'settings', component: SettingsPage },
     ],
   },
   { path: '**', redirectTo: '/home' },
