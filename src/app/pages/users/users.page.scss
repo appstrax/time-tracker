@@ -1,0 +1,27 @@
+.section-title {
+  color: var(--primary-color-dark);
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.users-section {
+  border-radius: 20px;
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+  width: 100%;
+  padding: 1.5rem 2rem;
+  margin: 2rem 0;
+  background-color: #ffffff;
+}
+
+.avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  object-fit: cover;
+  box-shadow: 0 0 8px rgba(0, 0, 0, 0.1);
+}
+
+.filter-card, .table-card {
+  border-radius: 20px;
+}
+
