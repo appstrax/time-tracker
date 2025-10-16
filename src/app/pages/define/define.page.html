@@ -1,8 +1,6 @@
 <app-split-pane
   storageKey="split.define"
   [initialLeftRatio]="0.7"
-  [minLeftPx]="480"
-  [minRightPx]="320"
   [collapseBreakpointPx]="1024"
   [collapsedOnSmallScreens]="true"
 >
@@ -12,7 +10,20 @@
 
   <ng-container right>
      <div class="container">
-        We will have the define page responses here, these windows are resizable and collapsible
+        <div>The project definition will be displayed here</div>
+        <div>We want to see a summary as well as things like:</div>
+        <ul>
+          <li>Project Name</li>
+          <li>Project Description</li>
+          <li>Project Features</li>
+          <li>Project Models</li>
+          <li>Project Definitions</li>
+          <li>Project Services</li>
+          <li>Project Components</li>
+          <li>User Interaction etc</li>
+        </ul>
+        <div>The more comprehensive the definition, the better the design and development will be</div>
+        <div>A flow chart might be great as well</div>
      </div>
   </ng-container>
 </app-split-pane>

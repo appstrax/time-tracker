@@ -10,15 +10,25 @@
   </div>
 
   <div class="menu">
-    <div class="group pt-4">
-      <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" *ngFor="let item of navItems">
-        <i [class]="item.icon"></i>
-        <span class="label">{{ item.title }}</span>
-      </a>
+    <div class="group pt-2" *ngFor="let group of groups">
+      <button type="button" class="menu-item group-header" (click)="toggleGroup(group.key)">
+        <span class="label">{{ group.title }}</span>
+        <i class="bi bi-chevron-right" [class.rotate]="expandedState[group.key]"></i>
+      </button>
+      <div class="group-items" *ngIf="expandedState[group.key]">
+        <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" *ngFor="let item of group.items">
+          <i [class]="item.icon"></i>
+          <span class="label">{{ item.title }}</span>
+        </a>
+      </div>
     </div>
   </div>
 
   <div class="footer">
+    <a routerLink="/contact" routerLinkActive="active" class="menu-item">
+      <i class="bi bi-envelope"></i>
+      <span class="label">Contact</span>
+    </a>
     <a routerLink="/settings" routerLinkActive="active" class="menu-item">
       <i class="bi bi-gear"></i>
       <span class="label">Settings</span>

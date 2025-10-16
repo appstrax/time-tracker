@@ -1,12 +1,20 @@
 <div class="collapsed-nav">
   <div class="logo-section">
     <a routerLink="/home">
-      <img src="/machine-logo.jpg" alt="Machine Logo" class="site-logo">
+      <img src="/machine-logo.jpg" alt="Machine Logo" class="site-logo" />
     </a>
   </div>
 
   <div class="nav-items">
-    <a [routerLink]="item.route" routerLinkActive="active" class="nav-item" *ngFor="let item of navItems" data-bs-toggle="tooltip" [attr.data-bs-title]="item.title" data-bs-placement="right">
+    <a
+      [routerLink]="item.route"
+      routerLinkActive="active"
+      class="nav-item"
+      *ngFor="let item of navItems"
+      data-bs-toggle="tooltip"
+      [attr.data-bs-title]="item.title"
+      data-bs-placement="right"
+    >
       <div class="icon-box">
         <i [class]="item.icon"></i>
       </div>
@@ -14,26 +22,61 @@
   </div>
 
   <div class="profile-section">
-    <a routerLink="/settings" routerLinkActive="active" class="nav-item" data-bs-toggle="tooltip" data-bs-title="Settings" data-bs-placement="right">
+    <a
+      routerLink="/contact"
+      routerLinkActive="active"
+      class="nav-item"
+      data-bs-toggle="tooltip"
+      data-bs-title="Contact"
+      data-bs-placement="right"
+    >
+      <div class="icon-box">
+        <i class="bi bi-envelope"></i>
+      </div>
+    </a>
+    <a
+      routerLink="/settings"
+      routerLinkActive="active"
+      class="nav-item"
+      data-bs-toggle="tooltip"
+      data-bs-title="Settings"
+      data-bs-placement="right"
+    >
       <div class="icon-box">
         <i class="bi bi-gear"></i>
       </div>
     </a>
-    <a routerLink="/profile" routerLinkActive="active" class="nav-item" data-bs-toggle="tooltip" data-bs-title="Profile" data-bs-placement="right">
+    <a
+      routerLink="/profile"
+      routerLinkActive="active"
+      class="nav-item"
+      data-bs-toggle="tooltip"
+      data-bs-title="Profile"
+      data-bs-placement="right"
+    >
       <div class="icon-box">
         <i class="bi bi-person-circle"></i>
       </div>
     </a>
-    <div class="nav-item" data-bs-toggle="tooltip" data-bs-title="Logout" data-bs-placement="right" (click)="logout.emit()">
+    <div
+      class="nav-item"
+      data-bs-toggle="tooltip"
+      data-bs-title="Logout"
+      data-bs-placement="right"
+      (click)="logout.emit()"
+    >
       <div class="icon-box">
         <i class="bi bi-box-arrow-right"></i>
       </div>
     </div>
   </div>
 
-  <button class="toggle-btn" type="button" (click)="toggle.emit()" aria-label="Expand side navigation">
+  <button
+    class="toggle-btn"
+    type="button"
+    (click)="toggle.emit()"
+    aria-label="Expand side navigation"
+  >
     <i class="bi bi-chevron-double-right"></i>
   </button>
 </div>
-
-

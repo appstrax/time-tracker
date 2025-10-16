@@ -1,8 +1,6 @@
 <app-split-pane
   storageKey="split.define"
   [initialLeftRatio]="0.7"
-  [minLeftPx]="480"
-  [minRightPx]="320"
   [collapseBreakpointPx]="1024"
   [collapsedOnSmallScreens]="true"
 >
@@ -14,8 +12,6 @@
   </ng-container>
 
   <ng-container right>
-    <div class="container">
-        We will have the tickets page responses here
-     </div>
+    <app-kanban-board storageKey="tickets.kanban.v1"></app-kanban-board>
   </ng-container>
 </app-split-pane>

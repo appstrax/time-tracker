@@ -3,13 +3,14 @@ import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { ChatComponent } from '../../components/chat/chat.component';
 import { SplitPaneComponent } from '../../components/split-pane/split-pane.component';
+import { KanbanBoardComponent } from '../../components/kanban-board/kanban-board.component';
 
 @Component({
   selector: 'app-tickets',
   templateUrl: './tickets.page.html',
   styleUrls: ['./tickets.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, ChatComponent, SplitPaneComponent],
+  imports: [CommonModule, RouterModule, ChatComponent, SplitPaneComponent, KanbanBoardComponent],
 })
 export class TicketsPage {
   public ticketsSuggestions: any[] = [

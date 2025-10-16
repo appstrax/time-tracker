@@ -1,0 +1,16 @@
+<app-split-pane
+  storageKey="split.design"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-chat [suggestions]="designSuggestions" placeholder="Start describing your design..."></app-chat>
+  </ng-container>
+
+  <ng-container right>
+     <div class="container">
+        We will have the Figma design responses here, these windows are resizable and collapsible
+     </div>
+  </ng-container>
+</app-split-pane>

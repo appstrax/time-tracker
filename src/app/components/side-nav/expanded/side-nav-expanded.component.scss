@@ -78,6 +78,25 @@
   }
 }
 
+.group-header {
+  font-weight: normal;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.group-items {
+  display: flex;
+  flex-direction: column;
+  margin-left: 8px;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+
+.bi-chevron-right.rotate {
+  transform: rotate(90deg);
+}
+
 .footer {
   padding: 8px 4px;
   display: flex;

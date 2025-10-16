@@ -1,4 +1,4 @@
-<div #container class="split-container" [class.collapsed]="isCollapsed">
+<div #container class="split-container" [class.collapsed]="isCollapsed" [class.collapsed-left]="showCollapsedLeft" [class.collapsed-right]="showCollapsedRight">
   <div class="left-pane" [style.flex-basis.%]="isCollapsed ? 0 : leftRatio * 100">
     <ng-content select="[left]"></ng-content>
   </div>
@@ -13,5 +13,25 @@
   <div class="right-pane" [style.flex-basis.%]="isCollapsed ? 100 : (100 - leftRatio * 100)">
     <ng-content select="[right]"></ng-content>
   </div>
+
+  <button
+    *ngIf="showCollapsedLeft"
+    type="button"
+    class="restore-tag left"
+    aria-label="Restore split from left"
+    (click)="restoreFromLeft()"
+  >
+    ▶
+  </button>
+
+  <button
+    *ngIf="showCollapsedRight"
+    type="button"
+    class="restore-tag right"
+    aria-label="Restore split from right"
+    (click)="restoreFromRight()"
+  >
+    ◀
+  </button>
 </div>
 
