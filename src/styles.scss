@@ -19,7 +19,8 @@ body {
 }
 
 body {
-  background-color: #f8f9fa;
+  background-color: var(--color-bg);
+  color: var(--text-primary);
 }
 
 /* Utility classes */
@@ -44,3 +45,82 @@ body {
 .fw-700 { font-weight: 700;}
 .fw-800 { font-weight: 800;}
 .fw-900 { font-weight: 900;}
+
+/* Theming tokens */
+:root {
+  /* Semantic colors */
+  --color-bg: #f8f9fa;
+  --color-surface: #ffffff;
+  --color-border: #e6e6e6;
+  --color-primary: #8a00b4;
+  --color-primary-contrast: #ffffff;
+  --text-primary: #1a1a1a;
+  --text-muted: #666666;
+
+  /* Map legacy vars to tokens for compatibility */
+  --primary-color: var(--color-primary);
+  --primary-color-light: color-mix(in srgb, var(--color-primary) 6%, transparent);
+  --primary-color-dark: #4a0068;
+
+  /* Bootstrap variable mapping */
+  --bs-body-bg: var(--color-bg);
+  --bs-body-color: var(--text-primary);
+  --bs-primary: var(--color-primary);
+  --bs-border-color: var(--color-border);
+}
+
+:root[data-theme="dark"] {
+  --color-bg: #0f0f10;
+  --color-surface: #16171a;
+  --color-border: #2a2a2e;
+  --color-primary: #b86bdb;
+  --color-primary-contrast: #0f0f10;
+  --text-primary: #f2f2f3;
+  --text-muted: #a0a0a5;
+
+  --primary-color: var(--color-primary);
+  --primary-color-light: color-mix(in srgb, var(--color-primary) 8%, transparent);
+  --primary-color-dark: #b86bdb;
+
+  --bs-body-bg: var(--color-bg);
+  --bs-body-color: var(--text-primary);
+  --bs-primary: var(--color-primary);
+  --bs-border-color: var(--color-border);
+}
+
+/* Global button color overrides to unify primary buttons */
+.btn-primary {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--color-primary-contrast) !important;
+}
+
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  filter: brightness(0.95);
+}
+
+.btn-primary:active,
+.btn-primary:focus:active {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  filter: brightness(0.9);
+}
+
+.btn-outline-primary {
+  color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+}
+
+.btn-outline-primary:hover,
+.btn-outline-primary:focus {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--color-primary-contrast) !important;
+}
+
+/* Token-based surfaces for cards/utilities */
+.bg-white { background-color: var(--color-surface) !important; }
+.card { background-color: var(--color-surface); border-color: var(--color-border); }

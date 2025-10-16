@@ -5,7 +5,7 @@
   margin-bottom: 0;
 
   .breadcrumb-item {
-    color: #6c757d;
+    color: var(--text-muted);
     cursor: pointer;
     &.active {
       cursor: default;
@@ -22,5 +22,5 @@ a {
   margin: 0 0 4px 0;
   font-size: 1.5rem;
   font-weight: 500;
-  color: black;
+  color: var(--text-primary);
 }

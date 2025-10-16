@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { ThemeService } from '@services';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -10,4 +11,6 @@ import { RouterOutlet } from '@angular/router';
 })
 export class AppComponent {
   title = 'machine-site';
+
+  constructor(private theme: ThemeService) {}
 }

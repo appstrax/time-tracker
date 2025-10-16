@@ -1,22 +1,103 @@
 <div class="container">
-  <div class="card setting-card">
-    <div class="card-body d-flex align-items-center justify-content-between">
-      <div>
-        <div class="setting-title">Auto-collapse side menu on inactivity</div>
-        <div class="setting-desc">
-          When enabled, the side navigation hides when the pointer leaves the
-          edge.
+  <section class="settings-section">
+    <div class="d-flex align-items-center justify-content-between">
+      <h2 class="section-title">General</h2>
+    </div>
+    <hr />
+    <div class="card setting-card">
+      <div class="card-body d-flex align-items-center justify-content-between">
+        <div>
+          <div class="setting-title">Auto-collapse side menu on inactivity</div>
+          <div class="setting-desc">
+            When enabled, the side navigation hides when the pointer leaves the edge.
+          </div>
+        </div>
+        <div class="form-check form-switch">
+          <input
+            class="form-check-input"
+            type="checkbox"
+            id="autoCollapseSwitch"
+            [checked]="(settings.autoCollapse$ | async) ?? false"
+            (change)="toggleAutoCollapse($event)"
+          />
         </div>
       </div>
-      <div class="form-check form-switch">
-        <input
-          class="form-check-input"
-          type="checkbox"
-          id="autoCollapseSwitch"
-          [checked]="(settings.autoCollapse$ | async) ?? false"
-          (change)="toggleAutoCollapse($event)"
-        />
+    </div>
+  </section>
+
+  <section class="settings-section">
+    <div class="d-flex align-items-center justify-content-between">
+      <h2 class="section-title">Appearance</h2>
+    </div>
+    <hr />
+    <div class="card setting-card">
+      <div class="card-body">
+        <div class="setting-title mb-2">Color theme</div>
+        <div class="setting-desc mb-3">Choose a theme for the application interface.</div>
+
+        <div class="theme-options">
+          <label class="theme-tile">
+            <input type="radio" name="theme" value="light" (change)="onThemeChange('light')" [checked]="(theme.currentTheme$ | async) === 'light'" />
+            <div class="tile-visual light">
+              <div class="tile-header"></div>
+              <div class="tile-body"></div>
+            </div>
+            <div class="tile-label">Light</div>
+          </label>
+
+          <label class="theme-tile">
+            <input type="radio" name="theme" value="dark" (change)="onThemeChange('dark')" [checked]="(theme.currentTheme$ | async) === 'dark'" />
+            <div class="tile-visual dark">
+              <div class="tile-header"></div>
+              <div class="tile-body"></div>
+            </div>
+            <div class="tile-label">Dark</div>
+          </label>
+
+          <label class="theme-tile">
+            <input type="radio" name="theme" value="system" (change)="onThemeChange('system')" [checked]="(theme.currentTheme$ | async) === 'system'" />
+            <div class="tile-visual system">
+              <div class="tile-header"></div>
+              <div class="tile-body"></div>
+            </div>
+            <div class="tile-label">System</div>
+          </label>
+
+          <label class="theme-tile">
+            <input type="radio" name="theme" value="custom" (change)="onThemeChange('custom')" [checked]="(theme.currentTheme$ | async) === 'custom'" />
+            <div class="tile-visual custom">
+              <div class="tile-header"></div>
+              <div class="tile-body"></div>
+            </div>
+            <div class="tile-label">Custom</div>
+          </label>
+        </div>
+        
+        <div class="custom-theme-editor mt-3" *ngIf="(theme.currentTheme$ | async) === 'custom'">
+          <div class="row g-3">
+            <div class="col-md-3">
+              <label class="form-label">Primary</label>
+              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.primary" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Background</label>
+              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.bg" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Surface</label>
+              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.surface" />
+            </div>
+            <div class="col-md-3">
+              <label class="form-label">Text</label>
+              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.text" />
+            </div>
+          </div>
+          <div class="mt-3 d-flex gap-2">
+            <button class="btn btn-primary" (click)="applyCustom()">Apply custom theme</button>
+            <button class="btn btn-light" (click)="resetCustom()">Reset</button>
+          </div>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 </div>

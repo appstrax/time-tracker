@@ -11,7 +11,8 @@
   padding: 2rem 3rem;
   margin-top: 1rem;
   margin-bottom: 3rem;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
 
   text-align: left;
 }
@@ -30,19 +31,19 @@
 .btn-primary:hover {
   background-color: var(--primary-color);
   border-color: var(--primary-color);
-  box-shadow: 0 0 10px 0 #8a00b459;
-  color: #ffffff;
+  box-shadow: 0 0 10px 0 color-mix(in srgb, var(--primary-color) 35%, transparent);
+  color: var(--color-primary-contrast);
 }
 
 .profile-picture img {
-  box-shadow: 0 0 20px 0 lightgrey;
+  box-shadow: 0 0 20px 0 color-mix(in srgb, var(--color-border) 60%, transparent);
   object-fit: cover;
   width: 10rem;
   height: 10rem;
   transition: box-shadow 0.3s ease;
 
   &:hover {
-    box-shadow: 0 0 10px 0 #8a00b459;
+    box-shadow: 0 0 10px 0 color-mix(in srgb, var(--primary-color) 35%, transparent);
   }
 }
 
@@ -64,7 +65,7 @@
   width: 2rem;
   bottom: 0.5rem;
   right: 0.5rem;
-  background-color: #ffffff;
+  background-color: var(--color-surface);
   border-radius: 50%;
   box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.3);
 
@@ -72,6 +73,6 @@
 
   &:hover {
     background-color: var(--primary-color);
-    color: #ffffff;
+    color: var(--color-primary-contrast);
   }
 }

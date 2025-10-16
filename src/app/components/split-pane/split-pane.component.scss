@@ -27,12 +27,12 @@
   left: 3px;
   right: 3px;
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.06);
+  background: var(--color-border);
   transition: background 0.2s ease;
 }
 
 .divider:hover::before {
-  background: rgba(0, 0, 0, 0.12);
+  background: color-mix(in srgb, var(--color-border) 80%, transparent);
 }
 
 .split-container.collapsed .left-pane {
@@ -57,9 +57,9 @@ body.noselect {
   top: 50%;
   transform: translateY(-50%);
   z-index: 2;
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  background: rgba(255, 255, 255, 0.9);
-  color: #333;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 90%, transparent);
+  color: var(--text-primary);
   padding: 4px 2px;
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
@@ -75,7 +75,7 @@ body.noselect {
 }
 
 .restore-tag:hover {
-  background: rgba(255, 255, 255, 1);
+  background: var(--color-surface);
 }
 
 

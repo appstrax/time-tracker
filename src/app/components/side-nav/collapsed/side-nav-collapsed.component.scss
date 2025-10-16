@@ -61,18 +61,18 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    background-color: #eaeaea;
+    background-color: var(--color-border);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
     transition: all 0.2s ease;
     cursor: pointer;
 
     &:hover {
-      background-color: #e0e0e0;
+      background-color: color-mix(in srgb, var(--color-border) 70%, transparent);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     i {
-      color: #424242;
+      color: var(--text-primary);
       font-size: 18px;
       width: 15px;
       height: 15px;
@@ -104,7 +104,7 @@
   align-items: center;
   justify-content: center;
   border: none;
-  background: #eaeaea;
+  background: var(--color-border);
   cursor: pointer;
 }
 

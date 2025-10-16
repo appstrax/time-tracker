@@ -9,7 +9,7 @@
 .create-project-container {
   width: 100%;
   max-width: 1000px;
-  background-color: #fff;
+  background-color: var(--color-surface);
   border-radius: 8px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
   overflow: hidden;
@@ -40,13 +40,13 @@
 .main-title {
   font-size: 2rem;
   font-weight: 700;
-  color: #212529;
+  color: var(--text-primary);
   margin-bottom: 0.5rem;
 }
 
 .subtitle {
   font-size: 1rem;
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .welcome-text {
@@ -125,8 +125,8 @@
   width: 100%;
   border-radius: 6px;
   border: 1px solid #ced4da;
-  background-color: #fff;
-  color: #212529;
+  background-color: var(--color-surface);
+  color: var(--text-primary);
 }
 
 .org-dropdown .dropdown-toggle::after {
@@ -194,8 +194,8 @@
 
 .create-project-btn {
   height: 52px;
-  background-color: #4169e1;
-  border-color: #4169e1;
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
   font-weight: 500;
   margin-bottom: 2rem;
   width: 100%;
