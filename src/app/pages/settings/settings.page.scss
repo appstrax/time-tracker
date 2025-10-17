@@ -15,12 +15,13 @@
 }
 
 .setting-card .setting-title {
+  color: var(--text-primary);
   font-weight: 600;
 }
 
 .setting-card .setting-desc {
-  color: #666;
   font-size: 0.9rem;
+  color: var(--text-muted);
 }
 
 .theme-options {

@@ -76,7 +76,7 @@ body {
   --color-primary: #b86bdb;
   --color-primary-contrast: #0f0f10;
   --text-primary: #f2f2f3;
-  --text-muted: #a0a0a5;
+  --text-muted: #9e9e9e;
 
   --primary-color: var(--color-primary);
   --primary-color-light: color-mix(in srgb, var(--color-primary) 8%, transparent);
@@ -124,3 +124,8 @@ body {
 /* Token-based surfaces for cards/utilities */
 .bg-white { background-color: var(--color-surface) !important; }
 .card { background-color: var(--color-surface); border-color: var(--color-border); }
+
+.tooltip {
+  --bs-tooltip-bg: var(--color-primary);
+  --bs-tooltip-color: var(--color-primary-contrast);
+}
