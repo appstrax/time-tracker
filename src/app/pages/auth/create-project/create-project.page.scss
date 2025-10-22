@@ -27,7 +27,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #f8f9fa;
+  background-color: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
 }
 
 .right-panel {
@@ -57,7 +59,7 @@
 
 .create-project-instruction {
   font-size: 1.1rem;
-  color: #6c757d;
+  color: var(--text-muted);
   margin-bottom: 2rem;
 }
 
@@ -75,20 +77,20 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #e9ecef;
-  color: #6c757d;
+  background: var(--color-border);
+  color: var(--text-muted);
   font-weight: 600;
 }
 
 .progress-indicator .step.active {
-  background: #4169e1;
-  color: #fff;
+  background: var(--primary-color);
+  color: var(--color-primary-contrast);
 }
 
 .progress-indicator .divider {
   flex: 1;
   height: 2px;
-  background: #e9ecef;
+  background: var(--color-border);
   margin: 0 4px;
 }
 
@@ -105,14 +107,16 @@
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .form-control {
   height: 52px;
   padding-left: 45px;
   border-radius: 6px;
-  border: 1px solid #ced4da;
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
 }
 
 /* Organization dropdown styles to match project-selector */
@@ -124,7 +128,7 @@
   height: 52px;
   width: 100%;
   border-radius: 6px;
-  border: 1px solid #ced4da;
+  border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   color: var(--text-primary);
 }
@@ -136,20 +140,20 @@
 .org-dropdown .dropdown-toggle:hover,
 .org-dropdown .dropdown-toggle:focus,
 .org-dropdown .dropdown-toggle:active {
-  background-color: #fff;
-  color: #212529;
-  border-color: #ced4da;
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border-color: var(--color-border);
   box-shadow: none;
 }
 
 .org-dropdown .dropdown-toggle i {
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .org-dropdown .dropdown-toggle:hover i,
 .org-dropdown .dropdown-toggle:focus i,
 .org-dropdown .dropdown-toggle:active i {
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .org-dropdown .dropdown-menu {
@@ -174,22 +178,22 @@
 
 /* Keep dropdown item text/icons dark on hover/focus/active */
 .org-dropdown .dropdown-item {
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .org-dropdown .dropdown-item:hover,
 .org-dropdown .dropdown-item:focus,
 .org-dropdown .dropdown-item:active,
 .org-dropdown .dropdown-item.active {
-  color: #212529;
-  background-color: #f8f9fa;
+  color: var(--text-primary);
+  background-color: color-mix(in srgb, var(--color-border) 60%, transparent);
 }
 
 .org-dropdown .dropdown-item:hover i,
 .org-dropdown .dropdown-item:focus i,
 .org-dropdown .dropdown-item:active i,
 .org-dropdown .dropdown-item.active i {
-  color: #212529;
+  color: var(--text-primary);
 }
 
 .create-project-btn {
@@ -227,11 +231,11 @@
 
 .create-project-link {
   text-align: center;
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .create-project-link a {
-  color: #4169e1;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
 }
@@ -243,7 +247,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #4169e1;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
 }

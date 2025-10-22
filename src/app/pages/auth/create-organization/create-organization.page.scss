@@ -27,7 +27,9 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: #f8f9fa;
+  background-color: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
+  border: 1px solid var(--color-border);
+  box-shadow: 0 1px 2px rgba(0,0,0,0.12);
 }
 
 .right-panel {
@@ -68,14 +70,14 @@
 
 .create-organization-instruction {
   font-size: 1.1rem;
-  color: #6c757d;
+  color: var(--text-muted);
   margin-bottom: 2rem;
 }
 
 .required-note {
   margin-top: -0.5rem;
   margin-bottom: 1rem;
-  color: #6c757d;
+  color: var(--text-muted);
   font-size: 0.9rem;
 }
 
@@ -102,14 +104,16 @@ form.ng-submitted .form-control.ng-invalid {
   left: 15px;
   top: 50%;
   transform: translateY(-50%);
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .form-control {
   height: 52px;
   padding-left: 45px;
   border-radius: 6px;
-  border: 1px solid #ced4da;
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
 }
 
 .create-organization-btn {
@@ -123,11 +127,11 @@ form.ng-submitted .form-control.ng-invalid {
 
 .create-organization-link {
   text-align: center;
-  color: #6c757d;
+  color: var(--text-muted);
 }
 
 .create-organization-link a {
-  color: #4169e1;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
 }
@@ -139,7 +143,7 @@ form.ng-submitted .form-control.ng-invalid {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #4169e1;
+  color: var(--primary-color);
   text-decoration: none;
   font-weight: 500;
 }
