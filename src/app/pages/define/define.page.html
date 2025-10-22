@@ -5,7 +5,14 @@
   [collapsedOnSmallScreens]="true"
 >
   <ng-container left>
-    <app-chat [suggestions]="defineSuggestions" placeholder="Start describing your project..."></app-chat>
+    <app-split-pane-vertical storageKey="split.define.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="defineSuggestions" placeholder="Start describing your project..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
   </ng-container>
 
   <ng-container right>

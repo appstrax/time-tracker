@@ -68,7 +68,9 @@
     text-decoration: none;
     color: inherit;
 
-    &.active {
+    &.active,
+    &:active,
+    &:focus-visible {
       .icon-box {
         background-color: var(--primary-color);
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

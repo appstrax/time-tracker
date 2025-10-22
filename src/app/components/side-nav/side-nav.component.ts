@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
-import { RouterModule, Router } from '@angular/router';
+import { RouterModule, Router, NavigationStart } from '@angular/router';
 import { HostListener, AfterViewInit } from '@angular/core';
 
 import { Tooltip } from 'bootstrap';
@@ -31,7 +31,6 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   private tooltips: Tooltip[] = [];
 
   constructor(private router: Router, private settings: SettingsService) {
-    // Load persisted mode
     this.mode = this.settings.getSideNavMode();
   }
 
@@ -59,7 +58,7 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
       this.closeTimeout = setTimeout(() => {
         this.isVisible = false;
         this.hideAllTooltips();
-      }, 2500);
+      }, 1500);
     }
   }
 
@@ -93,13 +92,22 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
       this.tooltips = [...tooltipTriggerList].map((tooltipTriggerEl) => {
         return new Tooltip(tooltipTriggerEl, {
           placement: 'right',
-          trigger: 'hover focus',
+          trigger: 'hover',
           delay: { show: 300, hide: 100 },
           container: 'body',
           boundary: document.body as any,
         });
       });
     }, 100);
+
+    // Hide tooltips on navigation to avoid lingering tooltips
+    this.router.events.subscribe((ev) => {
+      if (ev instanceof NavigationStart) {
+        this.hideAllTooltips();
+        // Also blur any focused element so focus-triggered tooltips cannot persist
+        (document.activeElement as HTMLElement | null)?.blur?.();
+      }
+    });
   }
 
   ngOnDestroy() {
@@ -108,6 +116,12 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
 
   private hideAllTooltips() {
     this.tooltips.forEach((tooltip) => tooltip.hide());
+  }
+
+  @HostListener('document:click')
+  onDocumentClick() {
+    // Clicking anywhere should close any visible tooltip in collapsed mode
+    this.hideAllTooltips();
   }
 
   async logout() {

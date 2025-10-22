@@ -73,7 +73,8 @@
     transition: all 0.2s ease;
     cursor: pointer;
 
-    &:hover {
+    /* Hover state only when not active */
+    .nav-item:not(.active) & :hover {
       background-color: color-mix(in srgb, var(--color-border) 70%, transparent);
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }

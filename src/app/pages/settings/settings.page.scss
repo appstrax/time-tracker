@@ -72,6 +72,25 @@
   outline-offset: 2px;
 }
 
+.form-check-input {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+}
+
+.form-check-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.2rem color-mix(in srgb, var(--primary-color) 25%, transparent);
+}
+
+.form-check-input:checked {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+}
+
+.form-switch .form-check-input {
+  background-color: var(--color-border);
+}
+
 .custom-theme-editor .form-label { font-weight: 500; }
 
 

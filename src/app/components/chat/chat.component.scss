@@ -1,9 +1,9 @@
-.full-height {
-  min-height: calc(100vh - 12rem);
-}
-
 .content-container {
   text-wrap: wrap;
+}
+
+.w-90 {
+  width: 90%;
 }
 
 h1 {
@@ -24,18 +24,17 @@ h3 {
 
 .prompt-input {
   width: 100%;
-  height: 60px;  border-radius: 15px;
+  height: 40px;  border-radius: 10px;
   border-bottom-right-radius: 0;
   border-top-right-radius: 0;
   border: 1px solid var(--color-border);
   background-color: var(--color-surface);
   color: var(--text-primary);
-  box-shadow: 0 0 10px 0 color-mix(in srgb, var(--color-border) 50%, transparent);
-  padding: 1rem;
-  padding-left: 1.5rem;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  padding: 0.5rem 0.75rem;
   z-index: 1;
 
-  font-size: 1rem;
+  font-size: 0.9rem;
   font-family: Consolas, monospace;
 
   &:focus {
@@ -51,28 +50,36 @@ h3 {
 
 .prompt-input-container {
   width: 100%;
-  
+  display: flex;
+  align-items: center;
+  max-width: 720px;
+  margin: 0 auto;
+  border-radius: 10px;
+  box-shadow: 0 0 12px 0 color-mix(in srgb, var(--primary-color) 18%, transparent);
+  transition: box-shadow 0.3s ease;
+
   &:focus-within {
     outline: none;
-    border-radius: 15px;
-    box-shadow: 0 0 30px 0 color-mix(in srgb, var(--primary-color) 40%, transparent);
+    border-radius: 10px;
+    box-shadow: 0 0 18px 0 color-mix(in srgb, var(--primary-color) 30%, transparent);
     transition: box-shadow 0.5s ease;
   }
 }
 
 .send-button {
-  padding-left: 20px;
-  height: 60px;
-  width: 80px;
-  border-radius: 15px;
+  padding-left: 10px;
+  height: 40px;
+  width: 48px;
+  border-radius: 10px;
   background-color: var(--primary-color);
-  box-shadow: 0 0 10px 0 rgba(0, 0, 0, 0.1);
-  margin-left: -20px;
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+  margin-left: -10px;
   cursor: pointer;
-  
+  border: 1px solid var(--primary-color);
+
   i {
-    font-size: 1.2rem;
-    color: var(--color-primary-contrast) !important;
+    font-size: 0.95rem;
+    color: var(--color-primary-contrast);
   }
 }
 
@@ -128,11 +135,10 @@ h3 {
   }
   
   .prompt-input {
-    height: 50px;
+    height: 38px;
     font-size: 0.9rem;
-    padding: 0.75rem;
-    padding-left: 1.25rem;
-    border-radius: 12px;
+    padding: 0.45rem 0.7rem;
+    border-radius: 10px;
     
     &::placeholder {
       font-size: 0.8rem;
@@ -141,19 +147,19 @@ h3 {
   
   .prompt-input-container {
     &:focus-within {
-      border-radius: 12px;
+      border-radius: 10px;
     }
   }
   
   .send-button {
-    height: 50px;
-    width: 70px;
-    padding-left: 15px;
-    margin-left: -15px;
-    border-radius: 12px;
+    height: 38px;
+    width: 44px;
+    padding-left: 10px;
+    margin-left: -10px;
+    border-radius: 10px;
     
     i {
-      font-size: 1rem;
+      font-size: 0.9rem;
     }
   }
 }
@@ -171,11 +177,10 @@ h3 {
   }
   
   .prompt-input {
-    height: 70px;
-    font-size: 1.1rem;
-    padding: 1.1rem;
-    padding-left: 1.75rem;
-    border-radius: 18px;
+    height: 44px;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.9rem;
+    border-radius: 10px;
     
     &::placeholder {
       font-size: 1rem;
@@ -189,15 +194,13 @@ h3 {
   }
   
   .send-button {
-    height: 70px;
-    width: 95px;
-    padding-left: 25px;
-    margin-left: -25px;
-    border-radius: 18px;
+    height: 44px;
+    width: 52px;
+    padding-left: 12px;
+    margin-left: -12px;
+    border-radius: 10px;
     
-    i {
-      font-size: 1.3rem;
-    }
+    i { font-size: 1rem; }
   }
 }
 
@@ -211,11 +214,10 @@ h3 {
   }
   
   .prompt-input {
-    height: 80px;
-    font-size: 1.25rem;
-    padding: 1.25rem;
-    padding-left: 2rem;
-    border-radius: 20px;
+    height: 48px;
+    font-size: 1rem;
+    padding: 0.7rem 1rem;
+    border-radius: 10px;
     
     &::placeholder {
       font-size: 1.1rem;
@@ -229,15 +231,13 @@ h3 {
   }
   
   .send-button {
-    height: 80px;
-    width: 110px;
-    padding-left: 30px;
-    margin-left: -30px;
-    border-radius: 20px;
+    height: 48px;
+    width: 56px;
+    padding-left: 12px;
+    margin-left: -12px;
+    border-radius: 10px;
     
-    i {
-      font-size: 1.4rem;
-    }
+    i { font-size: 1.05rem; }
   }
 }
 

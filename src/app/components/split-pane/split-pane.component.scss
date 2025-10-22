@@ -6,7 +6,11 @@
   position: relative; 
 }
 
-.left-pane,
+.left-pane {
+  min-width: 0; 
+  overflow: visible; /* allow child overlays (e.g., vertical restore pills) to show */
+}
+
 .right-pane {
   min-width: 0; 
   overflow: auto;
@@ -64,6 +68,9 @@ body.noselect {
   border-radius: 6px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
   cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .restore-tag.left {
