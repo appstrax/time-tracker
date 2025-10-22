@@ -17,10 +17,10 @@
         <ng-container *ngIf="editingColumnId !== col.id; else editColTmpl">
           <h6 class="title" (dblclick)="editingColumnId = col.id">{{ col.title }}</h6>
           <div class="actions">
-            <button class="btn btn-sm btn-light" (click)="editingColumnId = col.id" title="Rename">
+            <button class="btn btn-sm btn-outline-primary" (click)="editingColumnId = col.id" title="Rename">
               <i class="bi bi-pencil"></i>
             </button>
-            <button class="btn btn-sm btn-light" (click)="deleteColumn(col)" title="Delete column">
+            <button class="btn btn-sm btn-outline-primary" (click)="deleteColumn(col)" title="Delete column">
               <i class="bi bi-trash"></i>
             </button>
             <button class="btn btn-sm btn-primary" (click)="addCard(col)" title="Add card">

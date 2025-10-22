@@ -1,4 +1,18 @@
 .link-text {
-  color: var(--primary-color-dark);
+  color: var(--primary-color);
   text-decoration: none;
+}
+
+:host {
+  display: block;
+  color: var(--text-primary);
+}
+
+.text-muted {
+  color: var(--text-muted) !important;
+}
+
+.bi {
+  color: var(--text-muted);
+  margin-right: 6px;
 }

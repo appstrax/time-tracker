@@ -129,3 +129,26 @@ body {
   --bs-tooltip-bg: var(--color-primary);
   --bs-tooltip-color: var(--color-primary-contrast);
 }
+
+/* Themed global scrollbar */
+html {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border) transparent;
+}
+
+body::-webkit-scrollbar {
+  width: 10px;
+}
+
+body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+body::-webkit-scrollbar-thumb {
+  background-color: var(--color-border);
+  border-radius: 8px;
+}
+
+body::-webkit-scrollbar-thumb:hover {
+  background-color: color-mix(in srgb, var(--color-border) 80%, transparent);
+}
