@@ -18,8 +18,8 @@ export class SplitPaneVerticalComponent implements OnInit {
   @ViewChild('divider', { static: true }) dividerRef!: ElementRef<HTMLDivElement>;
 
   isDragging = false;
-  topRatio = this.initialTopRatio;
-  collapsedSide: 'top' | 'bottom' | null = null;
+  topRatio = 1;
+  collapsedSide: 'top' | 'bottom' | null = 'bottom';
   lastNonCollapsedRatio = this.initialTopRatio;
   private readonly collapseSnapPx = 8;
 
