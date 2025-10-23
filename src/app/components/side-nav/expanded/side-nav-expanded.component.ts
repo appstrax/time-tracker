@@ -99,6 +99,11 @@ export class SideNavExpandedComponent implements OnInit, OnDestroy {
       for (const g of this.groups) this.expandedState[g.key] = false;
     }
   }
+
+  isGroupActive(group: { key: string; title: string; items: { route: string }[] }): boolean {
+    const url = this.router.url || '';
+    return group.items.some((it) => url.startsWith(it.route));
+  }
 }
 
 

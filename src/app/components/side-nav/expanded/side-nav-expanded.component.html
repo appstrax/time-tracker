@@ -11,7 +11,7 @@
 
   <div class="menu">
     <div class="group pt-2" *ngFor="let group of groups">
-      <button type="button" class="menu-item group-header" (click)="toggleGroup(group.key)">
+      <button type="button" class="menu-item group-header" [class.active-group]="isGroupActive(group) && !expandedState[group.key]" (click)="toggleGroup(group.key)">
         <span class="label">{{ group.title }}</span>
         <i class="bi bi-chevron-right" [class.rotate]="expandedState[group.key]"></i>
       </button>
