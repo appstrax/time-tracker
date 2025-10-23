@@ -1,24 +1,31 @@
 <div class="container">
   <div class="w-100" *ngIf="user">
     <section class="profile-section">
-      <div class="d-flex align-items-center gap-4">
-        <div class="profile-picture rounded-circle position-relative">
-          <img
-            [src]="user.profilePictureUrl || '/profile-placeholder.png'"
-            alt="Profile Picture"
-            class="rounded-circle"
-          />
-          <input type="file" accept="image/*" hidden (change)="onProfilePictureSelected($event)" />
-          <i
-            class="bi bi-camera-fill camera-icon"
-            (click)="onUploadProfilePicture()"
-          >
-          </i>
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-4">
+          <div class="profile-picture rounded-circle position-relative">
+            <img
+              [src]="user.profilePictureUrl || '/profile-placeholder.png'"
+              alt="Profile Picture"
+              class="rounded-circle"
+            />
+            <input type="file" accept="image/*" hidden (change)="onProfilePictureSelected($event)" />
+            <i
+              class="bi bi-camera-fill camera-icon"
+              (click)="onUploadProfilePicture()"
+            >
+            </i>
+          </div>
+
+          <div>
+            <div class="fw-bold user-name">{{user.name}} {{user.surname}}</div>
+            <div>{{user.email}}</div>
+          </div>
         </div>
 
-        <div>
-          <div class="fw-bold user-name">{{user.name}} {{user.surname}}</div>
-          <div>{{user.email}}</div>
+        <div class="text-end">
+          <div class="fw-500">{{ organizationCount }} organizations</div>
+          <div class="fw-500">{{ projectCount }} projects</div>
         </div>
       </div>
     </section>

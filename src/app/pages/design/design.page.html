@@ -5,12 +5,26 @@
   [collapsedOnSmallScreens]="true"
 >
   <ng-container left>
-    <app-chat [suggestions]="designSuggestions" placeholder="Start describing your design..."></app-chat>
+    <app-split-pane-vertical storageKey="split.design.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="designSuggestions" placeholder="Start describing your design..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
   </ng-container>
 
   <ng-container right>
-     <div class="container">
-        We will have the Figma design responses here, these windows are resizable and collapsible
-     </div>
+    <app-split-pane-vertical storageKey="split.design.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          We will have the Figma design responses here, these windows are resizable and collapsible
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
   </ng-container>
 </app-split-pane>

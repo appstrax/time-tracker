@@ -1,9 +1,10 @@
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Component, ElementRef, ViewChild, Signal, effect } from '@angular/core';
 
-import { User } from '@models';
+import { User, Project, Organization, OrganizationProjects } from '@models';
+import { Store } from '@state';
 import { SocialLinkComponent } from './social-link/social-link.component';
 
 import { appstraxAuth } from '@appstrax/services/auth';
@@ -24,11 +25,29 @@ export class ProfilePage {
   public isEditingSocial = false;
   public isEditingPersonal = false;
 
+  projects!: Signal<Project[]>;
+  organizations!: Signal<Organization[]>;
+  orgProjects!: Signal<OrganizationProjects[]>;
+
+  public projectCount = 0;
+  public organizationCount = 0;
+
   @ViewChild('fileInput', { static: false })
   fileInput?: ElementRef<HTMLInputElement>;
 
   @ViewChild('cvInput', { static: false })
   cvInput?: ElementRef<HTMLInputElement>;
+
+  constructor(private store: Store) {
+    this.projects = this.store.projects.all;
+    this.organizations = this.store.organizations.all;
+    this.orgProjects = this.store.orgProjects.all;
+
+    effect(() => {
+      this.projectCount = this.projects()?.length ?? 0;
+      this.organizationCount = this.organizations()?.length ?? 0;
+    });
+  }
 
   public async ngOnInit(): Promise<void> {
     try {
