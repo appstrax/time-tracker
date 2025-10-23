@@ -13,11 +13,11 @@
 
 .right-pane {
   min-width: 0; 
-  overflow: auto;
+  overflow: visible; /* allow child overlays (e.g., vertical restore pills) to show */
 }
 
 .divider {
-  width: 8px;
+  width: 7px;
   cursor: col-resize;
   background: transparent;
   position: relative;
