@@ -4,10 +4,11 @@
       <div class="d-flex align-items-center gap-4">
         <div class="profile-picture rounded-circle position-relative">
           <img
-            [src]="user.profilePictureUrl"
+            [src]="user.profilePictureUrl || '/profile-placeholder.png'"
             alt="Profile Picture"
             class="rounded-circle"
           />
+          <input type="file" accept="image/*" hidden (change)="onProfilePictureSelected($event)" />
           <i
             class="bi bi-camera-fill camera-icon"
             (click)="onUploadProfilePicture()"
@@ -25,33 +26,62 @@
     <section class="profile-section">
       <div class="d-flex align-items-center justify-content-between">
         <h2 class="section-title">Personal Information</h2>
-        <button class="btn btn-primary d-flex align-items-center gap-3">
-          Edit
-          <i class="bi bi-pencil"></i>
-        </button>
+        <ng-container *ngIf="!isEditingPersonal; else editingActions">
+          <button class="btn btn-primary d-flex align-items-center gap-3" (click)="togglePersonal()">
+            Edit
+            <i class="bi bi-pencil"></i>
+          </button>
+        </ng-container>
+        <ng-template #editingActions>
+          <div class="d-flex gap-2">
+            <button class="btn btn-light" type="button" (click)="togglePersonal()">Cancel</button>
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="button" [disabled]="isSaving" (click)="updateUser()">
+              <ng-container *ngIf="!isSaving; else savingTpl">Save</ng-container>
+              <ng-template #savingTpl>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Saving...</span>
+              </ng-template>
+            </button>
+          </div>
+        </ng-template>
       </div>
       <hr />
       <div class="d-grid">
         <div class="row mb-4">
           <div class="col-md-4">
             <div class="text-muted fw-light">First Name</div>
-            <div class="fw-500">{{user.name}}</div>
+            <ng-container *ngIf="!isEditingPersonal; else editFirstName">
+              <div class="fw-500">{{user.name}}</div>
+            </ng-container>
+            <ng-template #editFirstName>
+              <input class="form-control" [(ngModel)]="user.name" placeholder="First name" />
+            </ng-template>
           </div>
           <div class="col-md-4">
             <div class="text-muted fw-light">Last Name</div>
-            <div class="fw-500">{{user.surname}}</div>
+            <ng-container *ngIf="!isEditingPersonal; else editLastName">
+              <div class="fw-500">{{user.surname}}</div>
+            </ng-container>
+            <ng-template #editLastName>
+              <input class="form-control" [(ngModel)]="user.surname" placeholder="Last name" />
+            </ng-template>
           </div>
           <div class="col-md-4">
             <div class="text-muted fw-light">CV/Resume</div>
+            <input id="cvInput" type="file" accept="application/pdf,.pdf" hidden (change)="onCVSelected($event)" />
             @if(user.cvPdfUrl){
-            <a class="fw-500 link-text" [href]="user.cvPdfUrl" target="_blank">
-              {{ user.cvPdfUrl }}
-            </a>
+            <div class="d-flex align-items-center gap-2">
+              <a class="btn btn-outline-primary d-flex align-items-center gap-2" [href]="user.cvPdfUrl" target="_blank" rel="noopener" title="View CV/Resume">
+                <i class="bi bi-eye"></i>
+                <span>View</span>
+              </a>
+              <button (click)="onUploadCV()" class="btn btn-primary d-flex align-items-center gap-2" title="Replace CV/Resume">
+                <span>Replace</span>
+                <i class="bi bi-upload"></i>
+              </button>
+            </div>
             } @else {
-            <button
-              (click)="onUploadCV()"
-              class="btn btn-primary d-flex align-items-center gap-3"
-            >
+            <button (click)="onUploadCV()" class="btn btn-primary d-flex align-items-center gap-3">
               Upload
               <i class="bi bi-upload"></i>
             </button>
@@ -62,7 +92,12 @@
         <div class="row">
           <div class="col-md-4">
             <div class="text-muted fw-light">Email</div>
-            <div class="fw-500">{{user.email}}</div>
+            <ng-container *ngIf="!isEditingPersonal; else editEmail">
+              <div class="fw-500">{{user.email}}</div>
+            </ng-container>
+            <ng-template #editEmail>
+              <input class="form-control" [(ngModel)]="user.email" placeholder="Email" />
+            </ng-template>
           </div>
           <div class="col-md-4">
             <div class="text-muted fw-light">Password</div>
@@ -75,69 +110,97 @@
     <section class="profile-section">
       <div class="d-flex align-items-center justify-content-between">
         <h2 class="section-title">Social Links</h2>
-        <button class="btn btn-primary d-flex align-items-center gap-3">
-          Edit
-          <i class="bi bi-pencil"></i>
-        </button>
+        <ng-container *ngIf="!isEditingSocial; else socialEditingActions">
+          <button class="btn btn-primary d-flex align-items-center gap-3" (click)="toggleSocial()">
+            Edit
+            <i class="bi bi-pencil"></i>
+          </button>
+        </ng-container>
+        <ng-template #socialEditingActions>
+          <div class="d-flex gap-2">
+            <button class="btn btn-light" type="button" (click)="toggleSocial()">Cancel</button>
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="button" [disabled]="isSaving" (click)="updateUser()">
+              <ng-container *ngIf="!isSaving; else savingTpl2">Save</ng-container>
+              <ng-template #savingTpl2>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Saving...</span>
+              </ng-template>
+            </button>
+          </div>
+        </ng-template>
       </div>
       <hr />
 
       <div class="d-grid">
         <div class="row mb-4">
           <div class="col-md-4">
-            <app-social-link
-              [url]="user.linkedinUrl"
-              icon="bi-linkedin"
-              type="LinkedIn"
-            ></app-social-link>
+            <div class="text-muted fw-light">LinkedIn</div>
+            <ng-container *ngIf="!isEditingSocial; else editLinkedin">
+              <app-social-link [url]="user.linkedinUrl" icon="bi-linkedin" type="LinkedIn"></app-social-link>
+            </ng-container>
+            <ng-template #editLinkedin>
+              <input class="form-control" [(ngModel)]="user.linkedinUrl" placeholder="LinkedIn URL" />
+            </ng-template>
           </div>
           <div class="col-md-4">
-            <app-social-link
-              [url]="user.githubUrl"
-              icon="bi-github"
-              type="GitHub"
-            ></app-social-link>
+            <div class="text-muted fw-light">GitHub</div>
+            <ng-container *ngIf="!isEditingSocial; else editGithub">
+              <app-social-link [url]="user.githubUrl" icon="bi-github" type="GitHub"></app-social-link>
+            </ng-container>
+            <ng-template #editGithub>
+              <input class="form-control" [(ngModel)]="user.githubUrl" placeholder="GitHub URL" />
+            </ng-template>
           </div>
           <div class="col-md-4">
-            <app-social-link
-              [url]="user.twitterUrl"
-              icon="bi-twitter"
-              type="Twitter"
-            ></app-social-link>
-          </div>
-        </div>
-
-        <div class="row mb-4">
-          <div class="col-md-4">
-            <app-social-link
-              [url]="user.facebookUrl"
-              icon="bi-facebook"
-              type="Facebook"
-            ></app-social-link>
-          </div>
-          <div class="col-md-4">
-            <app-social-link
-              [url]="user.instagramUrl"
-              icon="bi-instagram"
-              type="Instagram"
-            ></app-social-link>
-          </div>
-          <div class="col-md-4">
-            <app-social-link
-              [url]="user.youtubeUrl"
-              icon="bi-youtube"
-              type="YouTube"
-            ></app-social-link>
+            <div class="text-muted fw-light">Twitter</div>
+            <ng-container *ngIf="!isEditingSocial; else editTwitter">
+              <app-social-link [url]="user.twitterUrl" icon="bi-twitter" type="Twitter"></app-social-link>
+            </ng-container>
+            <ng-template #editTwitter>
+              <input class="form-control" [(ngModel)]="user.twitterUrl" placeholder="Twitter URL" />
+            </ng-template>
           </div>
         </div>
 
         <div class="row mb-4">
           <div class="col-md-4">
-            <app-social-link
-              [url]="user.tiktokUrl"
-              icon="bi-tiktok"
-              type="TikTok"
-            ></app-social-link>
+            <div class="text-muted fw-light">Facebook</div>
+            <ng-container *ngIf="!isEditingSocial; else editFacebook">
+              <app-social-link [url]="user.facebookUrl" icon="bi-facebook" type="Facebook"></app-social-link>
+            </ng-container>
+            <ng-template #editFacebook>
+              <input class="form-control" [(ngModel)]="user.facebookUrl" placeholder="Facebook URL" />
+            </ng-template>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">Instagram</div>
+            <ng-container *ngIf="!isEditingSocial; else editInstagram">
+              <app-social-link [url]="user.instagramUrl" icon="bi-instagram" type="Instagram"></app-social-link>
+            </ng-container>
+            <ng-template #editInstagram>
+              <input class="form-control" [(ngModel)]="user.instagramUrl" placeholder="Instagram URL" />
+            </ng-template>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">YouTube</div>
+            <ng-container *ngIf="!isEditingSocial; else editYoutube">
+              <app-social-link [url]="user.youtubeUrl" icon="bi-youtube" type="YouTube"></app-social-link>
+            </ng-container>
+            <ng-template #editYoutube>
+              <input class="form-control" [(ngModel)]="user.youtubeUrl" placeholder="YouTube URL" />
+            </ng-template>
+          </div>
+        </div>
+
+        <div class="row mb-4">
+          <div class="col-md-4">
+            <div class="text-muted fw-light">TikTok</div>
+            <ng-container *ngIf="!isEditingSocial; else editTiktok">
+              <app-social-link [url]="user.tiktokUrl" icon="bi-tiktok" type="TikTok"></app-social-link>
+            </ng-container>
+            <ng-template #editTiktok>
+              <input class="form-control" [(ngModel)]="user.tiktokUrl" placeholder="TikTok URL" />
+            </ng-template>
           </div>
           <div class="col-md-4">
             <div class="text-muted fw-light">&nbsp;</div>

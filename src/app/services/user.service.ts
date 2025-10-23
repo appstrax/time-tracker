@@ -1,19 +1,11 @@
 import { Injectable } from '@angular/core';
 
-import { Project } from '../models/project.model';
-import { Organization } from '../models/organization.model';
+import { Organization, Project } from '@models';
+import { OrganizationProjects, ProjectUsers } from '@models';
 
-import {
-  OrganizationService,
-  OrganizationUsersService,
-  OrganizationProjectsService,
-} from './organization.service';
-import { ProjectService, ProjectUsersService } from './project.service';
-import {
-  OrganizationProjects,
-  ProjectUsers,
-} from '../models/many-to-many.model';
-import { Operator } from '@appstrax/services';
+import { OrganizationProjectsService } from '@services';
+import { ProjectService, ProjectUsersService } from '@services';
+import { OrganizationService, OrganizationUsersService } from '@services';
 
 export class UserProjectOrganizations {
   projects: Project[] = [];
