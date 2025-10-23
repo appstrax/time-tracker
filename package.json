@@ -29,6 +29,8 @@
     "@ngrx/store-devtools": "^19.2.1",
     "bootstrap": "^5.3.5",
     "bootstrap-icons": "^1.11.3",
+    "ngx-extended-pdf-viewer": "^25.6.0-alpha.3",
+    "pdfjs-dist": "^5.4.296",
     "rxjs": "~7.8.0",
     "tslib": "^2.3.0",
     "zone.js": "~0.15.0"

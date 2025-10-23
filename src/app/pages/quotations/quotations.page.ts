@@ -2,17 +2,18 @@ import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { SplitPaneComponent } from '../../components/split-pane/split-pane.component';
-import { InnerSplitPaneComponent } from '../../components/inner-split-pane/inner-split-pane.component';
 import { SplitPaneVerticalComponent } from '../../components/split-pane-vertical/split-pane-vertical.component';
 import { ChatComponent } from '../../components/chat/chat.component';
 import { HistoryComponent } from '../../components/history/history.component';
+import { InnerSplitPaneComponent } from '../../components/inner-split-pane/inner-split-pane.component';
+import { PdfViewerComponent } from '../../components/pdf-viewer/pdf-viewer.component';
 
 @Component({
   selector: 'app-quotations',
   templateUrl: './quotations.page.html',
   styleUrls: ['./quotations.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, SplitPaneComponent, SplitPaneVerticalComponent, ChatComponent, HistoryComponent, InnerSplitPaneComponent],
+  imports: [CommonModule, RouterModule, SplitPaneComponent, SplitPaneVerticalComponent, ChatComponent, HistoryComponent, InnerSplitPaneComponent, PdfViewerComponent],
 })
 export class QuotationsPage {
   public quotationsSuggestions: any[] = [
@@ -56,4 +57,10 @@ export class QuotationsPage {
   ];
   public selectedHistoryQuote: any = null;
   selectHistoryQuote(q: any) { this.selectedHistoryQuote = q; }
+
+  public get selectedTemplateSrc(): string | undefined {
+    if (!this.selectedTemplate) return undefined;
+    // Map template fileName to public assets; using the provided quotation-template.pdf for demo
+    return '/quotation-template.pdf';
+  }
 } 

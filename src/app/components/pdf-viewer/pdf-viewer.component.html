@@ -1,0 +1,18 @@
+<div class="pdf-container">
+  <ngx-extended-pdf-viewer
+    *ngIf="src; else noSrc"
+    [src]="src"
+    useBrowserLocale="true"
+    [showToolbar]="false"
+    [sidebarVisible]="false"
+    [textLayer]="true"
+    [height]="'100%'"
+    [filenameForDownload]="'quotation-template.pdf'"
+  >
+  </ngx-extended-pdf-viewer>
+  <ng-template #noSrc>
+    <div class="text-muted">No PDF selected</div>
+  </ng-template>
+</div>
+
+
