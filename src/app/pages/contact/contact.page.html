@@ -1,12 +1,169 @@
 <div class="container">
-  <p>Contact page content will go here</p>
-  <p>Users can contact the support team here</p>
-  <p>Users can report issues here</p>
-  <p>Users can request features here</p>
-  <p>Users can get help here</p>
-  <p>Users can get support here</p>
-  <p>Users can get training here</p>
-  <p>Users can get documentation here</p>
-  <p>Users can get support here</p>
-  <p>Users can get training here</p>
+
+  <app-split-pane
+    storageKey="split.contact.main"
+    [initialLeftRatio]="0.65"
+    [collapseBreakpointPx]="1024"
+    [collapsedOnSmallScreens]="true"
+  >
+    <ng-container left>
+      <div class="card p-3 me-4">
+        <div class="row g-3">
+          <div class="col-md-6">
+            <label class="form-label">Topic</label>
+            <select class="form-select" [(ngModel)]="form.topic">
+              <option value="" disabled selected>Select a topic</option>
+              <option *ngFor="let t of topics" [value]="t">{{ t }}</option>
+            </select>
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Full name</label>
+            <input class="form-control" [(ngModel)]="form.name" placeholder="First and last name" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Email</label>
+            <input class="form-control" [(ngModel)]="form.email" placeholder="you@example.com" />
+          </div>
+          <div class="col-md-6">
+            <label class="form-label">Organization (optional)</label>
+            <input class="form-control" [(ngModel)]="form.organization" placeholder="Company or team" />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Subject</label>
+            <input class="form-control" [(ngModel)]="form.subject" placeholder="Brief summary" />
+          </div>
+          <div class="col-12">
+            <label class="form-label">Message</label>
+            <textarea class="form-control" rows="6" [(ngModel)]="form.message" placeholder="Tell us how we can help"></textarea>
+          </div>
+          <div class="col-12 d-flex align-items-center gap-2">
+            <input class="form-check-input" type="checkbox" [(ngModel)]="form.consent" id="consentChk" />
+            <label class="form-check-label text-muted" for="consentChk">You may contact me about my request.</label>
+          </div>
+          <div class="col-12 d-flex gap-2">
+            <button class="btn btn-primary d-inline-flex align-items-center gap-2" type="button" [disabled]="isSubmitting" (click)="onSubmit()">
+              <ng-container *ngIf="!isSubmitting; else submittingTpl">Send message</ng-container>
+              <ng-template #submittingTpl>
+                <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+                <span>Sending...</span>
+              </ng-template>
+            </button>
+            <div *ngIf="submitSuccess" class="text-success d-flex align-items-center">Thanks! We received your message.</div>
+          </div>
+        </div>
+      </div>
+    </ng-container>
+
+    <ng-container right>
+      <div class="d-flex flex-column gap-2">
+        <div class="card p-3 ms-4">
+          <ul class="nav nav-tabs">
+            <li class="nav-item">
+              <button type="button" class="nav-link" [class.active]="activeTab==='details'" (click)="setTab('details')">Contact details</button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link" [class.active]="activeTab==='faq'" (click)="setTab('faq')">FAQ</button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link" [class.active]="activeTab==='status'" (click)="setTab('status')">Status</button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link" [class.active]="activeTab==='releases'" (click)="setTab('releases')">Release Notes</button>
+            </li>
+            <li class="nav-item">
+              <button type="button" class="nav-link" [class.active]="activeTab==='upcoming'" (click)="setTab('upcoming')">Upcoming Features</button>
+            </li>
+          </ul>
+          <div class="pt-3">
+            <ng-container *ngIf="activeTab==='details'">
+              <div class="d-grid gap-2">
+                <div class="border rounded p-2" style="border-color: var(--color-border)">
+                  <div class="fw-500">General</div>
+                  <div class="text-muted">supportappstrax.io</div>
+                  <div class="text-muted"><i class="bi bi-clock me-1"></i>Mon–Fri, 9:00–17:00</div>
+                </div>
+                <div class="border rounded p-2" style="border-color: var(--color-border)">
+                  <div class="fw-500">Sales</div>
+                  <div class="text-muted">salesappstrax.io</div>
+                  <div class="text-muted"><i class="bi bi-clock me-1"></i>Typically responds in a few hours</div>
+                </div>
+                <div class="border rounded p-2" style="border-color: var(--color-border)">
+                  <div class="fw-500">Billing</div>
+                  <div class="text-muted">billingappstrax.io</div>
+                </div>
+                <div class="d-flex gap-3 align-items-center">
+                  <a href="#" class="link-text d-inline-flex align-items-center gap-1"><i class="bi bi-twitter"></i>Twitter</a>
+                  <a href="#" class="link-text d-inline-flex align-items-center gap-1"><i class="bi bi-linkedin"></i>LinkedIn</a>
+                  <a href="#" class="link-text d-inline-flex align-items-center gap-1"><i class="bi bi-github"></i>GitHub</a>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="activeTab==='faq'">
+              <div class="accordion" id="faqAccordion">
+                <div class="accordion-item">
+                  <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq1">How do I report a bug?</button></h2>
+                  <div id="faq1" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">Use the contact form with Topic \"Technical issue\" and include steps to reproduce.</div>
+                  </div>
+                </div>
+                <div class="accordion-item">
+                  <h2 class="accordion-header"><button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#faq2">Where can I find documentation?</button></h2>
+                  <div id="faq2" class="accordion-collapse collapse" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body text-muted">See the Docs page for guides, API references, and tutorials.</div>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="activeTab==='status'">
+              <div class="alert alert-info" role="alert">
+                <i class="bi bi-activity me-2"></i>All systems operational. No incidents reported.
+              </div>
+            </ng-container>
+            <ng-container *ngIf="activeTab==='releases'">
+              <div class="d-grid gap-2">
+                <div class="border rounded p-2" style="border-color: var(--color-border)">
+                  <div class="fw-500">v1.4.0</div>
+                  <div class="text-muted">Added Quotations tabs, PDF viewer, and improved dark theme.</div>
+                </div>
+                <div class="border rounded p-2" style="border-color: var(--color-border)">
+                  <div class="fw-500">v1.3.0</div>
+                  <div class="text-muted">Side-nav accordion, theming tokens, and split-pane enhancements.</div>
+                </div>
+              </div>
+            </ng-container>
+            <ng-container *ngIf="activeTab==='upcoming'">
+              <div class="d-grid gap-2">
+                <div class="feature-item border rounded p-2 d-flex justify-content-between align-items-start" style="border-color: var(--color-border)" *ngFor="let f of upcomingFeatures">
+                  <div class="me-3">
+                    <div class="fw-500">{{ f.title }}</div>
+                    <div class="text-muted small">{{ f.description }}</div>
+                    <div class="text-muted small mt-1">
+                      <i class="bi bi-calendar3 me-1"></i>Expected: {{ f.expectedDate }}
+                      <span class="ms-3"><i class="bi bi-circle-half me-1"></i>Status: {{ f.status }}</span>
+                    </div>
+                  </div>
+                  <div class="text-nowrap d-flex align-items-center gap-2">
+                    <button class="btn btn-sm btn-outline-primary" title="Edit" (click)="onEditFeature(f)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" title="Mark done" (click)="onMarkDone(f)">
+                      <i class="bi bi-check2"></i>
+                    </button>
+                    <button class="btn btn-sm btn-outline-primary" title="Archive" (click)="onArchiveFeature(f)">
+                      <i class="bi bi-archive"></i>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </ng-container>
+          </div>
+        </div>
+
+        <div class="card p-3 ms-4">
+          <div class="fw-500 mb-1">Office</div>
+          <div class="text-muted mb-2">123 Main Street, Cape Town</div>
+        </div>
+      </div>
+    </ng-container>
+  </app-split-pane>
 </div>
