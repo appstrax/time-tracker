@@ -1,3 +1,35 @@
-<div class="container">
-  <p>Stats page content will go here</p>
-</div>
+<app-split-pane
+  storageKey="split.stats"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.stats.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="statsSuggestions" placeholder="Ask about stats and trends..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.stats.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>Stats dashboard placeholder</div>
+          <ul>
+            <li>KPIs overview</li>
+            <li>Trends</li>
+            <li>Charts</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>

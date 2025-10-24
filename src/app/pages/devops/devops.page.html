@@ -1,3 +1,35 @@
-<div class="container">
-  <p>Dev-Ops page content will go here</p>
-</div>
+<app-split-pane
+  storageKey="split.devops"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.devops.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="devopsSuggestions" placeholder="Ask about pipelines, deploys..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.devops.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>DevOps overview placeholder</div>
+          <ul>
+            <li>Latest pipeline status</li>
+            <li>Recent deployments</li>
+            <li>Error logs summary</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>

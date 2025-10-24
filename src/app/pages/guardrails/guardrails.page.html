@@ -1,3 +1,35 @@
-<div class="container">
-  <p>Guard Rails page content will go here</p>
-</div>
+<app-split-pane
+  storageKey="split.guardrails"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.guardrails.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="guardrailSuggestions" placeholder="Ask about guardrails..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.guardrails.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>Guardrails dashboard placeholder</div>
+          <ul>
+            <li>Rules</li>
+            <li>Violations</li>
+            <li>Auto-fixes</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>

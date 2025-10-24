@@ -1,11 +1,35 @@
-<div class="container">
-  <p>Kpis page content will go here</p>
-  <p>Users can create and manage kpis here</p>
-  <p>Kpis are automatically generated based on the project design and can be updated and submitted from here</p>
-  <p>We can link KPI's to stats and pull through releavant information from the stats</p>
-  <p>We want to see the results of the kpis in real time</p>
-  <p>We want to see the logs of the kpis in real time</p>
-  <p>We want to see the reports of the kpis in real time</p>
-  <p>We want to see the trends of the kpis in real time</p>
-  <p>We want to see the performance of the kpis in real time</p>
-</div>
+<app-split-pane
+  storageKey="split.kpis"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.kpis.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="kpiSuggestions" placeholder="Ask about KPIs..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.kpis.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>KPI dashboard placeholder</div>
+          <ul>
+            <li>Key metrics</li>
+            <li>Targets vs actuals</li>
+            <li>Owner assignments</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>

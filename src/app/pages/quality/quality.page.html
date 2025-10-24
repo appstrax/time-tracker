@@ -1,3 +1,35 @@
-<div class="container">
-  <p>Quality page content will go here</p>
-</div>
+<app-split-pane
+  storageKey="split.quality"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.quality.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="qualitySuggestions" placeholder="Ask about quality metrics..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.quality.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>Quality dashboard placeholder</div>
+          <ul>
+            <li>Coverage</li>
+            <li>Lint issues</li>
+            <li>Test failures</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>

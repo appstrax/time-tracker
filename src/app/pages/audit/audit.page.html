@@ -1,3 +1,35 @@
-<div class="container">
-  <p>Audit Trails page content will go here</p>
-</div>
+<app-split-pane
+  storageKey="split.audit"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.audit.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="auditSuggestions" placeholder="Ask about audit logs..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.audit.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>Audit stream placeholder</div>
+          <ul>
+            <li>Recent events</li>
+            <li>Filters</li>
+            <li>Export</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>

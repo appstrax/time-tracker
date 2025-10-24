@@ -1,3 +1,35 @@
-<div class="container">
-  <p>Project State page content will go here</p>
-</div>
+<app-split-pane
+  storageKey="split.project"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.project.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="projectSuggestions" placeholder="Ask about project state..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.project.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>Project state overview placeholder</div>
+          <ul>
+            <li>Milestones</li>
+            <li>Risks</li>
+            <li>Dependencies</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>
