@@ -1,20 +1,47 @@
-<div class="d-flex flex-column align-items-center w-100">
-  <div class="content-container w-90">
+<div class="chat-root w-100">
+  <!-- Initial state: input at top -->
+  <div class="content-container w-90" *ngIf="!hasConversation">
     <div class="prompt-input-container mt-2">
       <input
         class="prompt-input"
         type="text"
         [placeholder]="placeholder"
         #promptInput
+        (keydown.enter)="onSend()"
       />
-
-      <button class="send-button" type="button" aria-label="Send">
+      <button class="send-button" type="button" aria-label="Send" (click)="onSend()">
         <i class="bi bi-send-fill"></i>
       </button>
     </div>
   </div>
 
-  <div class="suggestions-container">
+  <!-- Conversation: messages at top -->
+  <div class="messages-container w-90" *ngIf="hasConversation">
+    @for (m of messages; track $index) {
+      <div class="message-row" [class.from-user]="m.role === 'user'" [class.from-assistant]="m.role === 'assistant'">
+        <div class="message-bubble">{{ m.text }}</div>
+      </div>
+    }
+  </div>
+
+  <!-- Composer at bottom once conversation starts -->
+  <div class="content-container w-90" [class.composer]="hasConversation" *ngIf="hasConversation">
+    <div class="prompt-input-container mt-2 mb-4">
+      <input
+        class="prompt-input"
+        type="text"
+        [placeholder]="placeholder"
+        #promptInput
+        (keydown.enter)="onSend()"
+      />
+      <button class="send-button" type="button" aria-label="Send" (click)="onSend()">
+        <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+  </div>
+
+  <!-- Suggestions only before conversation starts -->
+  <div class="suggestions-container" *ngIf="!hasConversation">
     @for (suggestion of suggestions; track suggestion.prompt) {
       <div class="suggestion-item small" (click)="onSuggestionClick(suggestion)">
         <i class="bi" [class]="suggestion.icon"></i>
