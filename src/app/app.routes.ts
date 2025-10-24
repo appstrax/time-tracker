@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
 
-import { appstraxAuth } from '@appstrax/services/auth';
+import { AuthGuard } from './utils/auth.guard';
 
 import { CreateProjectPage, VerifyEmailPage } from '@pages';
 import { LoginPage, NotificationsPage, SignupPage } from '@pages';
@@ -25,12 +25,12 @@ export const routes: Routes = [
   {
     path: '',
     component: BasePage,
+    canActivate: [AuthGuard],
     children: [
       {
         path: 'home',
         data: { breadcrumb: 'Welcome' },
         component: HomePage,
-        canActivate: [() => appstraxAuth.isAuthenticated()],
       },
       { path: 'audit', data: { breadcrumb: 'Audit' }, component: AuditPage },
       {
