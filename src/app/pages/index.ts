@@ -24,6 +24,7 @@ export * from './quotations/quotations.page';
 export * from './compliance/compliance.page';
 export * from './guardrails/guardrails.page';
 export * from './marketplace/marketplace.page';
+export * from './notifications/notifications.page';
 export * from './auth/verify-email/verify-email.page';
 export * from './auth/create-project/create-project.page';
 export * from './auth/forgot-password/forgot-password.page';

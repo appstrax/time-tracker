@@ -2,11 +2,10 @@ import { Routes } from '@angular/router';
 
 import { appstraxAuth } from '@appstrax/services/auth';
 
-import { LoginPage, SignupPage } from '@pages';
 import { CreateProjectPage, VerifyEmailPage } from '@pages';
-import { ForgotPasswordPage, CreateOrganizationPage } from '@pages';
-
+import { LoginPage, NotificationsPage, SignupPage } from '@pages';
 import { HomePage, DocsPage, ReposPage, UsersPage } from '@pages';
+import { ForgotPasswordPage, CreateOrganizationPage } from '@pages';
 import { AuditPage, StatsPage, DefinePage, DevopsPage } from '@pages';
 import { TicketsPage, BillingPage, QualityPage, CodePage } from '@pages';
 import { SettingsPage, DesignPage, QuotationsPage, KpisPage } from '@pages';
@@ -20,9 +19,9 @@ export const routes: Routes = [
   { path: 'login', component: LoginPage },
   { path: 'sign-up', component: SignupPage },
   { path: 'verify-email', component: VerifyEmailPage },
+  { path: 'create-project', component: CreateProjectPage },
   { path: 'forgot-password', component: ForgotPasswordPage },
   { path: 'create-organization', component: CreateOrganizationPage },
-  { path: 'create-project', component: CreateProjectPage },
   {
     path: '',
     component: BasePage,
@@ -134,6 +133,11 @@ export const routes: Routes = [
         path: 'contact',
         data: { breadcrumb: 'Contact' },
         component: ContactPage,
+      },
+      {
+        path: 'notifications',
+        data: { breadcrumb: 'Notifications' },
+        component: NotificationsPage,
       },
     ],
   },

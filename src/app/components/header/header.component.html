@@ -2,5 +2,18 @@
   <div class="flex-grow-1">
     <app-breadcrumbs></app-breadcrumbs>
   </div>
+  <a
+    class="header-icon position-relative me-4"
+    [routerLink]="['/notifications']"
+    aria-label="Notifications"
+  >
+    <i class="bi bi-bell"></i>
+    <span
+      class="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger"
+      *ngIf="notificationCount > 0"
+    >
+      {{ notificationCount }}
+    </span>
+  </a>
   <app-project-selector></app-project-selector>
 </header>

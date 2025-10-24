@@ -1,0 +1,42 @@
+/* Themed notifications page */
+.nav-tabs .nav-link {
+  color: var(--text-muted);
+}
+.nav-tabs .nav-link.active {
+  color: var(--text-primary);
+  border-color: var(--color-border) var(--color-border) transparent;
+  background-color: var(--color-surface);
+}
+
+.card {
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.list-group-item {
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border-color: var(--color-border);
+}
+
+.list-group-item .text-muted {
+  color: var(--text-muted) !important;
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--text-primary);
+  --bs-btn-border-color: var(--color-border);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--text-primary) 8%, transparent);
+  --bs-btn-hover-color: var(--text-primary);
+  --bs-btn-hover-border-color: var(--color-border);
+}
+
+.btn-outline-primary {
+  --bs-btn-color: var(--primary-color);
+  --bs-btn-border-color: var(--primary-color);
+  --bs-btn-hover-bg: color-mix(in srgb, var(--primary-color) 15%, transparent);
+  --bs-btn-hover-color: var(--primary-color);
+  --bs-btn-hover-border-color: var(--primary-color);
+}
+

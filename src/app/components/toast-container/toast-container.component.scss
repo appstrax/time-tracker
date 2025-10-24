@@ -1,0 +1,101 @@
+.toast {
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
+  animation: toast-in-right 450ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+  will-change: transform, opacity;
+}
+
+.toast-header {
+  background-color: color-mix(in srgb, var(--color-surface) 90%, var(--color-bg));
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.toast-header .btn-close {
+  filter: none; /* default for light mode */
+  opacity: 0.8;
+}
+
+.toast-header .btn-close:hover,
+.toast-header .btn-close:focus {
+  opacity: 1;
+}
+
+.top-offset {
+  top: 4rem;
+}
+
+.toast-success {
+  border-left: 4px solid #28a745;
+}
+.toast-error {
+  border-left: 4px solid #dc3545;
+}
+.toast-info {
+  border-left: 4px solid #17a2b8;
+}
+.toast-warning {
+  border-left: 4px solid #ffc107;
+}
+
+/* Dark mode: slightly brighter borders for better contrast */
+:host-context([data-theme='dark']) .toast {
+  border-color: var(--color-border);
+  box-shadow:
+    /* subtle elevation */ 0 6px 16px rgba(0, 0, 0, 0.30), 0 2px 6px rgba(0, 0, 0, 0.22),
+    /* subtle ring */ 0 0 0 1px color-mix(in srgb, var(--primary-color) 18%, transparent),
+    /* subtle glow */ 0 0 10px color-mix(in srgb, var(--primary-color) 12%, transparent);
+}
+:host-context([data-theme='dark']) .toast-header {
+  border-bottom-color: var(--color-border);
+}
+
+/* Ensure close button is visible in dark mode */
+:host-context([data-theme='dark']) .toast-header .btn-close {
+  filter: invert(1);
+  opacity: 0.9;
+}
+:host-context([data-theme='dark']) .toast-header .btn-close:hover,
+:host-context([data-theme='dark']) .toast-header .btn-close:focus {
+  opacity: 1;
+}
+
+@keyframes toast-in-right {
+  from {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.toast-exit {
+  animation: toast-out-right 300ms ease-in both;
+}
+
+@keyframes toast-out-right {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(16px);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: none !important;
+  }
+}
+
+/* Enforce colored side tag across themes */
+.toast.toast-success { border-left: 4px solid #28a745 !important; }
+.toast.toast-error   { border-left: 4px solid #dc3545 !important; }
+.toast.toast-info    { border-left: 4px solid #17a2b8 !important; }
+.toast.toast-warning { border-left: 4px solid #ffc107 !important; }
+

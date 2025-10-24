@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Store } from '@state';
 import { SideNavComponent } from '@components';
 import { HeaderComponent } from '@components';
+import { ToastContainerComponent } from '../../components/toast-container/toast-container.component';
 
 @Component({
   selector: 'app-base-page',
@@ -16,6 +17,7 @@ import { HeaderComponent } from '@components';
     RouterModule,
     SideNavComponent,
     HeaderComponent,
+    ToastContainerComponent,
   ],
 })
 export class BasePage {

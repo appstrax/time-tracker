@@ -5,6 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { ProjectService, ProjectUsersService } from '@services';
 import { UserService, OrganizationProjectsService } from '@services';
+import { ToastService } from '../../../services/toast.service';
 
 import { Project, ProjectUsers } from '@models';
 import { Organization, OrganizationProjects } from '@models';
@@ -41,11 +42,12 @@ export class CreateProjectPage implements OnInit {
 
   constructor(
     private router: Router,
+    private toast: ToastService,
     private route: ActivatedRoute,
     private userService: UserService,
     private projectService: ProjectService,
     private projectUsersService: ProjectUsersService,
-    private orgProjectsService: OrganizationProjectsService
+    private orgProjectsService: OrganizationProjectsService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -198,10 +200,12 @@ export class CreateProjectPage implements OnInit {
       this.orgProject = await this.orgProjectsService.save(this.orgProject);
 
       if (this.project && this.projectUser && this.orgProject) {
+        this.toast.success('Project created successfully', 'Success');
         this.router.navigate(['/home']);
       }
     } catch (error: any) {
       this.errorMessage = error.message;
+      this.toast.error(error.message || 'Failed to create project', 'Error');
     } finally {
       this.isLoading = false;
     }
