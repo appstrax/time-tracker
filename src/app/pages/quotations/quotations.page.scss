@@ -28,6 +28,10 @@
   min-height: 0;
 }
 
+.container {
+  --bs-gutter-x: 0rem;
+}
+
 app-inner-split-pane { flex: 1 1 auto; min-height: 0; }
 
 /* List group theming for Templates list */

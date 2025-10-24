@@ -52,6 +52,14 @@
   display: none;
 }
 
+/* Ensure opposite pane is fully hidden when dragged to that side */
+.split-container.collapsed-left .left-pane {
+  display: none;
+}
+.split-container.collapsed-right .right-pane {
+  display: none;
+}
+
 body.noselect {
   user-select: none;
 }

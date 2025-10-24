@@ -33,20 +33,27 @@
         <ng-container *ngIf="activeTab === 'templates'">
           <app-inner-split-pane storageKey="split.quotations.templates.inner" [initialLeftRatio]="0.5">
             <ng-container left>
-              <div class="card p-3 h-100 d-flex flex-column gap-3 me-1">
-                <div class="fw-500">Upload or select a template</div>
-                <button class="btn btn-primary align-self-start">
-                  <i class="bi bi-upload me-2"></i>Upload Template (PDF)
-                </button>
-                <ul class="list-group">
-                  <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let t of templates" (click)="selectTemplate(t)" [class.active]="selectedTemplate?.id === t.id" style="cursor: pointer;">
-                    <span>
-                      <i class="bi bi-file-earmark-text me-2"></i>{{ t.name }}
-                    </span>
-                    <small class="text-muted">{{ t.fileName }}</small>
-                  </li>
-                </ul>
-              </div>
+              <app-split-pane-vertical storageKey="split.quotations.templates.left" [initialTopRatio]="0.7">
+                <ng-container top>
+                  <div class="card p-3 d-flex flex-column gap-3 mx-1 mb-1">
+                    <div class="fw-500">Upload or select a template</div>
+                    <button class="btn btn-primary align-self-start">
+                      <i class="bi bi-upload me-2"></i>Upload Template (PDF)
+                    </button>
+                    <ul class="list-group">
+                      <li class="list-group-item d-flex justify-content-between align-items-center" *ngFor="let t of templates" (click)="selectTemplate(t)" [class.active]="selectedTemplate?.id === t.id" style="cursor: pointer;">
+                        <span>
+                          <i class="bi bi-file-earmark-text me-2"></i>{{ t.name }}
+                        </span>
+                        <small class="text-muted">{{ t.fileName }}</small>
+                      </li>
+                    </ul>
+                  </div>
+                </ng-container>
+                <ng-container bottom>
+                  <app-history></app-history>
+                </ng-container>
+              </app-split-pane-vertical>
             </ng-container>
             <ng-container right>
               <div class="card p-0 h-100 ms-1 d-flex flex-column">
@@ -65,28 +72,35 @@
         <ng-container *ngIf="activeTab === 'active'">
           <app-inner-split-pane storageKey="split.quotations.active.inner" [initialLeftRatio]="0.55">
             <ng-container left>
-              <div class="card p-0 h-100 overflow-auto me-1">
-                <table class="table table-hover mb-0">
-                  <thead>
-                    <tr>
-                      <th>Quote #</th>
-                      <th>Client</th>
-                      <th>Amount</th>
-                      <th>Status</th>
-                      <th>Updated</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngFor="let q of activeQuotes" class="clickable" (click)="selectActiveQuote(q)" [class.selected]="selectedActiveQuote?.number === q.number">
-                      <td>{{ q.number }}</td>
-                      <td>{{ q.client }}</td>
-                      <td>{{ q.amount | currency }}</td>
-                      <td>{{ q.status }}</td>
-                      <td>{{ q.updated }}</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+              <app-split-pane-vertical storageKey="split.quotations.active.left" [initialTopRatio]="0.7">
+                <ng-container top>
+                  <div class="card p-0 overflow-auto mx-1 mb-1">
+                    <table class="table table-hover mb-0">
+                      <thead>
+                        <tr>
+                          <th>Quote #</th>
+                          <th>Client</th>
+                          <th>Amount</th>
+                          <th>Status</th>
+                          <th>Updated</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr *ngFor="let q of activeQuotes" class="clickable" (click)="selectActiveQuote(q)" [class.selected]="selectedActiveQuote?.number === q.number">
+                          <td>{{ q.number }}</td>
+                          <td>{{ q.client }}</td>
+                          <td>{{ q.amount | currency }}</td>
+                          <td>{{ q.status }}</td>
+                          <td>{{ q.updated }}</td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </ng-container>
+                <ng-container bottom>
+                  <app-history></app-history>
+                </ng-container>
+              </app-split-pane-vertical>
             </ng-container>
             <ng-container right>
               <div class="card p-3 h-100 ms-1">
@@ -104,7 +118,7 @@
         <ng-container *ngIf="activeTab === 'history'">
           <app-inner-split-pane storageKey="split.quotations.history.inner" [initialLeftRatio]="0.55">
             <ng-container left>
-              <div class="card p-0 h-100 overflow-auto me-1">
+              <div class="card p-0 overflow-auto mx-1 mb-1">
                 <table class="table table-hover mb-0">
                   <thead>
                     <tr>
