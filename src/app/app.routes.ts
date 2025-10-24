@@ -29,7 +29,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        data: { breadcrumb: 'Welcome' },
+        data: { breadcrumb: 'Project Summary' },
         component: HomePage,
       },
       { path: 'audit', data: { breadcrumb: 'Audit' }, component: AuditPage },

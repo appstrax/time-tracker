@@ -1,10 +1,248 @@
-<div class="container">
-  <p>
-    This is where we will have the project overview (the factory pictures
-    showing the project state)
-  </p>
-  <p>
-    With some of the parts of it in light grey to show it's not active or
-    something like that
-  </p>
+<div class="container py-3 home-grid">
+  <div class="row g-3">
+    <!-- Overview -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Overview</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/project']" aria-label="View project">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <span class="badge bg-success">Build: Passing</span>
+            <span class="badge bg-success">Quality: Good</span>
+            <span class="badge bg-warning text-dark">Compliance: Due soon</span>
+            <span class="badge bg-info text-dark">Billing: On track</span>
+          </div>
+          <div class="small text-muted">Last updated {{ overview.lastUpdated }}</div>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['overview'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tickets -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Tickets</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/tickets']" aria-label="View tickets">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-3 mb-3">
+            <div><span class="fw-semibold">Open:</span> {{ tickets.open }}</div>
+            <div><span class="fw-semibold">High:</span> {{ tickets.high }}</div>
+            <div><span class="fw-semibold">Due today:</span> {{ tickets.dueToday }}</div>
+          </div>
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let t of tickets.recent">#{{ t.id }} • {{ t.title }} <span class="badge rounded-pill ms-1" [class.bg-success]="t.status==='Open'" [class.bg-secondary]="t.status!=='Open'">{{ t.status }}</span></li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['tickets'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Repos -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Repositories</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/repos']" aria-label="View repos">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="mb-2"><span class="fw-semibold">Open PRs:</span> {{ repos.openPRs }}</div>
+          <div class="mb-3"><span class="fw-semibold me-2">Build:</span> <span class="badge bg-success">{{ repos.build }}</span></div>
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let c of repos.lastCommits">{{ c.repo }} • {{ c.message }} — <span class="text-muted">{{ c.when }}</span></li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['repos'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DevOps -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">DevOps</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/devops']" aria-label="View pipelines">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="mb-2"><span class="fw-semibold me-2">Last pipeline:</span> <span class="badge bg-success">{{ devops.lastPipeline }}</span></div>
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let d of devops.deployments">{{ d.env }} • {{ d.result }} — <span class="text-muted">{{ d.when }}</span></li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['devops'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Quality -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Quality</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/quality']" aria-label="View quality">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-3 mb-3">
+            <div><span class="fw-semibold">Coverage:</span> {{ quality.coverage }}%</div>
+            <div><span class="fw-semibold">Failing tests:</span> {{ quality.failingTests }}</div>
+            <div><span class="fw-semibold">Lint issues:</span> {{ quality.lint }}</div>
+          </div>
+          <div class="small text-muted">Trend: {{ quality.trend }}</div>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['quality'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Compliance -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Compliance</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/compliance']" aria-label="View compliance">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-3 mb-3">
+            <div><span class="fw-semibold">Outstanding:</span> {{ compliance.outstanding }}</div>
+            <div><span class="fw-semibold">Failing rules:</span> {{ compliance.failing }}</div>
+          </div>
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let dl of compliance.deadlines">{{ dl.item }} — <span class="text-muted">{{ dl.due }}</span></li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['compliance'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Docs -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Docs</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/docs']" aria-label="View docs">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let d of docs.recent">{{ d.title }} — <span class="text-muted">{{ d.when }}</span></li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['docs'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Users -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Users</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/users']" aria-label="View users">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="d-flex flex-wrap gap-3 mb-3">
+            <div><span class="fw-semibold">Active:</span> {{ users.active }}</div>
+            <div><span class="fw-semibold">Invites:</span> {{ users.invites }}</div>
+          </div>
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let u of users.recent">{{ u.name }} — <span class="text-muted">{{ u.when }}</span></li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['users'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Billing -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Billing</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/billing']" aria-label="View billing">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="mb-2"><span class="fw-semibold">Spend:</span> {{ billing.spend }} / {{ billing.budget }}</div>
+          <div class="small text-muted">Next invoice: {{ billing.nextInvoice }}</div>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['billing'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notifications / Invites -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Notifications</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/notifications']" aria-label="View notifications">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <div class="mb-2"><span class="fw-semibold">Unread:</span> {{ notifications.unread }}</div>
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let n of notifications.top">{{ n.title }} — <span class="text-muted">{{ n.when }}</span></li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['notifications'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Activity -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Today</span>
+          <button class="btn btn-sm btn-outline-primary" [routerLink]="['/audit']" aria-label="View activity">
+            <i class="bi bi-eye"></i>
+          </button>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled small mb-0">
+            <li *ngFor="let e of activity.today">
+              <span class="badge bg-secondary me-2">{{ e.type }}</span>{{ e.text }}
+              <span class="text-muted"> — {{ e.when }}</span>
+            </li>
+          </ul>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['activity'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Other Sections -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Other Sections</span>
+        </div>
+        <div class="card-body">
+          <ul class="list-unstyled small mb-0">
+            <li><span class="fw-semibold me-2">Define:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['define'].last7d }}</li>
+            <li><span class="fw-semibold me-2">Design:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['design'].last7d }}</li>
+            <li><span class="fw-semibold me-2">Quotations:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['quotations'].last7d }}</li>
+            <li><span class="fw-semibold me-2">Settings:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['settings'].last7d }}</li>
+            <li><span class="fw-semibold me-2">Project:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['project'].last7d }}</li>
+            <li><span class="fw-semibold me-2">Guardrails:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['guardrails'].last7d }}</li>
+            <li><span class="fw-semibold me-2">Stats:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['stats'].last7d }}</li>
+            <li><span class="fw-semibold me-2">Marketplace:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['marketplace'].last7d }}</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

@@ -1,0 +1,28 @@
+.home-grid .card {
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.home-grid .card-header {
+  background-color: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
+  color: var(--text-primary);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.home-grid .badge {
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* Ensure muted/secondary text is readable in dark mode */
+.home-grid .text-muted,
+.home-grid .card .text-muted,
+.home-grid .card-header .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Lists inside cards inherit proper colors */
+.home-grid .card .list-unstyled li {
+  color: var(--text-primary);
+}
+
