@@ -1,5 +1,35 @@
-<div class="container">
-  <p>Code page content will go here</p>
-  <p>Users can create and manage code here</p>
-  <p>Users can view sections, make updates merge changes etc</p>
-</div>
+<app-split-pane
+  storageKey="split.code"
+  [initialLeftRatio]="0.7"
+  [collapseBreakpointPx]="1024"
+  [collapsedOnSmallScreens]="true"
+>
+  <ng-container left>
+    <app-split-pane-vertical storageKey="split.code.left" [initialTopRatio]="0.7">
+      <ng-container top>
+        <app-chat [suggestions]="codeSuggestions" placeholder="Ask or generate code..."></app-chat>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+
+  <ng-container right>
+    <app-split-pane-vertical storageKey="split.code.right" [initialTopRatio]="0.7">
+      <ng-container top>
+        <div class="container">
+          <div>Code editor and file tree placeholder</div>
+          <ul>
+            <li>File browser</li>
+            <li>Editor area</li>
+            <li>Preview/terminal</li>
+          </ul>
+        </div>
+      </ng-container>
+      <ng-container bottom>
+        <app-history></app-history>
+      </ng-container>
+    </app-split-pane-vertical>
+  </ng-container>
+</app-split-pane>
