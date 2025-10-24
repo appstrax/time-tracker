@@ -16,7 +16,7 @@
   </div>
 
   <!-- Conversation: messages at top -->
-  <div class="messages-container w-90" *ngIf="hasConversation">
+  <div class="messages-container w-90 mb-4 pb-4" *ngIf="hasConversation" #messagesContainer>
     @for (m of messages; track $index) {
       <div class="message-row" [class.from-user]="m.role === 'user'" [class.from-assistant]="m.role === 'assistant'">
         <div class="message-bubble">{{ m.text }}</div>

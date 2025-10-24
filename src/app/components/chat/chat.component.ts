@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, ElementRef, Input, ViewChild } from '@angular/core';
+import { Component, ElementRef, Input, ViewChild, AfterViewInit } from '@angular/core';
 
 @Component({
   selector: 'app-chat',
@@ -7,9 +7,10 @@ import { Component, ElementRef, Input, ViewChild } from '@angular/core';
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
-export class ChatComponent {
+export class ChatComponent implements AfterViewInit {
   @Input() placeholder: string = '';
   @ViewChild('promptInput') promptInput!: ElementRef;
+  @ViewChild('messagesContainer') messagesContainer?: ElementRef<HTMLDivElement>;
 
   @Input() suggestions: any[] = [];
 
@@ -36,9 +37,21 @@ export class ChatComponent {
     // Push user message
     this.messages.push({ role: 'user', text: value });
     this.promptInput.nativeElement.value = '';
+    this.scrollToBottom();
     // Placeholder assistant echo for now
     setTimeout(() => {
       this.messages.push({ role: 'assistant', text: 'Thanks! I will process: ' + value });
+      this.scrollToBottom();
     }, 400);
+  }
+
+  private scrollToBottom() {
+    const el = this.messagesContainer?.nativeElement;
+    if (!el) return;
+    // Wait for DOM to update (new message rendered) before measuring
+    requestAnimationFrame(() => {
+      const maxScrollTop = el.scrollHeight - el.clientHeight;
+      el.scrollTop = maxScrollTop < 0 ? 0 : maxScrollTop;
+    });
   }
 }
