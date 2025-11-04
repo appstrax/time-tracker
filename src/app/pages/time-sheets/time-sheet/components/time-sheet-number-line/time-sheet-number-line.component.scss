@@ -1,0 +1,42 @@
+
+
+.entry-log-item{
+    border: 1px solid #000;
+    border-bottom: none;
+    border-top-right-radius: 3px;
+    border-top-left-radius: 3px;
+    height: 20px;
+    cursor: pointer !important;
+    flex-shrink: 0;
+    min-width: fit-content;
+}
+
+.number-line-item{
+    border: 1px solid #000;
+    border-right: none;
+    border-bottom: none;
+    height: 20px;
+    font-size: 12px;
+    flex-shrink: 0;
+    min-width: fit-content;
+}
+
+
+.time-sheet{
+    position: relative;
+    overflow-y: hidden;
+    overflow-x: auto;
+    min-height: 6cqh;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+.number-line{
+    position: absolute;
+    top: 30px;
+}
+
+// Tooltip styling to ensure left alignment
+::ng-deep .tooltip-inner {
+    text-align: left !important;
+}

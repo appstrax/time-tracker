@@ -1,0 +1,18 @@
+<div class="container">
+  <section class="time-sheet-section">
+    <app-time-sheet-date-selector
+      (weekChange)="onWeekChange($event)"
+    ></app-time-sheet-date-selector>
+    <div class="week-days-container">
+      @for (day of weekDays; track day.getTime()) {
+      <div class="day-selector-wrapper">
+        <app-time-sheet-day
+          [date]="day"
+          [entries]="filterEntriesByDate(day)"
+          [categoryColors]="categoryColors"
+        ></app-time-sheet-day>
+      </div>
+      }
+    </div>
+  </section>
+</div>

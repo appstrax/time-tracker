@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { AuthGuard } from './utils/auth.guard';
 
+import { TimeSheetPage } from '@pages';
 import { CreateProjectPage, VerifyEmailPage } from '@pages';
 import { LoginPage, NotificationsPage, SignupPage } from '@pages';
 import { HomePage, DocsPage, ReposPage, UsersPage } from '@pages';
@@ -138,6 +139,11 @@ export const routes: Routes = [
         path: 'notifications',
         data: { breadcrumb: 'Notifications' },
         component: NotificationsPage,
+      },
+      {
+        path: 'time-sheet',
+        data: { breadcrumb: 'Time Sheets' },
+        component: TimeSheetPage,
       },
     ],
   },

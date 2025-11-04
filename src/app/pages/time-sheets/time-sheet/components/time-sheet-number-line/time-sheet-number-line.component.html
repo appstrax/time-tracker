@@ -1,0 +1,33 @@
+<!-- <div style="height: 20px; border: 1px solid #000000;"> -->
+<div class="time-sheet">
+  <div class="d-flex no-wrap">
+    @for (entry of workHours.keys(); track entry.id) {
+    <div
+      #tooltipElement
+      class="entry-log-item"
+      (click)="openEntryLogItem(entry)"
+      [attr.data-bs-toggle]="'tooltip'"
+      [attr.data-bs-html]="'true'"
+      [attr.title]="getTooltipContent(entry)"
+      [ngStyle]="{
+        width: workHours.get(entry) + 'px', 
+        backgroundColor: getCategoryColor(entry), 
+       }"
+    ></div>
+    }
+  </div>
+  <div class="d-flex entry-log align-items-start number-line">
+    @for (i of createNumberLineArray(); track i) {
+    <div
+      class="number-line-item"
+      [ngStyle]="{
+              width: modifier + 'px',
+              height: getNumberLineHeight(i),
+              
+            }"
+    >
+      {{ getNumberLineValue(i) }}
+    </div>
+    }
+  </div>
+</div>

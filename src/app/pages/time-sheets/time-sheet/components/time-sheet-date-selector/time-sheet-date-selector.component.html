@@ -1,0 +1,21 @@
+<div class="week-selector">
+    <div class="d-flex align-items-center justify-content-between">
+        <button class="btn btn-outline-secondary btn-primary" (click)="previousWeek()">
+            <span>&lt;</span>
+        </button>
+        
+        <div class="week-display">
+            <span class="week-range-label">{{ currentWeekStart.getFullYear() }}</span>
+            <span class="week-range">
+                {{ formatDate(currentWeekStart) }} - {{ formatDate(currentWeekEnd) }}
+            </span>
+        </div>
+        
+        <button 
+            class="btn btn-outline-secondary  btn-primary" 
+            (click)="nextWeek()"
+            [disabled]="!canGoToNextWeek()">
+            <span>&gt;</span>
+        </button>
+    </div>
+</div>

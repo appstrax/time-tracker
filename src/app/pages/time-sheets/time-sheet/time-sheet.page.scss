@@ -1,0 +1,33 @@
+.time-sheet-section {
+    border-radius: 20px;
+    box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+    width: 100%;
+    padding: 2rem 3rem;
+    margin-top: 1rem;
+    margin-bottom: 2rem;
+    background-color: var(--color-surface);
+  }
+
+  .time-sheet-title {
+    color: var(--primary-color-dark);
+    font-size: 1.5rem;
+    font-weight: 600;
+  }
+  
+  .time-sheet-card .time-sheet-title {
+    color: var(--text-primary);
+    font-weight: 600;
+  }
+  
+  .time-sheet-card .time-sheet-desc {
+    font-size: 0.9rem;
+    color: var(--text-muted);
+  }
+
+
+  .day-label {
+    font-weight: 600;
+    font-size: 0.95rem;
+    color: var(--text-primary);
+    text-transform: capitalize;
+  }
