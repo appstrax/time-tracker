@@ -10,8 +10,8 @@
       [attr.data-bs-html]="'true'"
       [attr.title]="getTooltipContent(entry)"
       [ngStyle]="{
-        width: workHours.get(entry) + 'px', 
-        backgroundColor: getCategoryColor(entry), 
+        width: workHours.get(entry) + 'px',
+        backgroundColor: getCategoryColor(entry),
        }"
     ></div>
     }
@@ -23,7 +23,7 @@
       [ngStyle]="{
               width: modifier + 'px',
               height: getNumberLineHeight(i),
-              
+
             }"
     >
       {{ getNumberLineValue(i) }}

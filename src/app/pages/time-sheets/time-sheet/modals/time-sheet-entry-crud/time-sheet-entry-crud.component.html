@@ -1,0 +1,125 @@
+<div class="modal-header align-items-center d-flex justify-content-between">
+  <h4 class="modal-title text-white mb-0">Time Sheet Entry</h4>
+  <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="close()"></button>
+</div>
+
+<div class="modal-body">
+  <ng-container>
+    <div class="project-dropdown form-group" [class.show]="isProjectMenuOpen">
+      <button
+        type="button"
+        class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between form-select"
+        (click)="toggleProjectMenu()"
+        aria-expanded="isProjectMenuOpen"
+      >
+        <span class="d-flex align-items-center gap-2">
+          @if (selectedProject) { @if (selectedProject.logoUrl) {
+          <img
+            [src]="selectedProject.logoUrl"
+            alt="logo"
+            class="proj-thumb"
+            loading="lazy"
+          />
+          } @else {
+          <i class="bi bi-image proj-thumb-fallback"></i>
+          }
+          <span>{{ selectedProject.name }}</span>
+          } @else {
+          <i class="bi bi-image proj-thumb-fallback"></i>
+          <span>Select a project</span>
+          }
+        </span>
+        <i
+          class="bi"
+          [ngClass]="isProjectMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
+        ></i>
+      </button>
+      <ul
+        class="dropdown-menu dropdown-menu-end w-100"
+        [class.show]="isProjectMenuOpen"
+        [attr.data-bs-popper]="isProjectMenuOpen ? 'static' : null"
+      >
+        @for (project of projects(); track project.id) {
+        <li>
+          <button
+            class="dropdown-item d-flex align-items-center gap-2"
+            type="button"
+            (click)="selectProject(project)"
+            [class.active]="selectedProject?.id === project.id"
+          >
+            @if (project.logoUrl) {
+            <img
+              [src]="project.logoUrl"
+              alt="logo"
+              class="proj-thumb"
+              loading="lazy"
+            />
+            } @else {
+            <i class="bi bi-image proj-thumb-fallback"></i>
+            }
+            <span>{{ project.name }}</span>
+          </button>
+        </li>
+        }
+      </ul>
+    </div>
+
+    <div class="form-group">
+      <label for="category" class="visually-hidden">Category</label>
+      <div class="input-with-icon">
+        <i class="bi bi-tag"></i>
+        <input
+          type="text"
+          class="form-control"
+          id="category"
+          name="category"
+          [(ngModel)]="options.timeSheetEntry.category"
+          placeholder="* Category"
+          required
+        />
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="description" class="visually-hidden">Description</label>
+      <div class="input-with-icon">
+        <i class="bi bi-file-earmark-text"></i>
+        <input
+          type="text"
+          class="form-control"
+          id="description"
+          name="description"
+          [(ngModel)]="options.timeSheetEntry.description"
+          placeholder="* Description"
+          required
+        />
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="hours-input-container">
+        <div class="hours-range-wrapper">
+          <div class="hours-tooltip visible" #hoursTooltip>
+            {{ formatHours(hoursValue) }}
+          </div>
+          <input
+            [(ngModel)]="options.timeSheetEntry.hours"
+            type="range"
+            class="form-range hours-range"
+            min="0"
+            max="8"
+            step="0.25"
+            id="hoursRange"
+            #hoursInput
+            (input)="onRangeInputChange(hoursInput)"
+            required
+          />
+        </div>
+      </div>
+    </div>
+  </ng-container>
+</div>
+
+<div class="modal-footer">
+  <button type="button" class="btn btn-outline-secondary" (click)="close()">Close</button>
+  <button type="button" class="btn btn-primary" (click)="onSaveTimeSheetEntry()">Save</button>
+</div>

@@ -1,0 +1,49 @@
+import { TemplateRef, Injectable, Type } from '@angular/core';
+import { Model } from '@appstrax/services/shared/models/model';
+import {
+  NgbModal,
+  NgbModalRef,
+  NgbModalOptions,
+} from '@ng-bootstrap/ng-bootstrap';
+import { TimeSheetEntryCrudComponent, TimeSheetEntryCrudOptions } from '../pages/time-sheets/time-sheet/modals/time-sheet-entry-crud/time-sheet-entry-crud.component';
+
+
+@Injectable({ providedIn: 'root' })
+export class ModalService {
+  private modalRef?: NgbModalRef;
+
+  constructor(private modalService: NgbModal) {
+  }
+
+  public open(modal: TemplateRef<any>, options?: NgbModalOptions): NgbModalRef {
+    this.modalRef = this.modalService.open(modal, options);
+    return this.modalRef;
+  }
+
+  public close(): void {
+    if (!this.modalRef) return;
+    this.modalRef.close();
+  }
+
+  public dismiss(): void {
+    if (!this.modalRef) return;
+    this.modalRef.dismiss();
+  }
+
+  public showTimeSheetEntryCrudModal(options: TimeSheetEntryCrudOptions): NgbModalRef {
+    const modalRef = this.modalService.open(TimeSheetEntryCrudComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+    modalRef.componentInstance.options = options;
+    return modalRef;
+  }
+
+}
+
+export abstract class ModalCrudOptions<T extends Model> {
+  onSave(model: T): Promise<void> {
+    return Promise.resolve();
+  }
+}

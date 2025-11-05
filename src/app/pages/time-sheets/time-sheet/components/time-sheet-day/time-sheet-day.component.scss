@@ -13,13 +13,45 @@
     font-size: 1.5rem;
     font-weight: 600;
   }
-  
+
   .time-sheet-day-card .time-sheet-day-title {
     color: var(--text-primary);
     font-weight: 600;
   }
-  
+
   .time-sheet-day-card .time-sheet-day-desc {
     font-size: 0.9rem;
     color: var(--text-muted);
+  }
+
+  .add-entry-btn {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    border: none;
+    background-color: var(--primary-color);
+    color: var(--color-primary-contrast);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    padding: 0;
+    font-size: 1.25rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+
+  .add-entry-btn:hover {
+    background-color: var(--primary-color-dark);
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
+
+  .add-entry-btn:active {
+    transform: scale(0.95);
+  }
+
+  .add-entry-btn:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 30%, transparent);
   }

@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, Signal } from '@angular/core';
 
 import { appstraxAuth, User } from '@appstrax/services/auth';
 import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
@@ -6,6 +6,8 @@ import { TimeSheetEntryService } from 'src/app/services/time-sheet-entry.service
 import { TimeSheetDayComponent } from './components/time-sheet-day/time-sheet-day.component';
 import { TimeSheetDateSelectorComponent } from './components/time-sheet-date-selector/time-sheet-date-selector.component';
 import { ColorList } from 'src/app/utils/color-list';
+import { Store } from '@state';
+import { Project } from '@models';
 
 @Component({
   selector: 'app-time-sheet',
@@ -21,9 +23,13 @@ export class TimeSheetPage implements OnInit {
   public currentWeekEnd: Date = new Date();
   public weekDays: Date[] = [];
 
+  projects: Signal<Project[]>;
+
   categoryColors: Map<string, string> = new Map<string, string>();
 
-  constructor(private timeSheetEntryService: TimeSheetEntryService) {}
+  constructor(private timeSheetEntryService: TimeSheetEntryService, private store:Store) {
+    this.projects = this.store.projects.all;
+  }
 
   async ngOnInit(): Promise<void> {
     const user = await appstraxAuth.getUser();
@@ -38,15 +44,15 @@ export class TimeSheetPage implements OnInit {
     const today = new Date();
     const dayOfWeek = today.getUTCDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust to get Monday
-    
+
     this.currentWeekStart = new Date(today);
     this.currentWeekStart.setUTCDate(today.getUTCDate() + diff);
     this.currentWeekStart.setUTCHours(0, 0, 0, 0);
-    
+
     this.currentWeekEnd = new Date(this.currentWeekStart);
     this.currentWeekEnd.setUTCDate(this.currentWeekStart.getUTCDate() + 6);
     this.currentWeekEnd.setUTCHours(23, 59, 59, 999);
-    
+
     this.updateWeekDays();
   }
 
@@ -96,7 +102,7 @@ export class TimeSheetPage implements OnInit {
   generateDistinctColors(n: number, startHue = 0, saturation = 70, lightness = 55): string[] {
     const colors = [];
     const hueStep = 360 / n;
-    
+
     for (let i = 0; i < n; i++) {
       const hue = (startHue + i * hueStep) % 360;
       colors.push(`hsl(${hue}, ${saturation}%, ${lightness}%)`);
@@ -108,7 +114,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '1',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-27T00:00:00Z'),
       hours: 2.5,
       description: 'Feature development and code implementation',
@@ -117,7 +123,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '2',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-27T00:00:00Z'),
       hours: 1.25,
       description: 'Code review and peer feedback',
@@ -126,7 +132,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '3',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-28T00:00:00Z'),
       hours: 3.75,
       description: 'UI/UX design mockups and wireframes',
@@ -135,7 +141,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '4',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-28T00:00:00Z'),
       hours: 0.5,
       description: 'Infrastructure setup and deployment',
@@ -144,7 +150,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '5',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-29T00:00:00Z'),
       hours: 4,
       description: 'API documentation and technical writing',
@@ -153,7 +159,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '6',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-29T00:00:00Z'),
       hours: 1.5,
       description: 'Unit and integration testing',
@@ -162,7 +168,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '7',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-30T00:00:00Z'),
       hours: 2,
       description: 'Sprint planning and task estimation',
@@ -171,7 +177,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '8',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-30T00:00:00Z'),
       hours: 0.25,
       description: 'Quick bug fix in authentication module',
@@ -180,7 +186,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '9',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-31T00:00:00Z'),
       hours: 3,
       description: 'Database schema design and optimization',
@@ -189,7 +195,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '10',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-01T00:00:00Z'),
       hours: 1.75,
       description: 'Design system component library updates',
@@ -198,7 +204,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '11',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-01T00:00:00Z'),
       hours: 0.75,
       description: 'PR review and merge conflict resolution',
@@ -207,7 +213,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '12',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-02T00:00:00Z'),
       hours: 2.25,
       description: 'CI/CD pipeline configuration',
@@ -216,7 +222,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '13',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-03T00:00:00Z'),
       hours: 1,
       description: 'User guide documentation update',
@@ -225,7 +231,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '14',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-03T00:00:00Z'),
       hours: 3.5,
       description: 'End-to-end test suite development',
@@ -234,7 +240,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '15',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-04T00:00:00Z'),
       hours: 0.5,
       description: 'Team standup and sprint retrospective',
@@ -243,7 +249,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '16',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-05T00:00:00Z'),
       hours: 2.75,
       description: 'Feature implementation and refactoring',
@@ -252,7 +258,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '17',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-06T00:00:00Z'),
       hours: 1.25,
       description: 'Visual design and asset creation',
@@ -261,7 +267,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '18',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-07T00:00:00Z'),
       hours: 0.25,
       description: 'Performance testing and optimization',
@@ -270,7 +276,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '19',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-08T00:00:00Z'),
       hours: 4,
       description: 'Production deployment and monitoring setup',
@@ -279,7 +285,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '20',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-09T00:00:00Z'),
       hours: 1.5,
       description: 'Project roadmap and milestone planning',
@@ -288,7 +294,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '21',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-27T00:00:00Z'),
       hours: 0.75,
       description: 'Frontend component development',
@@ -297,7 +303,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '22',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-27T00:00:00Z'),
       hours: 2.25,
       description: 'API endpoint testing and validation',
@@ -306,7 +312,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '23',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-28T00:00:00Z'),
       hours: 1.5,
       description: 'User experience flow improvements',
@@ -315,7 +321,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '24',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-28T00:00:00Z'),
       hours: 3.25,
       description: 'Backend service implementation',
@@ -324,7 +330,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '25',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-29T00:00:00Z'),
       hours: 0.5,
       description: 'Security audit and code review',
@@ -333,7 +339,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '26',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-29T00:00:00Z'),
       hours: 2.5,
       description: 'Cloud infrastructure migration',
@@ -342,7 +348,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '27',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-30T00:00:00Z'),
       hours: 1.75,
       description: 'Technical specification documentation',
@@ -351,7 +357,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '28',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-30T00:00:00Z'),
       hours: 3.75,
       description: 'Load testing and performance analysis',
@@ -360,7 +366,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '29',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-31T00:00:00Z'),
       hours: 0.25,
       description: 'Quick bug fix in payment module',
@@ -369,7 +375,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '30',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-31T00:00:00Z'),
       hours: 2,
       description: 'Feature prioritization meeting',
@@ -378,7 +384,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '31',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-01T00:00:00Z'),
       hours: 1.25,
       description: 'Design system consistency check',
@@ -387,7 +393,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '32',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-01T00:00:00Z'),
       hours: 4,
       description: 'Full stack feature development',
@@ -396,7 +402,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '33',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-02T00:00:00Z'),
       hours: 0.5,
       description: 'Code quality review and refactoring',
@@ -405,7 +411,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '34',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-02T00:00:00Z'),
       hours: 2.75,
       description: 'Docker containerization setup',
@@ -414,7 +420,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '35',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-03T00:00:00Z'),
       hours: 1,
       description: 'Developer onboarding guide creation',
@@ -423,7 +429,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '36',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-03T00:00:00Z'),
       hours: 0.25,
       description: 'Regression test suite execution',
@@ -432,7 +438,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '37',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-04T00:00:00Z'),
       hours: 3,
       description: 'Architecture decision record writing',
@@ -441,7 +447,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '38',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-04T00:00:00Z'),
       hours: 1.5,
       description: 'Sprint backlog refinement session',
@@ -450,7 +456,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '39',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-05T00:00:00Z'),
       hours: 0.75,
       description: 'Mobile responsive design updates',
@@ -459,7 +465,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '40',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-05T00:00:00Z'),
       hours: 2.5,
       description: 'Database query optimization',
@@ -468,7 +474,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '41',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-06T00:00:00Z'),
       hours: 1.75,
       description: 'Pull request review and approval',
@@ -477,7 +483,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '42',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-06T00:00:00Z'),
       hours: 3.5,
       description: 'Automated testing framework setup',
@@ -486,7 +492,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '43',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-07T00:00:00Z'),
       hours: 0.5,
       description: 'Server monitoring and alerting configuration',
@@ -495,7 +501,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '44',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-07T00:00:00Z'),
       hours: 2.25,
       description: 'API reference documentation',
@@ -504,7 +510,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '45',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-08T00:00:00Z'),
       hours: 1.25,
       description: 'Product requirements gathering',
@@ -513,7 +519,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '46',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-08T00:00:00Z'),
       hours: 3.25,
       description: 'Microservices architecture design',
@@ -522,7 +528,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '47',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-09T00:00:00Z'),
       hours: 0.75,
       description: 'User interface mockup creation',
@@ -531,7 +537,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '48',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-09T00:00:00Z'),
       hours: 2,
       description: 'Integration test development',
@@ -540,7 +546,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '49',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-27T00:00:00Z'),
       hours: 1,
       description: 'Kubernetes cluster configuration',
@@ -549,7 +555,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '50',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-28T00:00:00Z'),
       hours: 2.5,
       description: 'Release notes documentation',
@@ -558,7 +564,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '51',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-29T00:00:00Z'),
       hours: 0.5,
       description: 'Quarterly planning session',
@@ -567,7 +573,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '52',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-30T00:00:00Z'),
       hours: 3.75,
       description: 'Advanced feature implementation',
@@ -576,7 +582,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '53',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-31T00:00:00Z'),
       hours: 1.5,
       description: 'Design pattern application review',
@@ -585,7 +591,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '54',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-01T00:00:00Z'),
       hours: 0.25,
       description: 'Color palette and typography updates',
@@ -594,7 +600,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '55',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-02T00:00:00Z'),
       hours: 4,
       description: 'Comprehensive system testing',
@@ -603,7 +609,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '56',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-03T00:00:00Z'),
       hours: 1.75,
       description: 'Database backup automation',
@@ -612,7 +618,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '57',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-04T00:00:00Z'),
       hours: 2.25,
       description: 'Technical blog post writing',
@@ -621,7 +627,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '58',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-05T00:00:00Z'),
       hours: 0.5,
       description: 'Feature scope definition meeting',
@@ -630,7 +636,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '59',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-11-06T00:00:00Z'),
       hours: 3,
       description: 'Legacy code modernization',
@@ -639,7 +645,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '60',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-11-07T00:00:00Z'),
       hours: 1.25,
       description: 'Code security review',
@@ -648,7 +654,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '61',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-13T00:00:00Z'),
       hours: 2.5,
       description: 'Technology research and evaluation',
@@ -657,7 +663,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '62',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-13T00:00:00Z'),
       hours: 1.75,
       description: 'Team training on new framework',
@@ -666,7 +672,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '63',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-14T00:00:00Z'),
       hours: 0.5,
       description: 'Customer support ticket resolution',
@@ -675,7 +681,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '64',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-14T00:00:00Z'),
       hours: 3.25,
       description: 'System maintenance and updates',
@@ -684,7 +690,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '65',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-15T00:00:00Z'),
       hours: 2,
       description: 'Quality assurance testing',
@@ -693,7 +699,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '66',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-15T00:00:00Z'),
       hours: 1.25,
       description: 'System architecture design',
@@ -702,7 +708,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '67',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-16T00:00:00Z'),
       hours: 4,
       description: 'React component development',
@@ -711,7 +717,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '68',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-16T00:00:00Z'),
       hours: 0.25,
       description: 'API endpoint implementation',
@@ -720,7 +726,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '69',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-17T00:00:00Z'),
       hours: 2.75,
       description: 'Database schema migration',
@@ -729,7 +735,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '70',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-17T00:00:00Z'),
       hours: 1.5,
       description: 'Security vulnerability assessment',
@@ -738,7 +744,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '71',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-18T00:00:00Z'),
       hours: 3,
       description: 'Market analysis and competitor research',
@@ -747,7 +753,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '72',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-18T00:00:00Z'),
       hours: 0.75,
       description: 'Onboarding new team member',
@@ -756,7 +762,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '73',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-19T00:00:00Z'),
       hours: 1.25,
       description: 'Technical support and troubleshooting',
@@ -765,7 +771,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '74',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-19T00:00:00Z'),
       hours: 2.5,
       description: 'Performance optimization and tuning',
@@ -774,7 +780,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '75',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-20T00:00:00Z'),
       hours: 0.5,
       description: 'Manual testing and bug verification',
@@ -783,7 +789,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '76',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-20T00:00:00Z'),
       hours: 3.75,
       description: 'Scalability architecture planning',
@@ -792,7 +798,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '77',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-21T00:00:00Z'),
       hours: 1,
       description: 'Vue.js component library updates',
@@ -801,7 +807,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '78',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-21T00:00:00Z'),
       hours: 2.25,
       description: 'Microservices implementation',
@@ -810,7 +816,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '79',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-22T00:00:00Z'),
       hours: 1.75,
       description: 'Query optimization and indexing',
@@ -819,7 +825,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '80',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-22T00:00:00Z'),
       hours: 0.25,
       description: 'Penetration testing preparation',
@@ -828,7 +834,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '81',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-23T00:00:00Z'),
       hours: 2,
       description: 'User behavior research and analytics',
@@ -837,7 +843,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '82',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-23T00:00:00Z'),
       hours: 3.5,
       description: 'Workshop on best practices',
@@ -846,7 +852,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '83',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-24T00:00:00Z'),
       hours: 0.75,
       description: 'Client support and issue resolution',
@@ -855,7 +861,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '84',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-24T00:00:00Z'),
       hours: 4,
       description: 'System backup and recovery procedures',
@@ -864,7 +870,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '85',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-25T00:00:00Z'),
       hours: 1.5,
       description: 'Regression testing suite execution',
@@ -873,7 +879,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '86',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-25T00:00:00Z'),
       hours: 2.25,
       description: 'Cloud infrastructure architecture',
@@ -882,7 +888,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '87',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-26T00:00:00Z'),
       hours: 0.5,
       description: 'Angular directive development',
@@ -891,7 +897,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '88',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-26T00:00:00Z'),
       hours: 3.25,
       description: 'RESTful API design and implementation',
@@ -900,7 +906,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '89',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-13T00:00:00Z'),
       hours: 1.25,
       description: 'Data normalization and cleanup',
@@ -909,7 +915,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '90',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-14T00:00:00Z'),
       hours: 2,
       description: 'Security audit and compliance check',
@@ -918,7 +924,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '91',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-09-29T00:00:00Z'),
       hours: 1.5,
       description: 'Team standup and project sync meeting',
@@ -927,7 +933,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '92',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-09-29T00:00:00Z'),
       hours: 2.75,
       description: 'Data analysis and metrics evaluation',
@@ -936,7 +942,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '93',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-09-30T00:00:00Z'),
       hours: 0.5,
       description: 'Weekly progress report generation',
@@ -945,7 +951,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '94',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-09-30T00:00:00Z'),
       hours: 3,
       description: 'Staging environment deployment',
@@ -954,7 +960,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '95',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-01T00:00:00Z'),
       hours: 1.25,
       description: 'Application performance monitoring',
@@ -963,7 +969,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '96',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-01T00:00:00Z'),
       hours: 2.5,
       description: 'Third-party API integration',
@@ -972,7 +978,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '97',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-02T00:00:00Z'),
       hours: 0.75,
       description: 'Environment configuration setup',
@@ -981,7 +987,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '98',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-02T00:00:00Z'),
       hours: 3.75,
       description: 'Code performance optimization',
@@ -990,7 +996,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '99',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-03T00:00:00Z'),
       hours: 1,
       description: 'Data migration to new database',
@@ -999,7 +1005,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '100',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-03T00:00:00Z'),
       hours: 2.25,
       description: 'Cross-team collaboration session',
@@ -1008,7 +1014,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '101',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-04T00:00:00Z'),
       hours: 0.25,
       description: 'Client feedback discussion meeting',
@@ -1017,7 +1023,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '102',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-04T00:00:00Z'),
       hours: 4,
       description: 'User behavior pattern analysis',
@@ -1026,7 +1032,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '103',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-05T00:00:00Z'),
       hours: 1.75,
       description: 'Monthly metrics report preparation',
@@ -1035,7 +1041,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '104',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-05T00:00:00Z'),
       hours: 0.5,
       description: 'Hotfix deployment to production',
@@ -1044,7 +1050,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '105',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-06T00:00:00Z'),
       hours: 2,
       description: 'Error tracking and alert monitoring',
@@ -1053,7 +1059,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '106',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-06T00:00:00Z'),
       hours: 3.25,
       description: 'Payment gateway integration',
@@ -1062,7 +1068,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '107',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-07T00:00:00Z'),
       hours: 1.5,
       description: 'Development environment configuration',
@@ -1071,7 +1077,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '108',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-07T00:00:00Z'),
       hours: 0.75,
       description: 'Bundle size optimization',
@@ -1080,7 +1086,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '109',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-08T00:00:00Z'),
       hours: 2.5,
       description: 'Legacy system migration planning',
@@ -1089,7 +1095,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '110',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-08T00:00:00Z'),
       hours: 1.25,
       description: 'Pair programming session',
@@ -1098,7 +1104,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '111',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-09T00:00:00Z'),
       hours: 3,
       description: 'Sprint planning and retrospective meeting',
@@ -1107,7 +1113,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '112',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-09T00:00:00Z'),
       hours: 1,
       description: 'Performance bottleneck analysis',
@@ -1116,7 +1122,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '113',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-10T00:00:00Z'),
       hours: 2.25,
       description: 'Executive summary report writing',
@@ -1125,7 +1131,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '114',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-10T00:00:00Z'),
       hours: 1.75,
       description: 'Automated deployment pipeline setup',
@@ -1134,7 +1140,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '115',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-11T00:00:00Z'),
       hours: 0.5,
       description: 'Server health monitoring dashboard',
@@ -1143,7 +1149,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '116',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-11T00:00:00Z'),
       hours: 3.5,
       description: 'OAuth authentication integration',
@@ -1152,7 +1158,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '117',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-10-12T00:00:00Z'),
       hours: 2,
       description: 'Feature flag configuration',
@@ -1161,7 +1167,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '118',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-10-12T00:00:00Z'),
       hours: 1.5,
       description: 'Memory usage optimization',
@@ -1170,7 +1176,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '119',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
       date: new Date('2025-09-29T00:00:00Z'),
       hours: 3.25,
       description: 'Cloud infrastructure migration',
@@ -1179,7 +1185,7 @@ export class TimeSheetPage implements OnInit {
     {
       id: '120',
       userId: 'user-1',
-      projectId: 'project-1',
+      projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
       date: new Date('2025-09-30T00:00:00Z'),
       hours: 0.5,
       description: 'Code review collaboration',

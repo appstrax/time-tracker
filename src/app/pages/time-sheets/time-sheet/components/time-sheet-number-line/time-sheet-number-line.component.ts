@@ -1,8 +1,9 @@
 import { NgStyle } from '@angular/common';
-import { Component, Input, OnInit, AfterViewInit, OnDestroy, ViewChildren, QueryList, ElementRef } from '@angular/core';
+import { Component, Input, OnInit, AfterViewInit, OnDestroy, ViewChildren, QueryList, ElementRef, EventEmitter, Output, Signal } from '@angular/core';
 import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
 import { Tooltip } from 'bootstrap';
 import { Subscription } from 'rxjs';
+import { Project } from 'src/app/models/project.model';
 
 @Component({
   selector: 'app-time-sheet-number-line',
@@ -14,6 +15,9 @@ import { Subscription } from 'rxjs';
 export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDestroy {
   @Input() entries: TimeSheetEntry[] = [];
   @Input() categoryColors:Map<string, string> = new Map<string, string>();
+  @Input() projects: Project[] = [];
+
+  @Output() onEntryClick: EventEmitter<TimeSheetEntry> = new EventEmitter<TimeSheetEntry>();
 
   @ViewChildren('tooltipElement') tooltipElements!: QueryList<ElementRef<HTMLElement>>;
 
@@ -21,6 +25,7 @@ export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDe
   public modifier = 20;
   private tooltips: Tooltip[] = [];
   private tooltipSubscription?: Subscription;
+
 
   ngOnInit() {
     this.calculateSize();
@@ -39,11 +44,19 @@ export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDe
   }
 
   initializeTooltips() {
+    // Dispose existing tooltips first
+    this.disposeTooltips();
+
     this.tooltipElements.forEach((elementRef) => {
       const tooltip = new Tooltip(elementRef.nativeElement, {
         html: true,
         placement: 'top',
-        trigger: 'hover'
+        trigger: 'hover',
+        fallbackPlacements: ['top', 'bottom']
+      });
+      // Ensure click events work properly by hiding tooltip on click
+      elementRef.nativeElement.addEventListener('click', () => {
+        tooltip.hide();
       });
       this.tooltips.push(tooltip);
     });
@@ -53,7 +66,7 @@ export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDe
     return `
       <div style="text-align: left;">
         <strong>Entry:</strong> ${entry.id || 'N/A'}<hr>
-        <strong>Project:</strong> ${entry.projectId || 'N/A'}<br>
+        <strong>Project:</strong> ${this.getProjectName(entry) || 'N/A'}<br>
         <strong>Category:</strong> ${entry.category || 'N/A'}<br>
         <strong>Description:</strong><br> ${entry.description || 'N/A'}
       </div>
@@ -69,7 +82,7 @@ export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDe
   }
 
   getCategoryColor(entry: TimeSheetEntry): string {
-    
+
     return this.categoryColors.get(entry.category ?? '') || '#6B7280'; // Default gray color
   }
 
@@ -107,6 +120,13 @@ export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDe
   }
 
   openEntryLogItem(entry: TimeSheetEntry) {
+    console.log('openEntryLogItem called with entry:', entry);
+    this.onEntryClick.emit(entry);
+    console.log('Event emitted');
+  }
+
+  getProjectName(entry: TimeSheetEntry): string {
+    return this.projects?.find(project => project.id === entry.projectId)?.name ?? 'N/A';
   }
 
   ngOnDestroy() {

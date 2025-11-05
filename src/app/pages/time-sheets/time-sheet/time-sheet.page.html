@@ -8,6 +8,7 @@
       <div class="day-selector-wrapper">
         <app-time-sheet-day
           [date]="day"
+          [projects]="projects()"
           [entries]="filterEntriesByDate(day)"
           [categoryColors]="categoryColors"
         ></app-time-sheet-day>
