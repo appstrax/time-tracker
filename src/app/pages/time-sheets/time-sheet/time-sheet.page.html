@@ -1,6 +1,7 @@
 <div class="container">
   <section class="time-sheet-section">
     <app-time-sheet-date-selector
+      [timeSheetEntries]="timeSheetEntries"
       (weekChange)="onWeekChange($event)"
     ></app-time-sheet-date-selector>
     <div class="week-days-container">
@@ -11,6 +12,8 @@
           [projects]="projects()"
           [entries]="filterEntriesByDate(day)"
           [categoryColors]="categoryColors"
+          [availableCategories]="getAvailableCategories()"
+          (onSave)="onTimeSheetEntrySaved($event)"
         ></app-time-sheet-day>
       </div>
       }

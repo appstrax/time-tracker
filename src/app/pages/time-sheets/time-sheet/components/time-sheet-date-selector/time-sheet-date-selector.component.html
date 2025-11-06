@@ -1,6 +1,9 @@
 <div class="week-selector">
     <div class="d-flex align-items-center justify-content-between">
-        <button class="btn btn-outline-secondary btn-primary" (click)="previousWeek()">
+        <button 
+            class="btn btn-outline-secondary btn-primary" 
+            (click)="previousWeek()"
+            [disabled]="!canGoToPreviousWeek()">
             <span>&lt;</span>
         </button>
         

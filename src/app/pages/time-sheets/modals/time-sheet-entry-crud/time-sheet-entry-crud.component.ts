@@ -14,7 +14,7 @@ import { ModalCrudOptions } from 'src/app/services/modal.service';
   templateUrl: './time-sheet-entry-crud.component.html',
   styleUrl: './time-sheet-entry-crud.component.scss'
 })
-export class TimeSheetEntryCrudComponent implements OnInit, AfterViewInit {
+export class TimeSheetEntryCrudComponent implements OnInit {
 
   @Input() options: TimeSheetEntryCrudOptions = new TimeSheetEntryCrudOptions();
 
@@ -22,6 +22,11 @@ export class TimeSheetEntryCrudComponent implements OnInit, AfterViewInit {
 
   projects: Signal<Project[]>;
   isProjectMenuOpen: boolean = false;
+
+  timeSheetEntry: TimeSheetEntry = new TimeSheetEntry();
+  availableCategories: string[] = [];
+  filteredCategories: string[] = [];
+  isCategoryDropdownOpen: boolean = false;
 
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
 
@@ -34,19 +39,12 @@ export class TimeSheetEntryCrudComponent implements OnInit, AfterViewInit {
   }
 
   ngOnInit(): void {
+    this.timeSheetEntry = this.options.timeSheetEntry.clone();
     if (this.options.timeSheetEntry.projectId) {
       this.selectedProject = this.projects().find(project => project.id === this.options.timeSheetEntry.projectId) ?? null;
     }
-  }
-
-  ngAfterViewInit(): void {
-    // Initialize tooltip position after view is ready
-    setTimeout(() => {
-      const hoursInput = document.getElementById('hoursRange') as HTMLInputElement;
-      if (hoursInput && this.hoursTooltip) {
-        this.updateTooltipPosition(hoursInput);
-      }
-    }, 0);
+    this.availableCategories = this.options.availableCategories || [];
+    this.filteredCategories = [...this.availableCategories];
   }
 
   formatHours(hours: number): string {
@@ -107,38 +105,7 @@ export class TimeSheetEntryCrudComponent implements OnInit, AfterViewInit {
     return Math.max(0, Math.min(24, totalHours));
   }
 
-  onHoursInputChange(value: string): void {
-    const parsedHours = this.parseHoursFromString(value);
-    if (!isNaN(parsedHours)) {
-      this.options.timeSheetEntry.hours = parsedHours;
-      // Update tooltip position
-      const hoursInput = document.getElementById('hoursRange') as HTMLInputElement;
-      if (hoursInput) {
-        this.updateTooltipPosition(hoursInput);
-      }
-    }
-  }
 
-  onHoursInputBlur(): void {
-    // Ensure the input displays the formatted value
-    const hoursInput = document.getElementById('hoursInput') as HTMLInputElement;
-    if (hoursInput) {
-      hoursInput.value = this.formatHours(this.hoursValue);
-    }
-  }
-
-  onRangeInputChange(input: HTMLInputElement): void {
-    this.updateTooltipPosition(input);
-    // Force input field to update
-    const hoursInput = document.getElementById('hoursInput') as HTMLInputElement;
-    if (hoursInput) {
-      hoursInput.value = this.formatHours(this.hoursValue);
-    }
-  }
-
-  updateTooltipPosition(input: HTMLInputElement): void {
-    // Tooltip is now fixed on the right side, no positioning needed
-  }
 
   toggleProjectMenu(): void {
     this.isProjectMenuOpen = !this.isProjectMenuOpen;
@@ -149,12 +116,55 @@ export class TimeSheetEntryCrudComponent implements OnInit, AfterViewInit {
     this.isProjectMenuOpen = false;
   }
 
+  onCategoryInput(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const value = input.value.toLowerCase().trim();
+    
+    if (value === '') {
+      this.filteredCategories = [...this.availableCategories];
+      this.isCategoryDropdownOpen = false;
+    } else {
+      this.filteredCategories = this.availableCategories.filter(cat => 
+        cat.toLowerCase().includes(value)
+      );
+      this.isCategoryDropdownOpen = this.filteredCategories.length > 0;
+    }
+  }
+
+  selectCategory(category: string): void {
+    this.timeSheetEntry.category = category;
+    this.isCategoryDropdownOpen = false;
+    this.filteredCategories = [...this.availableCategories];
+  }
+
+  onCategoryFocus(): void {
+    if (this.timeSheetEntry.category) {
+      const value = this.timeSheetEntry.category.toLowerCase().trim();
+      this.filteredCategories = this.availableCategories.filter(cat => 
+        cat.toLowerCase().includes(value)
+      );
+    } else {
+      this.filteredCategories = [...this.availableCategories];
+    }
+    if (this.filteredCategories.length > 0) {
+      this.isCategoryDropdownOpen = true;
+    }
+  }
+
+  onCategoryBlur(): void {
+    // Delay closing to allow click events to fire
+    setTimeout(() => {
+      this.isCategoryDropdownOpen = false;
+    }, 200);
+  }
+
   onSaveTimeSheetEntry() {
     if (!this.isFormValid()) return;
-    if (!this.options?.timeSheetEntry) return;
+    if (!this?.timeSheetEntry) return;
     if (this.selectedProject) {
-      this.options.timeSheetEntry.projectId = this.selectedProject.id!;
+      this.timeSheetEntry.projectId = this.selectedProject.id!;
     }
+    this.options.timeSheetEntry.update(this.timeSheetEntry);
     this.options.onSave(this.options.timeSheetEntry);
     this.ngModal.dismissAll();
   }
@@ -165,12 +175,13 @@ export class TimeSheetEntryCrudComponent implements OnInit, AfterViewInit {
 
   isFormValid(): boolean {
     return this.selectedProject != null &&
-    this.options.timeSheetEntry.hours > 0 &&
-    this.options.timeSheetEntry.description != '' &&
-    this.options.timeSheetEntry.category != '';
+    this.timeSheetEntry.hours > 0 &&
+    this.timeSheetEntry.description != '' &&
+    this.timeSheetEntry.category != '';
   }
 }
 
 export class TimeSheetEntryCrudOptions extends ModalCrudOptions<TimeSheetEntry> {
   timeSheetEntry!: TimeSheetEntry;
+  availableCategories: string[] = [];
 }

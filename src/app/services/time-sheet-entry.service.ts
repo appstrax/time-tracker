@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CrudService, Operator } from '@appstrax/services/database';
+import { CrudService, Operator, OrderDirection } from '@appstrax/services/database';
 
 import { TimeSheetEntry } from '../models/time-sheet-entry.model';
 
@@ -9,13 +9,13 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     super('time-sheet-entries', TimeSheetEntry);
   }
 
-  public async getTimeSheetEntries(userId: string): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({ where: { userId } });
+  public async getTimeSheetEntriesByUserId(userId: string): Promise<TimeSheetEntry[]> {
+    const timeSheetEntries = await this.find({ where: { userId }, order: { 'createdAt': OrderDirection.ASC} });
     return timeSheetEntries.data;
   }
 
   public async getTimeSheetEntriesByProjectId(projectId: string): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({ where: { projectId } });
+    const timeSheetEntries = await this.find({ where: { projectId }, order: { 'createdAt': OrderDirection.ASC} });
     return timeSheetEntries.data;
   }
 

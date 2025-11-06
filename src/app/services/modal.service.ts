@@ -5,7 +5,7 @@ import {
   NgbModalRef,
   NgbModalOptions,
 } from '@ng-bootstrap/ng-bootstrap';
-import { TimeSheetEntryCrudComponent, TimeSheetEntryCrudOptions } from '../pages/time-sheets/time-sheet/modals/time-sheet-entry-crud/time-sheet-entry-crud.component';
+import { TimeSheetEntryCrudComponent, TimeSheetEntryCrudOptions } from '../pages/time-sheets/modals/time-sheet-entry-crud/time-sheet-entry-crud.component';
 
 
 @Injectable({ providedIn: 'root' })

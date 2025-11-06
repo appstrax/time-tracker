@@ -27,7 +27,7 @@ export class TimeSheetPage implements OnInit {
 
   categoryColors: Map<string, string> = new Map<string, string>();
 
-  constructor(private timeSheetEntryService: TimeSheetEntryService, private store:Store) {
+  constructor(private timeSheetEntryService: TimeSheetEntryService, private store: Store) {
     this.projects = this.store.projects.all;
   }
 
@@ -36,14 +36,14 @@ export class TimeSheetPage implements OnInit {
     if (!user) return;
     this.user = user;
     this.initializeWeekDays();
-    this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntries(user.id);
+    await this.setTimeSheetEntries();
     this.initializeCategoryColors();
   }
 
   initializeWeekDays(): void {
     const today = new Date();
-    const dayOfWeek = today.getUTCDay(); // 0 = Sunday, 1 = Monday, ..., 6 = Saturday
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek; // Adjust to get Monday
+    const dayOfWeek = today.getUTCDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
     this.currentWeekStart = new Date(today);
     this.currentWeekStart.setUTCDate(today.getUTCDate() + diff);
@@ -54,6 +54,17 @@ export class TimeSheetPage implements OnInit {
     this.currentWeekEnd.setUTCHours(23, 59, 59, 999);
 
     this.updateWeekDays();
+  }
+
+  async setTimeSheetEntries(): Promise<void> {
+    // this.timeSheetEntries = this.testEntries;
+    this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserId(this.user?.id ?? '');
+
+  }
+
+  async onTimeSheetEntrySaved(entry: TimeSheetEntry): Promise<void> {
+    await this.setTimeSheetEntries();
+    this.initializeCategoryColors();
   }
 
   updateWeekDays(): void {
@@ -69,34 +80,26 @@ export class TimeSheetPage implements OnInit {
     this.currentWeekStart = weekRange.start;
     this.currentWeekEnd = weekRange.end;
     this.updateWeekDays();
-    this.loadTimeSheetEntriesForWeek();
   }
 
-  async loadTimeSheetEntriesForWeek(): Promise<void> {
-    if (!this.user) return;
-    this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
-      this.user.id,
-      this.currentWeekStart,
-      this.currentWeekEnd
-    );
-  }
 
   filterEntriesByDate(date: Date): TimeSheetEntry[] {
-    return this.testEntries.filter(entry => entry.date.toDateString() === date.toDateString());
+    let filteredEntries: TimeSheetEntry[] = this.timeSheetEntries.filter(
+      entry => entry.date.toDateString() === date.toDateString(),
+    );
+    return filteredEntries;
   }
-
-  async getTimeSheetEntriesByDateRange(startDate: Date, endDate: Date): Promise<TimeSheetEntry[]> {
-    if (!this.user) return [];
-    return this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(this.user.id, startDate, endDate);
-  }
-
 
 
   initializeCategoryColors(): void {
-    const categories = [...new Set(this.testEntries.map(entry => entry.category))];
+    const categories = [...new Set(this.timeSheetEntries.map(entry => entry.category))];
     for (let i = 0; i < categories.length; i++) {
       this.categoryColors.set(categories[i], ColorList.colors[i]);
     }
+  }
+
+  getAvailableCategories(): string[] {
+    return [...new Set(this.timeSheetEntries.map(entry => entry.category).filter(cat => cat && cat.trim() !== ''))];
   }
 
   generateDistinctColors(n: number, startHue = 0, saturation = 70, lightness = 55): string[] {
@@ -142,7 +145,7 @@ export class TimeSheetPage implements OnInit {
       id: '4',
       userId: 'user-1',
       projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
-      date: new Date('2025-10-28T00:00:00Z'),
+      date: new Date('2025-03-28T00:00:00Z'),
       hours: 0.5,
       description: 'Infrastructure setup and deployment',
       category: 'DevOps'
@@ -295,7 +298,7 @@ export class TimeSheetPage implements OnInit {
       id: '21',
       userId: 'user-1',
       projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
-      date: new Date('2025-10-27T00:00:00Z'),
+      date: new Date('2025-08-27T00:00:00Z'),
       hours: 0.75,
       description: 'Frontend component development',
       category: 'Development'
@@ -916,7 +919,7 @@ export class TimeSheetPage implements OnInit {
       id: '90',
       userId: 'user-1',
       projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
-      date: new Date('2025-10-14T00:00:00Z'),
+      date: new Date('2024-10-14T00:00:00Z'),
       hours: 2,
       description: 'Security audit and compliance check',
       category: 'Security'
@@ -925,7 +928,7 @@ export class TimeSheetPage implements OnInit {
       id: '91',
       userId: 'user-1',
       projectId: 'f712c3af-2ade-45d6-8163-ee51216ce271',
-      date: new Date('2025-09-29T00:00:00Z'),
+      date: new Date('2024-09-29T00:00:00Z'),
       hours: 1.5,
       description: 'Team standup and project sync meeting',
       category: 'Meeting'
@@ -1186,7 +1189,7 @@ export class TimeSheetPage implements OnInit {
       id: '120',
       userId: 'user-1',
       projectId: '4336268c-fe8a-49ac-b6ad-9eba49a0b9ab',
-      date: new Date('2025-09-30T00:00:00Z'),
+      date: new Date('2024-09-30T00:00:00Z'),
       hours: 0.5,
       description: 'Code review collaboration',
       category: 'Collaboration'

@@ -6,14 +6,20 @@
       <div class="day-date">{{ date | date : "d MMM yyyy" }}</div>
     </div>
     <div class="col-1">
+      @if (isWithinLastThreeWeeks) {
       <button
+        #addEntryBtn
         type="button"
         class="add-entry-btn"
         (click)="openTimeSheetEntryCrudModal()"
         aria-label="Add time sheet entry"
+        data-bs-toggle="tooltip"
+        data-bs-placement="top"
+        title="Add Entry"
       >
         <i class="bi bi-plus"></i>
       </button>
+      }
     </div>
     <div class="col-9">
       <div class="align-items-center">

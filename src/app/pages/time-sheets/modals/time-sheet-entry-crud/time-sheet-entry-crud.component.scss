@@ -7,6 +7,10 @@
   color: var(--color-primary-contrast);
 }
 
+.modal-body {
+  background-color: var(--color-surface);
+}
+
 .modal-header .btn-close {
   border-radius: 50%;
   width: 32px;
@@ -35,6 +39,11 @@
   color: var(--text-muted);
 }
 
+.input-with-icon:has(textarea) i {
+  top: 1rem;
+  transform: none;
+}
+
 .form-control {
   height: 52px;
   padding-left: 45px;
@@ -42,6 +51,14 @@
   background-color: var(--color-surface);
   color: var(--text-primary);
   border: 1px solid var(--color-border);
+}
+
+.form-control:is(textarea) {
+  height: auto;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  resize: vertical;
+  min-height: 80px;
 }
 
 /* Project dropdown styles */
@@ -139,7 +156,7 @@
 .hours-range-wrapper {
   position: relative;
   width: 100%;
-  max-width: 400px;
+  max-width: 500px;
   padding: 0.5rem 0;
   display: flex;
   align-items: center;
@@ -218,17 +235,12 @@
   opacity: 0;
   transition: opacity 0.2s ease;
   z-index: 10;
+  min-width: 80px;
+  width: 80px;
+  text-align: center;
 }
 
-.hours-tooltip::after {
-  content: '';
-  position: absolute;
-  left: 100%;
-  top: 50%;
-  transform: translateY(-50%);
-  border: 5px solid transparent;
-  border-left-color: var(--primary-color);
-}
+
 
 .hours-tooltip.visible {
   opacity: 1;
@@ -244,6 +256,42 @@
   text-align: center;
   font-weight: 500;
   font-size: 1rem;
+}
+
+/* Category autocomplete dropdown styles */
+.category-autocomplete {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  margin-top: 0.25rem;
+  max-height: 200px;
+  overflow-y: auto;
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.category-autocomplete .dropdown-item {
+  color: var(--text-primary);
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+
+.category-autocomplete .dropdown-item::hover {
+  background-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
+.category-autocomplete .dropdown-item:hover,
+.category-autocomplete .dropdown-item:focus {
+  background-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+  color: var(--text-primary);
 }
 
 /* Modal footer button styles */
