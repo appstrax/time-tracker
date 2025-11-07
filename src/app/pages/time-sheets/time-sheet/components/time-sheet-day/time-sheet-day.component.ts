@@ -36,6 +36,8 @@ export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit, 
 
   isAddEntryButtonVisible: boolean = false;
 
+  private readonly MAX_WEEKS_BACK_FOR_ADD_ENTRY: number = 3;
+
   @ViewChild('addEntryBtn', { static: false }) addEntryBtn?: ElementRef<HTMLButtonElement>;
 
   constructor(
@@ -46,7 +48,7 @@ export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit, 
 
   async ngOnInit(): Promise<void> {
     this.user = await appstraxAuth.getUser();
-    this.checkIfWithinLastNumberOfWeeks(3);
+    this.checkIfWithinLastNumberOfWeeks();
   }
 
   ngOnDestroy(): void {
@@ -61,11 +63,11 @@ export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit, 
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['date']) {
-      this.checkIfWithinLastNumberOfWeeks(3);
+      this.checkIfWithinLastNumberOfWeeks();
     }
   }
 
-  checkIfWithinLastNumberOfWeeks(numberOfWeeks: number): void {
+  checkIfWithinLastNumberOfWeeks(): void {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -75,7 +77,7 @@ export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit, 
     currentWeekStart.setUTCHours(0, 0, 0, 0);
 
     const threeWeeksAgoStart = new Date(currentWeekStart);
-    threeWeeksAgoStart.setUTCDate(currentWeekStart.getUTCDate() - ((numberOfWeeks - 1) * 7));
+    threeWeeksAgoStart.setUTCDate(currentWeekStart.getUTCDate() - ((this.MAX_WEEKS_BACK_FOR_ADD_ENTRY - 1) * 7));
 
     const currentWeekEnd = new Date(currentWeekStart);
     currentWeekEnd.setUTCDate(currentWeekStart.getUTCDate() + 6);
