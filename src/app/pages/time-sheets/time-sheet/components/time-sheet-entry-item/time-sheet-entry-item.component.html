@@ -1,0 +1,10 @@
+<div
+  #tooltipElement
+  class="entry-log-item"
+  (click)="onClick()"
+  [attr.title]="getTooltipContent()"
+  [ngStyle]="{
+    width: width + 'px',
+    backgroundColor: categoryColor,
+  }"
+></div>

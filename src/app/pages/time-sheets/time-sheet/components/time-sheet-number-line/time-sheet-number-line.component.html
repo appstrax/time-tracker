@@ -2,18 +2,13 @@
 <div class="time-sheet">
   <div class="d-flex no-wrap">
     @for (entry of workHours.keys(); track entry.id) {
-    <div
-      #tooltipElement
-      class="entry-log-item"
-      (click)="openEntryLogItem(entry)"
-      [attr.data-bs-toggle]="'tooltip'"
-      [attr.data-bs-html]="'true'"
-      [attr.title]="getTooltipContent(entry)"
-      [ngStyle]="{
-        width: workHours.get(entry) + 'px',
-        backgroundColor: getCategoryColor(entry),
-       }"
-    ></div>
+    <app-time-sheet-entry-item
+      [entry]="entry"
+      [width]="workHours.get(entry) || 0"
+      [categoryColor]="getCategoryColor(entry)"
+      [project]="getProject(entry)"
+      (onEntryClick)="openEntryLogItem($event)"
+    ></app-time-sheet-entry-item>
     }
   </div>
   <div class="d-flex entry-log align-items-start number-line">

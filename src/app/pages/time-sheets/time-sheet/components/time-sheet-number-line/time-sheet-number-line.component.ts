@@ -1,82 +1,34 @@
 import { NgStyle } from '@angular/common';
-import { Component, Input, OnInit, AfterViewInit, OnDestroy, ViewChildren, QueryList, ElementRef, EventEmitter, Output, Signal, SimpleChanges } from '@angular/core';
+import { Component, Input, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
 import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
-import { Tooltip } from 'bootstrap';
-import { Subscription } from 'rxjs';
 import { Project } from 'src/app/models/project.model';
+import { TimeSheetEntryItemComponent } from '../time-sheet-entry-item/time-sheet-entry-item.component';
 
 @Component({
   selector: 'app-time-sheet-number-line',
-  imports: [NgStyle],
+  imports: [NgStyle, TimeSheetEntryItemComponent],
   standalone: true,
   templateUrl: './time-sheet-number-line.component.html',
   styleUrl: './time-sheet-number-line.component.scss'
 })
-export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDestroy {
+export class TimeSheetNumberLineComponent implements OnInit {
   @Input() entries: TimeSheetEntry[] = [];
   @Input() categoryColors: Map<string, string> = new Map<string, string>();
   @Input() projects: Project[] = [];
 
   @Output() onEntryClick: EventEmitter<TimeSheetEntry> = new EventEmitter<TimeSheetEntry>();
 
-  @ViewChildren('tooltipElement') tooltipElements!: QueryList<ElementRef<HTMLElement>>;
-
   public workHours: Map<TimeSheetEntry, number> = new Map<TimeSheetEntry, number>();
   public modifier = 20;
-  private tooltips: Tooltip[] = [];
-  private tooltipSubscription?: Subscription;
-
 
   ngOnInit() {
     this.calculateSize();
-  }
-
-  ngAfterViewInit() {
-    this.initializeTooltips();
-    this.tooltipSubscription = this.tooltipElements.changes.subscribe(() => {
-      this.initializeTooltips();
-    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['entries']) {
       this.calculateSize();
     }
-  }
-
-  disposeTooltips() {
-    this.tooltips.forEach((tooltip) => tooltip.dispose());
-    this.tooltips = [];
-  }
-
-  initializeTooltips() {
-    this.disposeTooltips();
-
-    this.tooltipElements.forEach((elementRef) => {
-      const tooltip = new Tooltip(elementRef.nativeElement, {
-        html: true,
-        placement: 'top',
-        trigger: 'hover',
-        fallbackPlacements: ['top', 'bottom']
-      });
-      elementRef.nativeElement.addEventListener('click', () => {
-        tooltip.hide();
-      });
-      this.tooltips.push(tooltip);
-    });
-  }
-
-  getTooltipContent(entry: TimeSheetEntry): string {
-    let hours = Math.floor(entry.hours);
-    let minutes = (entry.hours - hours) * 60;
-    return `
-      <div style="text-align: left;">
-        <strong>Project:</strong> ${this.getProjectName(entry) || 'N/A'}<br>
-        <strong>Category:</strong> ${entry.category || 'N/A'}<br>
-        <strong>Description:</strong><br> ${entry.description || 'N/A'}<br>
-        <strong>Hours:</strong> ${hours}h ${minutes}m
-      </div>
-    `;
   }
 
   calculateSize() {
@@ -89,7 +41,7 @@ export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDe
 
   getCategoryColor(entry: TimeSheetEntry): string {
 
-    return this.categoryColors.get(entry.category ?? '') || '#6B7280'; 
+    return this.categoryColors.get(entry.category ?? '') || '#6B7280';
   }
 
   getNumberLineValue(i: number) {
@@ -129,12 +81,7 @@ export class TimeSheetNumberLineComponent implements OnInit, AfterViewInit, OnDe
     this.onEntryClick.emit(entry);
   }
 
-  getProjectName(entry: TimeSheetEntry): string {
-    return this.projects?.find(project => project.id === entry.projectId)?.name ?? 'N/A';
-  }
-
-  ngOnDestroy() {
-    this.tooltipSubscription?.unsubscribe();
-    this.disposeTooltips();
+  getProject(entry: TimeSheetEntry): Project | undefined {
+    return this.projects?.find(project => project.id === entry.projectId);
   }
 }
