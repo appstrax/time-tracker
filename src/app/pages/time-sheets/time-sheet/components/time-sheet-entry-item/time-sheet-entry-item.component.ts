@@ -1,21 +1,23 @@
-import { NgStyle } from '@angular/common';
-import { Component, Input, OnInit, AfterViewInit, OnDestroy, ElementRef, ViewChild, EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
-import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
 import { Tooltip } from 'bootstrap';
-import { Project } from 'src/app/models/project.model';
+import { NgStyle } from '@angular/common';
+import { Component, Input, AfterViewInit } from '@angular/core';
+import { OnDestroy, ElementRef, ViewChild } from '@angular/core';
+import { EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
+
+import { TimeSheetEntry, Project } from '@models';
 
 @Component({
   selector: 'app-time-sheet-entry-item',
-  imports: [NgStyle],
   standalone: true,
   templateUrl: './time-sheet-entry-item.component.html',
-  styleUrl: './time-sheet-entry-item.component.scss'
+  styleUrl: './time-sheet-entry-item.component.scss',
+  imports: [NgStyle]
 })
 export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, OnChanges {
-  @Input() entry!: TimeSheetEntry;
   @Input() width: number = 0;
-  @Input() categoryColor: string = '#6B7280';
   @Input() project?: Project;
+  @Input() entry!: TimeSheetEntry;
+  @Input() categoryColor: string = '#6B7280';
 
   @Output() onEntryClick: EventEmitter<TimeSheetEntry> = new EventEmitter<TimeSheetEntry>();
 
@@ -24,63 +26,47 @@ export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, On
   private tooltip?: Tooltip;
   private viewInitialized: boolean = false;
 
-  ngAfterViewInit() {
+  ngAfterViewInit(): void {
     this.viewInitialized = true;
     this.initializeTooltip();
   }
 
-  ngOnChanges(changes: SimpleChanges) {
+  ngOnChanges(changes: SimpleChanges): void {
     if (this.viewInitialized && (changes['entry'] || changes['project']) && this.tooltipElement) {
-      setTimeout(() => {
-        this.updateTooltip();
-      }, 0);
+      this.updateTooltip();
     }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.disposeTooltip();
   }
 
-  private initializeTooltip() {
+  private initializeTooltip(): void {
     if (!this.tooltipElement) return;
-
-    this.disposeTooltip();
-
-    this.tooltip = new Tooltip(this.tooltipElement.nativeElement, {
+    const element = this.tooltipElement.nativeElement;
+    const tooltipContent = this.getTooltipContent();
+    this.tooltip = new Tooltip(element, {
       html: true,
       placement: 'top',
       trigger: 'hover',
-      fallbackPlacements: ['top', 'bottom']
+      fallbackPlacements: ['top', 'bottom'],
+      title: tooltipContent
     });
-
-    this.tooltipElement.nativeElement.addEventListener('click', () => {
+    element.removeAttribute('title');
+    element.addEventListener('click', () => {
       this.tooltip?.hide();
     });
   }
 
-  private updateTooltip() {
+  private updateTooltip(): void {
     if (!this.tooltip || !this.tooltipElement) return;
-    const newContent = this.getTooltipContent();
-    this.tooltipElement.nativeElement.setAttribute('title', newContent);
-    try {
-      if (typeof (this.tooltip as any).setContent === 'function') {
-        (this.tooltip as any).setContent({ '.tooltip-inner': newContent });
-      } else {
-        this.disposeTooltip();
-        this.initializeTooltip();
-      }
-    } catch (e) {
-      this.disposeTooltip();
-      this.initializeTooltip();
-    }
+    this.disposeTooltip();
+    this.initializeTooltip();
   }
 
-  private disposeTooltip() {
+  private disposeTooltip(): void {
     if (this.tooltip) {
-      try {
-        this.tooltip.dispose();
-      } catch (e) {
-      }
+      this.tooltip.dispose();
       this.tooltip = undefined;
     }
   }
@@ -98,7 +84,7 @@ export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, On
     `;
   }
 
-  onClick() {
+  onClick(): void {
     this.onEntryClick.emit(this.entry);
   }
 }

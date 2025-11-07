@@ -2,27 +2,26 @@
 <div class="time-sheet">
   <div class="d-flex no-wrap">
     @for (entry of workHours.keys(); track entry.id) {
-    <app-time-sheet-entry-item
-      [entry]="entry"
-      [width]="workHours.get(entry) || 0"
-      [categoryColor]="getCategoryColor(entry)"
-      [project]="getProject(entry)"
-      (onEntryClick)="openEntryLogItem($event)"
-    ></app-time-sheet-entry-item>
+      <app-time-sheet-entry-item
+        [entry]="entry"
+        [width]="workHours.get(entry) || 0"
+        [categoryColor]="getCategoryColor(entry)"
+        [project]="getProject(entry)"
+        (onEntryClick)="openEntryLogItem($event)"
+      ></app-time-sheet-entry-item>
     }
   </div>
   <div class="d-flex entry-log align-items-start number-line">
     @for (i of createNumberLineArray(); track i) {
-    <div
-      class="number-line-item"
-      [ngStyle]="{
-              width: modifier + 'px',
-              height: getNumberLineHeight(i),
-
-            }"
-    >
-      {{ getNumberLineValue(i) }}
-    </div>
+      <div
+        class="number-line-item"
+        [ngStyle]="{
+          width: sizeModifier + 'px',
+          height: getNumberLineHeight(i)
+        }"
+      >
+        {{ getNumberLineValue(i) }}
+      </div>
     }
   </div>
 </div>

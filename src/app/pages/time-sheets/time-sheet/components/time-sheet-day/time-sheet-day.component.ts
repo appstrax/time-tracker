@@ -1,13 +1,18 @@
+import { Tooltip } from 'bootstrap';
 import { DatePipe } from '@angular/common';
-import { Component, EventEmitter, Input, OnInit, Output, Signal, OnChanges, SimpleChanges, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
+import { OnInit, Output, OnChanges } from '@angular/core'
+import { SimpleChanges, AfterViewInit } from '@angular/core'
+import { appstraxAuth, User } from '@appstrax/services/auth';
+import { Component, EventEmitter, Input } from '@angular/core'
+import { ViewChild, ElementRef, OnDestroy } from '@angular/core';
+
+import { Project, TimeSheetEntry } from '@models';
+import { TimeSheetEntryService, ToastService } from '@services';
+
+
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
 import { TimeSheetEntryCrudOptions } from '../../../modals/time-sheet-entry-crud/time-sheet-entry-crud.component';
 import { ModalService } from 'src/app/services/modal.service';
-import { appstraxAuth, User } from '@appstrax/services/auth';
-import { Project } from '@models';
-import { TimeSheetEntryService } from 'src/app/services/time-sheet-entry.service';
-import { Tooltip } from 'bootstrap';
 
 @Component({
   selector: 'app-time-sheet-day',
@@ -16,30 +21,36 @@ import { Tooltip } from 'bootstrap';
   styleUrl: './time-sheet-day.component.scss',
   imports: [TimeSheetNumberLineComponent, DatePipe]
 })
-export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit {
+export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit, OnDestroy {
 
   @Input() date: Date = new Date();
-  @Input() entries: TimeSheetEntry[] = [];
-  @Input() categoryColors: Map<string, string> = new Map<string, string>();
-  @Input() availableCategories: string[] = [];
-
   @Input() projects: Project[] = [];
+  @Input() entries: TimeSheetEntry[] = [];
+  @Input() availableCategories: string[] = [];
+  @Input() categoryColors: Map<string, string> = new Map<string, string>();
+
   @Output() onSave: EventEmitter<TimeSheetEntry> = new EventEmitter<TimeSheetEntry>();
 
-  user: User | null = null;
-  isWithinLastThreeWeeks: boolean = false;
+  private user: User | null = null;
   private addEntryTooltip?: Tooltip;
+
+  isAddEntryButtonVisible: boolean = false;
 
   @ViewChild('addEntryBtn', { static: false }) addEntryBtn?: ElementRef<HTMLButtonElement>;
 
   constructor(
     private modalService: ModalService,
+    private toastService: ToastService,
     private timeSheetEntryService: TimeSheetEntryService,
   ) { }
 
   async ngOnInit(): Promise<void> {
     this.user = await appstraxAuth.getUser();
     this.checkIfWithinLastNumberOfWeeks(3);
+  }
+
+  ngOnDestroy(): void {
+    this.addEntryTooltip?.dispose();
   }
 
   ngAfterViewInit(): void {
@@ -70,22 +81,26 @@ export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit {
     currentWeekEnd.setUTCDate(currentWeekStart.getUTCDate() + 6);
     currentWeekEnd.setUTCHours(23, 59, 59, 999);
 
-    this.isWithinLastThreeWeeks = this.date >= threeWeeksAgoStart && this.date <= currentWeekEnd;
+    this.isAddEntryButtonVisible = this.date >= threeWeeksAgoStart && this.date <= currentWeekEnd;
   }
 
 
-  async saveTimeSheetEntry(timeSheetEntry: TimeSheetEntry) {
-    timeSheetEntry = await this.timeSheetEntryService.save(timeSheetEntry);
-    this.onSave.emit(timeSheetEntry);
+  async saveTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
+    try {
+      timeSheetEntry = await this.timeSheetEntryService.save(timeSheetEntry);
+      this.onSave.emit(timeSheetEntry);
+    } catch (error) {
+      this.toastService.error('Error saving time sheet entry');
+    }
   }
 
 
-  openTimeSheetEntryCrudModal(timeSheetEntry?: TimeSheetEntry | undefined) {
+  openTimeSheetEntryCrudModal(timeSheetEntry?: TimeSheetEntry | undefined): void {
     const options = this.getTimeSheetEntryCrudOptions(timeSheetEntry);
     this.modalService.showTimeSheetEntryCrudModal(options);
   }
 
-  getTimeSheetEntryCrudOptions(timeSheetEntry?: TimeSheetEntry | undefined) {
+  getTimeSheetEntryCrudOptions(timeSheetEntry?: TimeSheetEntry | undefined): TimeSheetEntryCrudOptions {
     const options = new TimeSheetEntryCrudOptions();
     if (!timeSheetEntry) {
       timeSheetEntry = new TimeSheetEntry();
@@ -99,7 +114,7 @@ export class TimeSheetDayComponent implements OnInit, OnChanges, AfterViewInit {
     return options;
   }
 
-  onEntryClick(entry: TimeSheetEntry) {
+  onEntryClick(entry: TimeSheetEntry): void {
     this.openTimeSheetEntryCrudModal(entry);
   }
 }

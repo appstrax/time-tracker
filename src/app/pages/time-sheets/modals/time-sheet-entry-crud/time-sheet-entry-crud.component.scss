@@ -337,3 +337,8 @@
   filter: brightness(0.95);
   color: var(--color-primary-contrast);
 }
+
+/* Error message styling - preserve whitespace */
+.alert-danger {
+  white-space: pre-line;
+}

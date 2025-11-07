@@ -1,36 +1,36 @@
 @if (projects.length > 0) {
-<div class="time-sheet-day-section">
-  <div class="d-flex align-items-center">
-    <div class="col-2">
-      <div class="time-sheet-day-title">{{ date | date : "EEEE" }}</div>
-      <div class="day-date">{{ date | date : "d MMM yyyy" }}</div>
-    </div>
-    <div class="col-1">
-      @if (isWithinLastThreeWeeks) {
-      <button
-        #addEntryBtn
-        type="button"
-        class="add-entry-btn"
-        (click)="openTimeSheetEntryCrudModal()"
-        aria-label="Add time sheet entry"
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title="Add Entry"
-      >
-        <i class="bi bi-plus"></i>
-      </button>
-      }
-    </div>
-    <div class="col-9">
-      <div class="align-items-center">
-        <app-time-sheet-number-line
-          (onEntryClick)="onEntryClick($event)"
-          [projects]="projects"
-          [entries]="entries"
-          [categoryColors]="categoryColors"
-        ></app-time-sheet-number-line>
+  <div class="time-sheet-day-section">
+    <div class="d-flex align-items-center">
+      <div class="col-2">
+        <div class="time-sheet-day-title">{{ date | date : "EEEE" }}</div>
+        <div class="day-date">{{ date | date : "d MMM yyyy" }}</div>
+      </div>
+      <div class="col-1">
+        @if (isAddEntryButtonVisible) {
+          <button
+            #addEntryBtn
+            type="button"
+            class="add-entry-btn"
+            (click)="openTimeSheetEntryCrudModal()"
+            aria-label="Add time sheet entry"
+            data-bs-toggle="tooltip"
+            data-bs-placement="top"
+            title="Add Entry"
+          >
+            <i class="bi bi-plus"></i>
+          </button>
+        }
+      </div>
+      <div class="col-9">
+        <div class="align-items-center">
+          <app-time-sheet-number-line
+            (onEntryClick)="onEntryClick($event)"
+            [projects]="projects"
+            [entries]="entries"
+            [categoryColors]="categoryColors"
+          ></app-time-sheet-number-line>
+        </div>
       </div>
     </div>
   </div>
-</div>
 }

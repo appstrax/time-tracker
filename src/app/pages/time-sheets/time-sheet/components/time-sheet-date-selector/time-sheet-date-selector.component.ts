@@ -10,7 +10,7 @@ import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
 export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
   @Input() timeSheetEntries: TimeSheetEntry[] = [];
   @Output() weekChange = new EventEmitter<{ start: Date; end: Date }>();
-  
+
   public currentWeekStart: Date = new Date();
   public currentWeekEnd: Date = new Date();
   private availableWeeks: Set<string> = new Set();
@@ -35,27 +35,26 @@ export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    
+
     this.currentWeekStart = new Date(today);
     this.currentWeekStart.setUTCDate(today.getUTCDate() + diff);
     this.currentWeekStart.setUTCHours(0, 0, 0, 0);
-    
+
     this.currentWeekEnd = new Date(this.currentWeekStart);
     this.currentWeekEnd.setUTCDate(this.currentWeekStart.getUTCDate() + 6);
     this.currentWeekEnd.setUTCHours(0, 0, 0, 0);
   }
 
-  calculateAvailableWeeks(): void {
+  calculateAvailableWeeks(numberOfWeeks: number = 3): void {
     this.availableWeeks.clear();
     const weeksSet = new Set<string>();
     const weeksList: Date[] = [];
-    
-    // Add last 3 weeks
     const today = new Date();
+
     const dayOfWeek = today.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-    
-    for (let i = 0; i < 3; i++) {
+
+    for (let i = 0; i < numberOfWeeks; i++) {
       const weekStart = new Date(today);
       weekStart.setUTCDate(today.getUTCDate() + diff - (i * 7));
       weekStart.setUTCHours(0, 0, 0, 0);
@@ -65,25 +64,25 @@ export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
         weeksList.push(weekStart);
       }
     }
-    
+
     this.timeSheetEntries.forEach(entry => {
       const entryDate = new Date(entry.date);
       const entryDayOfWeek = entryDate.getUTCDay();
       const entryDiff = entryDayOfWeek === 0 ? -6 : 1 - entryDayOfWeek;
-      
+
       const entryWeekStart = new Date(entryDate);
       entryWeekStart.setUTCDate(entryDate.getUTCDate() + entryDiff);
       entryWeekStart.setUTCHours(0, 0, 0, 0);
-      
+
       const weekKey = this.getWeekKey(entryWeekStart);
       if (!weeksSet.has(weekKey)) {
         weeksSet.add(weekKey);
         weeksList.push(entryWeekStart);
       }
     });
-    
+
     weeksList.sort((a, b) => a.getTime() - b.getTime());
-    
+
     this.availableWeeks = weeksSet;
     this.availableWeeksList = weeksList;
     this.updateCurrentWeekIndex();
@@ -117,31 +116,26 @@ export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
 
   updateCurrentWeekIndex(): void {
     const currentWeekKey = this.getWeekKey(this.currentWeekStart);
-    this.currentWeekIndex = this.availableWeeksList.findIndex(week => 
+    this.currentWeekIndex = this.availableWeeksList.findIndex(week =>
       this.getWeekKey(week) === currentWeekKey
     );
   }
 
   findNearestAvailableWeek(fromWeek: Date): Date | null {
-    for (let i = 1; i <= 52; i++) {
-      const forwardWeek = new Date(fromWeek);
-      forwardWeek.setUTCDate(fromWeek.getUTCDate() + (i * 7));
-      forwardWeek.setUTCHours(0, 0, 0, 0);
-      if (this.isWeekAvailable(forwardWeek)) {
-        return forwardWeek;
+    if (this.availableWeeksList.length === 0) {
+      return null;
+    }
+    const fromTime = fromWeek.getTime();
+    let nearestWeek: Date | null = null;
+    let minDiff = Infinity;
+    for (const week of this.availableWeeksList) {
+      const diff = Math.abs(week.getTime() - fromTime);
+      if (diff < minDiff) {
+        minDiff = diff;
+        nearestWeek = week;
       }
     }
-    
-    for (let i = 1; i <= 52; i++) {
-      const backwardWeek = new Date(fromWeek);
-      backwardWeek.setUTCDate(fromWeek.getUTCDate() - (i * 7));
-      backwardWeek.setUTCHours(0, 0, 0, 0);
-      if (this.isWeekAvailable(backwardWeek)) {
-        return backwardWeek;
-      }
-    }
-    
-    return null;
+    return nearestWeek ? new Date(nearestWeek) : null;
   }
 
   previousWeek(): void {
