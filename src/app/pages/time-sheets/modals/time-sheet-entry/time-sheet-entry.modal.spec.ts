@@ -1,6 +1,6 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TimeSheetEntryCrudComponent } from './time-sheet-entry-crud.component';
+import { TimeSheetEntryCrudComponent } from './time-sheet-entry.modal';
 
 describe('TimeSheetEntryCrudComponent', () => {
   let component: TimeSheetEntryCrudComponent;

@@ -6,16 +6,16 @@
     ></app-time-sheet-date-selector>
     <div class="week-days-container">
       @for (day of weekDays; track day.getTime()) {
-        <div class="day-selector-wrapper">
-          <app-time-sheet-day
-            [date]="day"
-            [projects]="projects()"
-            [entries]="filterEntriesByDate(day)"
-            [categoryColors]="categoryColors"
-            [availableCategories]="getAvailableCategories()"
-            (onSave)="onTimeSheetEntrySaved($event)"
-          ></app-time-sheet-day>
-        </div>
+      <div class="day-selector-wrapper">
+        <app-time-sheet-day
+          [date]="day"
+          [projects]="projects()"
+          [entries]="filterEntriesByDate(day)"
+          [categoryColors]="categoryColors"
+          [categories]="getTimeSheetCategories()"
+          (onSave)="onTimeSheetEntrySaved($event)"
+        ></app-time-sheet-day>
+      </div>
       }
     </div>
   </section>

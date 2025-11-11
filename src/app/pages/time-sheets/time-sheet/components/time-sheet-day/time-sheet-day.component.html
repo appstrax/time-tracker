@@ -11,7 +11,7 @@
             #addEntryBtn
             type="button"
             class="add-entry-btn"
-            (click)="openTimeSheetEntryCrudModal()"
+            (click)="openTimeSheetEntryModal()"
             aria-label="Add time sheet entry"
             data-bs-toggle="tooltip"
             data-bs-placement="top"
@@ -24,7 +24,7 @@
       <div class="col-9">
         <div class="align-items-center">
           <app-time-sheet-number-line
-            (onEntryClick)="onEntryClick($event)"
+            (onEntryClick)="openTimeSheetEntryModal($event)"
             [projects]="projects"
             [entries]="entries"
             [categoryColors]="categoryColors"

@@ -5,7 +5,7 @@ import {
   NgbModalRef,
   NgbModalOptions,
 } from '@ng-bootstrap/ng-bootstrap';
-import { TimeSheetEntryCrudComponent, TimeSheetEntryCrudOptions } from '../pages/time-sheets/modals/time-sheet-entry-crud/time-sheet-entry-crud.component';
+import { TimeSheetEntryCrudComponent, TimeSheetEntryModalOptions } from '../pages/time-sheets/modals/time-sheet-entry/time-sheet-entry.modal';
 
 
 @Injectable({ providedIn: 'root' })
@@ -30,13 +30,13 @@ export class ModalService {
     this.modalRef.dismiss();
   }
 
-  public showTimeSheetEntryCrudModal(options: TimeSheetEntryCrudOptions): NgbModalRef {
+  public showTimeSheetEntryModal(options: TimeSheetEntryModalOptions): NgbModalRef {
     const modalRef = this.modalService.open(TimeSheetEntryCrudComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: true
     });
-    modalRef.componentInstance.options = options;
+    Object.assign(modalRef.componentInstance, options);
     return modalRef;
   }
 

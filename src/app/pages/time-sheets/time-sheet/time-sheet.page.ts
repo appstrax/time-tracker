@@ -77,7 +77,7 @@ export class TimeSheetPage implements OnInit {
   }
 
   initializeCategoryColors(): void {
-    const categories = this.getAvailableCategories();
+    const categories = this.getTimeSheetCategories();
     for (let i = 0; i < categories.length; i++) {
       this.categoryColors.set(categories[i], ColorList.colors[i]);
     }
@@ -105,7 +105,7 @@ export class TimeSheetPage implements OnInit {
     return filteredEntries;
   }
 
-  getAvailableCategories(): string[] {
+  getTimeSheetCategories(): string[] {
     return [...new Set(this.timeSheetEntries.map(entry => entry.category))];
   }
 }

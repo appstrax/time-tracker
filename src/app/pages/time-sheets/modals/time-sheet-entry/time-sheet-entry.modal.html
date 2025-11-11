@@ -5,7 +5,7 @@
 
 <div class="modal-body">
   <ng-container>
-    <div class="project-dropdown form-group" [class.show]="isProjectMenuOpen">
+    <div class="project-dropdown form-group" [class.show]="isProjectDropdownOpen">
       <button
         type="button"
         class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between form-select"
@@ -31,20 +31,20 @@
         </span>
         <i
           class="bi"
-          [ngClass]="isProjectMenuOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
+          [ngClass]="isProjectDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
         ></i>
       </button>
       <ul
         class="dropdown-menu dropdown-menu-end w-100"
-        [class.show]="isProjectMenuOpen"
-        [attr.data-bs-popper]="isProjectMenuOpen ? 'static' : null"
+        [class.show]="isProjectDropdownOpen"
+        [attr.data-bs-popper]="isProjectDropdownOpen ? 'static' : null"
       >
         @for (project of projects(); track project.id) {
         <li>
           <button
             class="dropdown-item d-flex align-items-center gap-2"
             type="button"
-            (click)="selectProject(project)"
+            (click)="onProjectSelected(project)"
             [class.active]="selectedProject?.id === project.id"
           >
             @if (project.logoUrl) {
