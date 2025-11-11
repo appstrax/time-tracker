@@ -176,3 +176,111 @@ body::-webkit-scrollbar-thumb {
 body::-webkit-scrollbar-thumb:hover {
   background-color: color-mix(in srgb, var(--color-border) 80%, transparent);
 }
+
+
+.input-with-icon {
+  position: relative;
+}
+
+.input-with-icon i {
+  position: absolute;
+  left: 15px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+}
+
+.input-with-icon:has(textarea) i {
+  top: 1rem;
+  transform: none;
+}
+
+.form-control {
+  height: 52px;
+  padding-left: 45px;
+  border-radius: 6px;
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+  border: 1px solid var(--color-border);
+}
+
+.form-control:is(textarea) {
+  height: auto;
+  padding-top: 0.75rem;
+  padding-bottom: 0.75rem;
+  resize: vertical;
+  min-height: 80px;
+}
+
+/* Modal footer button styles */
+.modal-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 0.75rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--color-border);
+  background-color: var(--color-surface);
+}
+
+.modal-footer .btn {
+  min-width: 100px;
+  height: 40px;
+  font-weight: 500;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s ease;
+}
+
+.modal-footer .btn-outline-secondary {
+  border-color: var(--color-border);
+  color: var(--text-primary);
+  background-color: var(--color-surface);
+}
+
+.modal-footer .btn-outline-secondary:hover {
+  background-color: var(--color-border);
+  border-color: var(--color-border);
+  color: var(--text-primary);
+}
+
+.modal-footer .btn-primary {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: var(--color-primary-contrast);
+}
+
+.modal-footer .btn-primary:hover {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  filter: brightness(0.95);
+  color: var(--color-primary-contrast);
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+.modal-header {
+  background-color: var(--primary-color);
+  color: var(--color-primary-contrast);
+}
+
+.modal-body {
+  background-color: var(--color-surface);
+}
+
+.modal-header .btn-close {
+  border-radius: 50%;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0.8;
+  transition: opacity 0.2s ease, background-color 0.2s ease;
+}
+
+.modal-header .btn-close:hover {
+  opacity: 1;
+  background-color: rgba(255, 255, 255, 0.1);
+}

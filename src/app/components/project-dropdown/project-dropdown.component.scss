@@ -1,0 +1,79 @@
+/* Project dropdown styles */
+.project-dropdown {
+    position: relative;
+  }
+  
+  .project-dropdown .dropdown-toggle {
+    height: 52px;
+    border-radius: 6px;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-surface);
+    color: var(--text-primary);
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .project-dropdown .dropdown-toggle::after {
+    display: none;
+  }
+  
+  .project-dropdown .dropdown-toggle:hover,
+  .project-dropdown .dropdown-toggle:focus,
+  .project-dropdown .dropdown-toggle:active {
+    background-color: var(--color-surface);
+    color: var(--text-primary);
+    border-color: var(--color-border);
+    box-shadow: none;
+  }
+  
+  .project-dropdown .dropdown-toggle i {
+    color: var(--text-primary);
+  }
+  
+  .project-dropdown .dropdown-menu {
+    border-radius: 6px;
+    background-color: var(--color-surface);
+    border: 1px solid var(--color-border);
+    max-height: 300px;
+    overflow-y: auto;
+  }
+  
+  /* Project thumbnail styling - matches project-selector */
+  .proj-thumb {
+    width: 24px;
+    height: 24px;
+    object-fit: cover;
+    border-radius: 15px;
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+  
+  .proj-thumb:hover {
+    transform: scale(1.05);
+  }
+  
+  .proj-thumb-fallback {
+    font-size: 16px;
+    width: 24px;
+    height: 24px;
+    border-radius: 15px;
+    background-color: var(--color-border);
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    color: var(--text-muted);
+    transition: background-color 0.2s ease, transform 0.2s ease;
+  }
+  
+  .project-dropdown .dropdown-item {
+    color: var(--text-primary);
+    padding: 0.375rem 0.75rem;
+  }
+  
+  .project-dropdown .dropdown-item:hover,
+  .project-dropdown .dropdown-item:focus,
+  .project-dropdown .dropdown-item:active,
+  .project-dropdown .dropdown-item.active {
+    color: var(--text-primary);
+    background-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+  }

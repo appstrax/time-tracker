@@ -1,69 +1,19 @@
 <div class="modal-header align-items-center d-flex justify-content-between">
   <h4 class="modal-title text-white mb-0">Time Sheet Entry</h4>
-  <button type="button" class="btn-close btn-close-white" aria-label="Close" (click)="close()"></button>
+  <button
+    type="button"
+    class="btn-close btn-close-white"
+    aria-label="Close"
+    (click)="close()"
+  ></button>
 </div>
 
 <div class="modal-body">
   <ng-container>
-    <div class="project-dropdown form-group" [class.show]="isProjectDropdownOpen">
-      <button
-        type="button"
-        class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between form-select"
-        (click)="toggleProjectMenu()"
-        aria-expanded="isProjectMenuOpen"
-      >
-        <span class="d-flex align-items-center gap-2">
-          @if (selectedProject) { @if (selectedProject.logoUrl) {
-          <img
-            [src]="selectedProject.logoUrl"
-            alt="logo"
-            class="proj-thumb"
-            loading="lazy"
-          />
-          } @else {
-          <i class="bi bi-image proj-thumb-fallback"></i>
-          }
-          <span>{{ selectedProject.name }}</span>
-          } @else {
-          <i class="bi bi-image proj-thumb-fallback"></i>
-          <span>Select a project</span>
-          }
-        </span>
-        <i
-          class="bi"
-          [ngClass]="isProjectDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
-        ></i>
-      </button>
-      <ul
-        class="dropdown-menu dropdown-menu-end w-100"
-        [class.show]="isProjectDropdownOpen"
-        [attr.data-bs-popper]="isProjectDropdownOpen ? 'static' : null"
-      >
-        @for (project of projects(); track project.id) {
-        <li>
-          <button
-            class="dropdown-item d-flex align-items-center gap-2"
-            type="button"
-            (click)="onProjectSelected(project)"
-            [class.active]="selectedProject?.id === project.id"
-          >
-            @if (project.logoUrl) {
-            <img
-              [src]="project.logoUrl"
-              alt="logo"
-              class="proj-thumb"
-              loading="lazy"
-            />
-            } @else {
-            <i class="bi bi-image proj-thumb-fallback"></i>
-            }
-            <span>{{ project.name }}</span>
-          </button>
-        </li>
-        }
-      </ul>
-    </div>
-
+    <app-project-dropdown
+      [selectedProject]="project"
+      (projectSelected)="onProjectSelected($event)"
+    ></app-project-dropdown>
     <div class="form-group">
       <label for="category" class="visually-hidden">Category</label>
       <div class="input-with-icon position-relative">
@@ -91,7 +41,7 @@
             <button
               class="dropdown-item"
               type="button"
-              (mousedown)="selectCategory(category)"
+              (click)="selectCategory(category)"
             >
               {{ category }}
             </button>
@@ -141,11 +91,31 @@
     <div *ngIf="errorMessage" class="alert alert-danger mb-3">
       {{ errorMessage }}
     </div>
-
   </ng-container>
 </div>
 
-<div class="modal-footer">
-  <button type="button" class="btn btn-outline-secondary" (click)="close()">Close</button>
-  <button type="button" class="btn btn-primary" (click)="onSaveTimeSheetEntry()">Save</button>
+<div class="modal-footer d-flex justify-content-between">
+  <div>
+    @if(timeSheetEntry.id){
+    <button
+      type="button"
+      class="btn btn-outline-danger"
+      (click)="onDeleteTimeSheetEntry()"
+    >
+      Delete
+    </button>
+    }
+  </div>
+  <div>
+    <button type="button" class="btn btn-outline-secondary me-3" (click)="close()">
+      Close
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary"
+      (click)="onSaveTimeSheetEntry()"
+    >
+      Save
+    </button>
+  </div>
 </div>

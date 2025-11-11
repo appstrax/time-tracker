@@ -23,12 +23,12 @@ export class TimeSheetDayComponent
 {
   @Input() date: Date = new Date();
   @Input() projects: Project[] = [];
-  @Input() entries: TimeSheetEntry[] = [];
   @Input() categories: string[] = [];
+  @Input() entries: TimeSheetEntry[] = [];
   @Input() categoryColors: Map<string, string> = new Map<string, string>();
 
-  @Output() onSave: EventEmitter<TimeSheetEntry> =
-    new EventEmitter<TimeSheetEntry>();
+  @Output() onSave: EventEmitter<TimeSheetEntry | undefined> =
+    new EventEmitter<TimeSheetEntry | undefined>();
 
   private addEntryTooltip?: Tooltip;
 
@@ -97,6 +97,15 @@ export class TimeSheetDayComponent
     }
   }
 
+  async deleteTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
+    try {
+      await this.timeSheetEntryService.delete(timeSheetEntry.id);
+      this.onSave.emit(undefined);
+    } catch (error) {
+      this.toastService.error('Error deleting time sheet entry');
+    }
+  }
+
   openTimeSheetEntryModal(timeSheetEntry?: TimeSheetEntry): void {
     const options = {
       timeSheetEntry: timeSheetEntry?.clone() || new TimeSheetEntry(),
@@ -106,8 +115,12 @@ export class TimeSheetDayComponent
 
     this.modalService
       .showTimeSheetEntryModal(options)
-      .result.then((result: TimeSheetEntry) => {
-        this.saveTimeSheetEntry(result);
+      .result.then((result: any) => {
+        if(result.action === 'save'){
+          this.saveTimeSheetEntry(result.timeSheetEntry);
+        }else{
+          this.deleteTimeSheetEntry(result.timeSheetEntry);
+        }
       });
   }
 }

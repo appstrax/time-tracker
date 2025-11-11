@@ -3,24 +3,45 @@
     <button
       class="btn btn-outline-secondary btn-primary"
       (click)="previousWeek()"
-      [disabled]="!canGoToPreviousWeek()"
     >
       <span>&lt;</span>
     </button>
 
-    <div class="week-display">
+    <div class="week-display" (click)="openDatePicker()">
+      <input
+        #datePicker
+        type="date"
+        class="date-picker-input"
+        [value]="getDatePickerValue()"
+        (change)="onDateSelected($event)"
+      />
       <span class="week-range-label">{{ currentWeekStart.getFullYear() }}</span>
       <span class="week-range">
         {{ formatDate(currentWeekStart) }} - {{ formatDate(currentWeekEnd) }}
       </span>
     </div>
 
-    <button
-      class="btn btn-outline-secondary btn-primary"
-      (click)="nextWeek()"
-      [disabled]="!canGoToNextWeek()"
-    >
-      <span>&gt;</span>
-    </button>
+    <div class="d-flex align-items-center gap-2">
+      <button
+        class="btn btn-outline-secondary btn-primary"
+        (click)="nextWeek()"
+        [disabled]="!canGoToNextWeek()"
+      >
+        <span>&gt;</span>
+      </button>
+      @if(!isToday()){
+      <button
+        class="btn btn-outline-secondary btn-primary"
+        (click)="goToCurrentWeek()"
+        title="Today"
+      >
+        <span>Today</span>
+      </button>
+    }
+    </div>
+
+  @if(isLoading){
+    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+    }
   </div>
 </div>

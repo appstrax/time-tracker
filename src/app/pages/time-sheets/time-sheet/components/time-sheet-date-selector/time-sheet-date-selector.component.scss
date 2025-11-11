@@ -1,6 +1,7 @@
 .week-selector {
   margin-bottom: 2rem;
-  width: 30%;
+  width: 350px;
+
   padding: 1rem;
   background-color: var(--color-surface);
   border-radius: 8px;
@@ -11,6 +12,27 @@
   flex-direction: column;
   align-items: center;
   gap: 0.25rem;
+  cursor: pointer;
+  position: relative;
+  padding: 0.5rem;
+  border-radius: 10px;
+  transition: background-color 0.2s;
+  
+  &:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+  }
+
+  &:active {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+}
+
+.date-picker-input {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  width: 0;
+  height: 0;
 }
 
 

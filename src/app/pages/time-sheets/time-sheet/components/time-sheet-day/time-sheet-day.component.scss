@@ -2,6 +2,7 @@
     border-radius: 20px;
     box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
     width: 100%;
+    min-width: 200px;
     padding: 2rem 3rem;
     margin-top: 1rem;
     margin-bottom: 2rem;
@@ -12,6 +13,10 @@
     color: var(--primary-color-dark);
     font-size: 1.5rem;
     font-weight: 600;
+  }
+
+  .time-sheet-day-date {
+    width:150px
   }
 
   .time-sheet-day-card .time-sheet-day-title {
@@ -54,4 +59,27 @@
   .add-entry-btn:focus {
     outline: none;
     box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 30%, transparent);
+  }
+
+  @media (max-width: 1200px) {
+  
+    .time-sheet-day-section > .d-flex {
+      flex-flow: row wrap;
+      padding: 5px 10px;
+    }
+    
+    .time-sheet-day-section .col-2,
+    .time-sheet-day-section .col-1 {
+      width: 50%;
+    }
+    
+    .time-sheet-day-section .col-9 {
+      margin-top: 1rem;
+      padding: 0px;
+      margin: 0px;
+    }
+
+    .time-sheet-day-section{
+      padding: 1rem;
+    }
   }

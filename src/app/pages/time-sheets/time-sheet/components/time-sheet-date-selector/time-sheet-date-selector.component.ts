@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input, OnChanges, SimpleChanges } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
 import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
 
 @Component({
@@ -7,29 +7,23 @@ import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
   templateUrl: './time-sheet-date-selector.component.html',
   styleUrl: './time-sheet-date-selector.component.scss'
 })
-export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
+export class TimeSheetDateSelectorComponent implements OnInit {
   @Input() timeSheetEntries: TimeSheetEntry[] = [];
+  @Input() isLoading: boolean = false;
+
   @Output() weekChange = new EventEmitter<{ start: Date; end: Date }>();
+  @ViewChild('datePicker') datePicker?: ElementRef<HTMLInputElement>;
 
   public currentWeekStart: Date = new Date();
   public currentWeekEnd: Date = new Date();
-  private availableWeeks: Set<string> = new Set();
-  private availableWeeksList: Date[] = [];
-  private currentWeekIndex: number = -1;
+  private maxDate: Date = new Date();
 
   ngOnInit(): void {
     this.initializeCurrentWeek();
-    this.calculateAvailableWeeks();
-    this.ensureCurrentWeekIsAvailable();
+    this.calculateDateRange();
     this.emitWeekChange();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['timeSheetEntries'] && !changes['timeSheetEntries'].firstChange) {
-      this.calculateAvailableWeeks();
-      this.ensureCurrentWeekIsAvailable();
-    }
-  }
 
   initializeCurrentWeek(): void {
     const today = new Date();
@@ -45,48 +39,16 @@ export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
     this.currentWeekEnd.setUTCHours(0, 0, 0, 0);
   }
 
-  calculateAvailableWeeks(numberOfWeeks: number = 3): void {
-    this.availableWeeks.clear();
-    const weeksSet = new Set<string>();
-    const weeksList: Date[] = [];
+  calculateDateRange(): void {
     const today = new Date();
-
     const dayOfWeek = today.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
-    for (let i = 0; i < numberOfWeeks; i++) {
-      const weekStart = new Date(today);
-      weekStart.setUTCDate(today.getUTCDate() + diff - (i * 7));
-      weekStart.setUTCHours(0, 0, 0, 0);
-      const weekKey = this.getWeekKey(weekStart);
-      if (!weeksSet.has(weekKey)) {
-        weeksSet.add(weekKey);
-        weeksList.push(weekStart);
-      }
-    }
-
-    this.timeSheetEntries.forEach(entry => {
-      const entryDate = new Date(entry.date);
-      const entryDayOfWeek = entryDate.getUTCDay();
-      const entryDiff = entryDayOfWeek === 0 ? -6 : 1 - entryDayOfWeek;
-
-      const entryWeekStart = new Date(entryDate);
-      entryWeekStart.setUTCDate(entryDate.getUTCDate() + entryDiff);
-      entryWeekStart.setUTCHours(0, 0, 0, 0);
-
-      const weekKey = this.getWeekKey(entryWeekStart);
-      if (!weeksSet.has(weekKey)) {
-        weeksSet.add(weekKey);
-        weeksList.push(entryWeekStart);
-      }
-    });
-
-    weeksList.sort((a, b) => a.getTime() - b.getTime());
-
-    this.availableWeeks = weeksSet;
-    this.availableWeeksList = weeksList;
-    this.updateCurrentWeekIndex();
+    this.maxDate = new Date(today);
+    this.maxDate.setUTCDate(today.getUTCDate() + diff);
+    this.maxDate.setUTCHours(0, 0, 0, 0);
   }
+
 
   getWeekKey(weekStart: Date): string {
     const year = weekStart.getUTCFullYear();
@@ -95,84 +57,28 @@ export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
     return `${year}-${month}-${date}`;
   }
 
-  isWeekAvailable(weekStart: Date): boolean {
-    return this.availableWeeks.has(this.getWeekKey(weekStart));
-  }
-
-  ensureCurrentWeekIsAvailable(): void {
-    if (!this.isWeekAvailable(this.currentWeekStart)) {
-      const nearestWeek = this.findNearestAvailableWeek(this.currentWeekStart);
-      if (nearestWeek) {
-        this.currentWeekStart = nearestWeek;
-        this.currentWeekEnd = new Date(this.currentWeekStart);
-        this.currentWeekEnd.setUTCDate(this.currentWeekStart.getUTCDate() + 6);
-        this.currentWeekEnd.setUTCHours(0, 0, 0, 0);
-        this.updateCurrentWeekIndex();
-      }
-    } else {
-      this.updateCurrentWeekIndex();
-    }
-  }
-
-  updateCurrentWeekIndex(): void {
-    const currentWeekKey = this.getWeekKey(this.currentWeekStart);
-    this.currentWeekIndex = this.availableWeeksList.findIndex(week =>
-      this.getWeekKey(week) === currentWeekKey
-    );
-  }
-
-  findNearestAvailableWeek(fromWeek: Date): Date | null {
-    if (this.availableWeeksList.length === 0) {
-      return null;
-    }
-    const fromTime = fromWeek.getTime();
-    let nearestWeek: Date | null = null;
-    let minDiff = Infinity;
-    for (const week of this.availableWeeksList) {
-      const diff = Math.abs(week.getTime() - fromTime);
-      if (diff < minDiff) {
-        minDiff = diff;
-        nearestWeek = week;
-      }
-    }
-    return nearestWeek ? new Date(nearestWeek) : null;
-  }
-
   previousWeek(): void {
-    if (this.canGoToPreviousWeek()) {
-      this.currentWeekIndex--;
-      const previousWeek = this.availableWeeksList[this.currentWeekIndex];
-      this.currentWeekStart = new Date(previousWeek);
-      this.currentWeekEnd = new Date(this.currentWeekStart);
-      this.currentWeekEnd.setUTCDate(this.currentWeekStart.getUTCDate() + 6);
-      this.currentWeekEnd.setUTCHours(0, 0, 0, 0);
-      this.emitWeekChange();
-    }
+    this.currentWeekStart.setUTCDate(this.currentWeekStart.getUTCDate() - 7);
+    this.currentWeekEnd.setUTCDate(this.currentWeekEnd.getUTCDate() - 7);
+    this.emitWeekChange();
   }
 
   nextWeek(): void {
     if (this.canGoToNextWeek()) {
-      this.currentWeekIndex++;
-      const nextWeek = this.availableWeeksList[this.currentWeekIndex];
-      this.currentWeekStart = new Date(nextWeek);
-      this.currentWeekEnd = new Date(this.currentWeekStart);
-      this.currentWeekEnd.setUTCDate(this.currentWeekStart.getUTCDate() + 6);
-      this.currentWeekEnd.setUTCHours(0, 0, 0, 0);
+      this.currentWeekStart.setUTCDate(this.currentWeekStart.getUTCDate() + 7);
+      this.currentWeekEnd.setUTCDate(this.currentWeekEnd.getUTCDate() + 7);
       this.emitWeekChange();
     }
   }
 
-  canGoToPreviousWeek(): boolean {
-    return this.currentWeekIndex > 0;
-  }
-
   canGoToNextWeek(): boolean {
-    return this.currentWeekIndex >= 0 && this.currentWeekIndex < this.availableWeeksList.length - 1;
+    const nextWeekStart = new Date(this.currentWeekStart);
+    nextWeekStart.setUTCDate(this.currentWeekStart.getUTCDate() + 7);
+    return nextWeekStart.getTime() <= this.maxDate.getTime();
   }
 
   goToCurrentWeek(): void {
     this.initializeCurrentWeek();
-    this.updateCurrentWeekIndex();
     this.emitWeekChange();
   }
 
@@ -185,5 +91,62 @@ export class TimeSheetDateSelectorComponent implements OnInit, OnChanges {
 
   formatDate(date: Date): string {
     return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+  }
+
+  openDatePicker(): void {
+    if (this.datePicker) {
+      const input = this.datePicker.nativeElement;
+      try {
+        input.showPicker();
+      } catch {
+        input.click(); //older and non chrome browsers
+      }
+    }
+  }
+
+  getDatePickerValue(): string {
+    const year = this.currentWeekStart.getUTCFullYear();
+    const month = String(this.currentWeekStart.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(this.currentWeekStart.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  onDateSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value) {
+      const selectedDate = new Date(input.value);
+      this.navigateToWeek(selectedDate);
+    }
+  }
+
+  navigateToWeek(date: Date): void {
+    const dayOfWeek = date.getUTCDay();
+    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+
+    const weekStart = new Date(date);
+    weekStart.setUTCDate(date.getUTCDate() + diff);
+    weekStart.setUTCHours(0, 0, 0, 0);
+
+    const weekEnd = new Date(weekStart);
+    weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
+    weekEnd.setUTCHours(0, 0, 0, 0);
+
+    if (weekStart.getTime() > this.maxDate.getTime()) {
+      this.initializeCurrentWeek();
+    } else {
+      this.currentWeekStart = weekStart;
+      this.currentWeekEnd = weekEnd;
+    }
+    this.emitWeekChange();
+  }
+
+  isToday(): boolean {
+    const newDate = new Date();
+    newDate.setUTCHours(0, 0, 0, 0);
+    if (newDate.getTime() >= this.currentWeekStart.getTime() &&
+      newDate.getTime() <= this.currentWeekEnd.getTime()) {
+      return true;
+    }
+    return false;
   }
 }

@@ -12,7 +12,9 @@ import {
   ElementRef,
 } from '@angular/core';
 
-import { Project, TimeSheetEntry } from '@models';
+import { Project, TimeSheetEntry, } from '@models';
+import { ProjectDropdownComponent } from '@components';
+import { TimeSheetEntryService } from '@services';
 
 
 @Component({
@@ -20,7 +22,7 @@ import { Project, TimeSheetEntry } from '@models';
   standalone: true,
   templateUrl: './time-sheet-entry.modal.html',
   styleUrl: './time-sheet-entry.modal.scss',
-  imports: [FormsModule, CommonModule],
+  imports: [FormsModule, CommonModule, ProjectDropdownComponent],
 })
 export class TimeSheetEntryCrudComponent implements OnInit {
   @Input() timeSheetEntry = new TimeSheetEntry();
@@ -28,33 +30,35 @@ export class TimeSheetEntryCrudComponent implements OnInit {
   @Input() date!: Date;
 
   projects: Signal<Project[]>;
-  
-  selectedProject: Project | undefined;
+
+  project: Project | undefined;
   filteredCategories: string[] = [];
-  
+
   isProjectDropdownOpen: boolean = false;
   isCategoryDropdownOpen: boolean = false;
-  
+
   errorMessage: string = '';
-  
+
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
-  
+
   get hours(): number {
     return this.timeSheetEntry?.hours || 0;
   }
-  
-  constructor(public activeModal: NgbActiveModal, private store: Store, ) {
+
+  constructor(public activeModal: NgbActiveModal, 
+    private store: Store, 
+    private timeSheetEntryService: TimeSheetEntryService) {
     this.projects = this.store.projects.all;
   }
-  
+
   async ngOnInit(): Promise<void> {
     const projectId = this.timeSheetEntry.projectId;
     if (projectId) {
-      this.selectedProject = this.projects().find((x) => x.id === projectId);
+      this.project = this.projects().find((x) => x.id === projectId);
     }
 
     this.filteredCategories = [...this.categories];
-    
+
     const user = await appstraxAuth.getUser();
     this.timeSheetEntry.userId = user.id;
     this.timeSheetEntry.date = this.date;
@@ -76,7 +80,6 @@ export class TimeSheetEntryCrudComponent implements OnInit {
   }
 
   onProjectSelected(project: Project): void {
-    this.selectedProject = project;
     this.isProjectDropdownOpen = false;
     this.timeSheetEntry.projectId = project.id;
   }
@@ -132,10 +135,14 @@ export class TimeSheetEntryCrudComponent implements OnInit {
         return;
       }
 
-      this.activeModal.close(this.timeSheetEntry);
+      this.activeModal.close({ action: 'save', timeSheetEntry: this.timeSheetEntry });
     } catch (error) {
       this.errorMessage = 'Error saving time sheet entry';
     }
+  }
+
+  async onDeleteTimeSheetEntry(): Promise<void> {
+    this.activeModal.close({ action: 'delete', timeSheetEntry: this.timeSheetEntry });
   }
 
   close(): void {
@@ -144,14 +151,14 @@ export class TimeSheetEntryCrudComponent implements OnInit {
 
   isFormValid(): boolean {
     let isValid =
-      this.selectedProject &&
+      this.timeSheetEntry.projectId &&
       this.timeSheetEntry.hours &&
       this.timeSheetEntry.description &&
       this.timeSheetEntry.category;
 
     if (isValid) return true;
     let errorMessage = 'Please fill in all required fields';
-    if (!this.selectedProject) errorMessage += '\n\t• Please select a project';
+    if (!this.timeSheetEntry.projectId) errorMessage += '\n\t• Please select a project';
     if (!this.timeSheetEntry.category)
       errorMessage += '\n\t• Category is required';
     if (!this.timeSheetEntry.hours)

@@ -3,6 +3,7 @@
     <app-time-sheet-date-selector
       [timeSheetEntries]="timeSheetEntries"
       (weekChange)="onWeekChange($event)"
+      [isLoading]="isLoading || isLoadingEntries"
     ></app-time-sheet-date-selector>
     <div class="week-days-container">
       @for (day of weekDays; track day.getTime()) {

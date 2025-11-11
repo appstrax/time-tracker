@@ -1,10 +1,10 @@
 <!-- <div style="height: 20px; border: 1px solid #000000;"> -->
 <div class="time-sheet">
   <div class="d-flex no-wrap">
-    @for (entry of workHours.keys(); track entry.id) {
+    @for (entry of numberLineWidths.keys(); track entry.id) {
       <app-time-sheet-entry-item
         [entry]="entry"
-        [width]="workHours.get(entry) || 0"
+        [width]="numberLineWidths.get(entry) || 0"
         [categoryColor]="getCategoryColor(entry)"
         [project]="getProject(entry)"
         (onEntryClick)="openEntryLogItem($event)"

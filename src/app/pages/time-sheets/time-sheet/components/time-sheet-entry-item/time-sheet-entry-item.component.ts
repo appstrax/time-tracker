@@ -76,10 +76,10 @@ export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, On
     let minutes = (this.entry.hours - hours) * 60;
     return `
       <div style="text-align: left;">
-        <strong>Project:</strong> ${this.project?.name || 'N/A'}<br>
-        <strong>Category:</strong> ${this.entry.category || 'N/A'}<br>
-        <strong>Description:</strong><br> ${this.entry.description || 'N/A'}<br>
-        <strong>Hours:</strong> ${hours}h ${minutes}m
+        <div class="mb-2"><strong>Project:</strong><br> ${this.project?.name || 'N/A'}</div>
+        <div class="mb-2"><strong>Category:</strong><br> ${this.entry.category || 'N/A'}</div>
+        <div class="mb-2"><strong>Hours:</strong><br> ${hours}h ${minutes}m</div>
+        <div class="mb-2"><strong>Description:</strong><br> ${this.entry.description || 'N/A'}</div>
       </div>
     `;
   }

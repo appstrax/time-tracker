@@ -1,6 +1,6 @@
 import { Store } from '@state';
 import { Project } from '@models';
-import { Component, OnInit, Signal } from '@angular/core';
+import { Component, effect, OnInit, Signal } from '@angular/core';
 import { appstraxAuth, User } from '@appstrax/services/auth';
 
 import { TimeSheetEntry } from '@models';
@@ -26,6 +26,10 @@ export class TimeSheetPage implements OnInit {
   public projects: Signal<Project[]>;
 
   public weekDays: Date[] = [];
+
+  public isLoading: boolean = false;
+  public isLoadingEntries: boolean = false;
+
   public timeSheetEntries: TimeSheetEntry[] = [];
   public categoryColors: Map<string, string> = new Map<string, string>();
 
@@ -35,18 +39,32 @@ export class TimeSheetPage implements OnInit {
     private timeSheetEntryService: TimeSheetEntryService,
   ) {
     this.projects = this.store.projects.all;
+    let projects = this.projects();
+    effect(() => {
+      if (projects.length !== this.projects().length) {
+        projects = this.projects();
+        this.ngOnInit();
+      }
+    });
   }
 
-  async ngOnInit(): Promise<void> {
+
+
+  public async ngOnInit(): Promise<void> {
+    if (!this.projects().length) return;
+    this.isLoading = true;
+
     const user = await appstraxAuth.getUser();
     if (!user) return;
     this.user = user;
     this.initializeWeekDays();
-    await this.initializeTimeSheetEntries();
+    await this.fetchTimeSheetEntries();
     this.initializeCategoryColors();
+
+    this.isLoading = false;
   }
 
-  initializeWeekDays(): void {
+  private initializeWeekDays(): void {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -62,34 +80,50 @@ export class TimeSheetPage implements OnInit {
     this.updateWeekDays();
   }
 
-  async onTimeSheetEntrySaved(entry: TimeSheetEntry): Promise<void> {
-    await this.initializeTimeSheetEntries();
+  public async onTimeSheetEntrySaved(entry: TimeSheetEntry | undefined): Promise<void> {
+    await this.fetchTimeSheetEntries();
     this.initializeCategoryColors();
   }
 
-  async initializeTimeSheetEntries(): Promise<void> {
+  private async fetchTimeSheetEntries(): Promise<void> {
     if (!this.user?.id) return;
     try {
-      this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserId(this.user.id);
+      this.isLoadingEntries = true;
+      const monthStart = new Date(this.currentWeekStart);
+      monthStart.setUTCDate(this.currentWeekStart.getUTCDate() - 14);
+      monthStart.setUTCHours(0, 0, 0, 0);
+
+      const monthEnd = new Date(this.currentWeekEnd);
+      monthEnd.setUTCDate(this.currentWeekEnd.getUTCDate() + 14);
+      monthEnd.setUTCHours(23, 59, 59, 999);
+
+      this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
+        this.user.id,
+        monthStart,
+        monthEnd
+      );
     } catch (error) {
       this.toastService.error('Error initializing time sheet entries');
     }
+    this.isLoadingEntries = false;
   }
 
-  initializeCategoryColors(): void {
+  private initializeCategoryColors(): void {
     const categories = this.getTimeSheetCategories();
     for (let i = 0; i < categories.length; i++) {
       this.categoryColors.set(categories[i], ColorList.colors[i]);
     }
   }
 
-  onWeekChange(weekRange: { start: Date; end: Date }): void {
+  public async onWeekChange(weekRange: { start: Date; end: Date }): Promise<void> {
     this.currentWeekStart = weekRange.start;
     this.currentWeekEnd = weekRange.end;
     this.updateWeekDays();
+    await this.fetchTimeSheetEntries();
+    this.initializeCategoryColors();
   }
 
-  updateWeekDays(): void {
+  private updateWeekDays(): void {
     this.weekDays = [];
     for (let i = 0; i < 7; i++) {
       const date = new Date(this.currentWeekStart);
@@ -98,14 +132,14 @@ export class TimeSheetPage implements OnInit {
     }
   }
 
-  filterEntriesByDate(date: Date): TimeSheetEntry[] {
+  public filterEntriesByDate(date: Date): TimeSheetEntry[] {
     let filteredEntries: TimeSheetEntry[] = this.timeSheetEntries.filter(
       entry => entry.date.toDateString() === date.toDateString(),
     );
     return filteredEntries;
   }
 
-  getTimeSheetCategories(): string[] {
+  public getTimeSheetCategories(): string[] {
     return [...new Set(this.timeSheetEntries.map(entry => entry.category))];
   }
 }

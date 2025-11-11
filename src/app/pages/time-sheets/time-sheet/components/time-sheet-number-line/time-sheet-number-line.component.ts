@@ -20,7 +20,7 @@ export class TimeSheetNumberLineComponent implements OnInit {
   @Output() onEntryClick: EventEmitter<TimeSheetEntry> = new EventEmitter<TimeSheetEntry>();
 
   public sizeModifier = 20;
-  public workHours: Map<TimeSheetEntry, number> = new Map<TimeSheetEntry, number>();
+  public numberLineWidths: Map<TimeSheetEntry, number> = new Map<TimeSheetEntry, number>();
 
   ngOnInit(): void {
     this.calculateSize();
@@ -33,10 +33,10 @@ export class TimeSheetNumberLineComponent implements OnInit {
   }
 
   calculateSize(): void {
-    this.workHours = new Map<TimeSheetEntry, number>();
+    this.numberLineWidths = new Map<TimeSheetEntry, number>();
     for (const entry of this.entries) {
       let size = (entry.hours * 4) * this.sizeModifier;
-      this.workHours.set(entry, size);
+      this.numberLineWidths.set(entry, size);
     }
   }
 

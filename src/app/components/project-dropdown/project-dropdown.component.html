@@ -1,0 +1,58 @@
+<div class="project-dropdown form-group" [class.show]="isProjectDropdownOpen">
+    <button
+      type="button"
+      class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between form-select"
+      (click)="toggleProjectDropdown()"
+      aria-expanded="isProjectMenuOpen"
+    >
+      <span class="d-flex align-items-center gap-2">
+        @if (selectedProject) { @if (selectedProject.logoUrl) {
+        <img
+          [src]="selectedProject.logoUrl"
+          alt="logo"
+          class="proj-thumb"
+          loading="lazy"
+        />
+        } @else {
+        <i class="bi bi-image proj-thumb-fallback"></i>
+        }
+        <span>{{ selectedProject.name }}</span>
+        } @else {
+        <i class="bi bi-image proj-thumb-fallback"></i>
+        <span>Select a project</span>
+        }
+      </span>
+      <i
+        class="bi"
+        [ngClass]="isProjectDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
+      ></i>
+    </button>
+    <ul
+      class="dropdown-menu dropdown-menu-end w-100"
+      [class.show]="isProjectDropdownOpen"
+      [attr.data-bs-popper]="isProjectDropdownOpen ? 'static' : null"
+    >
+      @for (project of projects(); track project.id) {
+      <li>
+        <button
+          class="dropdown-item d-flex align-items-center gap-2"
+          type="button"
+          (click)="onProjectSelected(project)"
+          [class.active]="selectedProject?.id === project.id"
+        >
+          @if (project.logoUrl) {
+          <img
+            [src]="project.logoUrl"
+            alt="logo"
+            class="proj-thumb"
+            loading="lazy"
+          />
+          } @else {
+          <i class="bi bi-image proj-thumb-fallback"></i>
+          }
+          <span>{{ project.name }}</span>
+        </button>
+      </li>
+      }
+    </ul>
+  </div>
