@@ -11,7 +11,7 @@
 
   <div class="menu">
     <ng-container *ngIf="projectGroups.length">
-      <div class="group-title">Project</div>
+      <div class="group-title project-section">Project</div>
       <div class="group pt-2" *ngFor="let group of projectGroups">
         <button type="button" class="menu-item group-header" [class.active-group]="isGroupActive(group) && !expandedState[group.key]" (click)="toggleGroup(group.key)">
           <span class="label">{{ group.title }}</span>
