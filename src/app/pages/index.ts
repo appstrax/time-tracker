@@ -8,6 +8,7 @@ export * from './users/users.page';
 export * from './audit/audit.page';
 export * from './define/define.page';
 export * from './design/design.page';
+export * from './db-design/db-design.page';
 export * from './devops/devops.page';
 export * from './contact/contact.page';
 export * from './billing/billing.page';

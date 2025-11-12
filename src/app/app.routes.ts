@@ -9,7 +9,7 @@ import { HomePage, DocsPage, ReposPage, UsersPage } from '@pages';
 import { ForgotPasswordPage, CreateOrganizationPage } from '@pages';
 import { AuditPage, StatsPage, DefinePage, DevopsPage } from '@pages';
 import { TicketsPage, BillingPage, QualityPage, CodePage } from '@pages';
-import { SettingsPage, DesignPage, QuotationsPage, KpisPage } from '@pages';
+import { SettingsPage, DesignPage, DbDesignPage, QuotationsPage, KpisPage } from '@pages';
 import { BasePage, ProjectPage, ProfilePage, MarketplacePage } from '@pages';
 import { TestingPage, CompliancePage, GuardrailsPage, ContactPage } from '@pages';
 
@@ -68,6 +68,11 @@ export const routes: Routes = [
         path: 'design',
         data: { breadcrumb: 'Project Design' },
         component: DesignPage,
+      },
+      {
+        path: 'db-design',
+        data: { breadcrumb: 'DB Design' },
+        component: DbDesignPage,
       },
       {
         path: 'devops',
