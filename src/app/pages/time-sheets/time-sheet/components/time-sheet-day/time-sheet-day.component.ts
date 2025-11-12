@@ -138,7 +138,7 @@ export class TimeSheetDayComponent
       .result.then((result: any) => {
         if (result.action === 'save') {
           this.saveTimeSheetEntry(result.timeSheetEntry);
-        } else {
+        } else if (result.action === 'delete') {
           this.deleteTimeSheetEntry(result.timeSheetEntry);
         }
       }, (reason: any) => { },);
