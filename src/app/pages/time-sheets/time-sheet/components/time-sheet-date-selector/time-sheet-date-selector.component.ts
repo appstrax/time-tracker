@@ -1,45 +1,37 @@
-import { Component, OnInit, Output, EventEmitter, Input, OnChanges, SimpleChanges, ViewChild, ElementRef } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { Component, OnInit, Output, EventEmitter, Input, ViewChild, ElementRef } from '@angular/core';
 import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
 
 @Component({
   selector: 'app-time-sheet-date-selector',
   standalone: true,
   templateUrl: './time-sheet-date-selector.component.html',
-  styleUrl: './time-sheet-date-selector.component.scss'
+  styleUrl: './time-sheet-date-selector.component.scss',
+  imports: [DatePipe]
 })
 export class TimeSheetDateSelectorComponent implements OnInit {
   @Input() timeSheetEntries: TimeSheetEntry[] = [];
   @Input() isLoading: boolean = false;
 
   @Output() weekChange = new EventEmitter<{ start: Date; end: Date }>();
+
   @ViewChild('datePicker') datePicker?: ElementRef<HTMLInputElement>;
 
-  public currentWeekStart: Date = new Date();
-  public currentWeekEnd: Date = new Date();
   private maxDate: Date = new Date();
+  public selectedWeekEnd: Date = new Date();
+  public selectedWeekStart: Date = new Date();
 
-  ngOnInit(): void {
+  public ngOnInit(): void {
     this.initializeCurrentWeek();
     this.calculateDateRange();
-    this.emitWeekChange();
   }
 
-
-  initializeCurrentWeek(): void {
+  public initializeCurrentWeek(): void {
     const today = new Date();
-    const dayOfWeek = today.getUTCDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-    this.currentWeekStart = new Date(today);
-    this.currentWeekStart.setUTCDate(today.getUTCDate() + diff);
-    this.currentWeekStart.setUTCHours(0, 0, 0, 0);
-
-    this.currentWeekEnd = new Date(this.currentWeekStart);
-    this.currentWeekEnd.setUTCDate(this.currentWeekStart.getUTCDate() + 6);
-    this.currentWeekEnd.setUTCHours(0, 0, 0, 0);
+    this.navigateToWeek(today);
   }
 
-  calculateDateRange(): void {
+  private calculateDateRange(): void {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -49,77 +41,33 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     this.maxDate.setUTCHours(0, 0, 0, 0);
   }
 
-
-  getWeekKey(weekStart: Date): string {
-    const year = weekStart.getUTCFullYear();
-    const month = String(weekStart.getUTCMonth() + 1).padStart(2, '0'); // getUTCMonth() is 0-indexed, so add 1
-    const date = String(weekStart.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${date}`;
+  public previousWeek(): void {
+    this.updateWeekRange(-7);
   }
 
-  previousWeek(): void {
-    this.currentWeekStart.setUTCDate(this.currentWeekStart.getUTCDate() - 7);
-    this.currentWeekEnd.setUTCDate(this.currentWeekEnd.getUTCDate() - 7);
-    this.emitWeekChange();
-  }
-
-  nextWeek(): void {
+  public nextWeek(): void {
     if (this.canGoToNextWeek()) {
-      this.currentWeekStart.setUTCDate(this.currentWeekStart.getUTCDate() + 7);
-      this.currentWeekEnd.setUTCDate(this.currentWeekEnd.getUTCDate() + 7);
-      this.emitWeekChange();
+      this.updateWeekRange(7);
     }
   }
 
-  canGoToNextWeek(): boolean {
-    const nextWeekStart = new Date(this.currentWeekStart);
-    nextWeekStart.setUTCDate(this.currentWeekStart.getUTCDate() + 7);
+  public canGoToNextWeek(): boolean {
+    const nextWeekStart = new Date(this.selectedWeekStart);
+    nextWeekStart.setUTCDate(this.selectedWeekStart.getUTCDate() + 7);
     return nextWeekStart.getTime() <= this.maxDate.getTime();
   }
 
-  goToCurrentWeek(): void {
-    this.initializeCurrentWeek();
+  private updateWeekRange(increment: number): void {
+    let currentWeekStart = new Date(this.selectedWeekStart);
+    let currentWeekEnd = new Date(this.selectedWeekEnd);
+    currentWeekStart.setUTCDate(currentWeekStart.getUTCDate() + increment);
+    currentWeekEnd.setUTCDate(currentWeekEnd.getUTCDate() + increment);
+    this.selectedWeekStart = currentWeekStart;
+    this.selectedWeekEnd = currentWeekEnd;
     this.emitWeekChange();
   }
 
-  emitWeekChange(): void {
-    this.weekChange.emit({
-      start: new Date(this.currentWeekStart),
-      end: new Date(this.currentWeekEnd)
-    });
-  }
-
-  formatDate(date: Date): string {
-    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-  }
-
-  openDatePicker(): void {
-    if (this.datePicker) {
-      const input = this.datePicker.nativeElement;
-      try {
-        input.showPicker();
-      } catch {
-        input.click(); //older and non chrome browsers
-      }
-    }
-  }
-
-  getDatePickerValue(): string {
-    const year = this.currentWeekStart.getUTCFullYear();
-    const month = String(this.currentWeekStart.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(this.currentWeekStart.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
-  }
-
-  onDateSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.value) {
-      const selectedDate = new Date(input.value);
-      this.navigateToWeek(selectedDate);
-    }
-  }
-
-  navigateToWeek(date: Date): void {
+  private navigateToWeek(date: Date): void {
     const dayOfWeek = date.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
 
@@ -132,21 +80,52 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     weekEnd.setUTCHours(0, 0, 0, 0);
 
     if (weekStart.getTime() > this.maxDate.getTime()) {
-      this.initializeCurrentWeek();
+      const today = new Date();
+      this.navigateToWeek(today);
     } else {
-      this.currentWeekStart = weekStart;
-      this.currentWeekEnd = weekEnd;
+      this.selectedWeekStart = weekStart;
+      this.selectedWeekEnd = weekEnd;
     }
     this.emitWeekChange();
   }
 
-  isToday(): boolean {
+  private emitWeekChange(): void {
+    this.weekChange.emit({
+      start: this.selectedWeekStart,
+      end: this.selectedWeekEnd
+    });
+  }
+
+  public isCurrentWeek(): boolean {
     const newDate = new Date();
     newDate.setUTCHours(0, 0, 0, 0);
-    if (newDate.getTime() >= this.currentWeekStart.getTime() &&
-      newDate.getTime() <= this.currentWeekEnd.getTime()) {
-      return true;
+    return newDate.getTime() >= this.selectedWeekStart.getTime() &&
+      newDate.getTime() <= this.selectedWeekEnd.getTime();
+  }
+
+  public openDatePicker(): void {
+    if (this.datePicker) {
+      const input = this.datePicker.nativeElement;
+      try {
+        input.showPicker();
+      } catch {
+        input.click(); //older and non chrome browsers
+      }
     }
-    return false;
+  }
+
+  public getDatePickerValue(): string {
+    const year = this.selectedWeekStart.getUTCFullYear();
+    const month = String(this.selectedWeekStart.getUTCMonth() + 1).padStart(2, '0');
+    const day = String(this.selectedWeekStart.getUTCDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  public onDateSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (input.value) {
+      const selectedDate = new Date(input.value);
+      this.navigateToWeek(selectedDate);
+    }
   }
 }

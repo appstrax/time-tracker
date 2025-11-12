@@ -19,8 +19,7 @@ import { ModalService } from 'src/app/services/modal.service';
   imports: [TimeSheetNumberLineComponent, DatePipe],
 })
 export class TimeSheetDayComponent
-  implements OnInit, OnChanges, AfterViewInit, OnDestroy
-{
+  implements OnInit, OnChanges, AfterViewInit, OnDestroy {
   @Input() date: Date = new Date();
   @Input() projects: Project[] = [];
   @Input() categories: string[] = [];
@@ -31,41 +30,40 @@ export class TimeSheetDayComponent
     new EventEmitter<TimeSheetEntry | undefined>();
 
   private addEntryTooltip?: Tooltip;
-
-  isAddEntryButtonVisible: boolean = false;
+  public isAddEntryButtonVisible: boolean = false;
 
   private readonly MAX_WEEKS_BACK_FOR_ADD_ENTRY: number = 3;
 
   @ViewChild('addEntryBtn', { static: false })
-  addEntryBtn?: ElementRef<HTMLButtonElement>;
+  public addEntryBtn?: ElementRef<HTMLButtonElement>;
 
   constructor(
     private modalService: ModalService,
     private toastService: ToastService,
     private timeSheetEntryService: TimeSheetEntryService
-  ) {}
+  ) { }
 
-  async ngOnInit(): Promise<void> {
+  public async ngOnInit(): Promise<void> {
     this.checkIfWithinLastNumberOfWeeks();
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.addEntryTooltip?.dispose();
   }
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     if (this.addEntryBtn) {
       this.addEntryTooltip = new Tooltip(this.addEntryBtn.nativeElement);
     }
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnChanges(changes: SimpleChanges): void {
     if (changes['date']) {
       this.checkIfWithinLastNumberOfWeeks();
     }
   }
 
-  checkIfWithinLastNumberOfWeeks(): void {
+  private checkIfWithinLastNumberOfWeeks(): void {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
     const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
@@ -77,7 +75,7 @@ export class TimeSheetDayComponent
     const threeWeeksAgoStart = new Date(currentWeekStart);
     threeWeeksAgoStart.setUTCDate(
       currentWeekStart.getUTCDate() -
-        (this.MAX_WEEKS_BACK_FOR_ADD_ENTRY - 1) * 7
+      (this.MAX_WEEKS_BACK_FOR_ADD_ENTRY - 1) * 7
     );
 
     const currentWeekEnd = new Date(currentWeekStart);
@@ -88,7 +86,7 @@ export class TimeSheetDayComponent
       this.date >= threeWeeksAgoStart && this.date <= currentWeekEnd;
   }
 
-  async saveTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
+  private async saveTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
     try {
       timeSheetEntry = await this.timeSheetEntryService.save(timeSheetEntry);
       this.onSave.emit(timeSheetEntry);
@@ -97,7 +95,7 @@ export class TimeSheetDayComponent
     }
   }
 
-  async deleteTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
+  private async deleteTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
     try {
       await this.timeSheetEntryService.delete(timeSheetEntry.id);
       this.onSave.emit(undefined);
@@ -106,7 +104,7 @@ export class TimeSheetDayComponent
     }
   }
 
-  openTimeSheetEntryModal(timeSheetEntry?: TimeSheetEntry): void {
+  public openTimeSheetEntryModal(timeSheetEntry?: TimeSheetEntry): void {
     const options = {
       timeSheetEntry: timeSheetEntry?.clone() || new TimeSheetEntry(),
       date: this.date,
@@ -116,11 +114,11 @@ export class TimeSheetDayComponent
     this.modalService
       .showTimeSheetEntryModal(options)
       .result.then((result: any) => {
-        if(result.action === 'save'){
+        if (result.action === 'save') {
           this.saveTimeSheetEntry(result.timeSheetEntry);
-        }else{
+        } else {
           this.deleteTimeSheetEntry(result.timeSheetEntry);
         }
-      });
+      }, (reason: any) => { },);
   }
 }

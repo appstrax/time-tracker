@@ -15,9 +15,9 @@
         [value]="getDatePickerValue()"
         (change)="onDateSelected($event)"
       />
-      <span class="week-range-label">{{ currentWeekStart.getFullYear() }}</span>
+      <span class="week-range-label">{{ selectedWeekStart.getFullYear() }}</span>
       <span class="week-range">
-        {{ formatDate(currentWeekStart) }} - {{ formatDate(currentWeekEnd) }}
+        {{ selectedWeekStart | date: "MMM dd" }} - {{ selectedWeekEnd | date: "MMM dd" }}
       </span>
     </div>
 
@@ -29,19 +29,18 @@
       >
         <span>&gt;</span>
       </button>
-      @if(!isToday()){
       <button
+        [disabled]="isCurrentWeek()"
         class="btn btn-outline-secondary btn-primary"
-        (click)="goToCurrentWeek()"
-        title="Today"
+        (click)="initializeCurrentWeek()"
       >
         <span>Today</span>
       </button>
-    }
     </div>
-
-  @if(isLoading){
-    <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-    }
+    <div class="spinner-div">
+      @if(isLoading){
+      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
+      }
+    </div>
   </div>
 </div>

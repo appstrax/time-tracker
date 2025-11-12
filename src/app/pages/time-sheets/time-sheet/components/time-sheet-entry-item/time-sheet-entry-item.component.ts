@@ -26,18 +26,18 @@ export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, On
   private tooltip?: Tooltip;
   private viewInitialized: boolean = false;
 
-  ngAfterViewInit(): void {
+  public ngAfterViewInit(): void {
     this.viewInitialized = true;
     this.initializeTooltip();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  public ngOnChanges(changes: SimpleChanges): void {
     if (this.viewInitialized && (changes['entry'] || changes['project']) && this.tooltipElement) {
       this.updateTooltip();
     }
   }
 
-  ngOnDestroy(): void {
+  public ngOnDestroy(): void {
     this.disposeTooltip();
   }
 
@@ -71,7 +71,7 @@ export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, On
     }
   }
 
-  getTooltipContent(): string {
+  private getTooltipContent(): string {
     let hours = Math.floor(this.entry.hours);
     let minutes = (this.entry.hours - hours) * 60;
     return `
@@ -84,7 +84,7 @@ export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, On
     `;
   }
 
-  onClick(): void {
+  public onClick(): void {
     this.onEntryClick.emit(this.entry);
   }
 }

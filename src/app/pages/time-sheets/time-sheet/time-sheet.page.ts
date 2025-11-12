@@ -57,44 +57,31 @@ export class TimeSheetPage implements OnInit {
     const user = await appstraxAuth.getUser();
     if (!user) return;
     this.user = user;
-    this.initializeWeekDays();
-    await this.fetchTimeSheetEntries();
-    this.initializeCategoryColors();
+    await this.initializeTimeSheetEntries();
 
     this.isLoading = false;
   }
 
-  private initializeWeekDays(): void {
-    const today = new Date();
-    const dayOfWeek = today.getUTCDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
-
-    this.currentWeekStart = new Date(today);
-    this.currentWeekStart.setUTCDate(today.getUTCDate() + diff);
-    this.currentWeekStart.setUTCHours(0, 0, 0, 0);
-
-    this.currentWeekEnd = new Date(this.currentWeekStart);
-    this.currentWeekEnd.setUTCDate(this.currentWeekStart.getUTCDate() + 6);
-    this.currentWeekEnd.setUTCHours(23, 59, 59, 999);
-
-    this.updateWeekDays();
+  async initializeTimeSheetEntries(): Promise<void> {
+    this.isLoadingEntries = true;
+    await this.fetchTimeSheetEntries();
+    this.initializeCategoryColors();
+    this.isLoadingEntries = false;
   }
 
   public async onTimeSheetEntrySaved(entry: TimeSheetEntry | undefined): Promise<void> {
-    await this.fetchTimeSheetEntries();
-    this.initializeCategoryColors();
+    await this.initializeTimeSheetEntries();
   }
 
   private async fetchTimeSheetEntries(): Promise<void> {
     if (!this.user?.id) return;
     try {
-      this.isLoadingEntries = true;
       const monthStart = new Date(this.currentWeekStart);
-      monthStart.setUTCDate(this.currentWeekStart.getUTCDate() - 14);
+      monthStart.setUTCDate(this.currentWeekStart.getUTCDate() - 21);
       monthStart.setUTCHours(0, 0, 0, 0);
 
       const monthEnd = new Date(this.currentWeekEnd);
-      monthEnd.setUTCDate(this.currentWeekEnd.getUTCDate() + 14);
+      monthEnd.setUTCDate(this.currentWeekEnd.getUTCDate() + 21);
       monthEnd.setUTCHours(23, 59, 59, 999);
 
       this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
@@ -105,7 +92,6 @@ export class TimeSheetPage implements OnInit {
     } catch (error) {
       this.toastService.error('Error initializing time sheet entries');
     }
-    this.isLoadingEntries = false;
   }
 
   private initializeCategoryColors(): void {
@@ -119,8 +105,7 @@ export class TimeSheetPage implements OnInit {
     this.currentWeekStart = weekRange.start;
     this.currentWeekEnd = weekRange.end;
     this.updateWeekDays();
-    await this.fetchTimeSheetEntries();
-    this.initializeCategoryColors();
+    await this.initializeTimeSheetEntries();
   }
 
   private updateWeekDays(): void {
@@ -133,10 +118,9 @@ export class TimeSheetPage implements OnInit {
   }
 
   public filterEntriesByDate(date: Date): TimeSheetEntry[] {
-    let filteredEntries: TimeSheetEntry[] = this.timeSheetEntries.filter(
+    return this.timeSheetEntries.filter(
       entry => entry.date.toDateString() === date.toDateString(),
     );
-    return filteredEntries;
   }
 
   public getTimeSheetCategories(): string[] {
