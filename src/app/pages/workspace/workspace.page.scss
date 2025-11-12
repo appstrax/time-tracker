@@ -1,0 +1,41 @@
+.nav-tabs .nav-link {
+  color: var(--text-primary);
+}
+.nav-tabs .nav-link.active {
+  border-color: var(--color-border) var(--color-border) transparent;
+}
+.table {
+  /* Ensure Bootstrap tables adopt theme tokens */
+  --bs-table-color: var(--text-primary);
+  --bs-table-bg: var(--color-surface);
+  --bs-table-border-color: var(--color-border);
+  --bs-table-striped-bg: color-mix(in srgb, var(--color-border) 20%, transparent);
+  --bs-table-striped-color: var(--text-primary);
+  --bs-table-active-bg: color-mix(in srgb, var(--color-border) 28%, transparent);
+  --bs-table-active-color: var(--text-primary);
+  --bs-table-hover-bg: color-mix(in srgb, var(--color-border) 30%, transparent);
+  --bs-table-hover-color: var(--text-primary);
+}
+
+.table thead tr th {
+  border-bottom-color: var(--color-border);
+  color: var(--text-primary);
+  background-color: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
+}
+.table tbody tr td {
+  border-top-color: var(--color-border);
+  color: var(--text-primary);
+  background-color: var(--color-surface);
+}
+
+/* Ensure muted text inside tables is readable in dark/system */
+.table .text-muted {
+  color: var(--text-muted) !important;
+}
+
+/* Strengthen primary column titles */
+.table .fw-semibold {
+  color: var(--text-primary);
+}
+
+

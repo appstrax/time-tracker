@@ -10,7 +10,7 @@ import { ForgotPasswordPage, CreateOrganizationPage } from '@pages';
 import { AuditPage, StatsPage, DefinePage, DevopsPage } from '@pages';
 import { TicketsPage, BillingPage, QualityPage, CodePage } from '@pages';
 import { SettingsPage, DesignPage, DbDesignPage, QuotationsPage, KpisPage } from '@pages';
-import { BasePage, ProjectPage, ProfilePage, MarketplacePage } from '@pages';
+import { BasePage, ProjectPage, ProfilePage, MarketplacePage, WorkspacePage } from '@pages';
 import { TestingPage, CompliancePage, GuardrailsPage, ContactPage } from '@pages';
 
 export const routes: Routes = [
@@ -32,6 +32,11 @@ export const routes: Routes = [
         path: 'home',
         data: { breadcrumb: 'Summary' },
         component: HomePage,
+      },
+      {
+        path: 'workspace',
+        data: { breadcrumb: 'Workspace' },
+        component: WorkspacePage,
       },
       { path: 'audit', data: { breadcrumb: 'Audit' }, component: AuditPage },
       {

@@ -54,9 +54,9 @@ export class SideNavCollapsedComponent implements AfterViewInit, OnDestroy {
       { key: 'qa', title: 'QA & Quality', match: (t) => ['Testing', 'Quality'].includes(t) },
       { key: 'ops', title: 'Delivery & Ops', match: (t) => ['Dev-Ops', 'Project State', 'Stats', 'Kpis'].includes(t) },
       { key: 'govsec', title: 'Security', match: (t) => ['Compliance', 'Guard Rails', 'Audit Trails'].includes(t) },
-      { key: 'org', title: 'Organization', match: (t) => ['User Management', 'Billing'].includes(t) },
+      { key: 'org', title: 'Organization', match: (t) => ['Workspace', 'User Management', 'Billing'].includes(t) },
       { key: 'tools', title: 'Tools', match: (t) => ['Quotations'].includes(t) },
-      { key: 'ext', title: 'Discover', match: (t) => ['Marketplace'].includes(t) },
+      { key: 'ext', title: 'Extensions', match: (t) => ['Marketplace'].includes(t) },
     ];
 
     const grouped: Record<string, NavItem[]> = {};
