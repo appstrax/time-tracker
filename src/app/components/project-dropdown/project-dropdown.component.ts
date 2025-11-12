@@ -13,11 +13,13 @@ import { Store } from '@state';
 export class ProjectDropdownComponent {
 
   @Input() selectedProject?: Project;
+  @Input() disabled: boolean = false;
+
   @Output() projectSelected = new EventEmitter<Project>();
 
+  projects: Signal<Project[]>;
   isProjectDropdownOpen: boolean = false;
 
-  projects: Signal<Project[]>;
 
   constructor(private store: Store) {
     this.projects = this.store.projects.all;
@@ -30,7 +32,9 @@ export class ProjectDropdownComponent {
   }
 
   toggleProjectDropdown(): void {
-    this.isProjectDropdownOpen = !this.isProjectDropdownOpen;
+    if (!this.disabled) {
+      this.isProjectDropdownOpen = !this.isProjectDropdownOpen;
+    }
   }
 
 }

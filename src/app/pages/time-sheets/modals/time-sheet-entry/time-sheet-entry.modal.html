@@ -13,6 +13,7 @@
     <app-project-dropdown
       [selectedProject]="project"
       (projectSelected)="onProjectSelected($event)"
+      [disabled]="timeSheetEntry.approved"
     ></app-project-dropdown>
     <div class="form-group">
       <label for="category" class="visually-hidden">Category</label>
@@ -29,9 +30,10 @@
           (blur)="onCategoryBlur()"
           placeholder="* Category"
           autocomplete="off"
+          [disabled]="timeSheetEntry.approved"
           required
         />
-        @if (isCategoryDropdownOpen && filteredCategories.length > 0) {
+        @if (isCategoryDropdownOpen && filteredCategories.length > 0 && !timeSheetEntry.approved) {
         <ul
           class="dropdown-menu dropdown-menu-end w-100 show category-autocomplete"
           [attr.data-bs-popper]="'static'"
@@ -63,6 +65,8 @@
             step="0.25"
             id="hoursRange"
             #hoursInput
+            [disabled]="timeSheetEntry.approved"
+
             required
           />
 
@@ -84,6 +88,7 @@
           placeholder="* Description"
           rows="5"
           required
+          [disabled]="timeSheetEntry.approved"
         ></textarea>
       </div>
     </div>
@@ -96,7 +101,7 @@
 
 <div class="modal-footer d-flex justify-content-between">
   <div>
-    @if(timeSheetEntry.id){
+    @if(timeSheetEntry.id && !timeSheetEntry.approved){
     <button
       type="button"
       class="btn btn-outline-danger"
@@ -107,15 +112,21 @@
     }
   </div>
   <div>
-    <button type="button" class="btn btn-outline-secondary me-3" (click)="close()">
-      Close
-    </button>
     <button
       type="button"
-      class="btn btn-primary"
+      class="btn btn-outline-secondary"
+      (click)="close()"
+    >
+      Close
+    </button>
+    @if(!timeSheetEntry.approved){
+    <button
+      type="button"
+      class="btn btn-primary ms-3"
       (click)="onSaveTimeSheetEntry()"
     >
       Save
     </button>
+    }
   </div>
 </div>

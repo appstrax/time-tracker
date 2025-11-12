@@ -27,8 +27,8 @@ export class TimeSheetPage implements OnInit {
 
   public weekDays: Date[] = [];
 
-  public isLoading: boolean = false;
-  public isLoadingEntries: boolean = false;
+  public isLoading: boolean = true;
+  public isLoadingEntries: boolean = true;
 
   public timeSheetEntries: TimeSheetEntry[] = [];
   public categoryColors: Map<string, string> = new Map<string, string>();
@@ -48,8 +48,6 @@ export class TimeSheetPage implements OnInit {
     });
   }
 
-
-
   public async ngOnInit(): Promise<void> {
     if (!this.projects().length) return;
     this.isLoading = true;
@@ -62,7 +60,7 @@ export class TimeSheetPage implements OnInit {
     this.isLoading = false;
   }
 
-  async initializeTimeSheetEntries(): Promise<void> {
+  public async initializeTimeSheetEntries(): Promise<void> {
     this.isLoadingEntries = true;
     await this.fetchTimeSheetEntries();
     this.initializeCategoryColors();

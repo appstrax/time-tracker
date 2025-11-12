@@ -1,5 +1,5 @@
 import { Tooltip } from 'bootstrap';
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { OnInit, Output, OnChanges } from '@angular/core';
 import { SimpleChanges, AfterViewInit } from '@angular/core';
 import { Component, EventEmitter, Input } from '@angular/core';
@@ -30,12 +30,16 @@ export class TimeSheetDayComponent
     new EventEmitter<TimeSheetEntry | undefined>();
 
   private addEntryTooltip?: Tooltip;
+  private lockIconTooltip?: Tooltip;
   public isAddEntryButtonVisible: boolean = false;
+  public isApproved: boolean = false;
 
   private readonly MAX_WEEKS_BACK_FOR_ADD_ENTRY: number = 3;
 
   @ViewChild('addEntryBtn', { static: false })
   public addEntryBtn?: ElementRef<HTMLButtonElement>;
+  @ViewChild('lockIcon', { static: false })
+  public lockIcon?: ElementRef<HTMLButtonElement>;
 
   constructor(
     private modalService: ModalService,
@@ -49,17 +53,35 @@ export class TimeSheetDayComponent
 
   public ngOnDestroy(): void {
     this.addEntryTooltip?.dispose();
+    this.lockIconTooltip?.dispose();
   }
 
   public ngAfterViewInit(): void {
     if (this.addEntryBtn) {
       this.addEntryTooltip = new Tooltip(this.addEntryBtn.nativeElement);
     }
+    this.isApproved = this.entries.some(entry => entry.approved);
+    this.initializeLockIconTooltip();
   }
 
   public ngOnChanges(changes: SimpleChanges): void {
     if (changes['date']) {
       this.checkIfWithinLastNumberOfWeeks();
+    }
+    const wasApproved = this.isApproved;
+    this.isApproved = this.entries.some(entry => entry.approved);
+
+    if (!wasApproved && this.isApproved) {
+      setTimeout(() => {
+        this.initializeLockIconTooltip();
+      }, 0);
+    }
+  }
+
+  private initializeLockIconTooltip(): void {
+    if (this.lockIcon && this.isApproved) {
+      this.lockIconTooltip?.dispose();
+      this.lockIconTooltip = new Tooltip(this.lockIcon.nativeElement);
     }
   }
 

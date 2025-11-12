@@ -1,7 +1,6 @@
 <div class="container">
   <section class="time-sheet-section">
     <app-time-sheet-date-selector
-      [timeSheetEntries]="timeSheetEntries"
       (weekChange)="onWeekChange($event)"
       [isLoading]="isLoading || isLoadingEntries"
     ></app-time-sheet-date-selector>

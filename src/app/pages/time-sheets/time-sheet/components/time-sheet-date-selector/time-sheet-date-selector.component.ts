@@ -10,7 +10,6 @@ import { TimeSheetEntry } from 'src/app/models/time-sheet-entry.model';
   imports: [DatePipe]
 })
 export class TimeSheetDateSelectorComponent implements OnInit {
-  @Input() timeSheetEntries: TimeSheetEntry[] = [];
   @Input() isLoading: boolean = false;
 
   @Output() weekChange = new EventEmitter<{ start: Date; end: Date }>();
@@ -22,8 +21,8 @@ export class TimeSheetDateSelectorComponent implements OnInit {
   public selectedWeekStart: Date = new Date();
 
   public ngOnInit(): void {
-    this.initializeCurrentWeek();
     this.calculateDateRange();
+    this.initializeCurrentWeek();
   }
 
   public initializeCurrentWeek(): void {

@@ -7,6 +7,7 @@ export class TimeSheetEntry extends Model {
   public hours: number = 0;
   public description: string = '';
   public category: string = '';
+  public approved: boolean = false;
 
   clone(): TimeSheetEntry {
     const entry = new TimeSheetEntry();

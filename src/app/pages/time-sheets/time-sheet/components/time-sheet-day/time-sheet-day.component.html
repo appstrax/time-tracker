@@ -1,4 +1,3 @@
-@if (projects.length > 0) {
 <div class="time-sheet-day-section">
   <div class="d-flex align-items-center">
     <div class="col-md-2 time-sheet-day-date">
@@ -6,7 +5,7 @@
       <div class="day-date">{{ date | date : "d MMM yyyy" }}</div>
     </div>
     <div class="col-md-1">
-      @if (isAddEntryButtonVisible) {
+      @if (isAddEntryButtonVisible && !isApproved) {
       <button
         #addEntryBtn
         type="button"
@@ -32,5 +31,13 @@
       </div>
     </div>
   </div>
+  @if(isApproved) {
+  <i
+    #lockIcon
+    class="lock-icon bi bi-lock"
+    data-bs-toggle="tooltip"
+    data-bs-placement="top"
+    title="Approved"
+  ></i>
+  }
 </div>
-}

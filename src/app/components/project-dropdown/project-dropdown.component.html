@@ -3,6 +3,7 @@
       type="button"
       class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between form-select"
       (click)="toggleProjectDropdown()"
+      [disabled]="disabled"
       aria-expanded="isProjectMenuOpen"
     >
       <span class="d-flex align-items-center gap-2">
@@ -29,8 +30,8 @@
     </button>
     <ul
       class="dropdown-menu dropdown-menu-end w-100"
-      [class.show]="isProjectDropdownOpen"
-      [attr.data-bs-popper]="isProjectDropdownOpen ? 'static' : null"
+      [class.show]="isProjectDropdownOpen && !disabled"
+      [attr.data-bs-popper]="isProjectDropdownOpen && !disabled ? 'static' : null"
     >
       @for (project of projects(); track project.id) {
       <li>
@@ -39,6 +40,7 @@
           type="button"
           (click)="onProjectSelected(project)"
           [class.active]="selectedProject?.id === project.id"
+          [disabled]="disabled"
         >
           @if (project.logoUrl) {
           <img

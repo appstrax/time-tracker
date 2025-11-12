@@ -43,6 +43,16 @@
   transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.hours-range:disabled::-webkit-slider-thumb {
+  background: var(--color-border);
+  cursor: not-allowed;
+}
+
+.hours-range:disabled::-moz-range-thumb {
+  background: var(--color-border);
+  cursor: not-allowed;
+}
+
 .hours-range::-webkit-slider-thumb:hover {
   transform: scale(1.1);
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);

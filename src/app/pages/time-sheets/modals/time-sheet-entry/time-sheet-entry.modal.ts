@@ -14,7 +14,6 @@ import {
 
 import { Project, TimeSheetEntry, } from '@models';
 import { ProjectDropdownComponent } from '@components';
-import { TimeSheetEntryService } from '@services';
 
 
 @Component({
@@ -34,7 +33,6 @@ export class TimeSheetEntryCrudComponent implements OnInit {
   project: Project | undefined;
   filteredCategories: string[] = [];
 
-  isProjectDropdownOpen: boolean = false;
   isCategoryDropdownOpen: boolean = false;
 
   errorMessage: string = '';
@@ -45,9 +43,8 @@ export class TimeSheetEntryCrudComponent implements OnInit {
     return this.timeSheetEntry?.hours || 0;
   }
 
-  constructor(public activeModal: NgbActiveModal, 
-    private store: Store, 
-    private timeSheetEntryService: TimeSheetEntryService) {
+  constructor(public activeModal: NgbActiveModal,
+    private store: Store,) {
     this.projects = this.store.projects.all;
   }
 
@@ -75,12 +72,7 @@ export class TimeSheetEntryCrudComponent implements OnInit {
     return `${formattedHours} ${formattedMinutes}`;
   }
 
-  toggleProjectMenu(): void {
-    this.isProjectDropdownOpen = !this.isProjectDropdownOpen;
-  }
-
   onProjectSelected(project: Project): void {
-    this.isProjectDropdownOpen = false;
     this.timeSheetEntry.projectId = project.id;
   }
 
