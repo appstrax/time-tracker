@@ -7,6 +7,9 @@ import { TimeSheetEntry } from '@models';
 import { ToastService, TimeSheetEntryService } from '@services';
 import { ColorList } from 'src/app/utils/color-list';
 
+import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
+
 import { TimeSheetDayComponent } from './components/time-sheet-day/time-sheet-day.component';
 import { TimeSheetDateSelectorComponent } from './components/time-sheet-date-selector/time-sheet-date-selector.component';
 
@@ -15,7 +18,7 @@ import { TimeSheetDateSelectorComponent } from './components/time-sheet-date-sel
   standalone: true,
   templateUrl: './time-sheet.page.html',
   styleUrl: './time-sheet.page.scss',
-  imports: [TimeSheetDayComponent, TimeSheetDateSelectorComponent]
+  imports: [CommonModule, RouterModule, TimeSheetDayComponent, TimeSheetDateSelectorComponent]
 })
 export class TimeSheetPage implements OnInit {
   private user: User | null = null;

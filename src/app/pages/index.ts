@@ -29,4 +29,5 @@ export * from './auth/verify-email/verify-email.page';
 export * from './auth/create-project/create-project.page';
 export * from './auth/forgot-password/forgot-password.page';
 export * from './time-sheets/time-sheet/time-sheet.page';
+export * from './time-sheets/overview/overview.component';
 export * from './auth/create-organization/create-organization.page';

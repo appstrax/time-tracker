@@ -12,6 +12,7 @@ import { TicketsPage, BillingPage, QualityPage, CodePage } from '@pages';
 import { SettingsPage, DesignPage, QuotationsPage, KpisPage } from '@pages';
 import { BasePage, ProjectPage, ProfilePage, MarketplacePage } from '@pages';
 import { TestingPage, CompliancePage, GuardrailsPage, ContactPage } from '@pages';
+import { OverviewComponent } from '@pages';
 
 export const routes: Routes = [
   { path: '', redirectTo: '/login', pathMatch: 'full' },
@@ -144,6 +145,11 @@ export const routes: Routes = [
         path: 'time-sheet',
         data: { breadcrumb: 'Time Sheets' },
         component: TimeSheetPage,
+      },
+      {
+        path: 'time-sheets/overview',
+        data: { breadcrumb: 'Time Sheets Overview' },
+        component: OverviewComponent,
       },
     ],
   },

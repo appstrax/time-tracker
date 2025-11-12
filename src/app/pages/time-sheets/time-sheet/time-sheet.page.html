@@ -1,4 +1,15 @@
 <div class="container">
+  <div class="d-flex align-items-center justify-content-between mb-3">
+    <h2 class="time-sheet-title mb-0">Time Sheet</h2>
+    <a
+      routerLink="/time-sheets/overview"
+      class="btn btn-outline-primary"
+      title="View Timesheet Overview"
+    >
+      <i class="bi bi-graph-up me-1"></i>
+      Overview
+    </a>
+  </div>
   <section class="time-sheet-section">
     <app-time-sheet-date-selector
       (weekChange)="onWeekChange($event)"
