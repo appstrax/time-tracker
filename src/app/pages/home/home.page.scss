@@ -26,6 +26,29 @@
   color: var(--text-primary);
 }
 
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.section-heading .pill {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.section-divider {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 18px 0;
+}
+
 .home-grid.grid-mode .row {
   display: grid;
   /* Use Bootstrap gutter variables set by g-classes for consistent spacing */

@@ -53,7 +53,12 @@ export class ProjectSelectorComponent implements OnInit, OnDestroy {
       const loadedAt = this.store.projects.loadedAt();
       if (loadedAt && !this.selectedProject) {
         const first = this.projects()[0] ?? null;
-        if (first) this.selectedProject = first;
+        if (first) {
+          this.selectedProject = first;
+          this.store.selectedProjectId.set(first.id);
+          const orgId = this.orgProjects().find((op) => op.projectId === first.id)?.organizationId ?? null;
+          if (orgId) this.store.selectedOrganizationId.set(orgId);
+        }
       }
     });
   }
@@ -73,6 +78,9 @@ export class ProjectSelectorComponent implements OnInit, OnDestroy {
     this.isMenuOpen = false;
     this.expand();
     this.startIdleTimer();
+    this.store.selectedProjectId.set(project.id);
+    const orgId = this.orgProjects().find((op) => op.projectId === project.id)?.organizationId ?? null;
+    if (orgId) this.store.selectedOrganizationId.set(orgId);
   }
 
   getProjectsForOrganization(orgId: string): Project[] {

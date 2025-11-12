@@ -30,7 +30,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        data: { breadcrumb: 'Project Summary' },
+        data: { breadcrumb: 'Summary' },
         component: HomePage,
       },
       { path: 'audit', data: { breadcrumb: 'Audit' }, component: AuditPage },

@@ -27,6 +27,10 @@
 
 <ng-template #grid>
   <div class="container py-3 home-grid" [class.grid-mode]="isExpanded">
+    <div class="section-heading">
+      <span class="pill"></span>
+      <h4 class="m-0">Project: {{ currentProjectName }}</h4>
+    </div>
     <div class="row g-3">
     <!-- Overview -->
     <div class="col-12 col-md-6 col-lg-4">
@@ -194,6 +198,197 @@
       </div>
     </div>
 
+    <!-- Define -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Define</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Define')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/define']" aria-label="View define">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Requirements, scope, acceptance criteria.</div>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['define'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Design -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Design</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Design')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/design']" aria-label="View design">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">UX/UI and flows.</div>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['design'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- DB Design -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">DB Design</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('DB Design')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/db-design']" aria-label="View DB Design">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Entities and relationships.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Code -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Code</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Code')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/code']" aria-label="View code">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Source and reviews.</div>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['code'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Testing -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Testing</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Testing')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/testing']" aria-label="View testing">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Automation and coverage.</div>
+          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['testing'].last7d }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Project State -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Project State</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Project State')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/project']" aria-label="View project state">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Status and progress.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- KPIs -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">KPIs</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('KPIs')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/kpis']" aria-label="View KPIs">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Key performance indicators.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Stats -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Stats</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Stats')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/stats']" aria-label="View stats">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Analytics and metrics.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Guard Rails -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Guard Rails</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Guard Rails')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/guardrails']" aria-label="View guard rails">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Policies and controls.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Audit Trails -->
+    <div class="col-12 col-md-6 col-lg-4">
+      <div class="card h-100">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Audit Trails</span>
+          <div class="d-flex gap-2">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Audit')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/audit']" aria-label="View audit trails">
+              <i class="bi bi-eye"></i>
+            </button>
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="small text-muted">Events and history.</div>
+        </div>
+      </div>
+    </div>
+
+    </div>
+    <hr class="section-divider" />
+    <div class="section-heading">
+      <span class="pill"></span>
+      <h4 class="m-0">Organization: {{ currentOrganizationName }}</h4>
+    </div>
+    <div class="row g-3">
     <!-- Users -->
     <div class="col-12 col-md-6 col-lg-4">
       <div class="card h-100">
@@ -261,50 +456,38 @@
       </div>
     </div>
 
-    <!-- Activity -->
+    <!-- Quotations -->
     <div class="col-12 col-md-6 col-lg-4">
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Today</span>
+          <span class="fw-semibold">Quotations</span>
           <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Today')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/audit']" aria-label="View activity">
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Quotations')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/quotations']" aria-label="View quotations">
               <i class="bi bi-eye"></i>
             </button>
           </div>
         </div>
         <div class="card-body">
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let e of activity.today">
-              <span class="badge bg-secondary me-2">{{ e.type }}</span>{{ e.text }}
-              <span class="text-muted"> — {{ e.when }}</span>
-            </li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['activity'].last7d }}</div>
+          <div class="small text-muted">Proposals and estimates.</div>
         </div>
       </div>
     </div>
 
-    <!-- Other Sections -->
+    <!-- Marketplace -->
     <div class="col-12 col-md-6 col-lg-4">
       <div class="card h-100">
         <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Other Sections</span>
+          <span class="fw-semibold">Marketplace</span>
           <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Other Sections')">See more</button>
+            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Marketplace')">See more</button>
+            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/marketplace']" aria-label="View marketplace">
+              <i class="bi bi-eye"></i>
+            </button>
           </div>
         </div>
         <div class="card-body">
-          <ul class="list-unstyled small mb-0">
-            <li><span class="fw-semibold me-2">Define:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['define'].last7d }}</li>
-            <li><span class="fw-semibold me-2">Design:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['design'].last7d }}</li>
-            <li><span class="fw-semibold me-2">Quotations:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['quotations'].last7d }}</li>
-            <li><span class="fw-semibold me-2">Settings:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['settings'].last7d }}</li>
-            <li><span class="fw-semibold me-2">Project:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['project'].last7d }}</li>
-            <li><span class="fw-semibold me-2">Guardrails:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['guardrails'].last7d }}</li>
-            <li><span class="fw-semibold me-2">Stats:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['stats'].last7d }}</li>
-            <li><span class="fw-semibold me-2">Marketplace:</span> <i class="bi bi-robot me-1"></i> {{ agentCounts['marketplace'].last7d }}</li>
-          </ul>
+          <div class="small text-muted">Add-ons and integrations.</div>
         </div>
       </div>
     </div>
