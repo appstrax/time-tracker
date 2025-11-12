@@ -1,6 +1,7 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
+import { SplitPaneComponent } from '../../components/split-pane/split-pane.component';
 
 import { ToastService } from '@services';
 
@@ -9,9 +10,11 @@ import { ToastService } from '@services';
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, SplitPaneComponent],
 })
 export class HomePage {
+  isExpanded = false;
+  selectedSectionTitle: string | null = null;
   overview = { lastUpdated: '2h ago' };
   tickets = {
     open: 18,
@@ -103,4 +106,9 @@ export class HomePage {
   };
 
   constructor(private toast: ToastService) {}
+
+  openSectionDetail(title: string) {
+    this.selectedSectionTitle = title;
+    this.isExpanded = true;
+  }
 } 

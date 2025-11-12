@@ -26,3 +26,19 @@
   color: var(--text-primary);
 }
 
+.home-grid.grid-mode .row {
+  display: grid;
+  /* Use Bootstrap gutter variables set by g-classes for consistent spacing */
+  gap: var(--bs-gutter-y, 1rem) var(--bs-gutter-x, 1rem);
+  margin-left: 0;  /* neutralize Bootstrap row negative margins */
+  margin-right: 0;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* Reset Bootstrap column width constraints so grid can place items naturally */
+.home-grid.grid-mode .row > [class^='col-'],
+.home-grid.grid-mode .row > [class*=' col-'] {
+  width: auto;
+  max-width: none;
+}
+
