@@ -1,0 +1,34 @@
+.table {
+  font-size: 0.9rem;
+
+  th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--bs-secondary);
+  }
+
+  td {
+    vertical-align: middle;
+  }
+
+  .badge {
+    font-size: 0.75rem;
+  }
+}
+
+.table-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.sticky-top {
+  z-index: 10;
+}
+
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+

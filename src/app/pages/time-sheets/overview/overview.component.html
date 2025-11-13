@@ -4,21 +4,9 @@
   [collapseBreakpointPx]="1024"
   [collapsedOnSmallScreens]="true"
 >
-  <ng-container left>
-    <app-split-pane-vertical storageKey="split.timesheet-overview.left" [initialTopRatio]="0.7">
-      <ng-container top>
-        <app-chat
-          [suggestions]="timesheetSuggestions"
-          placeholder="Ask about timesheets, approvals, or reports..."
-        ></app-chat>
-      </ng-container>
-      <ng-container bottom>
-        <app-history></app-history>
-      </ng-container>
-    </app-split-pane-vertical>
-  </ng-container>
 
-  <ng-container right>
+
+  <ng-container left>
     <app-split-pane-vertical storageKey="split.timesheet-overview.right" [initialTopRatio]="0.6">
       <ng-container top>
         <div class="container-fluid py-3">
@@ -95,6 +83,7 @@
                   <app-project-dropdown
                     [selectedProject]="getSelectedProject()"
                     (projectSelected)="onProjectSelected($event)"
+                    [allowNull]="true"
                   ></app-project-dropdown>
                 </div>
                 <div class="col-md-2">
@@ -207,5 +196,11 @@
         <app-history></app-history>
       </ng-container>
     </app-split-pane-vertical>
+  </ng-container>
+  <ng-container right>
+    <app-unapproved-entries
+      [timeSheetEntries]="timeSheetEntries"
+      [canApprove]="canApprove"
+    ></app-unapproved-entries>
   </ng-container>
 </app-split-pane>

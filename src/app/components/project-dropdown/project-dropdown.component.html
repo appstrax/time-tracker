@@ -33,6 +33,20 @@
       [class.show]="isProjectDropdownOpen && !disabled"
       [attr.data-bs-popper]="isProjectDropdownOpen && !disabled ? 'static' : null"
     >
+      @if (allowNull) {
+      <li>
+        <button
+          class="dropdown-item d-flex align-items-center gap-2"
+          type="button"
+          (click)="onProjectSelected(null)"
+          [class.active]="selectedProject === null || selectedProject === undefined"
+          [disabled]="disabled"
+        >
+          <i class="bi bi-image proj-thumb-fallback"></i>
+          <span>Select a project</span>
+        </button>
+      </li>
+      }
       @for (project of projects(); track project.id) {
       <li>
         <button

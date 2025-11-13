@@ -23,7 +23,7 @@ import { ProjectDropdownComponent } from '@components';
   styleUrl: './time-sheet-entry.modal.scss',
   imports: [FormsModule, CommonModule, ProjectDropdownComponent],
 })
-export class TimeSheetEntryCrudComponent implements OnInit {
+export class TimeSheetEntryComponent implements OnInit {
   @Input() timeSheetEntry = new TimeSheetEntry();
   @Input() categories!: string[];
   @Input() date!: Date;
@@ -72,7 +72,11 @@ export class TimeSheetEntryCrudComponent implements OnInit {
     return `${formattedHours} ${formattedMinutes}`;
   }
 
-  onProjectSelected(project: Project): void {
+  onProjectSelected(project: Project | null): void {
+    if (!project) {
+      this.timeSheetEntry.projectId = '';
+      return;
+    }
     this.timeSheetEntry.projectId = project.id;
   }
 

@@ -12,10 +12,11 @@ import { Store } from '@state';
 })
 export class ProjectDropdownComponent {
 
-  @Input() selectedProject?: Project;
+  @Input() selectedProject?: Project | null;
   @Input() disabled: boolean = false;
+  @Input() allowNull: boolean = false;
 
-  @Output() projectSelected = new EventEmitter<Project>();
+  @Output() projectSelected = new EventEmitter<Project | null>();
 
   projects: Signal<Project[]>;
   isProjectDropdownOpen: boolean = false;
@@ -25,7 +26,7 @@ export class ProjectDropdownComponent {
     this.projects = this.store.projects.all;
   }
 
-  onProjectSelected(project: Project): void {
+  onProjectSelected(project: Project | null): void {
     this.selectedProject = project;
     this.projectSelected.emit(project);
     this.isProjectDropdownOpen = false;

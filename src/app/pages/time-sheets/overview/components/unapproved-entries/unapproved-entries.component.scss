@@ -1,0 +1,38 @@
+:host {
+  display: block;
+  height: 100%;
+}
+
+.table {
+  font-size: 0.9rem;
+
+  th {
+    font-weight: 600;
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    color: var(--bs-secondary);
+  }
+
+  td {
+    vertical-align: middle;
+  }
+}
+
+.table-warning {
+  background-color: rgba(255, 193, 7, 0.1);
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s;
+
+  &:hover {
+    background-color: rgba(255, 193, 7, 0.2) !important;
+  }
+}
+
+.sticky-top {
+  z-index: 10;
+}
+

@@ -1,11 +1,12 @@
 import { TemplateRef, Injectable, Type } from '@angular/core';
-import { Model } from '@appstrax/services/shared/models/model';
 import {
   NgbModal,
   NgbModalRef,
   NgbModalOptions,
 } from '@ng-bootstrap/ng-bootstrap';
-import { TimeSheetEntryCrudComponent, TimeSheetEntryModalOptions } from '../pages/time-sheets/modals/time-sheet-entry/time-sheet-entry.modal';
+import { TimeSheetEntryComponent, TimeSheetEntryModalOptions } from '../pages/time-sheets/modals/time-sheet-entry/time-sheet-entry.modal';
+import { UnapprovedEntriesModalComponent, UnapprovedEntriesModalOptions } from '../pages/time-sheets/modals/unapproved-entries/unapproved-entries.modal';
+
 
 
 @Injectable({ providedIn: 'root' })
@@ -31,7 +32,7 @@ export class ModalService {
   }
 
   public showTimeSheetEntryModal(options: TimeSheetEntryModalOptions): NgbModalRef {
-    const modalRef = this.modalService.open(TimeSheetEntryCrudComponent, {
+    const modalRef = this.modalService.open(TimeSheetEntryComponent, {
       centered: true,
       backdrop: 'static',
       keyboard: true
@@ -40,10 +41,15 @@ export class ModalService {
     return modalRef;
   }
 
-}
-
-export abstract class ModalCrudOptions<T extends Model> {
-  onSave(model: T): Promise<void> {
-    return Promise.resolve();
+  public showUnapprovedEntriesModal(options: UnapprovedEntriesModalOptions): NgbModalRef {
+    const modalRef = this.modalService.open(UnapprovedEntriesModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+      size: 'lg'
+    });
+    Object.assign(modalRef.componentInstance, options);
+    return modalRef;
   }
+
 }

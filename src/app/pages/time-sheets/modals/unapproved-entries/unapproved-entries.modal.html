@@ -1,0 +1,81 @@
+<div class="modal-header align-items-center d-flex justify-content-between">
+  <h4 class="modal-title text-white mb-0">Unapproved Time Entries</h4>
+  <button
+    type="button"
+    class="btn-close btn-close-white"
+    aria-label="Close"
+    (click)="close()"
+  ></button>
+</div>
+
+<div class="modal-body">
+  <div class="mb-3">
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      <div>
+        <strong>Date:</strong> {{ formatDate(date) }}
+      </div>
+      <div>
+        <strong>User:</strong> {{ getUserName(userId) }}
+      </div>
+      <div>
+        <strong>Total Hours:</strong> {{ formatHours(getTotalHours()) }}
+      </div>
+    </div>
+  </div>
+
+  <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+    <table class="table table-hover mb-0">
+      <thead class="table-light sticky-top">
+        <tr>
+          <th>Project</th>
+          <th>Hours</th>
+          <th>Category</th>
+          <th>Description</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let entry of entries" class="table-warning">
+          <td>
+            <span class="badge bg-secondary">{{ getProjectName(entry.projectId) }}</span>
+          </td>
+          <td>{{ formatHours(entry.hours) }}</td>
+          <td>
+            <span class="badge bg-info">{{ entry.category }}</span>
+          </td>
+          <td>
+            <span class="text-truncate d-inline-block" style="max-width: 200px;" [title]="entry.description">
+              {{ entry.description }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<div class="modal-footer d-flex justify-content-between">
+  <div></div>
+  <div>
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      (click)="close()"
+      [disabled]="isApproving"
+    >
+      Close
+    </button>
+    <button
+      type="button"
+      class="btn btn-success ms-3"
+      (click)="approveAll()"
+      [disabled]="isApproving"
+    >
+      <span *ngIf="isApproving" class="spinner-border spinner-border-sm me-2" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </span>
+      <i *ngIf="!isApproving" class="bi bi-check-circle me-1"></i>
+      Approve All ({{ entries.length }})
+    </button>
+  </div>
+</div>
+

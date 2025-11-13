@@ -6,8 +6,9 @@ import { Store } from '@state';
 import { TimeSheetEntry, Project, User } from '@models';
 import { OrgUserRoles, ProjectUserRoles } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
-import { ChatComponent, HistoryComponent, SplitPaneComponent, SplitPaneVerticalComponent } from '@components';
+import { HistoryComponent, SplitPaneComponent, SplitPaneVerticalComponent } from '@components';
 import { ProjectDropdownComponent } from '@components';
+import { UnapprovedEntriesComponent } from './components/unapproved-entries/unapproved-entries.component';
 import { appstraxAuth } from '@appstrax/services/auth';
 
 interface TimeSheetFilters {
@@ -34,11 +35,11 @@ interface SummaryMetrics {
   imports: [
     CommonModule,
     FormsModule,
-    ChatComponent,
     HistoryComponent,
     SplitPaneComponent,
     SplitPaneVerticalComponent,
     ProjectDropdownComponent,
+    UnapprovedEntriesComponent,
   ],
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.scss'

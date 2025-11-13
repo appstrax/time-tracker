@@ -1,18 +1,18 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TimeSheetEntryCrudComponent } from './time-sheet-entry.modal';
+import { TimeSheetEntryComponent } from './time-sheet-entry.modal';
 
-describe('TimeSheetEntryCrudComponent', () => {
-  let component: TimeSheetEntryCrudComponent;
-  let fixture: ComponentFixture<TimeSheetEntryCrudComponent>;
+describe('TimeSheetEntryComponent', () => {
+  let component: TimeSheetEntryComponent;
+  let fixture: ComponentFixture<TimeSheetEntryComponent>;
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimeSheetEntryCrudComponent]
+      imports: [TimeSheetEntryComponent]
     })
     .compileComponents();
 
-    fixture = TestBed.createComponent(TimeSheetEntryCrudComponent);
+    fixture = TestBed.createComponent(TimeSheetEntryComponent);
     component = fixture.componentInstance;
     fixture.detectChanges();
   });
