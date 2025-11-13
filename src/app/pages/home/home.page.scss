@@ -26,3 +26,42 @@
   color: var(--text-primary);
 }
 
+.section-heading {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: 8px;
+}
+
+.section-heading .pill {
+  height: 10px;
+  width: 10px;
+  border-radius: 50%;
+  background: var(--primary-color);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
+}
+
+.section-divider {
+  border: 0;
+  border-top: 1px solid var(--color-border);
+  margin: 18px 0;
+}
+
+.home-grid.grid-mode .row {
+  display: grid;
+  /* Use Bootstrap gutter variables set by g-classes for consistent spacing */
+  gap: var(--bs-gutter-y, 1rem) var(--bs-gutter-x, 1rem);
+  margin-left: 0;  /* neutralize Bootstrap row negative margins */
+  margin-right: 0;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+}
+
+/* Reset Bootstrap column width constraints so grid can place items naturally */
+.home-grid.grid-mode .row > [class^='col-'],
+.home-grid.grid-mode .row > [class*=' col-'] {
+  width: auto;
+  max-width: none;
+}
+

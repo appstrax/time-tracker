@@ -9,6 +9,8 @@ export class ThemeService {
   private static readonly THEME_CUSTOM_VARS_KEY = 'app.theme.custom.vars';
   private prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)');
   private systemListener?: (this: MediaQueryList, ev: MediaQueryListEvent) => any;
+  // If true, 'system' mode mirrors OS preference; if false, we use branded dark
+  private readonly useOsPreferenceForSystem = false;
 
   private currentThemeSubject = new BehaviorSubject<ThemeMode>('light');
   currentTheme$ = this.currentThemeSubject.asObservable();
@@ -30,7 +32,9 @@ export class ThemeService {
 
   private applyTheme(mode: ThemeMode, customVars?: Record<string, string>) {
     const htmlEl = document.documentElement;
-    const effectiveBase = mode === 'system' ? (this.prefersDark?.matches ? 'dark' : 'light') : mode;
+    const effectiveBase = mode === 'system'
+      ? (this.useOsPreferenceForSystem ? (this.prefersDark?.matches ? 'dark' : 'light') : 'dark')
+      : mode;
     htmlEl.setAttribute('data-theme', effectiveBase === 'custom' ? 'light' : effectiveBase);
 
     // Manage system listener
@@ -38,7 +42,7 @@ export class ThemeService {
       this.prefersDark.removeEventListener('change', this.systemListener);
       this.systemListener = undefined;
     }
-    if (mode === 'system' && this.prefersDark) {
+    if (mode === 'system' && this.prefersDark && this.useOsPreferenceForSystem) {
       this.systemListener = () => {
         const nowDark = this.prefersDark!.matches;
         htmlEl.setAttribute('data-theme', nowDark ? 'dark' : 'light');
@@ -54,17 +58,29 @@ export class ThemeService {
       styleEl.id = styleId;
       document.head.appendChild(styleEl);
     }
-    const vars = mode === 'custom' && customVars ? customVars : this.getStoredCustomVars();
-    styleEl.textContent = this.buildVarsCss(vars);
+    let vars: Record<string, string> = {};
+    let selector = ':root';
+    if (mode === 'custom' && customVars) {
+      vars = customVars;
+    } else if (mode === 'system' && !this.useOsPreferenceForSystem) {
+      // Branded dark: keep dark base tokens but override primary to gold palette
+      vars = this.getBrandedSystemVars();
+      selector = ':root[data-theme="dark"]';
+    } else {
+      // In light/dark (and system with OS preference), do not apply any custom overrides
+      vars = {};
+      selector = ':root';
+    }
+    styleEl.textContent = this.buildVarsCss(vars, selector);
 
     this.currentThemeSubject.next(mode);
   }
 
-  private buildVarsCss(vars: Record<string, string>): string {
+  private buildVarsCss(vars: Record<string, string>, selector = ':root'): string {
     const entries = Object.entries(vars);
     if (!entries.length) return '';
     const body = entries.map(([k, v]) => `${k}: ${v};`).join(' ');
-    return `:root { ${body} }`;
+    return `${selector} { ${body} }`;
   }
 
   getStoredCustomVars(): Record<string, string> {
@@ -74,6 +90,29 @@ export class ThemeService {
     } catch {
       return {};
     }
+  }
+
+  clearCustomVars() {
+    try {
+      localStorage.removeItem(ThemeService.THEME_CUSTOM_VARS_KEY);
+      const styleEl = document.getElementById('theme-vars') as HTMLStyleElement | null;
+      if (styleEl) styleEl.textContent = '';
+    } catch {}
+  }
+
+  private getBrandedSystemVars(): Record<string, string> {
+    // Gold accents inspired by the brand logo; dark theme base remains from CSS tokens
+    const goldPrimary = '#bfa25a';       // softer, less glaring gold
+    const goldPrimaryDark = '#8e793b';   // muted dark gold for titles/accents
+    const goldPrimaryLight = '#cbb072';  // subtle lighter shade
+    return {
+      '--color-primary': goldPrimary,
+      '--color-primary-contrast': '#0f0f10',
+      '--primary-color': goldPrimary,
+      '--primary-color-dark': goldPrimaryDark,
+      '--primary-color-light': `color-mix(in srgb, ${goldPrimary} 6%, transparent)`,
+      '--bs-primary': goldPrimary,
+    };
   }
 }
 

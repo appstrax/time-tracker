@@ -65,11 +65,13 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   navItems: NavItem[] = [
     { title: 'Define', icon: 'bi bi-pencil-square', route: '/define' },
     { title: 'Design', icon: 'bi bi-palette', route: '/design' },
+    { title: 'DB Design', icon: 'bi bi-database', route: '/db-design' },
     { title: 'Tickets', icon: 'bi bi-ticket-perforated', route: '/tickets' },
     { title: 'Repos', icon: 'bi bi-github', route: '/repos' },
     { title: 'Code', icon: 'bi bi-code-square', route: '/code' },
     { title: 'Testing', icon: 'bi bi-robot', route: '/testing' },
     { title: 'Billing', icon: 'bi bi-credit-card', route: '/billing' },
+    { title: 'Workspace', icon: 'bi bi-collection', route: '/workspace' },
     { title: 'Quotations', icon: 'bi bi-file-earmark-text', route: '/quotations' },
     { title: 'User Management', icon: 'bi bi-people', route: '/users' },
     { title: 'Documentation', icon: 'bi bi-file-text', route: '/docs' },

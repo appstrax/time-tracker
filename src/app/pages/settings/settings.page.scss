@@ -61,8 +61,8 @@
 .tile-visual.dark .tile-header { background: #333; }
 .tile-visual.dark .tile-body { background: #111; }
 
-.tile-visual.system .tile-header { background: linear-gradient(90deg, #f0f0f0 50%, #333 50%); }
-.tile-visual.system .tile-body { background: linear-gradient(90deg, #fff 50%, #111 50%); }
+.tile-visual.system .tile-header { background: linear-gradient(90deg, #bfa25a 0%, #8e793b 100%); }
+.tile-visual.system .tile-body { background: #111; }
 
 .tile-visual.custom .tile-header { background: var(--color-primary); }
 .tile-visual.custom .tile-body { background: var(--color-bg); }

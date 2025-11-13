@@ -10,18 +10,37 @@
   </div>
 
   <div class="menu">
-    <div class="group pt-2" *ngFor="let group of groups">
-      <button type="button" class="menu-item group-header" [class.active-group]="isGroupActive(group) && !expandedState[group.key]" (click)="toggleGroup(group.key)">
-        <span class="label">{{ group.title }}</span>
-        <i class="bi bi-chevron-right" [class.rotate]="expandedState[group.key]"></i>
-      </button>
-      <div class="group-items" *ngIf="expandedState[group.key]">
-        <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" *ngFor="let item of group.items">
-          <i [class]="item.icon"></i>
-          <span class="label">{{ item.title }}</span>
-        </a>
+    <ng-container *ngIf="projectGroups.length">
+      <div class="group-title project-section">Project</div>
+      <div class="group pt-2" *ngFor="let group of projectGroups">
+        <button type="button" class="menu-item group-header" [class.active-group]="isGroupActive(group) && !expandedState[group.key]" (click)="toggleGroup(group.key)">
+          <span class="label">{{ group.title }}</span>
+          <i class="bi bi-chevron-right" [class.rotate]="expandedState[group.key]"></i>
+        </button>
+        <div class="group-items" *ngIf="expandedState[group.key]">
+          <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" *ngFor="let item of group.items">
+            <i [class]="item.icon"></i>
+            <span class="label">{{ item.title }}</span>
+          </a>
+        </div>
       </div>
-    </div>
+    </ng-container>
+
+    <ng-container *ngIf="organizationGroups.length">
+      <div class="group-title org-section">Organization</div>
+      <div class="group pt-2" *ngFor="let group of organizationGroups">
+        <button type="button" class="menu-item group-header" [class.active-group]="isGroupActive(group) && !expandedState[group.key]" (click)="toggleGroup(group.key)">
+          <span class="label">{{ group.title }}</span>
+          <i class="bi bi-chevron-right" [class.rotate]="expandedState[group.key]"></i>
+        </button>
+        <div class="group-items" *ngIf="expandedState[group.key]">
+          <a [routerLink]="item.route" routerLinkActive="active" class="menu-item" *ngFor="let item of group.items">
+            <i [class]="item.icon"></i>
+            <span class="label">{{ item.title }}</span>
+          </a>
+        </div>
+      </div>
+    </ng-container>
   </div>
 
   <div class="footer">

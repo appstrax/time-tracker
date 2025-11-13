@@ -9,8 +9,8 @@ import { HomePage, DocsPage, ReposPage, UsersPage } from '@pages';
 import { ForgotPasswordPage, CreateOrganizationPage } from '@pages';
 import { AuditPage, StatsPage, DefinePage, DevopsPage } from '@pages';
 import { TicketsPage, BillingPage, QualityPage, CodePage } from '@pages';
-import { SettingsPage, DesignPage, QuotationsPage, KpisPage } from '@pages';
-import { BasePage, ProjectPage, ProfilePage, MarketplacePage } from '@pages';
+import { SettingsPage, DesignPage, DbDesignPage, QuotationsPage, KpisPage } from '@pages';
+import { BasePage, ProjectPage, ProfilePage, MarketplacePage, WorkspacePage } from '@pages';
 import { TestingPage, CompliancePage, GuardrailsPage, ContactPage } from '@pages';
 import { OverviewComponent } from '@pages';
 
@@ -31,8 +31,13 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        data: { breadcrumb: 'Project Summary' },
+        data: { breadcrumb: 'Summary' },
         component: HomePage,
+      },
+      {
+        path: 'workspace',
+        data: { breadcrumb: 'Workspace' },
+        component: WorkspacePage,
       },
       { path: 'audit', data: { breadcrumb: 'Audit' }, component: AuditPage },
       {
@@ -69,6 +74,11 @@ export const routes: Routes = [
         path: 'design',
         data: { breadcrumb: 'Project Design' },
         component: DesignPage,
+      },
+      {
+        path: 'db-design',
+        data: { breadcrumb: 'DB Design' },
+        component: DbDesignPage,
       },
       {
         path: 'devops',
