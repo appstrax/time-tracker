@@ -26,19 +26,36 @@ export class WorkspacePage {
 
   filteredProjects = computed(() => {
     const q = (this.search() || '').toLowerCase();
-    if (!q) return this.projects();
-    return this.projects().filter((p: any) =>
-      [p?.name, p?.description].some((v: string) => (v || '').toLowerCase().includes(q))
-    );
+    const items = this.projects().map((p) => ({
+      project: p,
+      orgName: (this.getOrganizationNameForProject(p.id) || '').toLowerCase(),
+    }));
+    const filtered = q
+      ? items.filter(({ project, orgName }) =>
+          [project?.name, project?.description, orgName].some((v: string) =>
+            (v || '').toLowerCase().includes(q)
+          )
+        )
+      : items;
+    filtered.sort((a, b) => {
+      const byOrg = a.orgName.localeCompare(b.orgName);
+      if (byOrg !== 0) return byOrg;
+      return (a.project.name || '').localeCompare(b.project.name || '');
+    });
+    return filtered.map((x) => x.project);
   });
 
   filteredOrganizations = computed(() => {
     const q = (this.search() || '').toLowerCase();
-    if (!q) return this.organizations();
-    return this.organizations().filter((o: any) =>
-      [o?.name, o?.email, o?.website, o?.city, o?.country]
-        .some((v: string) => (v || '').toLowerCase().includes(q))
-    );
+    const items = this.organizations();
+    const filtered = q
+      ? items.filter((o: any) =>
+          [o?.name, o?.email, o?.website, o?.city, o?.country]
+            .some((v: string) => (v || '').toLowerCase().includes(q))
+        )
+      : items.slice();
+    filtered.sort((a: any, b: any) => (a?.name || '').localeCompare(b?.name || ''));
+    return filtered;
   });
 
   constructor(
