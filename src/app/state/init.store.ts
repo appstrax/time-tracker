@@ -6,7 +6,6 @@ import { ProjectUsersStore, OrganizationProjectsStore } from '@state';
 
 @Injectable({ providedIn: 'root' })
 export class Store {
-  // selected context shared across app
   selectedProjectId = signal<string | null>(null);
   selectedOrganizationId = signal<string | null>(null);
 

@@ -4,7 +4,6 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { Organization, OrganizationUsers, OrgUserRoles } from '@models';
-import { OrganizationUsersService } from '@services';
 
 import { appstraxAuth, User } from '@appstrax/services/auth';
 import { appstraxStorage } from '@appstrax/services/storage';
@@ -32,7 +31,6 @@ export class CreateOrganizationPage {
     private store: Store,
     private router: Router,
     private route: ActivatedRoute,
-    private organizationUsersService: OrganizationUsersService
   ) {
     const from = this.route.snapshot.queryParamMap.get('from');
     this.backLink = from === 'home' ? '/home' : '/sign-up';
@@ -61,7 +59,7 @@ export class CreateOrganizationPage {
       this.orgUser.userId = user.id;
       this.orgUser.role = OrgUserRoles.ADMIN;
 
-      this.orgUser = await this.organizationUsersService.save(this.orgUser);
+      this.orgUser = await this.store.orgUsers.save(this.orgUser);
 
       if (this.organization && this.orgUser) {
         this.router.navigate(['/create-project'], {

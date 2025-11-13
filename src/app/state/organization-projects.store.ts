@@ -2,7 +2,7 @@ import { computed, inject } from '@angular/core';
 
 import { signalStore, withState, withMethods, withComputed, patchState } from '@ngrx/signals';
 
-import { Operator } from '@appstrax/services/database';
+import { FetchQuery, FindResultDto, Operator } from '@appstrax/services/database';
 
 import { OrganizationProjects } from '@models';
 import { OrganizationProjectsService } from '@services';
@@ -73,6 +73,25 @@ export const OrganizationProjectsStore = signalStore(
     },
     setError(error: string | null) {
       patchState(store, { error });
+    },
+    async find(query?: FetchQuery): Promise<FindResultDto<OrganizationProjects>> {
+      const res = await orgProjectsService.find(query);
+      patchState(store, (state) => upsertMany(state, res.data ?? []));
+      return res;
+    },
+    async findById(id: string): Promise<OrganizationProjects> {
+      const res = await orgProjectsService.findById(id);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async save(entity: OrganizationProjects): Promise<OrganizationProjects> {
+      const res = await orgProjectsService.save(entity);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async delete(id: string): Promise<void> {
+      await orgProjectsService.delete(id);
+      patchState(store, (state) => removeOne(state, id));
     },
   }))
 );

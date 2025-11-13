@@ -5,8 +5,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { appstraxAuth, User } from '@appstrax/services/auth';
 import { appstraxStorage } from '@appstrax/services/storage';
 
-import { ProjectService, ProjectUsersService } from '@services';
-import { OrganizationProjectsService, ToastService } from '@services';
+import { ToastService } from '@services';
 
 import { Project, ProjectUsers } from '@models';
 import { Organization, OrganizationProjects } from '@models';
@@ -45,9 +44,6 @@ export class CreateProjectPage implements OnInit {
     private router: Router,
     private toast: ToastService,
     private route: ActivatedRoute,
-    private projectService: ProjectService,
-    private projectUsersService: ProjectUsersService,
-    private orgProjectsService: OrganizationProjectsService
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -171,19 +167,19 @@ export class CreateProjectPage implements OnInit {
       const user: User = await appstraxAuth.getUser();
       if (this.logoFile) await this.uploadProjectLogo(this.logoFile);
 
-      this.project = await this.projectService.save(this.project);
+      this.project = await this.store.projects.save(this.project);
 
       this.projectUser.projectId = this.project.id;
       this.projectUser.userId = user.id;
       this.projectUser.role = ProjectUserRoles.ADMIN;
 
-      this.projectUser = await this.projectUsersService.save(this.projectUser);
+      this.projectUser = await this.store.projUsers.save(this.projectUser);
 
       this.orgProject.projectId = this.project.id;
       this.orgProject.organizationId = this.organization.id;
       this.orgProject.role = ProjectOrgRoles.PROVIDER;
 
-      this.orgProject = await this.orgProjectsService.save(this.orgProject);
+      this.orgProject = await this.store.orgProjects.save(this.orgProject);
 
       if (this.project && this.projectUser && this.orgProject) {
         this.toast.success('Project created successfully', 'Success');

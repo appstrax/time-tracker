@@ -5,6 +5,7 @@ import { signalStore, withState, withMethods, withComputed, patchState } from '@
 import { OrganizationUsers } from '@models';
 import { OrganizationUsersService } from '@services';
 import { EntityState, createEmptyEntityState, upsertMany, upsertOne, removeOne } from '@state';
+import { FetchQuery, FindResultDto } from '@appstrax/services/database';
 
 interface OrganizationUsersState extends EntityState<OrganizationUsers> {}
 
@@ -68,6 +69,25 @@ export const OrganizationUsersStore = signalStore(
     },
     setError(error: string | null) {
       patchState(store, { error });
+    },
+    async find(query?: FetchQuery): Promise<FindResultDto<OrganizationUsers>> {
+      const res = await orgUsersService.find(query);
+      patchState(store, (state) => upsertMany(state, res.data ?? []));
+      return res;
+    },
+    async findById(id: string): Promise<OrganizationUsers> {
+      const res = await orgUsersService.findById(id);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async save(entity: OrganizationUsers): Promise<OrganizationUsers> {
+      const res = await orgUsersService.save(entity);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async delete(id: string): Promise<void> {
+      await orgUsersService.delete(id);
+      patchState(store, (state) => removeOne(state, id));
     },
   }))
 );
