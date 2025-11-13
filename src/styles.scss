@@ -145,6 +145,16 @@ select:-webkit-autofill {
   color: var(--color-primary-contrast) !important;
 }
 
+/* Ensure outline-primary matches across active/focus-visible/show states */
+.btn-outline-primary:active,
+.btn-outline-primary.active,
+.btn-outline-primary.show,
+.btn-outline-primary:focus-visible {
+  background-color: var(--primary-color) !important;
+  border-color: var(--primary-color) !important;
+  color: var(--color-primary-contrast) !important;
+}
+
 /* Token-based surfaces for cards/utilities */
 .bg-white { background-color: var(--color-surface) !important; }
 .card { background-color: var(--color-surface); border-color: var(--color-border); }

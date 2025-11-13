@@ -21,6 +21,9 @@ export class WorkspacePage {
   organizations!: Signal<Organization[]>;
   orgProjects!: Signal<OrganizationProjects[]>;
 
+  private projectUserCounts: Record<string, number> = {};
+  private orgUserCounts: Record<string, number> = {};
+
   filteredProjects = computed(() => {
     const q = (this.search() || '').toLowerCase();
     if (!q) return this.projects();
@@ -50,6 +53,27 @@ export class WorkspacePage {
         this.activeTab = 'organizations';
       }
     });
+    // Preload user counts for visible entities
+    effect(() => {
+      // Project user counts
+      for (const p of this.projects()) {
+        if (!this.projectUserCounts[p.id]) {
+          this.store.projUsers
+            .find({ where: { projectId: p.id } as any })
+            .then((res) => (this.projectUserCounts[p.id] = (res.data || []).length))
+            .catch(() => (this.projectUserCounts[p.id] = 0));
+        }
+      }
+      // Organization user counts
+      for (const o of this.organizations()) {
+        if (!this.orgUserCounts[o.id]) {
+          this.store.orgUsers
+            .find({ where: { organizationId: o.id } as any })
+            .then((res) => (this.orgUserCounts[o.id] = (res.data || []).length))
+            .catch(() => (this.orgUserCounts[o.id] = 0));
+        }
+      }
+    });
   }
 
   setCurrentProject(projectId: string) {
@@ -68,6 +92,25 @@ export class WorkspacePage {
     } catch {
       return 0;
     }
+  }
+
+  getOrganizationNameForProject(projectId: string): string {
+    try {
+      const mapping = this.orgProjects().find((op) => op.projectId === projectId);
+      if (!mapping) return '';
+      const org = this.organizations().find((o) => o.id === mapping.organizationId);
+      return org?.name || '';
+    } catch {
+      return '';
+    }
+  }
+
+  getUserCountForProject(projectId: string): number {
+    return this.projectUserCounts[projectId] ?? 0;
+  }
+
+  getUserCountForOrganization(orgId: string): number {
+    return this.orgUserCounts[orgId] ?? 0;
   }
 
   async deleteProject(projectId: string) {

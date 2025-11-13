@@ -55,6 +55,9 @@ export class CreateProjectPage implements OnInit {
     if (this.organizations.length === 1) {
       this.organization = this.organizations[0];
     }
+
+    // Default: enable all project features for ease of use
+    this.setAllFeatures(true);
   }
 
   public onOrganizationChanged(organizationId: string) {
@@ -91,8 +94,6 @@ export class CreateProjectPage implements OnInit {
     type FeatureKey =
       | 'ticketManagement'
       | 'repoManagement'
-      | 'billingManagement'
-      | 'userManagement'
       | 'documentationManagement'
       | 'complianceManagement'
       | 'devOpsManagement'
@@ -105,8 +106,6 @@ export class CreateProjectPage implements OnInit {
     const featureKeys: FeatureKey[] = [
       'ticketManagement',
       'repoManagement',
-      'billingManagement',
-      'userManagement',
       'documentationManagement',
       'complianceManagement',
       'devOpsManagement',
@@ -125,8 +124,6 @@ export class CreateProjectPage implements OnInit {
     type FeatureKey =
       | 'ticketManagement'
       | 'repoManagement'
-      | 'billingManagement'
-      | 'userManagement'
       | 'documentationManagement'
       | 'complianceManagement'
       | 'devOpsManagement'
@@ -139,8 +136,6 @@ export class CreateProjectPage implements OnInit {
     const featureKeys: FeatureKey[] = [
       'ticketManagement',
       'repoManagement',
-      'billingManagement',
-      'userManagement',
       'documentationManagement',
       'complianceManagement',
       'devOpsManagement',
@@ -220,8 +215,6 @@ export class CreateProjectPage implements OnInit {
     return (
       this.project.ticketManagement &&
       this.project.repoManagement &&
-      this.project.billingManagement &&
-      this.project.userManagement &&
       this.project.documentationManagement &&
       this.project.complianceManagement &&
       this.project.devOpsManagement &&
