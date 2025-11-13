@@ -2,17 +2,17 @@ import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
+import { appstraxAuth, User } from '@appstrax/services/auth';
+import { appstraxStorage } from '@appstrax/services/storage';
 
 import { ProjectService, ProjectUsersService } from '@services';
-import { UserService, OrganizationProjectsService } from '@services';
-import { ToastService } from '../../../services/toast.service';
+import { OrganizationProjectsService, ToastService } from '@services';
 
 import { Project, ProjectUsers } from '@models';
 import { Organization, OrganizationProjects } from '@models';
 import { OrganizationUsers, ProjectOrgRoles, ProjectUserRoles } from '@models';
 
-import { appstraxAuth, User } from '@appstrax/services/auth';
-import { appstraxStorage } from '@appstrax/services/storage';
+import { Store } from '@state';
 
 @Component({
   selector: 'app-create-project',
@@ -32,7 +32,7 @@ export class CreateProjectPage implements OnInit {
 
   step: number = 1;
   errorMessage: string = '';
- 
+
   isLoading: boolean = false;
   allFeaturesEnabled: boolean = false;
 
@@ -41,37 +41,23 @@ export class CreateProjectPage implements OnInit {
   backLink: string = '/create-organization';
 
   constructor(
+    private store: Store,
     private router: Router,
     private toast: ToastService,
     private route: ActivatedRoute,
-    private userService: UserService,
     private projectService: ProjectService,
     private projectUsersService: ProjectUsersService,
-    private orgProjectsService: OrganizationProjectsService,
+    private orgProjectsService: OrganizationProjectsService
   ) {}
 
   async ngOnInit(): Promise<void> {
     const from = this.route.snapshot.queryParamMap.get('from');
     this.backLink = from === 'home' ? '/home' : '/create-organization';
-    await this.getUserOrganizations();
+
+    this.organizations = this.store.organizations.all();
+
     if (this.organizations.length === 1) {
       this.organization = this.organizations[0];
-    }
-  }
-
-  public async getUserOrganizations(): Promise<void> {
-    this.isLoading = true;
-    try {
-      const user: User = await appstraxAuth.getUser();
-      const result = await this.userService.getUserOrganizations(user.id);
-      this.organizations = result;
-      if (this.organizations.length === 1) {
-        this.organization = this.organizations[0];
-      }
-    } catch (error: any) {
-      this.errorMessage = error.message;
-    } finally {
-      this.isLoading = false;
     }
   }
 

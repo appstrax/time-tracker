@@ -6,8 +6,7 @@ import { ProjectUsersStore, OrganizationProjectsStore } from '@state';
 
 @Injectable({ providedIn: 'root' })
 export class Store {
-  isInitialized = signal(false);
-  // Selected context shared across app
+  // selected context shared across app
   selectedProjectId = signal<string | null>(null);
   selectedOrganizationId = signal<string | null>(null);
 
@@ -19,8 +18,6 @@ export class Store {
   public projects = inject(ProjectsStore);
 
   async init(): Promise<void> {
-    if (this.isInitialized()) return;
-    this.isInitialized.set(false);
     try {
       await this.userStore.loadCurrent();
       const userId = this.userStore.current()?.id ?? '';
@@ -40,8 +37,6 @@ export class Store {
       await this.orgProjects.loadByProjectIds(projectIds);
     } catch (e: any) {
       throw e;
-    } finally {
-      this.isInitialized.set(true);
     }
   }
 }

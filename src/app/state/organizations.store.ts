@@ -1,12 +1,28 @@
 import { computed, inject } from '@angular/core';
 
-import { signalStore, withState, withMethods, withComputed, patchState } from '@ngrx/signals';
+import {
+  signalStore,
+  withState,
+  withMethods,
+  withComputed,
+  patchState,
+} from '@ngrx/signals';
 
-import { Operator } from '@appstrax/services/database';
+import {
+  FetchQuery,
+  FindResultDto,
+  Operator,
+} from '@appstrax/services/database';
 
 import { Organization } from '@models';
 import { OrganizationService } from '@services';
-import { EntityState, createEmptyEntityState, upsertMany, upsertOne, removeOne } from '@state';
+import {
+  EntityState,
+  createEmptyEntityState,
+  upsertMany,
+  upsertOne,
+  removeOne,
+} from '@state';
 
 interface OrganizationsState extends EntityState<Organization> {}
 
@@ -23,12 +39,14 @@ export const OrganizationsStore = signalStore(
       patchState(store, { loading: true, error: null });
       try {
         const res = await organizationService.find({
-          where: { id: { [Operator.IN]: Array.from(new Set(ids)) } }
+          where: { id: { [Operator.IN]: Array.from(new Set(ids)) } },
         });
         const orgs = (res.data ?? []) as Organization[];
         patchState(store, (state) => upsertMany(state, orgs));
       } catch (e: any) {
-        patchState(store, { error: e?.message ?? 'Failed to load organizations' });
+        patchState(store, {
+          error: e?.message ?? 'Failed to load organizations',
+        });
       } finally {
         patchState(store, { loading: false });
       }
@@ -56,7 +74,24 @@ export const OrganizationsStore = signalStore(
     setError(error: string | null) {
       patchState(store, { error });
     },
+    async find(query?: FetchQuery): Promise<FindResultDto<Organization>> {
+      const res = await organizationService.find(query);
+      patchState(store, (state) => upsertMany(state, res.data ?? []));
+      return res;
+    },
+    async findById(id: string): Promise<Organization> {
+      const res = await organizationService.findById(id);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async save(entity: Organization): Promise<Organization> {
+      const res = await organizationService.save(entity);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async delete(id: string): Promise<void> {
+      await organizationService.delete(id);
+      patchState(store, (state) => removeOne(state, id));
+    },
   }))
 );
-
-

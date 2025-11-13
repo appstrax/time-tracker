@@ -20,8 +20,4 @@ import { ToastContainerComponent } from '../../components/toast-container/toast-
     ToastContainerComponent,
   ],
 })
-export class BasePage {
-  constructor(private store: Store) {
-    this.store.init();
-  }
-}
+export class BasePage {}

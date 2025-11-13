@@ -7,6 +7,7 @@ import { Router } from '@angular/router';
 import { appstraxAuth, AuthStatus } from '@appstrax/services/auth';
 import { AuthResult } from '@appstrax/services/auth/models/auth_result';
 import { AuthErrors } from '@appstrax/services/auth/models/auth_result';
+import { Store } from '@state';
 
 @Component({
   selector: 'app-sign-up',
@@ -20,7 +21,7 @@ export class SignupPage {
   errorMessage: string = '';
   isLoading: boolean = false;
 
-  constructor(private router: Router) {}
+  constructor(private router: Router, private store: Store) {}
 
   public async register() {
     if (!this.isFormValid()) {
@@ -50,6 +51,8 @@ export class SignupPage {
         },
       });
       if (result.status == AuthStatus.authenticated) {
+        this.store.userStore.setCurrentFromAuthUser(result.user!);
+
         await appstraxAuth.sendEmailVerificationCode();
         this.router.navigate(['/verify-email']);
       }
