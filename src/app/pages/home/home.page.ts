@@ -18,6 +18,8 @@ export class HomePage implements OnInit {
   selectedSectionTitle: string | null = null;
   currentProjectName: string = '—';
   currentOrganizationName: string = '—';
+  collapseProjects: boolean = false;
+  collapseOrganizations: boolean = false;
   overview = { lastUpdated: '2h ago' };
   tickets = {
     open: 18,

@@ -14,6 +14,14 @@
   border: 1px solid rgba(0,0,0,0.06);
 }
 
+/* Collapse-all behavior for sections */
+.home-grid .section-collapsed .card .card-body {
+  display: none;
+}
+.home-grid .section-collapsed .card-header {
+  border-bottom-color: transparent;
+}
+
 /* Ensure muted/secondary text is readable in dark mode */
 .home-grid .text-muted,
 .home-grid .card .text-muted,

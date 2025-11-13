@@ -33,8 +33,16 @@
     <div class="section-heading">
       <span class="pill"></span>
       <h4 class="m-0">Project: {{ currentProjectName }}</h4>
+      <button
+        class="btn btn-sm btn-outline-secondary ms-auto"
+        (click)="collapseProjects = !collapseProjects"
+        [attr.aria-label]="collapseProjects ? 'Expand all project cards' : 'Collapse all project cards'"
+        title="{{ collapseProjects ? 'Expand all' : 'Collapse all' }}"
+      >
+        <i class="bi" [ngClass]="collapseProjects ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+      </button>
     </div>
-    <div class="row g-3">
+    <div class="row g-3" [class.section-collapsed]="collapseProjects">
     <!-- Overview -->
     <div class="col-12 col-md-6 col-lg-4">
       <div class="card h-100">
@@ -390,8 +398,16 @@
     <div class="section-heading">
       <span class="pill"></span>
       <h4 class="m-0">Organization: {{ currentOrganizationName }}</h4>
+      <button
+        class="btn btn-sm btn-outline-secondary ms-auto"
+        (click)="collapseOrganizations = !collapseOrganizations"
+        [attr.aria-label]="collapseOrganizations ? 'Expand all organization cards' : 'Collapse all organization cards'"
+        title="{{ collapseOrganizations ? 'Expand all' : 'Collapse all' }}"
+      >
+        <i class="bi" [ngClass]="collapseOrganizations ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
+      </button>
     </div>
-    <div class="row g-3">
+    <div class="row g-3" [class.section-collapsed]="collapseOrganizations">
     <!-- Users -->
     <div class="col-12 col-md-6 col-lg-4">
       <div class="card h-100">
