@@ -43,7 +43,8 @@ export class FilterViewContainerComponent implements OnInit, OnChanges {
     startDate: null,
     endDate: null,
     status: 'all',
-    category: null,
+    category: '',
+    userId: '',
   };
   @Input() selectedProject: Project | null = null;
   @Input() canApprove: boolean = false;
@@ -52,8 +53,8 @@ export class FilterViewContainerComponent implements OnInit, OnChanges {
   @Output() filtersChange = new EventEmitter<TimeSheetFilterState>();
   @Output() dateRangeChange = new EventEmitter<'week' | 'month' | 'year' | 'all' | 'custom'>();
   @Output() statusChange = new EventEmitter<'all' | 'approved' | 'pending'>();
-  @Output() categoryChange = new EventEmitter<string | null>();
-  @Output() userChange = new EventEmitter<string | null>();
+  @Output() categoryChange = new EventEmitter<string>();
+  @Output() userChange = new EventEmitter<string>();
   @Output() projectSelected = new EventEmitter<Project | null>();
   @Output() refreshRequested = new EventEmitter<void>();
   @Output() approveAllRequested = new EventEmitter<void>();
@@ -65,7 +66,6 @@ export class FilterViewContainerComponent implements OnInit, OnChanges {
     { value: 'summary', label: 'Summary', icon: 'bi-bar-chart', description: 'Totals by project' },
     { value: 'details', label: 'Details', icon: 'bi-list-check', description: 'Grouped by day' },
     { value: 'timeline', label: 'Timeline', icon: 'bi-calendar-event', description: 'Daily totals' },
-    { value: 'byUser', label: 'By User', icon: 'bi-people', description: 'Grouped by user' },
     { value: 'unapproved', label: 'Unapproved', icon: 'bi-exclamation-triangle', description: 'Pending items' },
   ];
 
@@ -165,12 +165,12 @@ export class FilterViewContainerComponent implements OnInit, OnChanges {
 
   public onCategoryChange(): void {
     this.filtersChange.emit({ ...this.filters });
-    this.categoryChange.emit(this.filters.category || null);
+    this.categoryChange.emit(this.filters.category ?? '');
   }
 
   public onUserChange(): void {
     this.filtersChange.emit({ ...this.filters });
-    this.userChange.emit(this.filters.userId || null);
+    this.userChange.emit(this.filters.userId ?? '');
   }
 
   public onProjectSelected(project: Project | null): void {

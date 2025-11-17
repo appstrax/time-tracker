@@ -10,18 +10,18 @@ import { SplitPaneComponent, SplitPaneVerticalComponent } from '@components';
 import { OrganizationSelectorComponent } from './components/organization-selector/organization-selector.component';
 import { FilterViewContainerComponent } from './components/filter-view-container/filter-view-container.component';
 import { SummaryMetricsComponent, SummaryMetrics } from './components/summary-metrics/summary-metrics.component';
-import { appstraxAuth } from '@appstrax/services/auth';
+import { appstraxAuth, Operator } from '@appstrax/services/auth';
 import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
 
 interface TimeSheetFilters {
   organizationId: string | null;
   projectId: string | null;
-  userId: string | null;
+  userId: string;
   status: 'all' | 'approved' | 'pending';
   dateRange: 'week' | 'month' | 'year' | 'all' | 'custom';
   startDate: Date | null;
   endDate: Date | null;
-  category: string | null;
+  category: string;
 }
 
 
@@ -59,12 +59,12 @@ export class OverviewComponent implements OnInit {
   public filters: TimeSheetFilters = {
     organizationId: null,
     projectId: null,
-    userId: null,
+    userId: '',
     status: 'all',
     dateRange: 'month',
     startDate: null,
     endDate: null,
-    category: null,
+    category: '',
   };
 
   public summaryMetrics: SummaryMetrics = {
@@ -74,13 +74,6 @@ export class OverviewComponent implements OnInit {
     projectsCount: 0,
     organizationsCount: 0,
   };
-
-  public timesheetSuggestions: any[] = [
-    { icon: 'bi bi-clock-history', prompt: 'Show my time entries for this week' },
-    { icon: 'bi bi-check-circle', prompt: 'Approve all pending time entries' },
-    { icon: 'bi bi-graph-up', prompt: 'Show time spent by project this month' },
-    { icon: 'bi bi-calendar-check', prompt: 'Generate a report of all time entries' },
-  ];
 
   constructor(
     private store: Store,
@@ -144,12 +137,7 @@ export class OverviewComponent implements OnInit {
           return;
         }
 
-        const allEntries: TimeSheetEntry[] = [];
-        for (const projectId of accessibleProjectIds) {
-          const entries = await this.timeSheetEntryService.getTimeSheetEntriesByProjectId(projectId);
-          allEntries.push(...entries);
-        }
-        this.allTimeSheetEntries = allEntries;
+        this.allTimeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByProjectId(accessibleProjectIds);
       } else {
         const result = await this.timeSheetEntryService.getTimeSheetEntriesByUserId(this.currentUserId);
         this.allTimeSheetEntries = result || [];
@@ -179,90 +167,46 @@ export class OverviewComponent implements OnInit {
     return Array.from(projectIds);
   }
 
+  async buildQueryFilters(): Promise<TimeSheetEntry[]> {
+    let projectIds = this.getFilteredProjectIds();
+
+    let queryList: any[] = [{ 'projectId': { [Operator.IN]: projectIds } } as any];
+    if (this.filters.userId) queryList.push({ 'userId': this.filters.userId });
+    if (this.filters.startDate) queryList.push({ 'date': { [Operator.GTE]: this.filters.startDate } });
+    if (this.filters.endDate) queryList.push({ 'date': { [Operator.LTE]: this.filters.endDate } });
+    if (this.filters.category) queryList.push({ 'category': this.filters.category });
+    if (this.filters.status === 'approved') queryList.push({ 'approved': true });
+    else if (this.filters.status === 'pending') queryList.push({ 'approved': false });
+
+    const filterQuery = { [Operator.AND]: queryList };
+
+    return await this.timeSheetEntryService.getByFilter(filterQuery);
+  }
+
+  getFilteredProjectIds(): String[] {
+    let projectIds = this.getAccessibleProjectIds();
+
+    if (this.filters.projectId) {
+      return projectIds.filter(id => id === this.filters.projectId);
+    }
+
+    if (this.filters.organizationId) {
+      const orgProjects = this.store.orgProjects.byOrganizationId(this.filters.organizationId)();
+      const orgProjectIds = orgProjects.map(op => op.projectId);
+      return projectIds.filter(id => orgProjectIds.includes(id));
+    }
+
+    return projectIds;
+
+  }
+
   public async loadTimeSheetEntries(): Promise<void> {
     try {
-      const startDate = this.filters.startDate || new Date();
-      const endDate = this.filters.endDate || new Date();
-
-      if (this.filters.projectId) {
-        this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByProjectId(
-          this.filters.projectId
-        );
-      } else if (this.filters.organizationId) {
-        const orgProjects = this.store.orgProjects.byOrganizationId(this.filters.organizationId)();
-        const projectIds = orgProjects.map(op => op.projectId);
-        if (projectIds.length) {
-          const allEntries: TimeSheetEntry[] = [];
-          for (const projectId of projectIds) {
-            const entries = await this.timeSheetEntryService.getTimeSheetEntriesByProjectId(projectId);
-            allEntries.push(...entries);
-          }
-          this.timeSheetEntries = allEntries;
-        } else {
-          this.timeSheetEntries = [];
-        }
-      } else if (this.canViewAllEntries && this.filters.userId) {
-        this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
-          this.filters.userId,
-          startDate,
-          endDate
-        );
-      } else if (this.canViewAllEntries) {
-        this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
-          this.currentUserId,
-          startDate,
-          endDate
-        );
-      } else {
-        this.timeSheetEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
-          this.currentUserId,
-          startDate,
-          endDate
-        );
-      }
-
-      this.applyFilters();
+      this.timeSheetEntries = await this.buildQueryFilters();
+      this.calculateSummaryMetrics();
     } catch (error) {
       this.toastService.error('Error loading time entries');
     }
-  }
-
-  public applyFilters(): void {
-    let filtered = [...this.timeSheetEntries];
-
-    if (this.filters.organizationId && !this.filters.projectId) {
-      const orgProjects = this.store.orgProjects.byOrganizationId(this.filters.organizationId)();
-      const projectIds = orgProjects.map(op => op.projectId);
-      filtered = filtered.filter(entry => projectIds.includes(entry.projectId));
-    }
-
-    if (this.filters.projectId) {
-      filtered = filtered.filter(entry => entry.projectId === this.filters.projectId);
-    }
-
-    if (this.filters.userId) {
-      filtered = filtered.filter(entry => entry.userId === this.filters.userId);
-    }
-
-    if (this.filters.status === 'approved') {
-      filtered = filtered.filter(entry => entry.approved);
-    } else if (this.filters.status === 'pending') {
-      filtered = filtered.filter(entry => !entry.approved);
-    }
-
-    if (this.filters.category) {
-      filtered = filtered.filter(entry => entry.category === this.filters.category);
-    }
-
-    if (this.filters.startDate && this.filters.endDate) {
-      filtered = filtered.filter(entry => {
-        const entryDate = new Date(entry.date);
-        return entryDate >= this.filters.startDate! && entryDate <= this.filters.endDate!;
-      });
-    }
-
-    this.filteredEntries = filtered;
-    this.calculateSummaryMetrics();
   }
 
   public onOrganizationSelected(organization: Organization | null): void {
@@ -270,16 +214,16 @@ export class OverviewComponent implements OnInit {
     this.filters.organizationId = organization?.id || null;
     this.selectedProject = null;
     this.filters.projectId = null; // Reset project when org changes
-    this.filters.userId = null; // Reset user filter
-    this.filters.category = null; // Reset category filter
+    this.filters.userId = ''; // Reset user filter
+    this.filters.category = ''; // Reset category filter
     this.loadTimeSheetEntries();
   }
 
   public onProjectSelected(project: Project | null): void {
     this.selectedProject = project;
     this.filters.projectId = project?.id || null;
-    this.filters.userId = null; // Reset user filter when project changes
-    this.filters.category = null; // Reset category filter
+    this.filters.userId = ''; // Reset user filter when project changes
+    this.filters.category = ''; // Reset category filter
     this.loadTimeSheetEntries();
   }
 
@@ -289,17 +233,17 @@ export class OverviewComponent implements OnInit {
   }
 
   public onStatusChange(): void {
-    this.applyFilters();
+    this.loadTimeSheetEntries();
   }
 
-  public onCategoryChange(category: string | null): void {
+  public onCategoryChange(category: string): void {
     this.filters.category = category;
-    this.applyFilters();
+    this.loadTimeSheetEntries();
   }
 
-  public onUserChange(userId: string | null): void {
+  public onUserChange(userId: string): void {
     this.filters.userId = userId;
-    this.applyFilters();
+    this.loadTimeSheetEntries();
   }
 
   public onDateRangeChange(): void {
@@ -345,19 +289,6 @@ export class OverviewComponent implements OnInit {
     this.filters.startDate = startDate;
     this.filters.endDate = endDate;
     this.loadTimeSheetEntries();
-  }
-
-  public async approveEntry(entry: TimeSheetEntry): Promise<void> {
-    if (!this.canApprove) return;
-
-    try {
-      entry.approved = true;
-      await this.timeSheetEntryService.save(entry);
-      this.toastService.success('Time entry approved');
-      await this.loadTimeSheetEntries();
-    } catch (error) {
-      this.toastService.error('Error approving time entry');
-    }
   }
 
   public async approveAllPending(): Promise<void> {
