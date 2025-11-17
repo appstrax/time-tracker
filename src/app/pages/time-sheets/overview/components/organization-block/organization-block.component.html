@@ -1,0 +1,21 @@
+<div
+  class="organization-block"
+  [class.selected]="isSelected"
+  (click)="onBlockClick()"
+  [title]="getDisplayName()"
+>
+  <div class="d-flex align-items-center justify-content-between">
+    <span class="organization-name">
+      <i class="bi bi-building me-2"></i>
+      {{ getDisplayName() }}
+    </span>
+    <div class="d-flex align-items-center gap-2">
+      <i *ngIf="isSelected" class="bi bi-check-circle-fill text-success"></i>
+      <i
+        *ngIf="isSelected && !isAllOrganizations"
+        class="bi bi-chevron-down"
+      ></i>
+    </div>
+  </div>
+</div>
+

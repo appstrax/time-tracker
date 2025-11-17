@@ -1,0 +1,28 @@
+<div class="organization-projects-block" *ngIf="organizationId && isExpanded">
+  <div class="projects-container">
+    <app-projects-block
+      [project]="null"
+      [isAllProjects]="true"
+      [isSelected]="isProjectSelected(null)"
+      (projectSelected)="onProjectSelected($event)"
+    ></app-projects-block>
+
+    <app-projects-block
+      *ngFor="let project of projects"
+      [project]="project"
+      [isSelected]="isProjectSelected(project)"
+      (projectSelected)="onProjectSelected($event)"
+    ></app-projects-block>
+
+    <div *ngIf="isLoading" class="text-center py-2 text-muted small">
+      <div class="spinner-border spinner-border-sm" role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+
+    <div *ngIf="!isLoading && projects.length === 0" class="text-center py-2 text-muted small">
+      No projects found
+    </div>
+  </div>
+</div>
+

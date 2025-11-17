@@ -9,6 +9,7 @@
         <thead class="table-light sticky-top">
           <tr>
             <th>Date</th>
+            <th>Category</th>
             <th>User</th>
             <th>Hours</th>
           </tr>
@@ -21,6 +22,7 @@
               </div>
             </td>
           </tr>
+
           <tr *ngIf="!isLoading && groupedEntries.length === 0">
             <td colspan="3" class="text-center py-4 text-muted">
               No unapproved entries
@@ -32,7 +34,8 @@
             (click)="onEntryClick(group)"
             [title]="'Click to view and approve ' + group.entries.length + ' entries'"
           >
-            <td>{{ formatDate(group.date) }}</td>
+            <td>{{ group.date | date:'MMM d, yyyy' }}</td>
+            <td>{{ getUniqueCategories(group.entries) }}</td>
             <td>
               <small>{{ getUserName(group.userId) }}</small>
             </td>

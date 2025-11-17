@@ -14,6 +14,7 @@ import {
 
 import { Project, TimeSheetEntry, } from '@models';
 import { ProjectDropdownComponent } from '@components';
+import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
 
 
 @Component({
@@ -62,14 +63,7 @@ export class TimeSheetEntryComponent implements OnInit {
   }
 
   formatHours(hours: number): string {
-    const wholeHours = Math.floor(hours);
-    const minutes = Math.round((hours - wholeHours) * 60);
-
-    let formattedMinutes = `${minutes}m`;
-    if (minutes < 10) formattedMinutes = '0' + formattedMinutes;
-    let formattedHours = `${wholeHours}h`;
-
-    return `${formattedHours} ${formattedMinutes}`;
+    return TimeCalculationUtils.formatHours(hours);
   }
 
   onProjectSelected(project: Project | null): void {

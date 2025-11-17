@@ -1,10 +1,11 @@
-import { Component, Input, OnInit } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
-import { TimeSheetEntry, Project } from '@models';
-import { Store } from '@state';
+import { CommonModule } from '@angular/common';
 import { appstraxAuth } from '@appstrax/services/auth';
+import { Component, Input, OnInit } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { Store } from '@state';
+import { TimeSheetEntry, Project } from '@models';
+import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
 
 @Component({
   selector: 'app-unapproved-entries-modal',
@@ -14,7 +15,8 @@ import { appstraxAuth } from '@appstrax/services/auth';
   styleUrl: './unapproved-entries.modal.scss'
 })
 export class UnapprovedEntriesModalComponent implements OnInit {
-  @Input() entries: TimeSheetEntry[] = [];
+  @Input() entries: TimeSheetEntry[] = []; // All entries for the user on this day
+  @Input() unapprovedEntries: TimeSheetEntry[] = []; // Only unapproved entries (for approve button)
   @Input() date!: Date;
   @Input() userId!: string;
   @Input() onApprove?: () => Promise<void>;
@@ -57,14 +59,27 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   }
 
   public formatHours(hours: number): string {
-    const wholeHours = Math.floor(hours);
-    const minutes = Math.round((hours - wholeHours) * 60);
-    if (minutes === 0) return `${wholeHours}h`;
-    return `${wholeHours}h ${minutes}m`;
+    return TimeCalculationUtils.formatHours(hours);
   }
 
-  public getTotalHours(): number {
-    return this.entries.reduce((sum, entry) => sum + entry.hours, 0);
+  public getTotalHours(): string {
+    let totalHours = this.entries.reduce((sum, entry) => sum + entry.hours, 0);
+    return this.formatHours(totalHours);
+  }
+
+  public isEntryUnapproved(entry: TimeSheetEntry): boolean {
+    return !entry.approved;
+  }
+
+  public getUnapprovedCount(): number {
+    return this.unapprovedEntries?.length || 0;
+  }
+
+  public getUniqueCategories(): string[] {
+    const categories = this.entries
+      .map(entry => entry.category)
+      .filter(category => category && category.trim() !== '');
+    return [...new Set(categories)].sort();
   }
 
   public async approveAll(): Promise<void> {
@@ -87,7 +102,8 @@ export class UnapprovedEntriesModalComponent implements OnInit {
 }
 
 export interface UnapprovedEntriesModalOptions {
-  entries: TimeSheetEntry[];
+  entries: TimeSheetEntry[]; // All entries for the user on this day
+  unapprovedEntries?: TimeSheetEntry[]; // Only unapproved entries (for approve button)
   date: Date;
   userId: string;
   onApprove?: () => Promise<void>;

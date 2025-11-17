@@ -4,203 +4,49 @@
   [collapseBreakpointPx]="1024"
   [collapsedOnSmallScreens]="true"
 >
-
-
   <ng-container left>
-    <app-split-pane-vertical storageKey="split.timesheet-overview.right" [initialTopRatio]="0.6">
-      <ng-container top>
-        <div class="container-fluid py-3">
-          <!-- Summary Metrics Cards -->
-          <div class="row g-3 mb-3">
-            <div class="col-md-3 col-sm-6">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                      <div class="text-muted small mb-1">Total Hours</div>
-                      <div class="h4 mb-0">{{ summaryMetrics.totalHours | number:'1.1-1' }}h</div>
-                    </div>
-                    <i class="bi bi-clock-history fs-1 text-primary opacity-50"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                      <div class="text-muted small mb-1">This Week</div>
-                      <div class="h4 mb-0">{{ summaryMetrics.totalHoursThisWeek | number:'1.1-1' }}h</div>
-                    </div>
-                    <i class="bi bi-calendar-week fs-1 text-info opacity-50"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                      <div class="text-muted small mb-1">Pending</div>
-                      <div class="h4 mb-0">{{ summaryMetrics.pendingCount }}</div>
-                    </div>
-                    <i class="bi bi-hourglass-split fs-1 text-warning opacity-50"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="col-md-3 col-sm-6">
-              <div class="card h-100">
-                <div class="card-body">
-                  <div class="d-flex align-items-center justify-content-between">
-                    <div>
-                      <div class="text-muted small mb-1">Projects</div>
-                      <div class="h4 mb-0">{{ summaryMetrics.projectsCount }}</div>
-                    </div>
-                    <i class="bi bi-folder fs-1 text-success opacity-50"></i>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+    <app-split-pane-vertical
+      storageKey="split.timesheet-overview.right"
+      [initialTopRatio]="0.6"
+    >
 
-          <!-- Filters and Controls -->
-          <div class="card mb-3">
-            <div class="card-body">
-              <div class="row g-3 align-items-end">
-                <div class="col-md-3">
-                  <label class="form-label small mb-1">Date Range</label>
-                  <select class="form-select form-select-sm" [(ngModel)]="filters.dateRange" (change)="onDateRangeChange()">
-                    <option value="week">This Week</option>
-                    <option value="month">This Month</option>
-                    <option value="custom">Custom</option>
-                  </select>
-                </div>
-                <div class="col-md-3">
-                  <label class="form-label small mb-1">Project</label>
-                  <app-project-dropdown
-                    [selectedProject]="getSelectedProject()"
-                    (projectSelected)="onProjectSelected($event)"
-                    [allowNull]="true"
-                  ></app-project-dropdown>
-                </div>
-                <div class="col-md-2">
-                  <label class="form-label small mb-1">Status</label>
-                  <select class="form-select form-select-sm" [(ngModel)]="filters.status" (change)="onStatusChange()">
-                    <option value="all">All</option>
-                    <option value="pending">Pending</option>
-                    <option value="approved">Approved</option>
-                  </select>
-                </div>
-                <div class="col-md-4 d-flex gap-2">
-                  <button
-                    *ngIf="canApprove && summaryMetrics.pendingCount > 0"
-                    class="btn btn-sm btn-success"
-                    (click)="approveAllPending()"
-                  >
-                    <i class="bi bi-check-circle me-1"></i>
-                    Approve All ({{ summaryMetrics.pendingCount }})
-                  </button>
-                  <button
-                    class="btn btn-sm btn-outline-secondary"
-                    (click)="loadTimeSheetEntries()"
-                  >
-                    <i class="bi bi-arrow-clockwise me-1"></i>
-                    Refresh
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Time Entries Table -->
-          <div class="card">
-            <div class="card-header d-flex justify-content-between align-items-center">
-              <span class="fw-semibold">Time Entries</span>
-              <span class="badge bg-secondary">{{ filteredEntries.length }} entries</span>
-            </div>
-            <div class="card-body p-0">
-              <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-                <table class="table table-hover mb-0">
-                  <thead class="table-light sticky-top">
-                    <tr>
-                      <th>Date</th>
-                      <th *ngIf="canViewAllEntries">User</th>
-                      <th>Project</th>
-                      <th>Hours</th>
-                      <th>Category</th>
-                      <th>Description</th>
-                      <th>Status</th>
-                      <th *ngIf="canApprove" class="text-end">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr *ngIf="isLoading">
-                      <td [attr.colspan]="canViewAllEntries ? (canApprove ? 8 : 7) : (canApprove ? 7 : 6)" class="text-center py-4">
-                        <div class="spinner-border spinner-border-sm" role="status">
-                          <span class="visually-hidden">Loading...</span>
-                        </div>
-                      </td>
-                    </tr>
-                    <tr *ngIf="!isLoading && filteredEntries.length === 0">
-                      <td [attr.colspan]="canViewAllEntries ? (canApprove ? 8 : 7) : (canApprove ? 7 : 6)" class="text-center py-4 text-muted">
-                        No time entries found
-                      </td>
-                    </tr>
-                    <tr *ngFor="let entry of filteredEntries" [class.table-warning]="!entry.approved">
-                      <td>{{ formatDate(entry.date) }}</td>
-                      <td *ngIf="canViewAllEntries">
-                        <small>{{ getUserName(entry.userId) }}</small>
-                      </td>
-                      <td>
-                        <span class="badge bg-secondary">{{ getProjectName(entry.projectId) }}</span>
-                      </td>
-                      <td>{{ formatHours(entry.hours) }}</td>
-                      <td>
-                        <span class="badge bg-info">{{ entry.category }}</span>
-                      </td>
-                      <td>
-                        <span class="text-truncate d-inline-block" style="max-width: 200px;" [title]="entry.description">
-                          {{ entry.description }}
-                        </span>
-                      </td>
-                      <td>
-                        <span class="badge" [class.bg-success]="entry.approved" [class.bg-warning]="!entry.approved">
-                          {{ entry.approved ? 'Approved' : 'Pending' }}
-                        </span>
-                      </td>
-                      <td *ngIf="canApprove" class="text-end">
-                        <button
-                          *ngIf="!entry.approved"
-                          class="btn btn-sm btn-success"
-                          (click)="approveEntry(entry)"
-                          title="Approve entry"
-                        >
-                          <i class="bi bi-check-circle"></i>
-                        </button>
-                        <span *ngIf="entry.approved" class="text-muted small">
-                          <i class="bi bi-check-circle-fill text-success"></i>
-                        </span>
-                      </td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          </div>
+    <ng-container top>
+      <app-summary-metrics [metrics]="summaryMetrics"></app-summary-metrics>
+      <div class="card mb-3">
+        <div class="card-header">
+          <span class="fw-semibold">Organization & Project</span>
         </div>
-      </ng-container>
+        <div class="card-body">
+          <app-organization-selector
+            [selectedOrganization]="selectedOrganization"
+            [selectedProject]="selectedProject"
+            (organizationSelected)="onOrganizationSelected($event)"
+            (projectSelected)="onProjectSelected($event)"
+          ></app-organization-selector>
+        </div>
+      </div>
+    </ng-container>
       <ng-container bottom>
-        <app-history></app-history>
+        <div class="container-fluid py-3">
+        </div>
       </ng-container>
     </app-split-pane-vertical>
   </ng-container>
   <ng-container right>
-    <app-unapproved-entries
+    <app-filter-view-container
       [timeSheetEntries]="timeSheetEntries"
+      [filteredEntries]="filteredEntries"
+      [filters]="filters"
+      [selectedProject]="getSelectedProject() || null"
       [canApprove]="canApprove"
-    ></app-unapproved-entries>
+      [pendingCount]="summaryMetrics.pendingCount"
+      (dateRangeChange)="onDateRangeChange()"
+      (statusChange)="onStatusChange()"
+      (categoryChange)="onCategoryChange($event)"
+      (userChange)="onUserChange($event)"
+      (projectSelected)="onProjectSelected($event)"
+      (refreshRequested)="loadTimeSheetEntries()"
+      (approveAllRequested)="approveAllPending()"
+    ></app-filter-view-container>
   </ng-container>
 </app-split-pane>

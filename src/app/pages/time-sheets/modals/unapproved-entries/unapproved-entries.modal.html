@@ -18,7 +18,15 @@
         <strong>User:</strong> {{ getUserName(userId) }}
       </div>
       <div>
-        <strong>Total Hours:</strong> {{ formatHours(getTotalHours()) }}
+        <strong>Total Hours:</strong> {{ getTotalHours() }}
+      </div>
+    </div>
+    <div class="mt-3" *ngIf="getUniqueCategories().length > 0">
+      <strong>Categories:</strong>
+      <div class="d-flex flex-wrap gap-2 mt-2">
+        <span *ngFor="let category of getUniqueCategories()" class="badge bg-info">
+          {{ category }}
+        </span>
       </div>
     </div>
   </div>
@@ -31,10 +39,15 @@
           <th>Hours</th>
           <th>Category</th>
           <th>Description</th>
+          <th>Status</th>
         </tr>
       </thead>
       <tbody>
-        <tr *ngFor="let entry of entries" class="table-warning">
+        <tr
+          *ngFor="let entry of entries"
+          [class.table-warning]="!entry.approved"
+          [class.table-success]="entry.approved"
+        >
           <td>
             <span class="badge bg-secondary">{{ getProjectName(entry.projectId) }}</span>
           </td>
@@ -45,6 +58,11 @@
           <td>
             <span class="text-truncate d-inline-block" style="max-width: 200px;" [title]="entry.description">
               {{ entry.description }}
+            </span>
+          </td>
+          <td>
+            <span class="badge" [class.bg-success]="entry.approved" [class.bg-warning]="!entry.approved">
+              {{ entry.approved ? 'Approved' : 'Pending' }}
             </span>
           </td>
         </tr>
@@ -65,6 +83,7 @@
       Close
     </button>
     <button
+      *ngIf="getUnapprovedCount() > 0"
       type="button"
       class="btn btn-success ms-3"
       (click)="approveAll()"
@@ -74,7 +93,7 @@
         <span class="visually-hidden">Loading...</span>
       </span>
       <i *ngIf="!isApproving" class="bi bi-check-circle me-1"></i>
-      Approve All ({{ entries.length }})
+      Approve All ({{ getUnapprovedCount() }})
     </button>
   </div>
 </div>

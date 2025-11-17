@@ -1,6 +1,7 @@
 import { Injectable } from '@angular/core';
+import { AuthService } from '@appstrax/services/auth/services/auth.service';
 
-import { Organization, Project } from '@models';
+import { Organization, Project, User } from '@models';
 import { OrganizationProjects, ProjectUsers } from '@models';
 
 import { OrganizationProjectsService } from '@services';

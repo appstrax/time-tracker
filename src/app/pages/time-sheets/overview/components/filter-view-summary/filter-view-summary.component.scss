@@ -1,0 +1,15 @@
+.filter-view-summary {
+  .table {
+    font-size: 0.9rem;
+    margin-bottom: 0;
+
+    th {
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--bs-secondary);
+    }
+  }
+}
+

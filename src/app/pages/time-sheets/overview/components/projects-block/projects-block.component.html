@@ -1,0 +1,12 @@
+<div
+  class="project-block"
+  [class.selected]="isSelected"
+  (click)="onBlockClick()"
+  [title]="getDisplayName()"
+>
+  <div class="d-flex align-items-center justify-content-between">
+    <span class="project-name">{{ getDisplayName() }}</span>
+    <i *ngIf="isSelected" class="bi bi-check-circle-fill text-success"></i>
+  </div>
+</div>
+

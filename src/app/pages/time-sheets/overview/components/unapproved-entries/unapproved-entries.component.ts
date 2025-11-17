@@ -1,9 +1,11 @@
 import { Component, Input, OnInit, OnChanges, SimpleChanges, Signal, computed, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@state';
-import { TimeSheetEntry, Project } from '@models';
-import { TimeSheetEntryService, ToastService, ModalService } from '@services';
+import { TimeSheetEntry } from '@models';
+import { TimeSheetEntryService, ToastService } from '@services';
 import { appstraxAuth } from '@appstrax/services/auth';
+import { ModalService } from 'src/app/services/modal.service';
+import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
 
 interface UnapprovedEntryGroup {
   date: Date;
@@ -37,20 +39,26 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
     if (user) {
       this.currentUserId = user.id;
     }
-    this.groupUnapprovedEntries();
+    await this.groupUnapprovedEntries();
   }
 
-  ngOnChanges(changes: SimpleChanges): void {
+  async ngOnChanges(changes: SimpleChanges): Promise<void> {
     if (changes['timeSheetEntries'] && !changes['timeSheetEntries'].firstChange) {
-      this.groupUnapprovedEntries();
+      await this.groupUnapprovedEntries();
     }
   }
 
-  private groupUnapprovedEntries(): void {
-    // Filter only unapproved entries
+  public getUniqueCategories(entries: TimeSheetEntry[]): string {
+    const categories = entries
+      .map(entry => entry.category)
+      .filter(category => category && category.trim() !== '');
+    let list = [...new Set(categories)].sort();
+return list.join(', ');
+  }
+
+  private async groupUnapprovedEntries(): Promise<void> {
     const unapproved = this.timeSheetEntries.filter(entry => !entry.approved);
 
-    // Group by date and userId
     const groupsMap = new Map<string, UnapprovedEntryGroup>();
 
     unapproved.forEach(entry => {
@@ -69,10 +77,28 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
 
       const group = groupsMap.get(groupKey)!;
       group.entries.push(entry);
-      group.totalHours += entry.hours;
     });
 
-    // Convert to array and sort by date (newest first)
+    for (const [groupKey, group] of groupsMap.entries()) {
+      try {
+        const allEntriesForDay = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDate(
+          group.userId,
+          group.date
+        );
+
+        group.totalHours = allEntriesForDay.reduce((sum, entry) => sum + entry.hours, 0);
+      } catch (error) {
+        console.error('Error loading all entries for day:', error);
+        const filteredEntriesForDay = this.timeSheetEntries.filter(entry => {
+          const entryDate = new Date(entry.date);
+          const dateKey = entryDate.toISOString().split('T')[0];
+          return entry.userId === group.userId &&
+                 dateKey === groupKey.split('_')[0];
+        });
+        group.totalHours = filteredEntriesForDay.reduce((sum, entry) => sum + entry.hours, 0);
+      }
+    }
+
     this.groupedEntries = Array.from(groupsMap.values()).sort((a, b) =>
       b.date.getTime() - a.date.getTime()
     );
@@ -82,40 +108,41 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
     if (userId === this.currentUserId) {
       return 'You';
     }
-    // In a real app, you'd fetch user names from a user service
     return userId.substring(0, 8);
   }
 
-  public formatDate(date: Date): string {
-    return new Date(date).toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric'
-    });
-  }
+
 
   public formatHours(hours: number): string {
-    const wholeHours = Math.floor(hours);
-    const minutes = Math.round((hours - wholeHours) * 60);
-    if (minutes === 0) return `${wholeHours}h`;
-    return `${wholeHours}h ${minutes}m`;
+    return TimeCalculationUtils.formatHours(hours);
   }
 
-  public onEntryClick(group: UnapprovedEntryGroup): void {
-    const modalRef = this.modalService.showUnapprovedEntriesModal({
-      entries: group.entries,
-      date: group.date,
-      userId: group.userId,
-      onApprove: async () => {
-        await this.approveEntries(group.entries);
-      }
-    });
+  public async onEntryClick(group: UnapprovedEntryGroup): Promise<void> {
+    try {
+      const allEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDate(
+        group.userId,
+        group.date
+      );
 
-    modalRef.result.then(() => {
-      // Modal closed successfully
-    }, () => {
-      // Modal dismissed
-    });
+      const unapprovedEntries = allEntries.filter(entry => !entry.approved);
+
+      const modalRef = this.modalService.showUnapprovedEntriesModal({
+        entries: allEntries,
+        unapprovedEntries: unapprovedEntries,
+        date: group.date,
+        userId: group.userId,
+        onApprove: async () => {
+          await this.approveEntries(unapprovedEntries);
+        }
+      });
+
+      modalRef.result.then(async () => {
+        await this.groupUnapprovedEntries();
+      }, () => {
+      });
+    } catch (error) {
+      this.toastService.error('Error loading time entries');
+    }
   }
 
   private async approveEntries(entries: TimeSheetEntry[]): Promise<void> {
@@ -126,8 +153,7 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
         await this.timeSheetEntryService.save(entry);
       }
       this.toastService.success(`Approved ${entries.length} time entries`);
-      // Remove approved entries from the list
-      this.groupUnapprovedEntries();
+      await this.groupUnapprovedEntries();
     } catch (error) {
       this.toastService.error('Error approving time entries');
     } finally {

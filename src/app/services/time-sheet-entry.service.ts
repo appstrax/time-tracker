@@ -20,18 +20,42 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
   }
 
   public async getTimeSheetEntriesByUserIdAndDateRange(
-    userId: string, 
-    startDate: Date, 
+    userId: string,
+    startDate: Date,
     endDate: Date,
   ): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({ 
-      where: { 
+    const timeSheetEntries = await this.find({
+      where: {
         [Operator.AND]: [
-          { 'userId': userId }, 
-          { 'date': {[Operator.GTE]: startDate} }, 
+          { 'userId': userId },
+          { 'date': {[Operator.GTE]: startDate} },
           { 'date': {[Operator.LTE]: endDate} },
-        ], 
+        ],
       },
+    });
+    return timeSheetEntries.data;
+  }
+
+  public async getTimeSheetEntriesByUserIdAndDate(
+    userId: string,
+    date: Date,
+  ): Promise<TimeSheetEntry[]> {
+    // Get start and end of the day
+    const startOfDay = new Date(date);
+    startOfDay.setHours(0, 0, 0, 0);
+
+    const endOfDay = new Date(date);
+    endOfDay.setHours(23, 59, 59, 999);
+
+    const timeSheetEntries = await this.find({
+      where: {
+        [Operator.AND]: [
+          { 'userId': userId },
+          { 'date': { [Operator.GTE]: startOfDay } },
+          { 'date': { [Operator.LTE]: endOfDay } },
+        ],
+      },
+      order: { 'createdAt': OrderDirection.ASC }
     });
     return timeSheetEntries.data;
   }
