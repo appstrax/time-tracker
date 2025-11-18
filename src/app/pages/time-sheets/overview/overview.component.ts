@@ -1,6 +1,9 @@
-import { Component, OnInit, Signal, computed, effect } from '@angular/core';
+import { Component, OnInit, Signal, OnDestroy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute, Params } from '@angular/router';
+import { Subject } from 'rxjs';
+import { takeUntil } from 'rxjs/operators';
 
 import { Store } from '@state';
 import { TimeSheetEntry, Project, User, Organization } from '@models';
@@ -12,17 +15,10 @@ import { FilterViewContainerComponent } from './components/filter-view-container
 import { SummaryMetricsComponent, SummaryMetrics } from './components/summary-metrics/summary-metrics.component';
 import { appstraxAuth, Operator } from '@appstrax/services/auth';
 import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
+import { TimeSheetFilterState } from './models/time-sheet-filter-state.model';
+import { TimeSheetFilterUtilsService } from './services/time-sheet-filter-utils.service';
 
-interface TimeSheetFilters {
-  organizationId: string | null;
-  projectId: string | null;
-  userId: string;
-  status: 'all' | 'approved' | 'pending';
-  dateRange: 'week' | 'month' | 'year' | 'all' | 'custom';
-  startDate: Date | null;
-  endDate: Date | null;
-  category: string;
-}
+
 
 
 @Component({
@@ -40,7 +36,7 @@ interface TimeSheetFilters {
   templateUrl: './overview.component.html',
   styleUrl: './overview.component.scss'
 })
-export class OverviewComponent implements OnInit {
+export class OverviewComponent implements OnInit, OnDestroy {
   public projects: Signal<Project[]>;
   public organizations: Signal<Organization[]>;
   public timeSheetEntries: TimeSheetEntry[] = [];
@@ -56,7 +52,7 @@ export class OverviewComponent implements OnInit {
   public selectedOrganization: Organization | null = null;
   public selectedProject: Project | null = null;
 
-  public filters: TimeSheetFilters = {
+  public filters: TimeSheetFilterState = {
     organizationId: null,
     projectId: null,
     userId: '',
@@ -66,6 +62,9 @@ export class OverviewComponent implements OnInit {
     endDate: null,
     category: '',
   };
+
+  private destroy$ = new Subject<void>();
+  private isInitializing = false;
 
   public summaryMetrics: SummaryMetrics = {
     totalHours: 0,
@@ -79,6 +78,8 @@ export class OverviewComponent implements OnInit {
     private store: Store,
     private timeSheetEntryService: TimeSheetEntryService,
     private toastService: ToastService,
+    private route: ActivatedRoute,
+    private filterUtils: TimeSheetFilterUtilsService,
   ) {
     this.projects = this.store.projects.all;
     this.organizations = this.store.organizations.all;
@@ -91,16 +92,41 @@ export class OverviewComponent implements OnInit {
 
       this.currentUserId = user.id;
       await this.checkPermissions();
-      await this.initializeDateRange();
+      
+      // Load filters from URL on initial load
+      const params = this.route.snapshot.queryParams;
+      this.loadFiltersFromUrl(params);
+
       await this.loadAllTimeSheetEntries(); // Load all entries for global metrics
       await this.loadTimeSheetEntries();
       this.calculateSummaryMetrics();
+
+      // Subscribe to query parameter changes (after initial load)
+      // Use a flag to skip the first emission (which is the initial load)
+      let isFirstEmission = true;
+      this.route.queryParams
+        .pipe(takeUntil(this.destroy$))
+        .subscribe(params => {
+          // Skip the first emission as it's the initial load
+          if (isFirstEmission) {
+            isFirstEmission = false;
+            return;
+          }
+          // URL changed (e.g., browser back/forward), reload filters and entries
+          this.loadFiltersFromUrl(params);
+          this.loadTimeSheetEntries();
+        });
 
       this.isLoading = false;
     } catch (error) {
       this.toastService.error('Error loading timesheet overview');
       this.isLoading = false;
     }
+  }
+
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   private async checkPermissions(): Promise<void> {
@@ -118,13 +144,32 @@ export class OverviewComponent implements OnInit {
     this.canApprove = isOrgAdmin || isProjAdmin;
   }
 
-  private async initializeDateRange(): Promise<void> {
-    const today = new Date();
-    const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
-    const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
+  private loadFiltersFromUrl(params: Params): void {
+    const previousState = this.isInitializing;
+    this.isInitializing = true;
+    this.filters = this.filterUtils.parseFiltersFromParams(params, this.filters, {
+      preserveOrganizationAndProject: true,
+    });
+    this.selectedOrganization = this.findOrganizationById(this.filters.organizationId);
+    this.selectedProject = this.findProjectById(this.filters.projectId);
+    this.isInitializing = previousState;
+  }
 
-    this.filters.startDate = startOfMonth;
-    this.filters.endDate = endOfMonth;
+  private findOrganizationById(id?: string | null): Organization | null {
+    if (!id) return null;
+    return this.organizations().find(org => org.id === id) ?? null;
+  }
+
+  private findProjectById(id?: string | null): Project | null {
+    if (!id) return null;
+    return this.projects().find(project => project.id === id) ?? null;
+  }
+
+  private syncFiltersToUrl(): void {
+    if (this.isInitializing) return;
+    this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
+      includeOrganizationAndProject: true,
+    });
   }
 
   private async loadAllTimeSheetEntries(): Promise<void> {
@@ -171,12 +216,9 @@ export class OverviewComponent implements OnInit {
     let projectIds = this.getFilteredProjectIds();
 
     let queryList: any[] = [{ 'projectId': { [Operator.IN]: projectIds } } as any];
-    if (this.filters.userId) queryList.push({ 'userId': this.filters.userId });
     if (this.filters.startDate) queryList.push({ 'date': { [Operator.GTE]: this.filters.startDate } });
     if (this.filters.endDate) queryList.push({ 'date': { [Operator.LTE]: this.filters.endDate } });
-    if (this.filters.category) queryList.push({ 'category': this.filters.category });
-    if (this.filters.status === 'approved') queryList.push({ 'approved': true });
-    else if (this.filters.status === 'pending') queryList.push({ 'approved': false });
+
 
     const filterQuery = { [Operator.AND]: queryList };
 
@@ -200,95 +242,56 @@ export class OverviewComponent implements OnInit {
 
   }
 
+  public async onFiltersChange(filters: TimeSheetFilterState): Promise<void> {
+    this.filters = { ...filters }; // Create a new object to ensure change detection
+    this.syncFiltersToUrl();
+    await this.loadTimeSheetEntries();
+  }
+
   public async loadTimeSheetEntries(): Promise<void> {
     try {
       this.timeSheetEntries = await this.buildQueryFilters();
+      this.filteredEntries = this.filterTimeSheetEntries();
       this.calculateSummaryMetrics();
     } catch (error) {
       this.toastService.error('Error loading time entries');
     }
   }
 
-  public onOrganizationSelected(organization: Organization | null): void {
+  filterTimeSheetEntries(): TimeSheetEntry[] {
+    return this.timeSheetEntries.filter(e => {
+      let isTrue = true;
+      if (this.filters.userId) isTrue = isTrue && e.userId === this.filters.userId;
+      if (this.filters.category) isTrue = isTrue && e.category === this.filters.category;
+      if (this.filters.status === 'approved') isTrue = isTrue && e.approved;
+      else if (this.filters.status === 'pending') isTrue = isTrue && !e.approved;
+      return isTrue;
+    });
+  }
+
+  public async onOrganizationSelected(organization: Organization | null): Promise<void> {
     this.selectedOrganization = organization;
     this.filters.organizationId = organization?.id || null;
     this.selectedProject = null;
     this.filters.projectId = null; // Reset project when org changes
     this.filters.userId = ''; // Reset user filter
     this.filters.category = ''; // Reset category filter
-    this.loadTimeSheetEntries();
+    this.syncFiltersToUrl();
+    await this.loadTimeSheetEntries();
   }
 
-  public onProjectSelected(project: Project | null): void {
+  public async onProjectSelected(project: Project | null): Promise<void> {
     this.selectedProject = project;
     this.filters.projectId = project?.id || null;
     this.filters.userId = ''; // Reset user filter when project changes
     this.filters.category = ''; // Reset category filter
-    this.loadTimeSheetEntries();
+    this.syncFiltersToUrl();
+    await this.loadTimeSheetEntries();
   }
 
   public getSelectedProject(): Project | undefined {
     if (!this.filters.projectId) return undefined;
     return this.projects().find(p => p.id === this.filters.projectId);
-  }
-
-  public onStatusChange(): void {
-    this.loadTimeSheetEntries();
-  }
-
-  public onCategoryChange(category: string): void {
-    this.filters.category = category;
-    this.loadTimeSheetEntries();
-  }
-
-  public onUserChange(userId: string): void {
-    this.filters.userId = userId;
-    this.loadTimeSheetEntries();
-  }
-
-  public onDateRangeChange(): void {
-    const today = new Date();
-    let startDate: Date;
-    let endDate: Date;
-
-    switch (this.filters.dateRange) {
-      case 'week':
-        const dayOfWeek = today.getDay();
-        startDate = new Date(today);
-        startDate.setDate(today.getDate() - dayOfWeek);
-        startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 6);
-        endDate.setHours(23, 59, 59, 999);
-        break;
-      case 'month':
-        startDate = new Date(today.getFullYear(), today.getMonth(), 1);
-        endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0, 23, 59, 59);
-        break;
-      case 'year':
-        startDate = new Date(today.getFullYear(), 0, 1);
-        endDate = new Date(today.getFullYear(), 11, 31, 23, 59, 59);
-        break;
-      case 'all':
-        startDate = new Date(today);
-        startDate.setDate(today.getDate() - today.getDay());
-        startDate.setHours(0, 0, 0, 0);
-        endDate = new Date(startDate);
-        endDate.setDate(startDate.getDate() + 6);
-        endDate.setHours(23, 59, 59, 999);
-        startDate = new Date(0);
-        break;
-      case 'custom':
-        startDate = this.filters.startDate || new Date();
-        endDate = this.filters.endDate || new Date();
-        break;
-      default:
-        return;
-    }
-
-    this.filters.startDate = startDate;
-    this.filters.endDate = endDate;
-    this.loadTimeSheetEntries();
   }
 
   public async approveAllPending(): Promise<void> {

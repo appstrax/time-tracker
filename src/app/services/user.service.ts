@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { AuthService } from '@appstrax/services/auth/services/auth.service';
+import { appstraxUsers, Operator } from '@appstrax/services/auth';
 
 import { Organization, Project, User } from '@models';
 import { OrganizationProjects, ProjectUsers } from '@models';
@@ -21,8 +21,14 @@ export class UserService {
     private projectUsersService: ProjectUsersService,
     private organizationService: OrganizationService,
     private orgUsersService: OrganizationUsersService,
-    private orgProjectsService: OrganizationProjectsService
+    private orgProjectsService: OrganizationProjectsService,
   ) {}
+
+  public async getUsers(userIds: string[]): Promise<User[]> {
+    //Not enough permissions to get users
+    const users = await appstraxUsers.find({ where: { id: { [Operator.IN]: userIds } } });
+    return users.data as unknown as User[];
+  }
 
   public async hasOrganization(userId: string): Promise<boolean> {
     const orgUsers = await this.orgUsersService.find({

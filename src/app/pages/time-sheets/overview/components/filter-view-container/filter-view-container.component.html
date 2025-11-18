@@ -65,7 +65,7 @@
         <select
           class="form-select form-select-sm"
           [(ngModel)]="filters.status"
-          (change)="onStatusChange()"
+          (change)="onEmitFilterChange()"
         >
           <option value="all">All</option>
           <option value="approved">Approved</option>
@@ -77,10 +77,10 @@
         <select
           class="form-select form-select-sm"
           [(ngModel)]="filters.category"
-          (change)="onCategoryChange()"
+          (change)="onEmitFilterChange()"
         >
           <option [value]="''">All Categories</option>
-          @for (category of availableCategories; track category) {
+          @for (category of categories; track category) {
           <option [value]="category">
             {{ category }}
           </option>
@@ -92,10 +92,10 @@
         <select
           class="form-select form-select-sm"
           [(ngModel)]="filters.userId"
-          (change)="onUserChange()"
+          (change)="onEmitFilterChange()"
         >
           <option [value]="''">All Users</option>
-          @for (user of availableUsers; track user.id) {
+          @for (user of users; track user.id) {
           <option [value]="user.id">
             {{ user.name }}
           </option>

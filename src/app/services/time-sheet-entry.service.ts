@@ -16,14 +16,11 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
 
   public async getTimeSheetEntriesByProjectId(projectIds: string[]): Promise<TimeSheetEntry[]> {
     const timeSheetEntries = await this.find({ where: {  projectId: { [Operator.IN]: projectIds } }, order: { 'createdAt': OrderDirection.ASC} });
-    console.log(timeSheetEntries.data);
     return timeSheetEntries.data;
   }
 
   public async getByFilter(filters: any): Promise<TimeSheetEntry[]> {
-    console.log(filters);
     const timeSheetEntries = await this.find({ where: filters, order: { 'createdAt': OrderDirection.ASC} });
-    console.log(timeSheetEntries.data);
     return timeSheetEntries.data;
   }
 

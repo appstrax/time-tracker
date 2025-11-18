@@ -36,15 +36,10 @@
     <app-filter-view-container
       [timeSheetEntries]="timeSheetEntries"
       [filteredEntries]="filteredEntries"
-      [filters]="filters"
       [selectedProject]="getSelectedProject() || null"
       [canApprove]="canApprove"
       [pendingCount]="summaryMetrics.pendingCount"
-      (dateRangeChange)="onDateRangeChange()"
-      (statusChange)="onStatusChange()"
-      (categoryChange)="onCategoryChange($event)"
-      (userChange)="onUserChange($event)"
-      (projectSelected)="onProjectSelected($event)"
+      (filtersChange)="onFiltersChange($event)"
       (refreshRequested)="loadTimeSheetEntries()"
       (approveAllRequested)="approveAllPending()"
     ></app-filter-view-container>
