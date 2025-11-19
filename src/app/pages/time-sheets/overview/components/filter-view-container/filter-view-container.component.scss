@@ -53,7 +53,7 @@
       width: 40px;
       height: 40px;
       border-radius: 50%;
-      background-color: var(--bs-gray-200);
+      // background-color: );
       display: flex;
       align-items: center;
       justify-content: center;
@@ -97,16 +97,5 @@
     flex: 1;
     overflow-y: auto;
   }
-}
-
-.filter-dropdown {
-  width: 100%;
-  max-width: 200px;
-  border-radius: 8px;
-  border: 1px solid var(--bs-border-color);
-  background-color: var(--bs-body-bg);
-  color: var(--bs-body-color);
-  padding: 0.5rem;
-  font-size: 0.85rem;
 }
 

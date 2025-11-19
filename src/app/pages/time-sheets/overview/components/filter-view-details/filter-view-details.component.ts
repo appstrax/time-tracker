@@ -18,9 +18,7 @@ export class FilterViewDetailsComponent implements OnInit {
   private store = inject(Store);
 
   ngOnInit(): void {
-    if (this.projects.length === 0) {
-      this.projects = this.store.projects.all();
-    }
+    if (!this.projects.length) this.projects = this.store.projects.all();
   }
 
   public getProjectName(projectId: string): string {

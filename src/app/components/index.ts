@@ -11,3 +11,5 @@ export * from './side-nav/collapsed/side-nav-collapsed.component';
 export * from './split-pane-vertical/split-pane-vertical.component';
 export * from './toast-container/toast-container.component';
 export * from './project-dropdown/project-dropdown.component';
+export * from './metric-card/metric-card.component';
+export * from './filter-block/filter-block.component';

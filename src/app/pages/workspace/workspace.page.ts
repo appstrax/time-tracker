@@ -51,7 +51,7 @@ export class WorkspacePage {
     this.orgProjects = this.store.orgProjects.all;
     // default the tab if there are no projects yet
     effect(() => {
-      if (this.projects().length === 0 && this.organizations().length > 0) {
+      if (!this.projects().length && this.organizations().length) {
         this.activeTab = 'organizations';
       }
     });

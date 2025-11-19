@@ -53,7 +53,14 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
       .map(entry => entry.category)
       .filter(category => category && category.trim() !== '');
     let list = [...new Set(categories)].sort();
-return list.join(', ');
+    return list.join(', ');
+  }
+
+  public getUniqueCategoriesList(entries: TimeSheetEntry[]): string[] {
+    const categories = entries
+      .map(entry => entry.category)
+      .filter(category => category && category.trim() !== '');
+    return [...new Set(categories)].sort();
   }
 
   private async groupUnapprovedEntries(): Promise<void> {

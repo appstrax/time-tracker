@@ -1,100 +1,115 @@
-<div class="modal-header align-items-center d-flex justify-content-between">
-  <h4 class="modal-title text-white mb-0">Unapproved Time Entries</h4>
-  <button
-    type="button"
-    class="btn-close btn-close-white"
-    aria-label="Close"
-    (click)="close()"
-  ></button>
-</div>
-
-<div class="modal-body">
-  <div class="mb-3">
-    <div class="d-flex justify-content-between align-items-center mb-2">
-      <div>
-        <strong>Date:</strong> {{ formatDate(date) }}
-      </div>
-      <div>
-        <strong>User:</strong> {{ getUserName(userId) }}
-      </div>
-      <div>
-        <strong>Total Hours:</strong> {{ getTotalHours() }}
-      </div>
-    </div>
-    <div class="mt-3" *ngIf="getUniqueCategories().length > 0">
-      <strong>Categories:</strong>
-      <div class="d-flex flex-wrap gap-2 mt-2">
-        <span *ngFor="let category of getUniqueCategories()" class="badge bg-info">
-          {{ category }}
-        </span>
-      </div>
-    </div>
-  </div>
-
-  <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-    <table class="table table-hover mb-0">
-      <thead class="table-light sticky-top">
-        <tr>
-          <th>Project</th>
-          <th>Hours</th>
-          <th>Category</th>
-          <th>Description</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr
-          *ngFor="let entry of entries"
-          [class.table-warning]="!entry.approved"
-          [class.table-success]="entry.approved"
-        >
-          <td>
-            <span class="badge bg-secondary">{{ getProjectName(entry.projectId) }}</span>
-          </td>
-          <td>{{ formatHours(entry.hours) }}</td>
-          <td>
-            <span class="badge bg-info">{{ entry.category }}</span>
-          </td>
-          <td>
-            <span class="text-truncate d-inline-block" style="max-width: 200px;" [title]="entry.description">
-              {{ entry.description }}
-            </span>
-          </td>
-          <td>
-            <span class="badge" [class.bg-success]="entry.approved" [class.bg-warning]="!entry.approved">
-              {{ entry.approved ? 'Approved' : 'Pending' }}
-            </span>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </div>
-</div>
-
-<div class="modal-footer d-flex justify-content-between">
-  <div></div>
-  <div>
+<div class="unapproved-modal">
+  <div class="modal-header align-items-center d-flex justify-content-between">
+    <h4 class="modal-title text-white mb-0">Unapproved Time Entries</h4>
     <button
       type="button"
-      class="btn btn-outline-secondary"
+      class="btn-close btn-close-white"
+      aria-label="Close"
       (click)="close()"
-      [disabled]="isApproving"
-    >
-      Close
-    </button>
-    <button
-      *ngIf="getUnapprovedCount() > 0"
-      type="button"
-      class="btn btn-success ms-3"
-      (click)="approveAll()"
-      [disabled]="isApproving"
-    >
-      <span *ngIf="isApproving" class="spinner-border spinner-border-sm me-2" role="status">
-        <span class="visually-hidden">Loading...</span>
-      </span>
-      <i *ngIf="!isApproving" class="bi bi-check-circle me-1"></i>
-      Approve All ({{ getUnapprovedCount() }})
-    </button>
+    ></button>
+  </div>
+
+  <div class="modal-body">
+    <div class="overview-card mb-4">
+      <div class="overview-item">
+        <span class="label">Date</span>
+        <span class="value text-color">{{ formatDate(date) }}</span>
+      </div>
+      <div class="overview-item">
+        <span class="label">User</span>
+        <span class="value text-color">{{ getUserName(userId) }}</span>
+      </div>
+      <div class="overview-item">
+        <span class="label">Total Hours</span>
+        <span class="value text-color">{{ getTotalHours() }}</span>
+      </div>
+      @if (getUniqueCategories().length) {
+      <div class="overview-item categories">
+        <span class="label">Categories</span>
+        <div class="categories-list">
+          <span *ngFor="let category of getUniqueCategories()" class="badge">
+            {{ category }}
+          </span>
+        </div>
+      </div>
+      }
+    </div>
+
+    <div class="table-responsive entries-table">
+      <table class="table table-sm table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Hours</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            *ngFor="let entry of entries"
+            class="clickable-row"
+            [class.pending]="!entry.approved"
+            [class.approved]="entry.approved"
+          >
+            <td>
+              <span class="badge">{{ getProjectName(entry.projectId) }}</span>
+            </td>
+            <td class="text-color text-end">
+              {{ formatHours(entry.hours) }}
+            </td>
+            <td>
+              <span class="badge">{{ entry.category }}</span>
+            </td>
+            <td>
+              <span
+                class="text-truncate d-inline-block description"
+                [title]="entry.description"
+              >
+                {{ entry.description }}
+              </span>
+            </td>
+            <td>
+              <span class="status-pill" [class.pending]="!entry.approved">
+                {{ entry.approved ? 'Approved' : 'Pending' }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-footer d-flex justify-content-between">
+    <div></div>
+    <div>
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="close()"
+        [disabled]="isApproving"
+      >
+        Close
+      </button>
+      @if (getUnapprovedCount()) {
+      <button
+        type="button"
+        class="btn btn-success ms-3"
+        (click)="approveAll()"
+        [disabled]="isApproving"
+      >
+        <span
+          *ngIf="isApproving"
+          class="spinner-border spinner-border-sm me-2"
+          role="status"
+        >
+          <span class="visually-hidden">Loading...</span>
+        </span>
+        <i *ngIf="!isApproving" class="bi bi-check-circle me-1"></i>
+        Approve All ({{ getUnapprovedCount() }})
+      </button>
+      }
+    </div>
   </div>
 </div>
-

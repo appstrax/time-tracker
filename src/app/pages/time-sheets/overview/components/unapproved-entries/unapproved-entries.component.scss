@@ -1,38 +1,33 @@
-:host {
-  display: block;
-  height: 100%;
-}
+.unapproved-entries {
+  .table {
+    font-size: 0.9rem;
+    margin-bottom: 0;
 
-.table {
-  font-size: 0.9rem;
-
-  th {
-    font-weight: 600;
-    font-size: 0.85rem;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    color: var(--bs-secondary);
+    th {
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--bs-secondary);
+    }
   }
 
-  td {
-    vertical-align: middle;
+  .text-color {
+    color: var(--bs-primary);
   }
-}
 
-.table-warning {
-  background-color: rgba(255, 193, 7, 0.1);
-}
+  .clickable-row {
+    cursor: pointer;
+    transition: background-color 0.2s;
 
-.clickable-row {
-  cursor: pointer;
-  transition: background-color 0.2s;
-
-  &:hover {
-    background-color: rgba(255, 193, 7, 0.2) !important;
+    &:hover {
+      background-color: rgba(var(--bs-primary-rgb), 0.1);
+    }
   }
-}
 
-.sticky-top {
-  z-index: 10;
+  .badge {
+    background-color: var(--bs-secondary);
+    color: #fff;
+  }
 }
 

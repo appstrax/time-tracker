@@ -9,8 +9,8 @@
   user-select: none;
 
   &:hover {
-    background-color: var(--bs-gray-100);
-    border-color: var(--bs-primary);
+    background-color: var(--bs-primary);
+    color: white;
     transform: translateX(2px);
   }
 

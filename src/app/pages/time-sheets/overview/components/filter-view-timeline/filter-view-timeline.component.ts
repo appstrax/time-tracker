@@ -60,7 +60,7 @@ export class FilterViewTimelineComponent implements OnInit {
 
   public getMaxHours(): number {
     const timeline = this.getTimelineData();
-    if (timeline.length === 0) return 1;
+    if (!timeline.length) return 1;
     return Math.max(...timeline.map(d => d.hours), 1);
   }
 }

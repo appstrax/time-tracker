@@ -18,7 +18,7 @@ export class FilterViewSummaryComponent implements OnInit {
   private store = inject(Store);
 
   ngOnInit(): void {
-    if (this.projects.length === 0) {
+    if (!this.projects.length) {
       this.projects = this.store.projects.all();
     }
   }

@@ -5,27 +5,22 @@
     [isSelected]="isOrganizationSelected(null)"
     (organizationSelected)="onOrganizationClick($event)"
   ></app-organization-block>
-
-  <div
-    *ngFor="let org of organizations()"
-    class="organization-item"
-  >
+  @for (org of organizations(); track org.id) {
+  <div class="organization-item">
     <app-organization-block
       [organization]="org"
       [isSelected]="isOrganizationSelected(org)"
       (organizationSelected)="onOrganizationClick($event)"
     ></app-organization-block>
-
+    @if (isOrganizationSelected(org)) {
     <app-organization-projects-block
-      *ngIf="isOrganizationSelected(org)"
       [organizationId]="org.id"
       [selectedProject]="selectedProject"
       (projectSelected)="onProjectSelected($event)"
     ></app-organization-projects-block>
+    }
   </div>
-
-  <div *ngIf="organizations().length === 0" class="text-center py-3 text-muted small">
-    No organizations found
-  </div>
+  } @if (!organizations().length) {
+  <div class="text-center py-3 text-muted small">No organizations found</div>
+  }
 </div>
-

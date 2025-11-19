@@ -1,4 +1,4 @@
-import { Component, OnInit, Signal, OnDestroy } from '@angular/core';
+import { Component, OnInit, Signal, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
@@ -6,7 +6,7 @@ import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { Store } from '@state';
-import { TimeSheetEntry, Project, User, Organization } from '@models';
+import { TimeSheetEntry, Project, User, Organization, OrganizationProjects } from '@models';
 import { OrgUserRoles, ProjectUserRoles } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { SplitPaneComponent, SplitPaneVerticalComponent } from '@components';
@@ -39,6 +39,8 @@ import { TimeSheetFilterUtilsService } from './services/time-sheet-filter-utils.
 export class OverviewComponent implements OnInit, OnDestroy {
   public projects: Signal<Project[]>;
   public organizations: Signal<Organization[]>;
+  public orgProjects: Signal<OrganizationProjects[]>;
+
   public timeSheetEntries: TimeSheetEntry[] = [];
   public allTimeSheetEntries: TimeSheetEntry[] = []; // All entries for global metrics (unfiltered)
   public filteredEntries: TimeSheetEntry[] = [];
@@ -51,6 +53,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
 
   public selectedOrganization: Organization | null = null;
   public selectedProject: Project | null = null;
+
 
   public filters: TimeSheetFilterState = {
     organizationId: null,
@@ -81,38 +84,42 @@ export class OverviewComponent implements OnInit, OnDestroy {
     private route: ActivatedRoute,
     private filterUtils: TimeSheetFilterUtilsService,
   ) {
-    this.projects = this.store.projects.all;
     this.organizations = this.store.organizations.all;
+    this.projects = this.store.projects.all;
+    this.orgProjects = this.store.orgProjects.all;
+    effect(() => {
+      if (
+        this.organizations().length&&
+        this.projects().length &&
+        this.orgProjects().length
+      ) {
+        this.ngOnInit();
+      }
+    });
   }
 
   async ngOnInit(): Promise<void> {
     try {
+      if (!this.projects().length || !this.organizations().length) return;
       const user = await appstraxAuth.getUser();
       if (!user) return;
 
       this.currentUserId = user.id;
       await this.checkPermissions();
-      
-      // Load filters from URL on initial load
       const params = this.route.snapshot.queryParams;
       this.loadFiltersFromUrl(params);
 
-      await this.loadAllTimeSheetEntries(); // Load all entries for global metrics
+      await this.loadAllTimeSheetEntries();
       await this.loadTimeSheetEntries();
-      this.calculateSummaryMetrics();
 
-      // Subscribe to query parameter changes (after initial load)
-      // Use a flag to skip the first emission (which is the initial load)
       let isFirstEmission = true;
       this.route.queryParams
         .pipe(takeUntil(this.destroy$))
         .subscribe(params => {
-          // Skip the first emission as it's the initial load
           if (isFirstEmission) {
             isFirstEmission = false;
             return;
           }
-          // URL changed (e.g., browser back/forward), reload filters and entries
           this.loadFiltersFromUrl(params);
           this.loadTimeSheetEntries();
         });
@@ -298,7 +305,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
     if (!this.canApprove) return;
 
     const pendingEntries = this.filteredEntries.filter(e => !e.approved);
-    if (pendingEntries.length === 0) {
+    if (!pendingEntries.length) {
       this.toastService.info('No pending entries to approve');
       return;
     }
@@ -309,7 +316,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
         await this.timeSheetEntryService.save(entry);
       }
       this.toastService.success(`Approved ${pendingEntries.length} time entries`);
-      await this.loadAllTimeSheetEntries(); // Reload all entries for global metrics
+      await this.loadAllTimeSheetEntries();
       await this.loadTimeSheetEntries();
     } catch (error) {
       this.toastService.error('Error approving time entries');

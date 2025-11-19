@@ -1,0 +1,15 @@
+<div class="card h-100 metric-card">
+  <div class="card-body">
+    <div class="d-flex align-items-center justify-content-between">
+      <div>
+        <div class="text-muted small mb-1">{{ label }}</div>
+        <div class="h4 mb-0">
+          {{ value }}
+          <span *ngIf="valueSuffix" class="value-suffix">{{ valueSuffix }}</span>
+        </div>
+      </div>
+      <i class="fs-1 opacity-50" [ngClass]="iconClass"></i>
+    </div>
+  </div>
+</div>
+

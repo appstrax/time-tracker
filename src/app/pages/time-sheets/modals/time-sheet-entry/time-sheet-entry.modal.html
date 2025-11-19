@@ -33,7 +33,7 @@
           [disabled]="timeSheetEntry.approved"
           required
         />
-        @if (isCategoryDropdownOpen && filteredCategories.length > 0 && !timeSheetEntry.approved) {
+        @if (isCategoryDropdownOpen && filteredCategories.length && !timeSheetEntry.approved) {
         <ul
           class="dropdown-menu dropdown-menu-end w-100 show category-autocomplete"
           [attr.data-bs-popper]="'static'"

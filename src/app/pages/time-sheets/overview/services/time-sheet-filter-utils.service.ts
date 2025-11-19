@@ -262,7 +262,7 @@ export class TimeSheetFilterUtilsService {
 
   private stringOrNull(value?: string | null): string | null {
     if (!value) return null;
-    return value.trim().length === 0 ? null : value;
+    return !value.trim().length ? null : value;
   }
 }
 

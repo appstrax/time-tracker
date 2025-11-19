@@ -33,7 +33,7 @@ export class TimeSheetDateSelectorComponent implements OnInit {
   private calculateDateRange(): void {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const diff = !dayOfWeek ? -6 : 1 - dayOfWeek;
 
     this.maxDate = new Date(today);
     this.maxDate.setUTCDate(today.getUTCDate() + diff);
@@ -68,7 +68,7 @@ export class TimeSheetDateSelectorComponent implements OnInit {
 
   private navigateToWeek(date: Date): void {
     const dayOfWeek = date.getUTCDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const diff = !dayOfWeek ? -6 : 1 - dayOfWeek;
 
     const weekStart = new Date(date);
     weekStart.setUTCDate(date.getUTCDate() + diff);

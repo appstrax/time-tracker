@@ -16,22 +16,32 @@
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let project of getEntriesByProject()">
+            @for (project of getEntriesByProject(); track project.projectId) {
+            <tr>
               <td>
-                <span class="badge bg-secondary">{{ project.projectName }}</span>
+                <span class="badge bg-secondary">{{
+                  project.projectName
+                }}</span>
               </td>
-              <td class="text-end fw-semibold">{{ formatHours(project.hours) }}</td>
-              <td class="text-end text-success">{{ formatHours(project.approvedHours) }}</td>
-              <td class="text-end text-warning">{{ formatHours(project.pendingHours) }}</td>
-              <td class="text-end">{{ project.count }}</td>
+              <td class="text-end fw-semibold text-color">
+                {{ formatHours(project.hours) }}
+              </td>
+              <td class="text-end text-success">
+                {{ formatHours(project.approvedHours) }}
+              </td>
+              <td class="text-end text-warning">
+                {{ formatHours(project.pendingHours) }}
+              </td>
+              <td class="text-end text-color">{{ project.count }}</td>
             </tr>
-            <tr *ngIf="getEntriesByProject().length === 0" class="text-center text-muted">
+            } @if (!getEntriesByProject().length) {
+            <tr class="text-center text-muted">
               <td colspan="5">No entries found</td>
             </tr>
+            }
           </tbody>
         </table>
       </div>
     </div>
   </div>
 </div>
-

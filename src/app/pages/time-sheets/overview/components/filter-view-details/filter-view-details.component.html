@@ -27,7 +27,7 @@
                   <td>
                     <span class="badge bg-secondary">{{ getProjectName(entry.projectId) }}</span>
                   </td>
-                  <td>{{ formatHours(entry.hours) }}</td>
+                  <td class="hours">{{ formatHours(entry.hours) }}</td>
                   <td>
                     <span class="badge bg-info">{{ entry.category }}</span>
                   </td>
@@ -41,9 +41,11 @@
             </table>
           </div>
         </div>
-        <div *ngIf="getEntriesByDate().length === 0" class="text-center text-muted py-4">
+        @if (!getEntriesByDate().length) {
+        <div class="text-center text-muted py-4">
           No entries found
         </div>
+      }
       </div>
     </div>
   </div>

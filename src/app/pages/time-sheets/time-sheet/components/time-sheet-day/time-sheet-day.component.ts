@@ -88,7 +88,7 @@ export class TimeSheetDayComponent
   private checkIfWithinLastNumberOfWeeks(): void {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
-    const diff = dayOfWeek === 0 ? -6 : 1 - dayOfWeek;
+    const diff = !dayOfWeek ? -6 : 1 - dayOfWeek;
 
     const currentWeekStart = new Date(today);
     currentWeekStart.setUTCDate(today.getUTCDate() + diff);

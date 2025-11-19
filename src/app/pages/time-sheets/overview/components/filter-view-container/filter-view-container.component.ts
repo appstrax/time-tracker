@@ -9,6 +9,7 @@ import { FilterViewSummaryComponent } from '../filter-view-summary/filter-view-s
 import { FilterViewDetailsComponent } from '../filter-view-details/filter-view-details.component';
 import { FilterViewTimelineComponent } from '../filter-view-timeline/filter-view-timeline.component';
 import { UnapprovedEntriesComponent } from '../unapproved-entries/unapproved-entries.component';
+import { FilterBlockComponent } from '../../../../../components/filter-block/filter-block.component';
 import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
 import { TimeSheetFilterState } from '../../models/time-sheet-filter-state.model';
 import { TimeSheetFilterUtilsService } from '../../services/time-sheet-filter-utils.service';
@@ -21,6 +22,7 @@ export type FilterViewType = 'summary' | 'details' | 'timeline' | 'unapproved';
   imports: [
     CommonModule,
     FormsModule,
+    FilterBlockComponent,
     FilterViewSummaryComponent,
     FilterViewDetailsComponent,
     FilterViewTimelineComponent,
@@ -77,7 +79,7 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
     this.loadFiltersFromUrl(params);
-    
+
     let isFirstEmission = true;
     this.route.queryParams
       .pipe(takeUntil(this.destroy$))
@@ -88,7 +90,7 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
         }
         this.loadFiltersFromUrl(params);
       });
-    
+
     this.initialize();
   }
 
@@ -104,7 +106,7 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   }
 
   initialize(): void {
-    const allEntries = this.filteredEntries.length > 0 ? this.filteredEntries : this.timeSheetEntries;
+    const allEntries = !!this.filteredEntries.length ? this.filteredEntries : this.timeSheetEntries;
     this.recalculateStats(allEntries);
     this.updateAvailableCategories();
     this.updateAvailableUsers();
@@ -197,10 +199,8 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   }
 
   public getEntriesForView(): TimeSheetEntry[] {
-    return this.filteredEntries.length > 0 ? this.filteredEntries : this.timeSheetEntries;
+    return !!this.filteredEntries.length ? this.filteredEntries : this.timeSheetEntries;
   }
-
-
 
   onEmitFilterChange(): void {
     this.emitFilterChange();

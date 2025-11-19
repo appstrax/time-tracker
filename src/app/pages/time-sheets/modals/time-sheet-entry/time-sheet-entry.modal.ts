@@ -85,7 +85,7 @@ export class TimeSheetEntryComponent implements OnInit {
       this.filteredCategories = this.categories.filter((category) =>
         category.toLowerCase().includes(value)
       );
-      this.isCategoryDropdownOpen = this.filteredCategories.length > 0;
+      this.isCategoryDropdownOpen = !!this.filteredCategories.length;
     }
   }
 
@@ -104,9 +104,7 @@ export class TimeSheetEntryComponent implements OnInit {
     } else {
       this.filteredCategories = [...this.categories];
     }
-    if (this.filteredCategories.length > 0) {
-      this.isCategoryDropdownOpen = true;
-    }
+    this.isCategoryDropdownOpen = !!this.filteredCategories.length;
   }
 
   onCategoryBlur(): void {
