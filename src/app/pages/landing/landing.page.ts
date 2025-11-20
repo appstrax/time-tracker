@@ -2,6 +2,7 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { ToastContainerComponent } from '@components';
 
 import { Interest, InterestIntent } from '@models';
 import { InterestService, ToastService } from '@services';
@@ -9,7 +10,7 @@ import { InterestService, ToastService } from '@services';
 @Component({
   selector: 'app-landing',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, ToastContainerComponent],
   templateUrl: './landing.page.html',
   styleUrls: ['./landing.page.scss'],
 })
