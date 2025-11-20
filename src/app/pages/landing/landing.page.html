@@ -1,0 +1,118 @@
+<header class="landing-header">
+  <a class="brand" routerLink="/">
+    <img src="/appstrax-logo-icon.png" alt="Machine Logo" class="logo">
+    <span class="brand-name">The Machine</span>
+  </a>
+  </header>
+  
+  <main class="landing">
+  <section class="hero">
+    <div class="hero-content">
+      <h1>From idea to MVP in minutes, not months</h1>
+      <p class="sub">
+        Idea to delivery, The Machine automates definition, design, guardrails, testing, and DevOps
+        so teams ship better software for less.
+      </p>
+    </div>
+  </section>
+  
+  <section class="benefits">
+    <h2>Why The Machine</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>Ship 2–4× faster</h3>
+        <p>Automated handoffs from definition through deployment remove waiting and rework.</p>
+      </div>
+      <div class="card">
+        <h3>Reduce rework 30–50%</h3>
+        <p>Guardrails and test harnesses catch defects early and standardize quality.</p>
+      </div>
+      <div class="card">
+        <h3>Lower tooling spend</h3>
+        <p>Integrated pipeline replaces a stack of overlapping tools and glue code.</p>
+      </div>
+      <div class="card">
+        <h3>Predictable delivery</h3>
+        <p>Opinionated workflows create clarity from idea to release.</p>
+      </div>
+    </div>
+  </section>
+  
+  <section class="how">
+    <h2>How it works</h2>
+    <ol class="steps">
+      <li><strong>Define</strong> — Capture requirements and constraints with structure.</li>
+      <li><strong>Design</strong> — Generate architecture, data models, and interfaces.</li>
+      <li><strong>Deliver</strong> — Enforce guardrails, validate with tests, and deploy.</li>
+    </ol>
+  </section>
+  
+  <section class="truths">
+    <h2>What you should know</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>AI will change development</h3>
+        <p>The Machine will replace developers as we know them — AI is getting stronger.</p>
+      </div>
+      <div class="card">
+        <h3>MVPs, faster and cheaper</h3>
+        <p>Optimised to produce MVPs, saving ~30% upfront costs and time to validate ideas.</p>
+      </div>
+      <div class="card">
+        <h3>Heroes on your side</h3>
+        <p>Projects are assigned Heroes (expert developers) to help if anything goes wrong.</p>
+      </div>
+      <div class="card">
+        <h3>Hire Heroes to scale</h3>
+        <p>Heroes can be hired to build out your ideas — like working with a software company.</p>
+      </div>
+    </div>
+  </section>
+  
+  <section class="features">
+    <h2>What it includes</h2>
+    <div class="grid">
+      <button type="button" class="feat" [class.active]="selectedKey === 'define'" (click)="selectFeature('define')">Define</button>
+      <button type="button" class="feat" [class.active]="selectedKey === 'design'" (click)="selectFeature('design')">Design</button>
+      <button type="button" class="feat" [class.active]="selectedKey === 'db-design'" (click)="selectFeature('db-design')">DB Design</button>
+      <button type="button" class="feat" [class.active]="selectedKey === 'guardrails'" (click)="selectFeature('guardrails')">Guardrails</button>
+      <button type="button" class="feat" [class.active]="selectedKey === 'testing'" (click)="selectFeature('testing')">Testing</button>
+      <button type="button" class="feat" [class.active]="selectedKey === 'devops'" (click)="selectFeature('devops')">Dev‑Ops</button>
+      <button type="button" class="feat" [class.active]="selectedKey === 'docs'" (click)="selectFeature('docs')">Docs</button>
+      <button type="button" class="feat" [class.active]="selectedKey === 'workspace'" (click)="selectFeature('workspace')">Workspace</button>
+    </div>
+    <div class="feature-detail" *ngIf="selectedFeature as f">
+      <h3>{{ f.title }}</h3>
+      <p class="short">{{ f.short }}</p>
+      <ul>
+        <li *ngFor="let p of f.points">{{ p }}</li>
+      </ul>
+    </div>
+  </section>
+  
+  <section class="secondary-cta mb-4">
+    <h2>Get notified about the beta</h2>
+    <form (ngSubmit)="submitInterest()" #interestForm2="ngForm" class="interest-form alt">
+      <div class="row">
+        <input
+          name="email2"
+          type="email"
+          placeholder="your@email.com"
+          required
+          [(ngModel)]="email"
+          [disabled]="submitting"
+        />
+        <button type="submit" [disabled]="submitting">Notify me</button>
+      </div>
+    </form>
+  </section>
+  </main>
+  
+  <footer class="landing-footer">
+  <div class="container">
+    <span class="copyright">© {{ currentYear }} The Machine</span>
+    <span class="powered-by">Powered by <img src="/appstrax-logo.png" alt="Appstrax" class="powered-logo"></span>
+  </div>
+  </footer>
+  
+

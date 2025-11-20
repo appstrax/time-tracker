@@ -32,3 +32,4 @@ export * from './auth/forgot-password/forgot-password.page';
 export * from './time-sheets/time-sheet/time-sheet.page';
 export * from './auth/create-organization/create-organization.page';
 export * from './workspace/workspace.page';
+export * from './landing/landing.page';

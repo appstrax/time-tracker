@@ -12,9 +12,11 @@ import { TicketsPage, BillingPage, QualityPage, CodePage } from '@pages';
 import { SettingsPage, DesignPage, DbDesignPage, QuotationsPage, KpisPage } from '@pages';
 import { BasePage, ProjectPage, ProfilePage, MarketplacePage, WorkspacePage } from '@pages';
 import { TestingPage, CompliancePage, GuardrailsPage, ContactPage } from '@pages';
+import { LandingPage } from '@pages';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  // PUBLIC LANDING
+  { path: '', component: LandingPage, pathMatch: 'full' },
 
   // AUTH
   { path: 'login', component: LoginPage },

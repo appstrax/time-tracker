@@ -7,3 +7,4 @@ export * from './organization.service';
 export * from './notifications.service';
 export * from './time-sheet-entry.service';
 
+export * from './interest.service';
