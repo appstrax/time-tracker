@@ -56,6 +56,9 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
 .restore-pill.top { 
@@ -68,6 +71,28 @@
 
 .restore-pill:hover {
   background: var(--color-surface);
+}
+
+.restore-hover-zone {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 24px; /* hover area thickness near the edge */
+  z-index: 4;
+}
+.restore-hover-zone.top { top: 0; }
+.restore-hover-zone.bottom { bottom: 0; }
+
+/* Reveal logic: show the pill when near or when hovering it directly */
+.restore-hover-zone.top:hover + .restore-pill.top,
+.restore-pill.top:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+.restore-hover-zone.bottom:hover + .restore-pill.bottom,
+.restore-pill.bottom:hover {
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .collapsed-top .divider-horizontal,

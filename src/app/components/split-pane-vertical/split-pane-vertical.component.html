@@ -7,9 +7,11 @@
     <ng-content select="[bottom]"></ng-content>
   </div>
 
+  <div *ngIf="showCollapsedTop" class="restore-hover-zone top" aria-hidden="true"></div>
   <button *ngIf="showCollapsedTop" type="button" class="restore-pill top" aria-label="Restore top" (click)="restoreFromTop()">
     <i class="bi bi-chevron-down"></i>
   </button>
+  <div *ngIf="showCollapsedBottom" class="restore-hover-zone bottom" aria-hidden="true"></div>
   <button *ngIf="showCollapsedBottom" type="button" class="restore-pill bottom" aria-label="Restore bottom" (click)="restoreFromBottom()">
     <i class="bi bi-chevron-up"></i>
   </button>
