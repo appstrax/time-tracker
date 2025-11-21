@@ -56,7 +56,7 @@
             <td>
               <span class="badge">{{ getProjectName(entry.projectId) }}</span>
             </td>
-            <td class="text-color text-end">
+            <td class="text-color">
               {{ formatHours(entry.hours) }}
             </td>
             <td>
@@ -64,8 +64,9 @@
             </td>
             <td>
               <span
-                class="text-truncate d-inline-block description"
+                class="text-truncate d-inline-block description text-color"
                 [title]="entry.description"
+
               >
                 {{ entry.description }}
               </span>

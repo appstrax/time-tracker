@@ -97,5 +97,16 @@
     flex: 1;
     overflow-y: auto;
   }
+
+  .custom-date-range {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+
+    .custom-date-field {
+      display: flex;
+      flex-direction: column;
+    }
+  }
 }
 

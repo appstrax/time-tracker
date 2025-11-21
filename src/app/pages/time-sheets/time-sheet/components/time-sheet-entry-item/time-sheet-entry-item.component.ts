@@ -47,9 +47,9 @@ export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, On
     const tooltipContent = this.getTooltipContent();
     this.tooltip = new Tooltip(element, {
       html: true,
-      placement: 'top',
+      placement: 'left',
       trigger: 'hover',
-      fallbackPlacements: ['top', 'bottom'],
+      fallbackPlacements: ['bottom'],
       title: tooltipContent
     });
     element.removeAttribute('title');

@@ -106,7 +106,7 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   }
 
   initialize(): void {
-    const allEntries = !!this.filteredEntries.length ? this.filteredEntries : this.timeSheetEntries;
+    const allEntries = this.filteredEntries;
     this.recalculateStats(allEntries);
     this.updateAvailableCategories();
     this.updateAvailableUsers();
@@ -180,6 +180,16 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   }
 
   public onDateRangeChange(): void {
+    if (this.filters.dateRange === 'custom') {
+      const today = new Date();
+      this.filters.startDate =
+        this.filters.startDate ?? new Date(today.getFullYear(), today.getMonth(), today.getDate());
+      this.filters.endDate =
+        this.filters.endDate ?? new Date(this.filters.startDate);
+      this.emitFilterChange();
+      return;
+    }
+
     const { startDate, endDate } = this.filterUtils.calculateDateRangeBounds(
       this.filters.dateRange,
       this.filters.startDate,
@@ -199,11 +209,36 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   }
 
   public getEntriesForView(): TimeSheetEntry[] {
-    return !!this.filteredEntries.length ? this.filteredEntries : this.timeSheetEntries;
+    return this.filteredEntries;
   }
 
   onEmitFilterChange(): void {
     this.emitFilterChange();
+  }
+
+  toDateInput(date: Date | null): string {
+    if (!date) return '';
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
+  onCustomStartDateChange(value: string): void {
+    this.filters.startDate = this.parseDateFromInput(value);
+    this.emitFilterChange();
+  }
+
+  onCustomEndDateChange(value: string): void {
+    this.filters.endDate = this.parseDateFromInput(value);
+    this.emitFilterChange();
+  }
+
+  private parseDateFromInput(value: string): Date | null {
+    if (!value) return null;
+    const [year, month, day] = value.split('-').map(Number);
+    if (![year, month, day].every(v => !isNaN(v))) return null;
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
   }
 
   public onApproveAll(): void {

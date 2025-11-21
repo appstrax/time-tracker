@@ -223,8 +223,8 @@ export class OverviewComponent implements OnInit, OnDestroy {
     let projectIds = this.getFilteredProjectIds();
 
     let queryList: any[] = [{ 'projectId': { [Operator.IN]: projectIds } } as any];
-    if (this.filters.startDate) queryList.push({ 'date': { [Operator.GTE]: this.filters.startDate } });
-    if (this.filters.endDate) queryList.push({ 'date': { [Operator.LTE]: this.filters.endDate } });
+    // if (this.filters.startDate) queryList.push({ 'date': { [Operator.GTE]: this.filters.startDate } });
+    // if (this.filters.endDate) queryList.push({ 'date': { [Operator.LTE]: this.filters.endDate } });
 
 
     const filterQuery = { [Operator.AND]: queryList };
@@ -268,6 +268,8 @@ export class OverviewComponent implements OnInit, OnDestroy {
   filterTimeSheetEntries(): TimeSheetEntry[] {
     return this.timeSheetEntries.filter(e => {
       let isTrue = true;
+      if(this.filters.startDate) isTrue = isTrue && e.date >= this.filters.startDate;
+      if(this.filters.endDate) isTrue = isTrue && e.date <= this.filters.endDate;
       if (this.filters.userId) isTrue = isTrue && e.userId === this.filters.userId;
       if (this.filters.category) isTrue = isTrue && e.category === this.filters.category;
       if (this.filters.status === 'approved') isTrue = isTrue && e.approved;

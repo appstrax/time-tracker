@@ -212,6 +212,20 @@ body::-webkit-scrollbar-thumb:hover {
   min-height: 80px;
 }
 
+.form-control:disabled,
+.form-control[disabled] {
+  background-color: var(--color-bg) !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+textarea.form-control:disabled,
+textarea.form-control[disabled] {
+  background-color: var(--color-bg) !important;
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
 /* Modal footer button styles */
 .modal-footer {
   display: flex;
