@@ -22,7 +22,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-code-slash"></i></div>
         <h3>Developers</h3>
-        <p>Ship faster with designs, tests, and Dev‑Ops pipelines done for you.</p>
+        <p class="description">Ship faster with designs, tests, and Dev‑Ops pipelines done for you.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-developers', 1)" [disabled]="isVoting('audience-developers')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-developers', -1)" [disabled]="isVoting('audience-developers')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -32,7 +32,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-briefcase"></i></div>
         <h3>Founders & Clients</h3>
-        <p>Validate ideas quickly, reduce upfront costs, and see clear deliverables.</p>
+        <p class="description">Validate ideas quickly, reduce upfront costs, and see clear deliverables.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-founders', 1)" [disabled]="isVoting('audience-founders')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-founders', -1)" [disabled]="isVoting('audience-founders')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -42,7 +42,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-mortarboard"></i></div>
         <h3>Newcomers</h3>
-        <p>Guided workflows and sensible defaults from no‑code to pro‑code.</p>
+        <p class="description">Guided workflows and sensible defaults from no‑code to pro‑code.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-newcomers', 1)" [disabled]="isVoting('audience-newcomers')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-newcomers', -1)" [disabled]="isVoting('audience-newcomers')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -52,7 +52,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-people"></i></div>
         <h3>Teams & PMs</h3>
-        <p>Standardized workflows with a single source of truth across delivery.</p>
+        <p class="description">Standardized workflows with a single source of truth across delivery.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-teams', 1)" [disabled]="isVoting('audience-teams')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-teams', -1)" [disabled]="isVoting('audience-teams')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -62,7 +62,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-building"></i></div>
         <h3>Agencies</h3>
-        <p>Scale delivery, quote accurately, and manage predictable outcomes.</p>
+        <p class="description">Scale delivery, quote accurately, and manage predictable outcomes.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-agencies', 1)" [disabled]="isVoting('audience-agencies')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-agencies', -1)" [disabled]="isVoting('audience-agencies')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -72,7 +72,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-lightbulb"></i></div>
         <h3>Anyone with an idea</h3>
-        <p>From concept to MVP in minutes — then iterate with confidence.</p>
+        <p class="description">From concept to MVP in minutes — then iterate with confidence.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-anyone', 1)" [disabled]="isVoting('audience-anyone')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-anyone', -1)" [disabled]="isVoting('audience-anyone')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -82,7 +82,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-person-workspace"></i></div>
         <h3>Freelancers</h3>
-        <p>Deliver more with less by automating the heavy lifting.</p>
+        <p class="description">Deliver more with less by automating the heavy lifting.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-freelancers', 1)" [disabled]="isVoting('audience-freelancers')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-freelancers', -1)" [disabled]="isVoting('audience-freelancers')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -92,7 +92,7 @@
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-buildings"></i></div>
         <h3>Enterprises</h3>
-        <p>Standardize delivery at scale with opinionated workflows and guardrails.</p>
+        <p class="description">Standardize delivery at scale with opinionated workflows and guardrails.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-enterprises', 1)" [disabled]="isVoting('audience-enterprises')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-enterprises', -1)" [disabled]="isVoting('audience-enterprises')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -107,7 +107,7 @@
     <div class="grid">
       <div class="card">
         <h3>Ship 100× faster</h3>
-        <p>Automated handoffs from definition through deployment remove waiting and rework.</p>
+        <p class="description">Automated handoffs from definition through deployment remove waiting and rework.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-ship-fast', 1)" [disabled]="isVoting('benefit-ship-fast')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-ship-fast', -1)" [disabled]="isVoting('benefit-ship-fast')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -116,7 +116,7 @@
       </div>
       <div class="card">
         <h3>Reduce rework 30–70%</h3>
-        <p>Guardrails and test harnesses catch defects early and standardize quality.</p>
+        <p class="description">Guardrails and test harnesses catch defects early and standardize quality.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-reduce-rework', 1)" [disabled]="isVoting('benefit-reduce-rework')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-reduce-rework', -1)" [disabled]="isVoting('benefit-reduce-rework')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -125,7 +125,7 @@
       </div>
       <div class="card">
         <h3>Scale without the rebuild tax</h3>
-        <p>Architecture, guardrails, and ops that grow from MVP to enterprise—no throwaway prototype.</p>
+        <p class="description">Architecture, guardrails, and ops that grow from MVP to enterprise—no throwaway prototype.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-scale', 1)" [disabled]="isVoting('benefit-scale')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-scale', -1)" [disabled]="isVoting('benefit-scale')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -134,7 +134,7 @@
       </div>
       <div class="card">
         <h3>Predictable delivery</h3>
-        <p>Opinionated workflows create clarity from idea to release.</p>
+        <p class="description">Opinionated workflows create clarity from idea to release.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-predictable', 1)" [disabled]="isVoting('benefit-predictable')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-predictable', -1)" [disabled]="isVoting('benefit-predictable')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -149,7 +149,7 @@
     <div class="grid">
       <div class="card">
         <h3>AI multiplies experienced teams</h3>
-        <p>AI accelerates delivery, while Heroes own reviews, integration, and system design for reliability.</p>
+        <p class="description">AI accelerates delivery, while Heroes own reviews, integration, and system design for reliability.</p>
         <div class="votes">
             <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-ai-multiplies', 1)" [disabled]="isVoting('truths-ai-multiplies')"><i class="bi bi-hand-thumbs-up"></i></button>
             <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-ai-multiplies', -1)" [disabled]="isVoting('truths-ai-multiplies')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -158,7 +158,7 @@
       </div>
       <div class="card">
         <h3>Avoid the “vibe coding” wall</h3>
-        <p>Skip the prototype‑to‑rebuild trap by combining AI with governance, security, and real engineering.</p>
+        <p class="description">Skip the prototype‑to‑rebuild trap by combining AI with governance, security, and real engineering.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-avoid-vibe', 1)" [disabled]="isVoting('truths-avoid-vibe')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-avoid-vibe', -1)" [disabled]="isVoting('truths-avoid-vibe')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -167,7 +167,7 @@
       </div>
       <div class="card">
         <h3>Heroes on your team</h3>
-        <p>Optionally assign vetted senior engineers to your project. They guide architecture and delivery with The Machine.</p>
+        <p class="description">Optionally assign vetted senior engineers to your project. They guide architecture and delivery with The Machine.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-heroes', 1)" [disabled]="isVoting('truths-heroes')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-heroes', -1)" [disabled]="isVoting('truths-heroes')"><i class="bi bi-hand-thumbs-down"></i></button>
@@ -176,7 +176,7 @@
       </div>
       <div class="card">
         <h3>Scale with the power of AI</h3>
-        <p>From first commit to full scale: pipelines, tests, and observability evolve as your product grows.</p>
+        <p class="description">From first commit to full scale: pipelines, tests, and observability evolve as your product grows.</p>
         <div class="votes">
           <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-scale', 1)" [disabled]="isVoting('truths-scale')"><i class="bi bi-hand-thumbs-up"></i></button>
           <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-scale', -1)" [disabled]="isVoting('truths-scale')"><i class="bi bi-hand-thumbs-down"></i></button>
