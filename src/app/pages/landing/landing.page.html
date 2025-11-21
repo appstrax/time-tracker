@@ -8,9 +8,9 @@
   <main class="landing">
   <section class="hero">
     <div class="hero-content">
-      <h1>MVP in minutes, not months</h1>
+      <h1>Build with AI. Ship with Heroes.</h1>
       <p class="sub">
-        With AI on the rise, don't be left behind. From idea to delivery, The Machine automates everything in the SDLC. Build MVPs faster and cheaper, saving you time and money. Apply for the beta below.
+        The Machine pairs AI acceleration with assigned senior engineers (“Heroes”) who guide architecture, integrations, and delivery. Go from idea to enterprise‑grade without the rebuild tax—optionally embed Heroes on your project when you need them.
       </p>
     </div>
   </section>
@@ -23,41 +23,81 @@
         <div class="icon-circle"><i class="bi bi-code-slash"></i></div>
         <h3>Developers</h3>
         <p>Ship faster with designs, tests, and Dev‑Ops pipelines done for you.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-developers', 1)" [disabled]="isVoting('audience-developers')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-developers', -1)" [disabled]="isVoting('audience-developers')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-developers') }}</span>
+        </div>
       </div>
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-briefcase"></i></div>
         <h3>Founders & Clients</h3>
         <p>Validate ideas quickly, reduce upfront costs, and see clear deliverables.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-founders', 1)" [disabled]="isVoting('audience-founders')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-founders', -1)" [disabled]="isVoting('audience-founders')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-founders') }}</span>
+        </div>
       </div>
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-mortarboard"></i></div>
         <h3>Newcomers</h3>
         <p>Guided workflows and sensible defaults from no‑code to pro‑code.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-newcomers', 1)" [disabled]="isVoting('audience-newcomers')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-newcomers', -1)" [disabled]="isVoting('audience-newcomers')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-newcomers') }}</span>
+        </div>
       </div>
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-people"></i></div>
         <h3>Teams & PMs</h3>
         <p>Standardized workflows with a single source of truth across delivery.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-teams', 1)" [disabled]="isVoting('audience-teams')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-teams', -1)" [disabled]="isVoting('audience-teams')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-teams') }}</span>
+        </div>
       </div>
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-building"></i></div>
         <h3>Agencies</h3>
         <p>Scale delivery, quote accurately, and manage predictable outcomes.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-agencies', 1)" [disabled]="isVoting('audience-agencies')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-agencies', -1)" [disabled]="isVoting('audience-agencies')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-agencies') }}</span>
+        </div>
       </div>
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-lightbulb"></i></div>
         <h3>Anyone with an idea</h3>
         <p>From concept to MVP in minutes — then iterate with confidence.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-anyone', 1)" [disabled]="isVoting('audience-anyone')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-anyone', -1)" [disabled]="isVoting('audience-anyone')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-anyone') }}</span>
+        </div>
       </div>
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-person-workspace"></i></div>
         <h3>Freelancers</h3>
         <p>Deliver more with less by automating the heavy lifting.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-freelancers', 1)" [disabled]="isVoting('audience-freelancers')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-freelancers', -1)" [disabled]="isVoting('audience-freelancers')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-freelancers') }}</span>
+        </div>
       </div>
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-buildings"></i></div>
         <h3>Enterprises</h3>
         <p>Standardize delivery at scale with opinionated workflows and guardrails.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('audience-enterprises', 1)" [disabled]="isVoting('audience-enterprises')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('audience-enterprises', -1)" [disabled]="isVoting('audience-enterprises')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('audience-enterprises') }}</span>
+        </div>
       </div>
     </div>
   </section>
@@ -68,49 +108,80 @@
       <div class="card">
         <h3>Ship 100× faster</h3>
         <p>Automated handoffs from definition through deployment remove waiting and rework.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-ship-fast', 1)" [disabled]="isVoting('benefit-ship-fast')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-ship-fast', -1)" [disabled]="isVoting('benefit-ship-fast')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('benefit-ship-fast') }}</span>
+        </div>
       </div>
       <div class="card">
         <h3>Reduce rework 30–70%</h3>
         <p>Guardrails and test harnesses catch defects early and standardize quality.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-reduce-rework', 1)" [disabled]="isVoting('benefit-reduce-rework')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-reduce-rework', -1)" [disabled]="isVoting('benefit-reduce-rework')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('benefit-reduce-rework') }}</span>
+        </div>
       </div>
       <div class="card">
-        <h3>Lower tooling spend</h3>
-        <p>Integrated pipeline replaces a stack of overlapping tools and glue code.</p>
+        <h3>Scale without the rebuild tax</h3>
+        <p>Architecture, guardrails, and ops that grow from MVP to enterprise—no throwaway prototype.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-scale', 1)" [disabled]="isVoting('benefit-scale')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-scale', -1)" [disabled]="isVoting('benefit-scale')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('benefit-scale') }}</span>
+        </div>
       </div>
       <div class="card">
         <h3>Predictable delivery</h3>
         <p>Opinionated workflows create clarity from idea to release.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('benefit-predictable', 1)" [disabled]="isVoting('benefit-predictable')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('benefit-predictable', -1)" [disabled]="isVoting('benefit-predictable')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('benefit-predictable') }}</span>
+        </div>
       </div>
     </div>
-  </section>
-  
-  <section class="how">
-    <h2>How it works</h2>
-    <ol class="steps">
-      <li><strong>Define</strong> — Capture requirements and constraints with structure.</li>
-      <li><strong>Design</strong> — Generate architecture, data models, and interfaces.</li>
-      <li><strong>Deliver</strong> — Enforce guardrails, validate with tests, and deploy.</li>
-    </ol>
   </section>
   
   <section class="truths">
     <h2>What you should know</h2>
     <div class="grid">
       <div class="card">
-        <h3>AI will change development</h3>
-        <p>The Machine will replace developers as we know them — AI is getting stronger.</p>
+        <h3>AI multiplies experienced teams</h3>
+        <p>AI accelerates delivery, while Heroes own reviews, integration, and system design for reliability.</p>
+        <div class="votes">
+            <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-ai-multiplies', 1)" [disabled]="isVoting('truths-ai-multiplies')"><i class="bi bi-hand-thumbs-up"></i></button>
+            <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-ai-multiplies', -1)" [disabled]="isVoting('truths-ai-multiplies')"><i class="bi bi-hand-thumbs-down"></i></button>
+            <span class="vote-count">{{ getTally('truths-ai-multiplies') }}</span>
+        </div>
       </div>
       <div class="card">
-        <h3>MVPs, faster and cheaper</h3>
-        <p>Optimised to produce MVPs, saving ~30% upfront costs and time to validate ideas.</p>
+        <h3>Avoid the “vibe coding” wall</h3>
+        <p>Skip the prototype‑to‑rebuild trap by combining AI with governance, security, and real engineering.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-avoid-vibe', 1)" [disabled]="isVoting('truths-avoid-vibe')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-avoid-vibe', -1)" [disabled]="isVoting('truths-avoid-vibe')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('truths-avoid-vibe') }}</span>
+        </div>
       </div>
       <div class="card">
-        <h3>Heroes on your side</h3>
-        <p>Projects are assigned Heroes (expert developers) to help if anything goes wrong.</p>
+        <h3>Heroes on your team</h3>
+        <p>Optionally assign vetted senior engineers to your project. They guide architecture and delivery with The Machine.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-heroes', 1)" [disabled]="isVoting('truths-heroes')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-heroes', -1)" [disabled]="isVoting('truths-heroes')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('truths-heroes') }}</span>
+        </div>
       </div>
       <div class="card">
-        <h3>Hire Heroes to scale</h3>
-        <p>Heroes can be hired to build out your ideas — like working with a software company.</p>
+        <h3>Scale with the power of AI</h3>
+        <p>From first commit to full scale: pipelines, tests, and observability evolve as your product grows.</p>
+        <div class="votes">
+          <button type="button" class="vote-btn up" title="Like" (click)="vote('truths-scale', 1)" [disabled]="isVoting('truths-scale')"><i class="bi bi-hand-thumbs-up"></i></button>
+          <button type="button" class="vote-btn down" title="Dislike" (click)="vote('truths-scale', -1)" [disabled]="isVoting('truths-scale')"><i class="bi bi-hand-thumbs-down"></i></button>
+          <span class="vote-count">{{ getTally('truths-scale') }}</span>
+        </div>
       </div>
     </div>
   </section>
@@ -135,6 +206,11 @@
           <ul>
             <li *ngFor="let p of f.points">{{ p }}</li>
           </ul>
+          <div class="votes">
+            <button type="button" class="vote-btn up" title="Like" (click)="vote('feature-' + f.key, 1)" [disabled]="isVoting('feature-' + f.key)"><i class="bi bi-hand-thumbs-up"></i></button>
+            <button type="button" class="vote-btn down" title="Dislike" (click)="vote('feature-' + f.key, -1)" [disabled]="isVoting('feature-' + f.key)"><i class="bi bi-hand-thumbs-down"></i></button>
+            <span class="vote-count">{{ getTally('feature-' + f.key) }}</span>
+          </div>
         </div>
         <div class="detail-image" *ngIf="selectedImage as img">
           <img [src]="img" [alt]="f.title + ' preview'">
@@ -161,6 +237,11 @@
           <ul>
             <li *ngFor="let p of xf.points">{{ p }}</li>
           </ul>
+          <div class="votes">
+            <button type="button" class="vote-btn up" title="Like" (click)="vote('extra-' + xf.key, 1)" [disabled]="isVoting('extra-' + xf.key)"><i class="bi bi-hand-thumbs-up"></i></button>
+            <button type="button" class="vote-btn down" title="Dislike" (click)="vote('extra-' + xf.key, -1)" [disabled]="isVoting('extra-' + xf.key)"><i class="bi bi-hand-thumbs-down"></i></button>
+            <span class="vote-count">{{ getTally('extra-' + xf.key) }}</span>
+          </div>
         </div>
         <div class="detail-image" *ngIf="extraSelectedImage as ximg">
           <img [src]="ximg" [alt]="xf.title + ' preview'">
@@ -170,7 +251,7 @@
   </section>
   
   <section class="secondary-cta mb-4">
-    <h2>Get notified about the beta</h2>
+    <h2>Get early access</h2>
     <p class="interested-count" *ngIf="interestCount !== null">{{ interestCount }} interested so far</p>
     <form (ngSubmit)="submitInterest()" #interestForm2="ngForm" class="interest-form alt">
       <div class="row">
@@ -185,6 +266,44 @@
         <button type="submit" [disabled]="submitting">Notify me</button>
       </div>
     </form>
+  </section>
+  <section class="results-summary mb-4">
+    <h2>What people are interested in</h2>
+    <h3>Who it's for</h3>
+    <div class="grid">
+      <div class="card stat" *ngFor="let it of getAudienceSummary()">
+        <div class="stat-label">{{ it.label }}</div>
+        <div class="stat-count"><span class="vote-count">{{ it.count }}</span></div>
+      </div>
+    </div>
+    <h3>Why The Machine</h3>
+    <div class="grid">
+      <div class="card stat" *ngFor="let it of getBenefitSummary()">
+        <div class="stat-label">{{ it.label }}</div>
+        <div class="stat-count"><span class="vote-count">{{ it.count }}</span></div>
+      </div>
+    </div>
+    <h3>What you should know</h3>
+    <div class="grid">
+      <div class="card stat" *ngFor="let it of getTruthsSummary()">
+        <div class="stat-label">{{ it.label }}</div>
+        <div class="stat-count"><span class="vote-count">{{ it.count }}</span></div>
+      </div>
+    </div>
+    <h3>What it includes</h3>
+    <div class="grid">
+      <div class="card stat" *ngFor="let it of getFeatureSummary()">
+        <div class="stat-label">{{ it.label }}</div>
+        <div class="stat-count"><span class="vote-count">{{ it.count }}</span></div>
+      </div>
+    </div>
+    <h3>Additional AI tools & extra features</h3>
+    <div class="grid">
+      <div class="card stat" *ngFor="let it of getExtraSummary()">
+        <div class="stat-label">{{ it.label }}</div>
+        <div class="stat-count"><span class="vote-count">{{ it.count }}</span></div>
+      </div>
+    </div>
   </section>
   </main>
   
