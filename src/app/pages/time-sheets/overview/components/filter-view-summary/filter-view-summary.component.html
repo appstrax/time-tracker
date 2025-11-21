@@ -24,13 +24,13 @@
                 }}</span>
               </td>
               <td class="text-end fw-semibold text-color">
-                {{ formatHours(project.hours) }}
+                {{ displayUtils.formatHours(project.hours) }}
               </td>
               <td class="text-end text-success">
-                {{ formatHours(project.approvedHours) }}
+                {{ displayUtils.formatHours(project.approvedHours) }}
               </td>
               <td class="text-end text-warning">
-                {{ formatHours(project.pendingHours) }}
+                {{ displayUtils.formatHours(project.pendingHours) }}
               </td>
               <td class="text-end text-color">{{ project.count }}</td>
             </tr>

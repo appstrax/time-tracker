@@ -1,20 +1,19 @@
-import { Component, OnInit, Signal, OnDestroy, effect } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
+import { appstraxAuth } from '@appstrax/services/auth';
 import { ActivatedRoute, Params } from '@angular/router';
+import { Component, OnInit, Signal, OnDestroy, effect, inject } from '@angular/core';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
 
 import { Store } from '@state';
-import { TimeSheetEntry, Project, User, Organization, OrganizationProjects } from '@models';
 import { OrgUserRoles, ProjectUserRoles } from '@models';
+import { TimeSheetEntry, Project, Organization, OrganizationProjects } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { SplitPaneComponent, SplitPaneVerticalComponent } from '@components';
 import { OrganizationSelectorComponent } from './components/organization-selector/organization-selector.component';
 import { FilterViewContainerComponent } from './components/filter-view-container/filter-view-container.component';
 import { SummaryMetricsComponent, SummaryMetrics } from './components/summary-metrics/summary-metrics.component';
-import { appstraxAuth, Operator } from '@appstrax/services/auth';
-import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
 import { TimeSheetFilterState } from './models/time-sheet-filter-state.model';
 import { TimeSheetFilterUtilsService } from './services/time-sheet-filter-utils.service';
 
@@ -37,14 +36,19 @@ import { TimeSheetFilterUtilsService } from './services/time-sheet-filter-utils.
   styleUrl: './overview.component.scss'
 })
 export class OverviewComponent implements OnInit, OnDestroy {
+  private store: Store = inject(Store);
+  private timeSheetEntryService: TimeSheetEntryService = inject(TimeSheetEntryService);
+  private toastService: ToastService = inject(ToastService);
+  private route: ActivatedRoute = inject(ActivatedRoute);
+  private filterUtils: TimeSheetFilterUtilsService = inject(TimeSheetFilterUtilsService);
+
   public projects: Signal<Project[]>;
   public organizations: Signal<Organization[]>;
   public orgProjects: Signal<OrganizationProjects[]>;
 
   public timeSheetEntries: TimeSheetEntry[] = [];
-  public allTimeSheetEntries: TimeSheetEntry[] = []; // All entries for global metrics (unfiltered)
+  public allTimeSheetEntries: TimeSheetEntry[] = [];
   public filteredEntries: TimeSheetEntry[] = [];
-  public allUsers: User[] = []; // For admin view
 
   public isLoading: boolean = true;
   public currentUserId: string = '';
@@ -77,19 +81,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
     organizationsCount: 0,
   };
 
-  constructor(
-    private store: Store,
-    private timeSheetEntryService: TimeSheetEntryService,
-    private toastService: ToastService,
-    private route: ActivatedRoute,
-    private filterUtils: TimeSheetFilterUtilsService,
-  ) {
+  constructor() {
     this.organizations = this.store.organizations.all;
     this.projects = this.store.projects.all;
     this.orgProjects = this.store.orgProjects.all;
     effect(() => {
       if (
-        this.organizations().length&&
+        this.organizations().length &&
         this.projects().length &&
         this.orgProjects().length
       ) {
@@ -136,6 +134,59 @@ export class OverviewComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  public async onFiltersChange(filters: TimeSheetFilterState): Promise<void> {
+    this.filters = { ...filters };
+    this.syncFiltersToUrl();
+    await this.loadTimeSheetEntries();
+  }
+
+  public async onOrganizationSelected(organization: Organization | null): Promise<void> {
+    this.selectedOrganization = organization;
+    this.filters.organizationId = organization?.id || null;
+    this.selectedProject = null;
+    this.filters.projectId = null;
+    this.filters.userId = '';
+    this.filters.category = '';
+    this.syncFiltersToUrl();
+    await this.loadTimeSheetEntries();
+  }
+
+  public async onProjectSelected(project: Project | null): Promise<void> {
+    this.selectedProject = project;
+    this.filters.projectId = project?.id || null;
+    this.filters.userId = '';
+    this.filters.category = '';
+    this.syncFiltersToUrl();
+    await this.loadTimeSheetEntries();
+  }
+
+  public async approveAllPending(): Promise<void> {
+    if (!this.canApprove) return;
+
+    const pendingEntries = this.filteredEntries.filter(e => !e.approved);
+    if (!pendingEntries.length) {
+      this.toastService.info('No pending entries to approve');
+      return;
+    }
+
+    try {
+      for (const entry of pendingEntries) {
+        entry.approved = true;
+        await this.timeSheetEntryService.save(entry);
+      }
+      this.toastService.success(`Approved ${pendingEntries.length} time entries`);
+      await this.loadAllTimeSheetEntries();
+      await this.loadTimeSheetEntries();
+    } catch (error) {
+      this.toastService.error('Error approving time entries');
+    }
+  }
+
+  public getSelectedProject(): Project | undefined {
+    if (!this.filters.projectId) return undefined;
+    return this.projects().find(p => p.id === this.filters.projectId);
+  }
+
   private async checkPermissions(): Promise<void> {
     const orgUsers = this.store.orgUsers.byUserId(this.currentUserId)();
     const isOrgAdmin = orgUsers.some(ou => ou.role === OrgUserRoles.ADMIN);
@@ -162,6 +213,13 @@ export class OverviewComponent implements OnInit, OnDestroy {
     this.isInitializing = previousState;
   }
 
+  private syncFiltersToUrl(): void {
+    if (this.isInitializing) return;
+    this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
+      includeOrganizationAndProject: true,
+    });
+  }
+
   private findOrganizationById(id?: string | null): Organization | null {
     if (!id) return null;
     return this.organizations().find(org => org.id === id) ?? null;
@@ -170,13 +228,6 @@ export class OverviewComponent implements OnInit, OnDestroy {
   private findProjectById(id?: string | null): Project | null {
     if (!id) return null;
     return this.projects().find(project => project.id === id) ?? null;
-  }
-
-  private syncFiltersToUrl(): void {
-    if (this.isInitializing) return;
-    this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
-      includeOrganizationAndProject: true,
-    });
   }
 
   private async loadAllTimeSheetEntries(): Promise<void> {
@@ -200,6 +251,21 @@ export class OverviewComponent implements OnInit, OnDestroy {
     }
   }
 
+  private async loadTimeSheetEntries(): Promise<void> {
+    try {
+      this.timeSheetEntries = await this.fetchFilteredProjectEntries();
+      this.filteredEntries = this.filterTimeSheetEntries();
+      this.calculateSummaryMetrics();
+    } catch (error) {
+      this.toastService.error('Error loading time entries');
+    }
+  }
+
+  private async fetchFilteredProjectEntries(): Promise<TimeSheetEntry[]> {
+    const projectIds = this.getFilteredProjectIds();
+    return await this.timeSheetEntryService.getTimeSheetEntriesByProjectId(projectIds);
+  }
+
   private getAccessibleProjectIds(): string[] {
     const projectIds = new Set<string>();
 
@@ -219,119 +285,29 @@ export class OverviewComponent implements OnInit, OnDestroy {
     return Array.from(projectIds);
   }
 
-  async buildQueryFilters(): Promise<TimeSheetEntry[]> {
-    let projectIds = this.getFilteredProjectIds();
-
-    let queryList: any[] = [{ 'projectId': { [Operator.IN]: projectIds } } as any];
-    // if (this.filters.startDate) queryList.push({ 'date': { [Operator.GTE]: this.filters.startDate } });
-    // if (this.filters.endDate) queryList.push({ 'date': { [Operator.LTE]: this.filters.endDate } });
-
-
-    const filterQuery = { [Operator.AND]: queryList };
-
-    return await this.timeSheetEntryService.getByFilter(filterQuery);
-  }
-
-  getFilteredProjectIds(): String[] {
-    let projectIds = this.getAccessibleProjectIds();
-
+  private getFilteredProjectIds(): string[] {
+    const projectIds = this.getAccessibleProjectIds();
     if (this.filters.projectId) {
       return projectIds.filter(id => id === this.filters.projectId);
     }
-
     if (this.filters.organizationId) {
       const orgProjects = this.store.orgProjects.byOrganizationId(this.filters.organizationId)();
       const orgProjectIds = orgProjects.map(op => op.projectId);
       return projectIds.filter(id => orgProjectIds.includes(id));
     }
-
     return projectIds;
-
   }
 
-  public async onFiltersChange(filters: TimeSheetFilterState): Promise<void> {
-    this.filters = { ...filters }; // Create a new object to ensure change detection
-    this.syncFiltersToUrl();
-    await this.loadTimeSheetEntries();
-  }
-
-  public async loadTimeSheetEntries(): Promise<void> {
-    try {
-      this.timeSheetEntries = await this.buildQueryFilters();
-      this.filteredEntries = this.filterTimeSheetEntries();
-      this.calculateSummaryMetrics();
-    } catch (error) {
-      this.toastService.error('Error loading time entries');
-    }
-  }
-
-  filterTimeSheetEntries(): TimeSheetEntry[] {
+  private filterTimeSheetEntries(): TimeSheetEntry[] {
     return this.timeSheetEntries.filter(e => {
-      let isTrue = true;
-      if(this.filters.startDate) isTrue = isTrue && e.date >= this.filters.startDate;
-      if(this.filters.endDate) isTrue = isTrue && e.date <= this.filters.endDate;
-      if (this.filters.userId) isTrue = isTrue && e.userId === this.filters.userId;
-      if (this.filters.category) isTrue = isTrue && e.category === this.filters.category;
-      if (this.filters.status === 'approved') isTrue = isTrue && e.approved;
-      else if (this.filters.status === 'pending') isTrue = isTrue && !e.approved;
-      return isTrue;
+      if (this.filters.startDate && e.date < this.filters.startDate) return false;
+      if (this.filters.endDate && e.date > this.filters.endDate) return false;
+      if (this.filters.userId && e.userId !== this.filters.userId) return false;
+      if (this.filters.category && e.category !== this.filters.category) return false;
+      if (this.filters.status === 'approved' && !e.approved) return false;
+      if (this.filters.status === 'pending' && e.approved) return false;
+      return true;
     });
-  }
-
-  public async onOrganizationSelected(organization: Organization | null): Promise<void> {
-    this.selectedOrganization = organization;
-    this.filters.organizationId = organization?.id || null;
-    this.selectedProject = null;
-    this.filters.projectId = null; // Reset project when org changes
-    this.filters.userId = ''; // Reset user filter
-    this.filters.category = ''; // Reset category filter
-    this.syncFiltersToUrl();
-    await this.loadTimeSheetEntries();
-  }
-
-  public async onProjectSelected(project: Project | null): Promise<void> {
-    this.selectedProject = project;
-    this.filters.projectId = project?.id || null;
-    this.filters.userId = ''; // Reset user filter when project changes
-    this.filters.category = ''; // Reset category filter
-    this.syncFiltersToUrl();
-    await this.loadTimeSheetEntries();
-  }
-
-  public getSelectedProject(): Project | undefined {
-    if (!this.filters.projectId) return undefined;
-    return this.projects().find(p => p.id === this.filters.projectId);
-  }
-
-  public async approveAllPending(): Promise<void> {
-    if (!this.canApprove) return;
-
-    const pendingEntries = this.filteredEntries.filter(e => !e.approved);
-    if (!pendingEntries.length) {
-      this.toastService.info('No pending entries to approve');
-      return;
-    }
-
-    try {
-      for (const entry of pendingEntries) {
-        entry.approved = true;
-        await this.timeSheetEntryService.save(entry);
-      }
-      this.toastService.success(`Approved ${pendingEntries.length} time entries`);
-      await this.loadAllTimeSheetEntries();
-      await this.loadTimeSheetEntries();
-    } catch (error) {
-      this.toastService.error('Error approving time entries');
-    }
-  }
-
-  public getProjectName(projectId: string): string {
-    const project = this.projects().find(p => p.id === projectId);
-    return project?.name || 'Unknown Project';
-  }
-
-  public getUserName(userId: string): string {
-    return userId === this.currentUserId ? 'You' : userId.substring(0, 8);
   }
 
   private calculateSummaryMetrics(): void {
@@ -346,9 +322,5 @@ export class OverviewComponent implements OnInit, OnDestroy {
       projectsCount: projectCount,
       organizationsCount: organizationCount,
     };
-  }
-
-  public formatHours(hours: number): string {
-    return TimeCalculationUtils.formatHours(hours);
   }
 }

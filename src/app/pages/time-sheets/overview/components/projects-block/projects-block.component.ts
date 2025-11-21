@@ -16,14 +16,12 @@ export class ProjectsBlockComponent {
 
   @Output() projectSelected = new EventEmitter<Project | null>();
 
-  onBlockClick(): void {
+  public onBlockClick(): void {
     this.projectSelected.emit(this.project);
   }
 
-  getDisplayName(): string {
-    if (this.isAllProjects) {
-      return 'All Projects';
-    }
+  public getDisplayName(): string {
+    if (this.isAllProjects) return 'All Projects';
     return this.project?.name || 'Unknown Project';
   }
 }

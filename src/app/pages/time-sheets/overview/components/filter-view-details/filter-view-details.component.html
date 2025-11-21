@@ -25,9 +25,9 @@
               <tbody>
                 <tr *ngFor="let entry of dateGroup.entries">
                   <td>
-                    <span class="badge bg-secondary">{{ getProjectName(entry.projectId) }}</span>
+                    <span class="badge bg-secondary">{{ displayUtils.getProjectName(entry.projectId, projects) }}</span>
                   </td>
-                  <td class="hours">{{ formatHours(entry.hours) }}</td>
+                  <td class="hours">{{ displayUtils.formatHours(entry.hours) }}</td>
                   <td>
                     <span class="badge bg-info">{{ entry.category }}</span>
                   </td>

@@ -43,43 +43,9 @@
           }
         </div>
       </div>
-      <div class="d-flex flex-wrap gap-2 card-body">
-        <app-filter-block label="Date Range">
-          <select
-            class="form-select form-select-sm"
-            [(ngModel)]="filters.dateRange"
-            (change)="onDateRangeChange()"
-          >
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-            <option value="all">All</option>
-            <option value="custom">Custom</option>
-          </select>
 
-          @if (filters.dateRange === 'custom') {
-          <div class="custom-date-range mt-2">
-            <div class="custom-date-field">
-              <label class="form-label small fw-semibold mb-1">Start</label>
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                [ngModel]="toDateInput(filters.startDate)"
-                (ngModelChange)="onCustomStartDateChange($event)"
-              />
-            </div>
-            <div class="custom-date-field">
-              <label class="form-label small fw-semibold mb-1">End</label>
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                [ngModel]="toDateInput(filters.endDate)"
-                (ngModelChange)="onCustomEndDateChange($event)"
-              />
-            </div>
-          </div>
-          }
-        </app-filter-block>
+      <div class="d-flex flex-wrap gap-2 card-body">
+
 
         <app-filter-block label="Status">
           <select
@@ -122,6 +88,43 @@
             }
           </select>
         </app-filter-block>
+
+        <app-filter-block label="Date Range">
+          <select
+            class="form-select form-select-sm"
+            [(ngModel)]="filters.dateRange"
+            (change)="onDateRangeChange()"
+          >
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+            <option value="all">All</option>
+            <option value="custom">Custom</option>
+          </select>
+
+          @if (filters.dateRange === 'custom') {
+          <div class="custom-date-range mt-2">
+            <div class="custom-date-field">
+              <label class="form-label small fw-semibold mb-1">Start</label>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [ngModel]="toDateInput(filters.startDate)"
+                (ngModelChange)="onCustomStartDateChange($event)"
+              />
+            </div>
+            <div class="custom-date-field">
+              <label class="form-label small fw-semibold mb-1">End</label>
+              <input
+                type="date"
+                class="form-control form-control-sm"
+                [ngModel]="toDateInput(filters.endDate)"
+                (ngModelChange)="onCustomEndDateChange($event)"
+              />
+            </div>
+          </div>
+          }
+        </app-filter-block>
       </div>
     </div>
   </div>
@@ -132,15 +135,15 @@
     <app-filter-view-summary
       [entries]="getEntriesForView()"
     ></app-filter-view-summary>
-    } @if(currentViewType === 'details') {
+    } @else if(currentViewType === 'details') {
     <app-filter-view-details
       [entries]="getEntriesForView()"
     ></app-filter-view-details>
-    } @if(currentViewType === 'timeline') {
+    } @else if(currentViewType === 'timeline') {
     <app-filter-view-timeline
       [entries]="getEntriesForView()"
     ></app-filter-view-timeline>
-    } @if(currentViewType === 'unapproved') {
+    } @else if(currentViewType === 'unapproved') {
     <app-unapproved-entries
       [timeSheetEntries]="timeSheetEntries"
       [canApprove]="canApprove"

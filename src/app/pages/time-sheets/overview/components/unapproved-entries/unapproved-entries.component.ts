@@ -1,11 +1,11 @@
-import { Component, Input, OnInit, OnChanges, SimpleChanges, Signal, computed, inject } from '@angular/core';
+import { Component, Input, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@state';
 import { TimeSheetEntry } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { ModalService } from 'src/app/services/modal.service';
-import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
+import { TimeSheetDisplayUtilsService } from '../../services/time-sheet-display-utils.service';
 
 interface UnapprovedEntryGroup {
   date: Date;
@@ -33,6 +33,7 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
   private timeSheetEntryService = inject(TimeSheetEntryService);
   private toastService = inject(ToastService);
   private modalService = inject(ModalService);
+  public displayUtils = inject(TimeSheetDisplayUtilsService);
 
   async ngOnInit(): Promise<void> {
     const user = await appstraxAuth.getUser();
@@ -52,7 +53,7 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
     const categories = entries
       .map(entry => entry.category)
       .filter(category => category && category.trim() !== '');
-    let list = [...new Set(categories)].sort();
+    const list = [...new Set(categories)].sort();
     return list.join(', ');
   }
 
@@ -61,6 +62,34 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
       .map(entry => entry.category)
       .filter(category => category && category.trim() !== '');
     return [...new Set(categories)].sort();
+  }
+
+  public async onEntryClick(group: UnapprovedEntryGroup): Promise<void> {
+    try {
+      const allEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDate(
+        group.userId,
+        group.date
+      );
+
+      const unapprovedEntries = allEntries.filter(entry => !entry.approved);
+
+      const modalRef = this.modalService.showUnapprovedEntriesModal({
+        entries: allEntries,
+        unapprovedEntries: unapprovedEntries,
+        date: group.date,
+        userId: group.userId,
+        onApprove: async () => {
+          await this.approveEntries(unapprovedEntries);
+        }
+      });
+
+      modalRef.result.then(async () => {
+        await this.groupUnapprovedEntries();
+      }, () => {
+      });
+    } catch (error) {
+      this.toastService.error('Error loading time entries');
+    }
   }
 
   private async groupUnapprovedEntries(): Promise<void> {
@@ -109,47 +138,6 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
     this.groupedEntries = Array.from(groupsMap.values()).sort((a, b) =>
       b.date.getTime() - a.date.getTime()
     );
-  }
-
-  public getUserName(userId: string): string {
-    if (userId === this.currentUserId) {
-      return 'You';
-    }
-    return userId.substring(0, 8);
-  }
-
-
-
-  public formatHours(hours: number): string {
-    return TimeCalculationUtils.formatHours(hours);
-  }
-
-  public async onEntryClick(group: UnapprovedEntryGroup): Promise<void> {
-    try {
-      const allEntries = await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDate(
-        group.userId,
-        group.date
-      );
-
-      const unapprovedEntries = allEntries.filter(entry => !entry.approved);
-
-      const modalRef = this.modalService.showUnapprovedEntriesModal({
-        entries: allEntries,
-        unapprovedEntries: unapprovedEntries,
-        date: group.date,
-        userId: group.userId,
-        onApprove: async () => {
-          await this.approveEntries(unapprovedEntries);
-        }
-      });
-
-      modalRef.result.then(async () => {
-        await this.groupUnapprovedEntries();
-      }, () => {
-      });
-    } catch (error) {
-      this.toastService.error('Error loading time entries');
-    }
   }
 
   private async approveEntries(entries: TimeSheetEntry[]): Promise<void> {

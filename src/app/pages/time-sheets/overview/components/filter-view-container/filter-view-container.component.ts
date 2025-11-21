@@ -1,18 +1,18 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, OnDestroy } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, OnDestroy, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
 import { Subject } from 'rxjs';
 import { takeUntil } from 'rxjs/operators';
-import { TimeSheetEntry, Project, User } from '@models';
+import { TimeSheetEntry, Project } from '@models';
 import { FilterViewSummaryComponent } from '../filter-view-summary/filter-view-summary.component';
 import { FilterViewDetailsComponent } from '../filter-view-details/filter-view-details.component';
 import { FilterViewTimelineComponent } from '../filter-view-timeline/filter-view-timeline.component';
 import { UnapprovedEntriesComponent } from '../unapproved-entries/unapproved-entries.component';
-import { FilterBlockComponent } from '../../../../../components/filter-block/filter-block.component';
-import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
+import { FilterBlockComponent } from '../filter-block/filter-block.component';
 import { TimeSheetFilterState } from '../../models/time-sheet-filter-state.model';
 import { TimeSheetFilterUtilsService } from '../../services/time-sheet-filter-utils.service';
+import { TimeSheetDisplayUtilsService } from '../../services/time-sheet-display-utils.service';
 
 export type FilterViewType = 'summary' | 'details' | 'timeline' | 'unapproved';
 
@@ -32,6 +32,11 @@ export type FilterViewType = 'summary' | 'details' | 'timeline' | 'unapproved';
   styleUrl: './filter-view-container.component.scss'
 })
 export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestroy {
+
+  private route: ActivatedRoute = inject(ActivatedRoute);
+  private filterUtils: TimeSheetFilterUtilsService = inject(TimeSheetFilterUtilsService);
+  private displayUtils: TimeSheetDisplayUtilsService = inject(TimeSheetDisplayUtilsService);
+
   @Input() timeSheetEntries: TimeSheetEntry[] = [];
   @Input() filteredEntries: TimeSheetEntry[] = [];
   @Input() selectedProject: Project | null = null;
@@ -63,18 +68,8 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
     { value: 'unapproved', label: 'Unapproved', icon: 'bi-exclamation-triangle', description: 'Pending items' },
   ];
 
-  public totalHours: number = 0;
-  public approvedHours: number = 0;
-  public pendingHours: number = 0;
-  public totalEntries: number = 0;
-  public totalProjects: number = 0;
   public categories: string[] = [];
   public users: { id: string; name: string }[] = [];
-
-  constructor(
-    private route: ActivatedRoute,
-    private filterUtils: TimeSheetFilterUtilsService
-  ) {}
 
   ngOnInit(): void {
     const params = this.route.snapshot.queryParams;
@@ -94,89 +89,15 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
     this.initialize();
   }
 
-  ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
-  }
-
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['timeSheetEntries'] || changes['filteredEntries']) {
       this.initialize();
     }
   }
 
-  initialize(): void {
-    const allEntries = this.filteredEntries;
-    this.recalculateStats(allEntries);
-    this.updateAvailableCategories();
-    this.updateAvailableUsers();
-  }
-
-  private recalculateStats(entries: TimeSheetEntry[]): void {
-    this.totalHours = entries.reduce((sum, e) => sum + e.hours, 0);
-    this.approvedHours = entries.filter(e => e.approved).reduce((sum, e) => sum + e.hours, 0);
-    this.pendingHours = entries.filter(e => !e.approved).reduce((sum, e) => sum + e.hours, 0);
-    this.totalEntries = entries.length;
-    this.totalProjects = new Set(entries.map(e => e.projectId)).size;
-  }
-
-  private updateAvailableCategories(): void {
-    const categories = this.timeSheetEntries
-      .map(e => e.category)
-      .filter(c => c && c.trim() !== '');
-    this.categories = [...new Set(categories)].sort();
-  }
-
-  private updateAvailableUsers(): void {
-    const entriesToUse = this.timeSheetEntries;
-    const userIds = new Set<string>();
-    entriesToUse.forEach(entry => {
-      if (entry.userId && entry.userId.trim() !== '') {
-        userIds.add(entry.userId);
-      }
-    });
-    this.users = Array.from(userIds)
-      .map(userId => ({
-        id: userId,
-        name: this.getUserName(userId)
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }
-
-  private getUserName(userId: string): string {
-    if (userId.length > 20) {
-      return userId.substring(0, 20) + '...';
-    }
-    return userId;
-  }
-
-  private loadFiltersFromUrl(params: Params): void {
-    const previousState = this.isInitializing;
-    this.isInitializing = true;
-    this.filters = this.filterUtils.parseFiltersFromParams(params, this.filters, {
-      preserveOrganizationAndProject: true,
-    });
-    this.isInitializing = previousState;
-  }
-
-  private syncOrgAndProjectFromUrl(): void {
-    const params = this.route.snapshot.queryParams;
-    this.filters.organizationId = this.normalizeNullableParam(params['organizationId']);
-    this.filters.projectId = this.normalizeNullableParam(params['projectId']);
-  }
-
-  private normalizeNullableParam(value: any): string | null {
-    if (value === undefined || value === null || value === '') return null;
-    return value;
-  }
-
-  private emitFilterChange(): void {
-    if (this.isInitializing) return;
-    this.syncOrgAndProjectFromUrl();
-    this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
-      preserveExistingOrgProject: true,
-    });
-    this.filtersChange.emit({ ...this.filters });
+  ngOnDestroy(): void {
+    this.destroy$.next();
+    this.destroy$.complete();
   }
 
   public onDateRangeChange(): void {
@@ -212,11 +133,25 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
     return this.filteredEntries;
   }
 
-  onEmitFilterChange(): void {
+  public onEmitFilterChange(): void {
     this.emitFilterChange();
   }
 
-  toDateInput(date: Date | null): string {
+  public onCustomStartDateChange(value: string): void {
+    this.filters.startDate = this.parseDateFromInput(value);
+    this.emitFilterChange();
+  }
+
+  public onCustomEndDateChange(value: string): void {
+    this.filters.endDate = this.parseDateFromInput(value);
+    this.emitFilterChange();
+  }
+
+  public onApproveAll(): void {
+    this.approveAllRequested.emit();
+  }
+
+  public toDateInput(date: Date | null): string {
     if (!date) return '';
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -224,14 +159,61 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
     return `${year}-${month}-${day}`;
   }
 
-  onCustomStartDateChange(value: string): void {
-    this.filters.startDate = this.parseDateFromInput(value);
-    this.emitFilterChange();
+  private initialize(): void {
+    this.updateAvailableCategories();
+    this.updateAvailableUsers();
   }
 
-  onCustomEndDateChange(value: string): void {
-    this.filters.endDate = this.parseDateFromInput(value);
-    this.emitFilterChange();
+  private updateAvailableCategories(): void {
+    const categories = this.timeSheetEntries
+      .map(e => e.category)
+      .filter(c => c && c.trim() !== '');
+    this.categories = [...new Set(categories)].sort();
+  }
+
+  private updateAvailableUsers(): void {
+    const entriesToUse = this.timeSheetEntries;
+    const userIds = new Set<string>();
+    entriesToUse.forEach(entry => {
+      if (entry.userId && entry.userId.trim() !== '') {
+        userIds.add(entry.userId);
+      }
+    });
+    this.users = Array.from(userIds)
+      .map(userId => ({
+        id: userId,
+        name: this.displayUtils.getUserName(userId, { maxLength: 20, addEllipsis: true })
+      }))
+      .sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  private loadFiltersFromUrl(params: Params): void {
+    const previousState = this.isInitializing;
+    this.isInitializing = true;
+    this.filters = this.filterUtils.parseFiltersFromParams(params, this.filters, {
+      preserveOrganizationAndProject: true,
+    });
+    this.isInitializing = previousState;
+  }
+
+  private syncOrgAndProjectFromUrl(): void {
+    const params = this.route.snapshot.queryParams;
+    this.filters.organizationId = this.normalizeNullableParam(params['organizationId']);
+    this.filters.projectId = this.normalizeNullableParam(params['projectId']);
+  }
+
+  private normalizeNullableParam(value: any): string | null {
+    if (value === undefined || value === null || value === '') return null;
+    return value;
+  }
+
+  private emitFilterChange(): void {
+    if (this.isInitializing) return;
+    this.syncOrgAndProjectFromUrl();
+    this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
+      preserveExistingOrgProject: true,
+    });
+    this.filtersChange.emit({ ...this.filters });
   }
 
   private parseDateFromInput(value: string): Date | null {
@@ -239,26 +221,6 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
     const [year, month, day] = value.split('-').map(Number);
     if (![year, month, day].every(v => !isNaN(v))) return null;
     return new Date(year, month - 1, day, 0, 0, 0, 0);
-  }
-
-  public onApproveAll(): void {
-    this.approveAllRequested.emit();
-  }
-
-  public formatHours(hours: number): string {
-    return TimeCalculationUtils.formatHours(hours);
-  }
-
-  public getTotalHoursLabel(): string {
-    return this.formatHours(this.totalHours);
-  }
-
-  public getApprovedHoursLabel(): string {
-    return this.formatHours(this.approvedHours);
-  }
-
-  public getPendingHoursLabel(): string {
-    return this.formatHours(this.pendingHours);
   }
 }
 

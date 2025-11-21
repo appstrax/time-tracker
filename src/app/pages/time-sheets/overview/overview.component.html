@@ -41,7 +41,6 @@
       [canApprove]="canApprove"
       [pendingCount]="summaryMetrics.pendingCount"
       (filtersChange)="onFiltersChange($event)"
-      (refreshRequested)="loadTimeSheetEntries()"
       (approveAllRequested)="approveAllPending()"
     ></app-filter-view-container>
   </ng-container>

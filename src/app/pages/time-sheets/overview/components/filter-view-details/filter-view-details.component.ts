@@ -2,7 +2,7 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TimeSheetEntry, Project } from '@models';
 import { Store } from '@state';
-import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
+import { TimeSheetDisplayUtilsService } from '../../services/time-sheet-display-utils.service';
 
 @Component({
   selector: 'app-filter-view-details',
@@ -16,18 +16,10 @@ export class FilterViewDetailsComponent implements OnInit {
   @Input() projects: Project[] = [];
 
   private store = inject(Store);
+  public displayUtils = inject(TimeSheetDisplayUtilsService);
 
   ngOnInit(): void {
     if (!this.projects.length) this.projects = this.store.projects.all();
-  }
-
-  public getProjectName(projectId: string): string {
-    const project = this.projects.find(p => p.id === projectId);
-    return project?.name || 'Unknown Project';
-  }
-
-  public formatHours(hours: number): string {
-    return TimeCalculationUtils.formatHours(hours);
   }
 
   public getEntriesByDate(): { date: Date; entries: TimeSheetEntry[] }[] {

@@ -6,7 +6,8 @@
 >
   <div class="d-flex align-items-center justify-content-between">
     <span class="project-name">{{ getDisplayName() }}</span>
-    <i *ngIf="isSelected" class="bi bi-check-circle-fill text-success"></i>
+    @if (isSelected) {
+    <i class="bi bi-check-circle-fill text-success"></i>
+    }
   </div>
 </div>
-

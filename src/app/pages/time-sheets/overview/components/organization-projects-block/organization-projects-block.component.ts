@@ -1,7 +1,7 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Signal, computed, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@state';
-import { Project, OrganizationProjects } from '@models';
+import { Project } from '@models';
 import { ProjectsBlockComponent } from '../projects-block/projects-block.component';
 
 @Component({
@@ -40,6 +40,16 @@ export class OrganizationProjectsBlockComponent implements OnInit, OnChanges {
     }
   }
 
+  public onProjectSelected(project: Project | null): void {
+    this.projectSelected.emit(project);
+  }
+
+  public isProjectSelected(project: Project | null): boolean {
+    if (!project && !this.selectedProject) return true;
+    if (!project || !this.selectedProject) return false;
+    return project.id === this.selectedProject.id;
+  }
+
   private loadProjects(): void {
     if (!this.organizationId) return;
 
@@ -55,16 +65,6 @@ export class OrganizationProjectsBlockComponent implements OnInit, OnChanges {
     } finally {
       this.isLoading = false;
     }
-  }
-
-  public onProjectSelected(project: Project | null): void {
-    this.projectSelected.emit(project);
-  }
-
-  public isProjectSelected(project: Project | null): boolean {
-    if (!project && !this.selectedProject) return true; // "All Projects" selected
-    if (!project || !this.selectedProject) return false;
-    return project.id === this.selectedProject.id;
   }
 }
 

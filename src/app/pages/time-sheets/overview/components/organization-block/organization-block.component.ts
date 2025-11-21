@@ -16,14 +16,12 @@ export class OrganizationBlockComponent {
 
   @Output() organizationSelected = new EventEmitter<Organization | null>();
 
-  onBlockClick(): void {
+  public onBlockClick(): void {
     this.organizationSelected.emit(this.organization);
   }
 
-  getDisplayName(): string {
-    if (this.isAllOrganizations) {
-      return 'All Organizations';
-    }
+  public getDisplayName(): string {
+    if (this.isAllOrganizations) return 'All Organizations';
     return this.organization?.name || 'Unknown Organization';
   }
 }

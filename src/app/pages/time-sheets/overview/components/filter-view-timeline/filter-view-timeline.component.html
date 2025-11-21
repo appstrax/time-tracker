@@ -9,29 +9,29 @@
           <div class="timeline-date">
             <strong>{{ day.date | date : "MMM d, yyyy" }}</strong>
             <span class="badge bg-secondary ms-2">{{
-              formatHours(day.hours)
+              displayUtils.formatHours(day.hours)
             }}</span>
           </div>
           <div class="timeline-bar">
             <div
               class="timeline-segment approved"
               [style.width.%]="(day.approvedHours / getMaxHours()) * 100"
-              [title]="formatHours(day.approvedHours) + ' approved'"
+              [title]="displayUtils.formatHours(day.approvedHours) + ' approved'"
             ></div>
             <div
               class="timeline-segment pending"
               [style.width.%]="(day.pendingHours / getMaxHours()) * 100"
-              [title]="formatHours(day.pendingHours) + ' pending'"
+              [title]="displayUtils.formatHours(day.pendingHours) + ' pending'"
             ></div>
           </div>
           <div class="timeline-legend">
             <span class="legend-item">
               <span class="legend-color approved"></span>
-              Approved: {{ formatHours(day.approvedHours) }}
+              Approved: {{ displayUtils.formatHours(day.approvedHours) }}
             </span>
             <span class="legend-item">
               <span class="legend-color pending"></span>
-              Pending: {{ formatHours(day.pendingHours) }}
+              Pending: {{ displayUtils.formatHours(day.pendingHours) }}
             </span>
           </div>
         </div>

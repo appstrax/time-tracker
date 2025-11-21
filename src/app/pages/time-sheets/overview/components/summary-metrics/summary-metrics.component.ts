@@ -1,6 +1,6 @@
 import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { MetricCardComponent } from '../../../../../components/metric-card/metric-card.component';
+import { MetricCardComponent } from '../metric-card/metric-card.component';
 
 export interface SummaryMetrics {
   totalHours: number;

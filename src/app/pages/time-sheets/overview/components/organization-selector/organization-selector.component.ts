@@ -1,4 +1,4 @@
-import { Component, Input, Output, EventEmitter, OnInit, OnChanges, SimpleChanges, Signal, computed, inject } from '@angular/core';
+import { Component, Input, Output, EventEmitter, Signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Store } from '@state';
 import { Organization, Project } from '@models';
@@ -13,6 +13,7 @@ import { OrganizationBlockComponent } from '../organization-block/organization-b
   styleUrl: './organization-selector.component.scss'
 })
 export class OrganizationSelectorComponent {
+  private store: Store = inject(Store);
   @Input() selectedOrganization: Organization | null = null;
   @Input() selectedProject: Project | null = null;
 
@@ -21,7 +22,7 @@ export class OrganizationSelectorComponent {
 
   public organizations: Signal<Organization[]>;
 
-  constructor(private store: Store) {
+  constructor() {
     this.organizations = this.store.organizations.all;
   }
 

@@ -2,7 +2,7 @@ import { Component, Input, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { TimeSheetEntry, Project } from '@models';
 import { Store } from '@state';
-import { TimeCalculationUtils } from 'src/app/utils/time-calculation-utils';
+import { TimeSheetDisplayUtilsService } from '../../services/time-sheet-display-utils.service';
 
 @Component({
   selector: 'app-filter-view-summary',
@@ -16,6 +16,7 @@ export class FilterViewSummaryComponent implements OnInit {
   @Input() projects: Project[] = [];
 
   private store = inject(Store);
+  public displayUtils = inject(TimeSheetDisplayUtilsService);
 
   ngOnInit(): void {
     if (!this.projects.length) {
@@ -23,16 +24,27 @@ export class FilterViewSummaryComponent implements OnInit {
     }
   }
 
-  public getProjectName(projectId: string): string {
-    const project = this.projects.find(p => p.id === projectId);
-    return project?.name || 'Unknown Project';
-  }
-
-  public getEntriesByProject(): { projectId: string; projectName: string; hours: number; approvedHours: number; pendingHours: number; count: number }[] {
-    const projectMap = new Map<string, { projectName: string; hours: number; approvedHours: number; pendingHours: number; count: number }>();
+  public getEntriesByProject(): {
+    projectId: string;
+    projectName: string;
+    hours: number;
+    approvedHours: number;
+    pendingHours: number;
+    count: number
+  }[] {
+    const projectMap = new Map<
+      string,
+      {
+        projectName: string;
+        hours: number;
+        approvedHours: number;
+        pendingHours: number;
+        count: number,
+      }
+    >();
 
     this.entries.forEach(entry => {
-      const projectName = this.getProjectName(entry.projectId);
+      const projectName = this.displayUtils.getProjectName(entry.projectId, this.projects);
       if (!projectMap.has(entry.projectId)) {
         projectMap.set(entry.projectId, {
           projectName,
@@ -55,10 +67,6 @@ export class FilterViewSummaryComponent implements OnInit {
     return Array.from(projectMap.entries())
       .map(([projectId, data]) => ({ projectId, ...data }))
       .sort((a, b) => b.hours - a.hours);
-  }
-
-  public formatHours(hours: number): string {
-    return TimeCalculationUtils.formatHours(hours);
   }
 }
 

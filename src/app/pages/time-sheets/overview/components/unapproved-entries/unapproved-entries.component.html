@@ -46,10 +46,16 @@
                 }
               </td>
               <td class="text-color">
-                <small>{{ getUserName(group.userId) }}</small>
+                <small>
+                  {{
+                    displayUtils.getUserName(group.userId, {
+                      currentUserId: currentUserId
+                    })
+                  }}
+                </small>
               </td>
               <td class="text-end text-color">
-                {{ formatHours(group.totalHours) }}
+                {{ displayUtils.formatHours(group.totalHours) }}
               </td>
             </tr>
             }
