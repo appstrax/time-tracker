@@ -13,9 +13,11 @@ import { SettingsPage, DesignPage, DbDesignPage, QuotationsPage, KpisPage } from
 import { BasePage, ProjectPage, ProfilePage, MarketplacePage, WorkspacePage } from '@pages';
 import { TestingPage, CompliancePage, GuardrailsPage, ContactPage } from '@pages';
 import { OverviewComponent } from '@pages';
+import { LandingPage } from '@pages';
 
 export const routes: Routes = [
-  { path: '', redirectTo: '/login', pathMatch: 'full' },
+  // PUBLIC LANDING
+  { path: '', component: LandingPage, pathMatch: 'full' },
 
   // AUTH
   { path: 'login', component: LoginPage },

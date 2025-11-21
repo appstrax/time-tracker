@@ -205,3 +205,9 @@
   padding-left: 0.75rem;
   padding-right: 0.75rem;
 }
+
+/* Ensure dividers use themed border color (dark mode friendly) */
+.top-right .dropdown-menu .dropdown-divider {
+  border-top-color: var(--color-border);
+  opacity: 1;
+}

@@ -9,7 +9,7 @@ export class SettingsService {
 
   constructor() {
     const stored = localStorage.getItem(SettingsService.AUTO_COLLAPSE_KEY);
-    const initial = stored !== null ? stored === 'true' : true;
+    const initial = stored !== null ? stored === 'true' : false;
     this.autoCollapseSubject = new BehaviorSubject<boolean>(initial);
   }
 
@@ -28,7 +28,7 @@ export class SettingsService {
 
   getSideNavMode(): 'collapsed' | 'expanded' {
     const value = localStorage.getItem(SettingsService.SIDENAV_MODE_KEY);
-    return value === 'expanded' ? 'expanded' : 'collapsed';
+    return value === 'collapsed' ? 'collapsed' : 'expanded';
   }
 
   setSideNavMode(mode: 'collapsed' | 'expanded'): void {

@@ -4,10 +4,10 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 
 import { Organization, OrganizationUsers, OrgUserRoles } from '@models';
-import { OrganizationService, OrganizationUsersService } from '@services';
 
 import { appstraxAuth, User } from '@appstrax/services/auth';
 import { appstraxStorage } from '@appstrax/services/storage';
+import { Store } from '@state';
 
 @Component({
   selector: 'app-create-organization',
@@ -25,14 +25,16 @@ export class CreateOrganizationPage {
   orgUser: OrganizationUsers = new OrganizationUsers();
   backLink: string = '/sign-up';
 
+  private orgsStore;
+
   constructor(
+    private store: Store,
     private router: Router,
     private route: ActivatedRoute,
-    private organizationService: OrganizationService,
-    private organizationUsersService: OrganizationUsersService
   ) {
     const from = this.route.snapshot.queryParamMap.get('from');
     this.backLink = from === 'home' ? '/home' : '/sign-up';
+    this.orgsStore = this.store.organizations;
   }
 
   async createOrganization(): Promise<void> {
@@ -51,18 +53,18 @@ export class CreateOrganizationPage {
         await this.uploadOrganizationLogo(this.logoFile);
       }
 
-      this.organization = await this.organizationService.save(
-        this.organization
-      );
+      this.organization = await this.orgsStore.save(this.organization);
 
       this.orgUser.organizationId = this.organization.id;
       this.orgUser.userId = user.id;
       this.orgUser.role = OrgUserRoles.ADMIN;
 
-      this.orgUser = await this.organizationUsersService.save(this.orgUser);
+      this.orgUser = await this.store.orgUsers.save(this.orgUser);
 
       if (this.organization && this.orgUser) {
-        this.router.navigate(['/create-project'], { queryParams: { from: 'create-organization' } });
+        this.router.navigate(['/create-project'], {
+          queryParams: { from: 'create-organization' },
+        });
       }
     } catch (error: any) {
       this.errorMessage = error.message;

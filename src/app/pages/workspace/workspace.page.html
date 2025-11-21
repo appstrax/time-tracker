@@ -1,23 +1,7 @@
 <div class="container py-3">
   <div class="d-flex align-items-center justify-content-between mb-3">
     <h2 class="m-0">Workspace</h2>
-    <div class="d-flex gap-2 align-items-center flex-nowrap">
-      <button
-        class="btn btn-sm btn-outline-primary flex-shrink-0"
-        *ngIf="activeTab==='projects'"
-        [routerLink]="['/create-project']"
-        [queryParams]="{ from: 'home' }"
-      >
-        <i class="bi bi-plus-lg me-1"></i> Add Project
-      </button>
-      <button
-        class="btn btn-sm btn-outline-primary flex-shrink-0"
-        *ngIf="activeTab==='organizations'"
-        [routerLink]="['/create-organization']"
-        [queryParams]="{ from: 'home' }"
-      >
-        <i class="bi bi-plus-lg me-1"></i> Add Organization
-      </button>
+    <div class="d-flex gap-2 align-items-end flex-nowrap">
       <input
         class="form-control form-control-sm"
         type="search"
@@ -29,26 +13,50 @@
     </div>
   </div>
 
-  <ul class="nav nav-tabs mb-3">
-    <li class="nav-item">
+  <div class="d-flex align-items-end justify-content-between mb-3">
+    <ul class="nav nav-tabs m-0">
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          [class.active]="activeTab==='projects'"
+          (click)="activeTab='projects'"
+        >
+          Projects
+        </button>
+      </li>
+      <li class="nav-item">
+        <button
+          class="nav-link"
+          [class.active]="activeTab==='organizations'"
+          (click)="activeTab='organizations'"
+        >
+          Organizations
+        </button>
+      </li>
+    </ul>
+    <div class="d-flex gap-2">
       <button
-        class="nav-link"
-        [class.active]="activeTab==='projects'"
-        (click)="activeTab='projects'"
+        class="btn btn-sm btn-outline-primary flex-shrink-0"
+        *ngIf="activeTab==='projects'"
+        [routerLink]="['/create-project']"
+        [queryParams]="{ from: 'home' }"
+        title="Add Project"
+        aria-label="Add Project"
       >
-        Projects
+        <i class="bi bi-plus-lg"></i>
       </button>
-    </li>
-    <li class="nav-item">
       <button
-        class="nav-link"
-        [class.active]="activeTab==='organizations'"
-        (click)="activeTab='organizations'"
+        class="btn btn-sm btn-outline-primary flex-shrink-0"
+        *ngIf="activeTab==='organizations'"
+        [routerLink]="['/create-organization']"
+        [queryParams]="{ from: 'home' }"
+        title="Add Organization"
+        aria-label="Add Organization"
       >
-        Organizations
+        <i class="bi bi-plus-lg"></i>
       </button>
-    </li>
-  </ul>
+    </div>
+  </div>
 
   <div [hidden]="activeTab!=='projects'">
     <div class="card">
@@ -58,7 +66,8 @@
             <thead class="table-light">
               <tr>
                 <th style="width: 28%">Name</th>
-                <th style="width: 30%">Description</th>
+                <th style="width: 20%">Description</th>
+                <th style="width: 10%">Users</th>
                 <th style="width: 12%">Build</th>
                 <th style="width: 12%">Quality</th>
                 <th style="width: 10%">Tickets</th>
@@ -66,15 +75,23 @@
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let p of filteredProjects()">
+              @for (p of filteredProjects(); track p.id) {
+              <tr>
                 <td>
                   <div class="fw-semibold">{{ p.name }}</div>
-                  <div class="small text-muted">ID: {{ p.id }}</div>
+                  <div class="small text-muted">
+                    Org: {{ getOrganizationNameForProject(p.id) || '—' }}
+                  </div>
                 </td>
                 <td>
                   <div class="text-truncate" style="max-width: 520px">
                     {{ p.description || '—' }}
                   </div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary"
+                    >{{ getUserCountForProject(p.id) }}</span
+                  >
                 </td>
                 <td>
                   <span class="badge bg-success">Passing</span>
@@ -92,37 +109,44 @@
                     <button
                       class="btn btn-sm btn-outline-primary"
                       [routerLink]="['/project']"
+                      title="Open project"
+                      aria-label="Open project"
                     >
-                      Open
+                      <i class="bi bi-eye"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-secondary"
                       (click)="editProject(p.id)"
+                      title="Edit project"
+                      aria-label="Edit project"
                     >
-                      Edit
+                      <i class="bi bi-pencil"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-danger"
                       (click)="deleteProject(p.id)"
+                      title="Delete project"
+                      aria-label="Delete project"
                     >
-                      Delete
+                      <i class="bi bi-trash"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-secondary"
                       (click)="setCurrentProject(p.id)"
+                      title="Set as current project"
+                      aria-label="Set as current project"
                     >
-                      Set current
+                      <i class="bi bi-check-circle"></i>
                     </button>
                   </div>
                 </td>
               </tr>
-              @if (!filteredProjects().length) {
-              <tr>
-                <td colspan="6" class="text-center text-muted py-4">
+              <tr *ngIf="filteredProjects().length === 0">
+                <td colspan="7" class="text-center text-muted py-4">
                   No projects found.
                 </td>
               </tr>
-            }
+              }
             </tbody>
           </table>
         </div>
@@ -138,27 +162,32 @@
             <thead class="table-light">
               <tr>
                 <th style="width: 26%">Name</th>
-                <th style="width: 22%">Contact</th>
-                <th style="width: 20%">Location</th>
-                <th style="width: 16%">Projects</th>
+                <th style="width: 18%">Contact</th>
+                <th style="width: 18%">Location</th>
+                <th style="width: 8%">Users</th>
+                <th style="width: 14%">Projects</th>
                 <th style="width: 16%"></th>
               </tr>
             </thead>
             <tbody>
-              <tr *ngFor="let o of filteredOrganizations()">
+              @for (o of filteredOrganizations(); track o.id) {
+              <tr>
                 <td>
                   <div class="fw-semibold">{{ o.name }}</div>
-                  <div class="small text-muted">ID: {{ o.id }}</div>
                 </td>
                 <td>
                   <div class="small">{{ o.email || '—' }}</div>
-                  <div class="small text-muted">{{ o.website || '—' }}</div>
                 </td>
                 <td>
                   <div class="small">
                     {{ o.city || '—' }}, {{ o.state || '' }} {{ o.country || ''
                     }}
                   </div>
+                </td>
+                <td>
+                  <span class="badge bg-secondary"
+                    >{{ getUserCountForOrganization(o.id) }}</span
+                  >
                 </td>
                 <td>
                   <span class="badge bg-secondary"
@@ -170,33 +199,40 @@
                     <button
                       class="btn btn-sm btn-outline-primary"
                       [routerLink]="['/users']"
+                      title="Manage users"
+                      aria-label="Manage users"
                     >
-                      Manage users
+                      <i class="bi bi-people"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-secondary"
                       (click)="editOrganization(o.id)"
+                      title="Edit organization"
+                      aria-label="Edit organization"
                     >
-                      Edit
+                      <i class="bi bi-pencil"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-danger"
                       (click)="deleteOrganization(o.id)"
+                      title="Delete organization"
+                      aria-label="Delete organization"
                     >
-                      Delete
+                      <i class="bi bi-trash"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-secondary"
                       (click)="setCurrentOrganization(o.id)"
+                      title="Set as current organization"
+                      aria-label="Set as current organization"
                     >
-                      Set current
+                      <i class="bi bi-check-circle"></i>
                     </button>
                   </div>
                 </td>
               </tr>
-              @if (!filteredOrganizations().length) {
-              <tr>
-                <td colspan="5" class="text-center text-muted py-4">
+              <tr *ngIf="filteredOrganizations().length === 0">
+                <td colspan="6" class="text-center text-muted py-4">
                   No organizations found.
                 </td>
               </tr>

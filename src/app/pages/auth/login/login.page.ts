@@ -2,10 +2,10 @@ import { Router } from '@angular/router';
 import { Component } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
-
-import { UserService } from '@services';
-import { User, AuthErrors } from '@appstrax/services/auth';
+import { AuthErrors } from '@appstrax/services/auth';
 import { AuthStatus, appstraxAuth } from '@appstrax/services/auth';
+
+import { Store } from '@state';
 
 @Component({
   selector: 'app-login',
@@ -19,11 +19,9 @@ export class LoginPage {
   password: string = '';
   errorMessage: string = '';
 
-  isLoading: boolean = false;
-  hasProject: boolean = false;
-  hasOrganization: boolean = false;
+  loading: boolean = false;
 
-  constructor(private router: Router, private userService: UserService) {}
+  constructor(private router: Router, private store: Store) {}
 
   async onSubmit(): Promise<void> {
     if (!this.isFormValid()) {
@@ -31,7 +29,7 @@ export class LoginPage {
       return;
     }
 
-    this.isLoading = true;
+    this.loading = true;
     this.errorMessage = '';
 
     try {
@@ -40,25 +38,27 @@ export class LoginPage {
         password: this.password,
       });
 
-      const user: User = await appstraxAuth.getUser();
-      this.hasProject = await this.userService.hasProject(user.id);
-      this.hasOrganization = await this.userService.hasOrganization(user.id);
+      if (response.status != AuthStatus.authenticated) {
+        throw new Error(response.status);
+      }
 
-      if (
-        response.status == AuthStatus.authenticated &&
-        this.hasOrganization &&
-        this.hasProject
-      ) {
+      // fetch user data
+      await this.store.init();
+
+      const projects = this.store.projects.all();
+      const organizations = this.store.organizations.all();
+
+      if (organizations.length && projects.length) {
         this.router.navigate(['/home']);
-      } else if (!this.hasOrganization) {
+      } else if (!organizations.length) {
         this.router.navigate(['/create-organization']);
-      } else if (this.hasProject) {
+      } else if (!projects.length) {
         this.router.navigate(['/create-project']);
       }
     } catch (error: any) {
       this.errorMessage = this.getErrorMessage(error);
     } finally {
-      this.isLoading = false;
+      this.loading = false;
     }
   }
 

@@ -18,3 +18,8 @@
   overflow: hidden;
 }
 
+/* Ensure muted/secondary text is readable in dark mode inside cards */
+.marketplace .card .text-muted {
+  color: var(--text-muted) !important;
+}
+

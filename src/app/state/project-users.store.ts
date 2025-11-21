@@ -2,9 +2,11 @@ import { computed, inject } from '@angular/core';
 
 import { signalStore, withState, withMethods, withComputed, patchState } from '@ngrx/signals';
 
-import { ProjectUsers } from '@models';
+import { Organization, ProjectUsers } from '@models';
 import { ProjectUsersService } from '@services';
 import { EntityState, createEmptyEntityState, upsertMany, upsertOne, removeOne } from '@state';
+import { FetchQuery } from '@appstrax/services';
+import { FindResultDto } from '@appstrax/services/database';
 
 interface ProjectUsersState extends EntityState<ProjectUsers> {}
 
@@ -68,6 +70,25 @@ export const ProjectUsersStore = signalStore(
     },
     setError(error: string | null) {
       patchState(store, { error });
+    },
+    async find(query?: FetchQuery): Promise<FindResultDto<ProjectUsers>> {
+      const res = await projUsersService.find(query);
+      patchState(store, (state) => upsertMany(state, res.data ?? []));
+      return res;
+    },
+    async findById(id: string): Promise<ProjectUsers> {
+      const res = await projUsersService.findById(id);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async save(entity: ProjectUsers): Promise<ProjectUsers> {
+      const res = await projUsersService.save(entity);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async delete(id: string): Promise<void> {
+      await projUsersService.delete(id);
+      patchState(store, (state) => removeOne(state, id));
     },
   }))
 );

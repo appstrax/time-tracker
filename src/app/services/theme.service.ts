@@ -16,7 +16,7 @@ export class ThemeService {
   currentTheme$ = this.currentThemeSubject.asObservable();
 
   constructor() {
-    const storedMode = (localStorage.getItem(ThemeService.THEME_MODE_KEY) as ThemeMode) || 'light';
+    const storedMode = (localStorage.getItem(ThemeService.THEME_MODE_KEY) as ThemeMode) || 'system';
     const storedVarsRaw = localStorage.getItem(ThemeService.THEME_CUSTOM_VARS_KEY);
     const customVars: Record<string, string> = storedVarsRaw ? JSON.parse(storedVarsRaw) : {};
     this.applyTheme(storedMode, customVars);

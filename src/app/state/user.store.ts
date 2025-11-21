@@ -1,5 +1,5 @@
 import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
-import { appstraxAuth } from '@appstrax/services/auth';
+import { appstraxAuth, User as AuthUser } from '@appstrax/services/auth';
 import { User } from '@models';
 
 interface UserState {
@@ -23,14 +23,20 @@ export const UserStore = signalStore(
       try {
         const authUser = await appstraxAuth.getUser();
         const user = new User();
-        (user as any).id = (authUser as any).id;
-        user.email = (authUser as any).email ?? '';
+        user.id = authUser.id;
+        user.email = authUser.email;
         patchState(store, { current: user });
       } catch (e: any) {
         patchState(store, { error: e?.message ?? 'Failed to load user' });
       } finally {
         patchState(store, { loading: false });
       }
+    },
+    setCurrentFromAuthUser(authUser: AuthUser) {
+      const user = new User();
+      user.id = authUser.id;
+      user.email = authUser.email;
+      patchState(store, { current: user });
     },
     setCurrent(user: User | null) {
       patchState(store, { current: user });
@@ -46,5 +52,3 @@ export const UserStore = signalStore(
     },
   }))
 );
-
-

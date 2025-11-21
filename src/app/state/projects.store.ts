@@ -3,9 +3,9 @@ import { computed, inject } from '@angular/core';
 import { withComputed, patchState } from '@ngrx/signals';
 import { signalStore, withState, withMethods } from '@ngrx/signals';
 
-import { Operator } from '@appstrax/services/database';
+import { FetchQuery, FindResultDto, Operator } from '@appstrax/services/database';
 
-import { Project } from '@models';
+import { Organization, Project } from '@models';
 import { ProjectService } from '@services';
 import { upsertOne, removeOne, upsertMany } from '@state';
 import { EntityState, createEmptyEntityState } from '@state';
@@ -57,6 +57,25 @@ export const ProjectsStore = signalStore(
     },
     setError(error: string | null) {
       patchState(store, { error });
+    },
+    async find(query?: FetchQuery): Promise<FindResultDto<Project>> {
+      const res = await projectService.find(query);
+      patchState(store, (state) => upsertMany(state, res.data ?? []));
+      return res;
+    },
+    async findById(id: string): Promise<Project> {
+      const res = await projectService.findById(id);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async save(entity: Project): Promise<Project> {
+      const res = await projectService.save(entity);
+      patchState(store, (state) => upsertOne(state, res));
+      return res;
+    },
+    async delete(id: string): Promise<void> {
+      await projectService.delete(id);
+      patchState(store, (state) => removeOne(state, id));
     },
   }))
 );

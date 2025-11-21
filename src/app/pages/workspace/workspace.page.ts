@@ -3,7 +3,6 @@ import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { Store } from '@state';
-import { ProjectService, OrganizationService } from '@services';
 import { ToastService } from '../../services/toast.service';
 import { Project, Organization, OrganizationProjects } from '@models';
 
@@ -22,37 +21,74 @@ export class WorkspacePage {
   organizations!: Signal<Organization[]>;
   orgProjects!: Signal<OrganizationProjects[]>;
 
+  private projectUserCounts: Record<string, number> = {};
+  private orgUserCounts: Record<string, number> = {};
+
   filteredProjects = computed(() => {
     const q = (this.search() || '').toLowerCase();
-    if (!q) return this.projects();
-    return this.projects().filter((p: any) =>
-      [p?.name, p?.description].some((v: string) => (v || '').toLowerCase().includes(q))
-    );
+    const items = this.projects().map((p) => ({
+      project: p,
+      orgName: (this.getOrganizationNameForProject(p.id) || '').toLowerCase(),
+    }));
+    const filtered = q
+      ? items.filter(({ project, orgName }) =>
+          [project?.name, project?.description, orgName].some((v: string) =>
+            (v || '').toLowerCase().includes(q)
+          )
+        )
+      : items;
+    filtered.sort((a, b) => {
+      const byOrg = a.orgName.localeCompare(b.orgName);
+      if (byOrg !== 0) return byOrg;
+      return (a.project.name || '').localeCompare(b.project.name || '');
+    });
+    return filtered.map((x) => x.project);
   });
 
   filteredOrganizations = computed(() => {
     const q = (this.search() || '').toLowerCase();
-    if (!q) return this.organizations();
-    return this.organizations().filter((o: any) =>
-      [o?.name, o?.email, o?.website, o?.city, o?.country]
-        .some((v: string) => (v || '').toLowerCase().includes(q))
-    );
+    const items = this.organizations();
+    const filtered = q
+      ? items.filter((o: any) =>
+          [o?.name, o?.email, o?.website, o?.city, o?.country]
+            .some((v: string) => (v || '').toLowerCase().includes(q))
+        )
+      : items.slice();
+    filtered.sort((a: any, b: any) => (a?.name || '').localeCompare(b?.name || ''));
+    return filtered;
   });
 
   constructor(
     private store: Store,
-    private projectService: ProjectService,
-    private organizationService: OrganizationService,
     private toast: ToastService,
   ) {
-    // assign signals post-injection to avoid "used before initialization"
     this.projects = this.store.projects.all;
     this.organizations = this.store.organizations.all;
     this.orgProjects = this.store.orgProjects.all;
-    // default the tab if there are no projects yet
     effect(() => {
       if (!this.projects().length && this.organizations().length) {
         this.activeTab = 'organizations';
+      }
+    });
+    // Preload user counts for visible entities
+    effect(() => {
+      // Project user counts
+      for (const p of this.projects()) {
+        if (!this.projectUserCounts[p.id]) {
+          this.store.projUsers
+            .find({ where: { projectId: p.id } as any })
+            .then((res) => (this.projectUserCounts[p.id] = (res.data || []).length))
+            .catch(() => (this.projectUserCounts[p.id] = 0));
+        }
+      }
+      // Organization user counts
+      for (const o of this.organizations()) {
+        if (!this.orgUserCounts[o.id]) {
+          this.store.orgUsers
+            .find({ where: { organizationId: o.id } as any })
+            .then((res) => (this.orgUserCounts[o.id] = (res.data || []).length))
+            .catch(() => (this.orgUserCounts[o.id] = 0));
+        }
       }
     });
   }
@@ -75,12 +111,30 @@ export class WorkspacePage {
     }
   }
 
+  getOrganizationNameForProject(projectId: string): string {
+    try {
+      const mapping = this.orgProjects().find((op) => op.projectId === projectId);
+      if (!mapping) return '';
+      const org = this.organizations().find((o) => o.id === mapping.organizationId);
+      return org?.name || '';
+    } catch {
+      return '';
+    }
+  }
+
+  getUserCountForProject(projectId: string): number {
+    return this.projectUserCounts[projectId] ?? 0;
+  }
+
+  getUserCountForOrganization(orgId: string): number {
+    return this.orgUserCounts[orgId] ?? 0;
+  }
+
   async deleteProject(projectId: string) {
     const ok = confirm('Delete this project? This cannot be undone.');
     if (!ok) return;
     try {
-      await this.projectService.delete(projectId);
-      this.store.projects.removeOne(projectId);
+      await this.store.projects.delete(projectId);
       this.toast.success('Project deleted', 'Success');
     } catch (e) {
       this.toast.error('Failed to delete project', 'Error');
@@ -91,8 +145,7 @@ export class WorkspacePage {
     const ok = confirm('Delete this organization? This cannot be undone.');
     if (!ok) return;
     try {
-      await this.organizationService.delete(orgId);
-      this.store.organizations.removeOne(orgId);
+      await this.store.organizations.delete(orgId);
       this.toast.success('Organization deleted', 'Success');
     } catch (e) {
       this.toast.error('Failed to delete organization', 'Error');
