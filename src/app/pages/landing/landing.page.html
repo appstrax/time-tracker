@@ -18,6 +18,9 @@
   <section class="audience">
     <h2>Who it's for</h2>
     <p class="lead">The Machine is for anyone who wants to go from concept to working software — fast.</p>
+    <p class="section-desc">
+      The Machine adapts to your role: developers automate scaffolding, tests, and pipelines; founders and clients validate scope with clear deliverables; teams align on a single source of truth. When you need more, assign Heroes—senior engineers who guide architecture and integrations—so you can ship with confidence at any scale.
+    </p>
     <div class="grid">
       <div class="card audience-card">
         <div class="icon-circle"><i class="bi bi-code-slash"></i></div>
@@ -104,6 +107,9 @@
  
   <section class="benefits">
     <h2>Why The Machine</h2>
+    <p class="section-desc">
+      Most AI tools help you prototype, then stall at integration, governance, security, and reliability. The Machine pairs AI acceleration with built‑in guardrails, tests, and delivery pipelines—plus optional Heroes who ensure your system design holds up—so you avoid the rebuild tax and keep momentum from MVP to enterprise.
+    </p>
     <div class="grid">
       <div class="card">
         <h3>Ship 100× faster</h3>
@@ -146,6 +152,9 @@
   
   <section class="truths">
     <h2>What you should know</h2>
+    <p class="section-desc">
+      AI multiplies experienced teams—it doesn’t replace engineering discipline. With The Machine, automation handles the repetitive work while human review gates, standards, and tests safeguard quality. Assign Heroes when you want hands‑on support, and scale with confidence as your product grows.
+    </p>
     <div class="grid">
       <div class="card">
         <h3>AI multiplies experienced teams</h3>
@@ -250,6 +259,76 @@
     </div>
   </section>
   
+  <section class="pricing">
+    <h2>Plans that scale with you</h2>
+    <div class="grid">
+      <div class="card plan-card" (click)="selectPlan('starter')" [class.featured]="selectedPlan === 'starter'">
+        <h3>Starter</h3>
+        <p class="price"><span class="amount">$0</span><span class="period">/mo</span></p>
+        <ul class="features-list">
+          <li>AI‑assisted builder</li>
+          <li>Standard guardrails</li>
+          <li>Community support</li>
+          <li>Limited features</li>
+        </ul>
+        <button type="button" class="plan-cta" [disabled]="true">Get started</button>
+      </div>
+      <div class="card plan-card" (click)="selectPlan('pro')" [class.featured]="selectedPlan === 'pro'">
+        <h3>Pro</h3>
+        <p class="price"><span class="amount">$99</span><span class="period">/mo</span></p>
+        <ul class="features-list">
+          <li>Everything in Starter</li>
+          <li>Advanced guardrails & tests</li>
+          <li>Hero check‑ins (2h/month)</li>
+          <li>Priority support</li>
+        </ul>
+        <button type="button" class="plan-cta primary" [disabled]="true">Start Pro</button>
+      </div>
+      <div class="card plan-card" (click)="selectPlan('enterprise')" [class.featured]="selectedPlan === 'enterprise'">
+        <h3>Enterprise</h3>
+        <p class="price"><span class="amount">Custom</span></p>
+        <ul class="features-list">
+          <li>Dedicated Heroes & SRE</li>
+          <li>Compliance & governance</li>
+          <li>Private cloud & SSO</li>
+          <li>Tailored SLAs</li>
+        </ul>
+        <button type="button" class="plan-cta" [disabled]="true">Talk to sales</button>
+      </div>
+    </div>
+  </section>
+
+  <section class="providers">
+    <h2>Payment providers</h2>
+    <div class="grid">
+      <div class="card provider">
+        <div class="provider-logo"></div>
+        <div class="provider-name">Stripe</div>
+      </div>
+      <div class="card provider">
+        <div class="provider-logo"></div>
+        <div class="provider-name">PayPal</div>
+      </div>
+      <div class="card provider">
+        <div class="provider-logo"></div>
+        <div class="provider-name">Apple&nbsp;Pay</div>
+      </div>
+      <div class="card provider">
+        <div class="provider-logo"></div>
+        <div class="provider-name">Google&nbsp;Pay</div>
+      </div>
+      <div class="card provider">
+        <div class="provider-logo"></div>
+        <div class="provider-name">Adyen</div>
+      </div>
+      <div class="card provider">
+        <div class="provider-logo"></div>
+        <div class="provider-name">Braintree</div>
+      </div>
+    </div>
+    <p class="providers-note">Icons coming soon. Configure multiple providers per workspace.</p>
+  </section>
+
   <section class="secondary-cta mb-4">
     <h2>Get early access</h2>
     <p class="interested-count" *ngIf="interestCount !== null">{{ interestCount }} interested so far</p>

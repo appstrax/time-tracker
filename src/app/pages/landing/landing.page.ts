@@ -182,6 +182,8 @@ export class LandingPage implements OnInit {
   private truthKeys: string[] = [];
   private featureKeys: string[] = [];
   private extraKeys: string[] = [];
+  // Pricing selection
+  selectedPlan: 'starter' | 'pro' | 'enterprise' = 'pro';
 
   private voteStorageKey(itemKey: string): string {
     return `vote:${itemKey}`;
@@ -440,6 +442,11 @@ export class LandingPage implements OnInit {
 
   get extraSelectedImage(): string | null {
     return this.extraFeatureImages[this.extraSelectedKey] ?? null;
+  }
+
+  // Pricing
+  selectPlan(plan: 'starter' | 'pro' | 'enterprise') {
+    this.selectedPlan = plan;
   }
 }
 
