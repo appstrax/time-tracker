@@ -68,6 +68,8 @@ export class PromptAnalyserComponent {
   }
 
   openImproveModal() {
+    // Blur the trigger to avoid focused element being inside aria-hidden subtree
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
     this.modalService.showPromptAnalyserModal(this.text);
   }
 

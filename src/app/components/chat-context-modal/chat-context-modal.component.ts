@@ -51,6 +51,7 @@ export class ChatContextModalComponent implements AfterViewInit {
     setTimeout(() => {
       if (this.editor?.nativeElement) {
         this.editor.nativeElement.scrollTop = 0;
+        this.editor.nativeElement.focus();
       }
     });
   }

@@ -1,5 +1,5 @@
 import { CommonModule } from '@angular/common';
-import { Component, Input } from '@angular/core';
+import { Component, Input, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
@@ -9,7 +9,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
   template: `
     <div class="modal-header">
       <h5 class="modal-title">Improve your prompt</h5>
-      <button type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
+      <button #closeBtn type="button" class="btn-close" aria-label="Close" (click)="activeModal.dismiss()"></button>
     </div>
     <div class="modal-body" style="max-height: 80vh; overflow: auto;">
       <div class="mb-3">
@@ -30,9 +30,15 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
     </div>
   `,
 })
-export class PromptAnalyserModalComponent {
+export class PromptAnalyserModalComponent implements AfterViewInit {
   @Input() promptText: string = '';
+  @ViewChild('closeBtn') closeBtn?: ElementRef<HTMLButtonElement>;
   constructor(public activeModal: NgbActiveModal) {}
+  ngAfterViewInit(): void {
+    setTimeout(() => {
+      this.closeBtn?.nativeElement?.focus?.();
+    });
+  }
 }
 
 

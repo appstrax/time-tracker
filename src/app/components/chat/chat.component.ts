@@ -59,6 +59,8 @@ export class ChatComponent implements AfterViewInit {
   }
 
   public openContextModal() {
+    // Blur the trigger to avoid focused element being inside aria-hidden subtree
+    try { (document.activeElement as HTMLElement | null)?.blur?.(); } catch {}
     const modalRef = this.modalService.showChatContextModal(this.context);
     modalRef.result.then(
       (updated: any) => {
