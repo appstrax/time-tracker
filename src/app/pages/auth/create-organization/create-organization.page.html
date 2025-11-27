@@ -6,8 +6,8 @@
     </a>
     <div class="create-organization-content">
       <div class="left-panel">
-        <h1 class="main-title">Create Organization</h1>
-        <p class="subtitle">to get started</p>
+        <h1 class="main-title">{{ isEditMode ? 'Edit Organization' : 'Create Organization' }}</h1>
+        <p class="subtitle">{{ isEditMode ? 'make your changes' : 'to get started' }}</p>
 
         <div class="logo-preview" *ngIf="logoPreviewUrl">
           <img [src]="logoPreviewUrl" alt="Logo preview" />
@@ -234,7 +234,7 @@
               class="spinner-border spinner-border-sm"
               aria-hidden="true"
             ></span>
-            <span class="ms-2" role="status">Create Organization</span>
+            <span class="ms-2" role="status">{{ isEditMode ? 'Update Organization' : 'Create Organization' }}</span>
           </button>
         </form>
       </div>

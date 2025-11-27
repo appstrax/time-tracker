@@ -177,6 +177,12 @@ export class WorkspacePage {
   }
 
   async deleteOrganization(orgId: string) {
+    // Block deletion if organization has projects
+    const numProjects = this.getProjectCountForOrg(orgId);
+    if (numProjects > 0) {
+      this.toast.error('You cannot delete an organization that still has projects', 'Blocked');
+      return;
+    }
     const ok = confirm('Delete this organization? This cannot be undone.');
     if (!ok) return;
     try {
@@ -194,7 +200,9 @@ export class WorkspacePage {
   }
 
   editOrganization(orgId: string) {
-    this.toast.info('Edit organization coming soon', 'Info');
+    this.router.navigate(['/create-organization'], {
+      queryParams: { from: 'home', editId: orgId },
+    });
   }
 }
 

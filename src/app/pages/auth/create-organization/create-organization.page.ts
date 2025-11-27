@@ -24,6 +24,7 @@ export class CreateOrganizationPage {
   organization: Organization = new Organization();
   orgUser: OrganizationUsers = new OrganizationUsers();
   backLink: string = '/sign-up';
+  isEditMode: boolean = false;
 
   private orgsStore;
 
@@ -35,6 +36,23 @@ export class CreateOrganizationPage {
     const from = this.route.snapshot.queryParamMap.get('from');
     this.backLink = from === 'home' ? '/home' : '/sign-up';
     this.orgsStore = this.store.organizations;
+    const editId = this.route.snapshot.queryParamMap.get('editId');
+    if (editId) {
+      this.isEditMode = true;
+      // Prefill organization and logo
+      const existing = this.orgsStore.all().find((o) => o.id === editId);
+      if (existing) {
+        this.organization = existing;
+        this.logoPreviewUrl = existing.logoUrl || null;
+      } else {
+        this.orgsStore.findById(editId).then((org) => {
+          this.organization = org;
+          this.logoPreviewUrl = org.logoUrl || null;
+        }).catch(() => {
+          this.errorMessage = 'Failed to load organization';
+        });
+      }
+    }
   }
 
   async createOrganization(): Promise<void> {
@@ -47,24 +65,25 @@ export class CreateOrganizationPage {
     this.errorMessage = '';
 
     try {
-      const user: User = await appstraxAuth.getUser();
-
       if (this.logoFile) {
         await this.uploadOrganizationLogo(this.logoFile);
       }
 
-      this.organization = await this.orgsStore.save(this.organization);
-
-      this.orgUser.organizationId = this.organization.id;
-      this.orgUser.userId = user.id;
-      this.orgUser.role = OrgUserRoles.ADMIN;
-
-      this.orgUser = await this.store.orgUsers.save(this.orgUser);
-
-      if (this.organization && this.orgUser) {
-        this.router.navigate(['/create-project'], {
-          queryParams: { from: 'create-organization' },
-        });
+      if (this.isEditMode) {
+        this.organization = await this.orgsStore.save(this.organization);
+        this.router.navigate(['/home']);
+      } else {
+        const user: User = await appstraxAuth.getUser();
+        this.organization = await this.orgsStore.save(this.organization);
+        this.orgUser.organizationId = this.organization.id;
+        this.orgUser.userId = user.id;
+        this.orgUser.role = OrgUserRoles.ADMIN;
+        this.orgUser = await this.store.orgUsers.save(this.orgUser);
+        if (this.organization && this.orgUser) {
+          this.router.navigate(['/create-project'], {
+            queryParams: { from: 'create-organization' },
+          });
+        }
       }
     } catch (error: any) {
       this.errorMessage = error.message;
