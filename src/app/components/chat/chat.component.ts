@@ -3,10 +3,11 @@ import { Component, ElementRef, Input, ViewChild, AfterViewInit } from '@angular
 import { ModalService } from '../../services/modal.service';
 import { ToastService } from '../../services/toast.service';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
+import { PromptAnalyserComponent } from '../prompt-analyser/prompt-analyser.component';
 
 @Component({
   selector: 'app-chat',
-  imports: [CommonModule, NgbTooltip],
+  imports: [CommonModule, NgbTooltip, PromptAnalyserComponent],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
@@ -19,6 +20,7 @@ export class ChatComponent implements AfterViewInit {
   @Input() context: any = {};
 
   messages: Array<{ role: 'user' | 'assistant'; text: string }> = [];
+  currentPrompt: string = '';
 
   get hasConversation(): boolean {
     return this.messages.length > 0;
@@ -36,6 +38,7 @@ export class ChatComponent implements AfterViewInit {
 
   public onSuggestionClick(suggestion: any) {
     this.promptInput.nativeElement.value = suggestion.prompt;
+    this.currentPrompt = suggestion.prompt;
     this.promptInput.nativeElement.focus();
   }
 
@@ -45,6 +48,7 @@ export class ChatComponent implements AfterViewInit {
     // Push user message
     this.messages.push({ role: 'user', text: value });
     this.promptInput.nativeElement.value = '';
+    this.currentPrompt = '';
     this.scrollToBottom();
     // Placeholder assistant echo for now
     this.pendingTimer = setTimeout(() => {
@@ -105,6 +109,11 @@ export class ChatComponent implements AfterViewInit {
   public onClear() {
     this.messages = [];
     this.toast.success('Conversation cleared');
+  }
+
+  public onInputChange(evt: Event) {
+    const target = evt.target as HTMLInputElement | HTMLTextAreaElement;
+    this.currentPrompt = target.value ?? '';
   }
 
   private scrollToBottom() {

@@ -302,6 +302,18 @@ h3 {
   gap: 0.5rem;
   padding-left: 0.5rem; /* nudge to the right */
   margin-top: 0.35rem;  /* add a bit more space below input */
+  align-items: center;
+  justify-content: space-between;
+}
+
+.chat-actions-left {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+.chat-actions-right {
+  display: flex;
+  align-items: center;
 }
 
 .icon-button {
