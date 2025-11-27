@@ -19,10 +19,13 @@ export class Store {
   async init(): Promise<void> {
     try {
       await this.userStore.loadCurrent();
+      await this.delay(100)
       const userId = this.userStore.current()?.id ?? '';
       if (!userId) throw new Error('No authenticated user');
       await this.orgUsers.loadForUser(userId);
+      await this.delay(100)
       await this.projUsers.loadForUser(userId);
+      await this.delay(100)
 
       const orgIds = Array.from(
         new Set(this.orgUsers.all().map((x) => x.organizationId))
@@ -30,12 +33,19 @@ export class Store {
       const projectIds = Array.from(
         new Set(this.projUsers.all().map((x) => x.projectId))
       );
-
+      await this.delay(100)
       await this.organizations.loadByIds(orgIds);
+      await this.delay(100)
       await this.projects.loadByIds(projectIds);
+      await this.delay(100)
       await this.orgProjects.loadByProjectIds(projectIds);
+      await this.delay(100)
     } catch (e: any) {
       throw e;
     }
+  }
+
+  private delay(ms: number): Promise<void> {
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
