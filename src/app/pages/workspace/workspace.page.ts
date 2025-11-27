@@ -2,6 +2,7 @@ import { Component, Signal, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@state';
 import { ToastService } from '../../services/toast.service';
 import { Project, Organization, OrganizationProjects } from '@models';
@@ -11,7 +12,7 @@ import { Project, Organization, OrganizationProjects } from '@models';
   templateUrl: './workspace.page.html',
   styleUrls: ['./workspace.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule],
+  imports: [CommonModule, RouterModule, FormsModule, NgbTooltip],
 })
 export class WorkspacePage {
   activeTab: 'projects' | 'organizations' = 'projects';

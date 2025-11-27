@@ -16,10 +16,10 @@
       </li>
     </ul>
     <div class="d-flex gap-2">
-      <button class="btn btn-sm btn-outline-primary flex-shrink-0" *ngIf="activeTab==='projects'" [routerLink]="['/create-project']" [queryParams]="{ from: 'home' }" title="Add Project" aria-label="Add Project">
+      <button class="btn btn-sm btn-outline-primary flex-shrink-0" *ngIf="activeTab==='projects'" [routerLink]="['/create-project']" [queryParams]="{ from: 'home' }" aria-label="Add Project" ngbTooltip="Add Project" placement="bottom">
         <i class="bi bi-plus-lg"></i>
       </button>
-      <button class="btn btn-sm btn-outline-primary flex-shrink-0" *ngIf="activeTab==='organizations'" [routerLink]="['/create-organization']" [queryParams]="{ from: 'home' }" title="Add Organization" aria-label="Add Organization">
+      <button class="btn btn-sm btn-outline-primary flex-shrink-0" *ngIf="activeTab==='organizations'" [routerLink]="['/create-organization']" [queryParams]="{ from: 'home' }" aria-label="Add Organization" ngbTooltip="Add Organization" placement="bottom">
         <i class="bi bi-plus-lg"></i>
       </button>
     </div>
@@ -64,16 +64,16 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" [routerLink]="['/project']" title="Open project" aria-label="Open project">
+                    <button class="btn btn-sm btn-outline-primary" [routerLink]="['/project']" aria-label="Open project" ngbTooltip="Open project" placement="top">
                       <i class="bi bi-eye"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="editProject(p.id)" title="Edit project" aria-label="Edit project">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="editProject(p.id)" aria-label="Edit project" ngbTooltip="Edit project" placement="top">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" (click)="deleteProject(p.id)" title="Delete project" aria-label="Delete project">
+                    <button class="btn btn-sm btn-outline-danger" (click)="deleteProject(p.id)" aria-label="Delete project" ngbTooltip="Delete project" placement="top">
                       <i class="bi bi-trash"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="setCurrentProject(p.id)" title="Set as current project" aria-label="Set as current project">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="setCurrentProject(p.id)" aria-label="Set as current project" ngbTooltip="Set as current project" placement="top">
                       <i class="bi bi-check-circle"></i>
                     </button>
                   </div>
@@ -125,16 +125,16 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" [routerLink]="['/users']" title="Manage users" aria-label="Manage users">
+                    <button class="btn btn-sm btn-outline-primary" [routerLink]="['/users']" aria-label="Manage users" ngbTooltip="Manage users" placement="top">
                       <i class="bi bi-people"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="editOrganization(o.id)" title="Edit organization" aria-label="Edit organization">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="editOrganization(o.id)" aria-label="Edit organization" ngbTooltip="Edit organization" placement="top">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" (click)="deleteOrganization(o.id)" title="Delete organization" aria-label="Delete organization">
+                    <button class="btn btn-sm btn-outline-danger" (click)="deleteOrganization(o.id)" aria-label="Delete organization" ngbTooltip="Delete organization" placement="top">
                       <i class="bi bi-trash"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="setCurrentOrganization(o.id)" title="Set as current organization" aria-label="Set as current organization">
+                    <button class="btn btn-sm btn-outline-secondary" (click)="setCurrentOrganization(o.id)" aria-label="Set as current organization" ngbTooltip="Set as current organization" placement="top">
                       <i class="bi bi-check-circle"></i>
                     </button>
                   </div>
