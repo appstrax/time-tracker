@@ -17,9 +17,11 @@ import { Project, Organization, OrganizationProjects } from '@models';
 })
 export class WorkspacePage {
   @ViewChild('deleteProjectModal') deleteProjectModal!: TemplateRef<any>;
+  @ViewChild('deleteOrganizationModal') deleteOrganizationModal!: TemplateRef<any>;
   activeTab: 'projects' | 'organizations' = 'projects';
   search = signal<string>('');
   deletingProject = false;
+  deletingOrganization = false;
 
   projects!: Signal<Project[]>;
   organizations!: Signal<Organization[]>;
@@ -28,6 +30,7 @@ export class WorkspacePage {
   private projectUserCounts: Record<string, number> = {};
   private orgUserCounts: Record<string, number> = {};
   projectPendingDelete: Project | null = null;
+  organizationPendingDelete: Organization | null = null;
 
   filteredProjects = computed(() => {
     const q = (this.search() || '').toLowerCase();
@@ -183,14 +186,10 @@ export class WorkspacePage {
       this.toast.error('You cannot delete an organization that still has projects', 'Blocked');
       return;
     }
-    const ok = confirm('Delete this organization? This cannot be undone.');
-    if (!ok) return;
-    try {
-      await this.store.organizations.delete(orgId);
-      this.toast.success('Organization deleted', 'Success');
-    } catch (e) {
-      this.toast.error('Failed to delete organization', 'Error');
-    }
+    const org = this.organizations().find((o) => o.id === orgId) || null;
+    if (!org) return;
+    this.organizationPendingDelete = org;
+    this.modal.open(this.deleteOrganizationModal, { centered: true, backdrop: 'static', keyboard: true });
   }
 
   editProject(projectId: string) {
@@ -203,6 +202,41 @@ export class WorkspacePage {
     this.router.navigate(['/create-organization'], {
       queryParams: { from: 'home', editId: orgId },
     });
+  }
+
+  closeDeleteOrganizationModal() {
+    this.organizationPendingDelete = null;
+    this.deletingOrganization = false;
+    this.modal.dismiss();
+  }
+
+  async confirmDeleteOrganization() {
+    if (!this.organizationPendingDelete) return;
+    try {
+      this.deletingOrganization = true;
+      const orgId = this.organizationPendingDelete.id;
+      // Extra safety: remove any org-project mappings (should be none if blocked above)
+      const [orgUsersRes, orgProjRes] = await Promise.all([
+        this.store.orgUsers.find({ where: { organizationId: orgId } as any }),
+        this.store.orgProjects.find({ where: { organizationId: orgId } as any }),
+      ]);
+      const orgUsers = orgUsersRes.data ?? [];
+      const orgMappings = orgProjRes.data ?? [];
+      for (const ou of orgUsers) {
+        await this.store.orgUsers.delete(ou.id);
+      }
+      for (const mapping of orgMappings) {
+        await this.store.orgProjects.delete(mapping.id);
+      }
+      await this.store.organizations.delete(orgId);
+      this.toast.success('Organization deleted', 'Success');
+      this.modal.close();
+    } catch (e) {
+      this.toast.error('Failed to delete organization', 'Error');
+    } finally {
+      this.deletingOrganization = false;
+      this.organizationPendingDelete = null;
+    }
   }
 }
 

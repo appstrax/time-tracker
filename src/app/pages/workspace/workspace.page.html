@@ -165,3 +165,24 @@
     </button>
   </div>
 </ng-template>
+
+<ng-template #deleteOrganizationModal>
+  <div class="modal-header">
+    <h5 class="modal-title">Delete Organization</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeDeleteOrganizationModal()" [disabled]="deletingOrganization"></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-0">
+      Are you sure you want to delete
+      <span class="fw-semibold">{{ organizationPendingDelete?.name }}</span>?
+      This cannot be undone.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="closeDeleteOrganizationModal()" [disabled]="deletingOrganization">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeleteOrganization()" [disabled]="deletingOrganization">
+      <span *ngIf="deletingOrganization" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      {{ deletingOrganization ? 'Deleting...' : 'Delete' }}
+    </button>
+  </div>
+</ng-template>
