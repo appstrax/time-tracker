@@ -1,5 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, ViewChild, AfterViewInit } from '@angular/core';
+import { ModalService } from '../../services/modal.service';
 
 @Component({
   selector: 'app-chat',
@@ -13,6 +14,7 @@ export class ChatComponent implements AfterViewInit {
   @ViewChild('messagesContainer') messagesContainer?: ElementRef<HTMLDivElement>;
 
   @Input() suggestions: any[] = [];
+  @Input() context: any = {};
 
   messages: Array<{ role: 'user' | 'assistant'; text: string }> = [];
 
@@ -20,7 +22,7 @@ export class ChatComponent implements AfterViewInit {
     return this.messages.length > 0;
   }
 
-  constructor() {}
+  constructor(private modalService: ModalService) {}
 
   public ngAfterViewInit() {
     this.promptInput?.nativeElement.focus();
@@ -43,6 +45,18 @@ export class ChatComponent implements AfterViewInit {
       this.messages.push({ role: 'assistant', text: 'Thanks! I will process: ' + value });
       this.scrollToBottom();
     }, 400);
+  }
+
+  public openContextModal() {
+    const modalRef = this.modalService.showChatContextModal(this.context);
+    modalRef.result.then(
+      (updated: any) => {
+        if (updated) {
+          this.context = updated;
+        }
+      },
+      () => {}
+    );
   }
 
   private scrollToBottom() {

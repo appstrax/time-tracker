@@ -25,5 +25,14 @@ export class ProjectPage {
     { icon: 'bi bi-diagram-3', prompt: 'Summarize dependencies' },
   ];
 
+  public projectContext: any = {
+    page: 'project',
+    purpose: 'Provide project overview: milestones, risks, dependencies',
+    milestones: [],
+    risks: [],
+    dependencies: [],
+    outputs: ['Milestone status', 'Risk register', 'Dependency map']
+  };
+
   constructor() {}
 } 

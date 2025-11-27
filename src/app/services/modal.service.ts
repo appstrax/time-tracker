@@ -6,6 +6,7 @@ import {
   NgbModalOptions,
 } from '@ng-bootstrap/ng-bootstrap';
 import { TimeSheetEntryCrudComponent, TimeSheetEntryModalOptions } from '../pages/time-sheets/modals/time-sheet-entry/time-sheet-entry.modal';
+import { ChatContextModalComponent } from '../components/chat-context-modal/chat-context-modal.component';
 
 
 @Injectable({ providedIn: 'root' })
@@ -37,6 +38,18 @@ export class ModalService {
       keyboard: true
     });
     Object.assign(modalRef.componentInstance, options);
+    return modalRef;
+  }
+
+  public showChatContextModal(initialContext: any, options?: NgbModalOptions): NgbModalRef {
+    const modalRef = this.modalService.open(ChatContextModalComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+      size: 'xl',
+      ...options
+    });
+    (modalRef.componentInstance as ChatContextModalComponent).context = initialContext;
     return modalRef;
   }
 

@@ -20,6 +20,14 @@ export class QuotationsPage {
     { icon: 'bi bi-receipt', prompt: 'Draft a quotation for the current project' },
   ];
 
+  public quotationsContext: any = {
+    page: 'quotations',
+    purpose: 'Prepare, manage and send quotations',
+    template: null,
+    currency: 'USD',
+    outputs: ['Quotation draft', 'Pricing summary', 'Client-facing PDF']
+  };
+
   constructor() {}
 
   public activeTab: 'templates' | 'active' | 'history' = 'templates';

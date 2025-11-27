@@ -25,5 +25,13 @@ export class AuditPage {
     { icon: 'bi bi-download', prompt: 'Export last 24h' },
   ];
 
+  public auditContext: any = {
+    page: 'audit',
+    purpose: 'Search and analyze audit events',
+    filters: {},
+    timeRange: 'last_24h',
+    outputs: ['Event summary', 'Filter results', 'Export']
+  };
+
   constructor() {}
 } 

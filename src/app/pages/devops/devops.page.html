@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.devops.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="devopsSuggestions" placeholder="Ask about pipelines, deploys..."></app-chat>
+        <app-chat [suggestions]="devopsSuggestions" [context]="devopsContext" placeholder="Ask about pipelines, deploys..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

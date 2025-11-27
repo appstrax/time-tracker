@@ -25,5 +25,15 @@ export class CompliancePage {
     { icon: 'bi bi-folder-check', prompt: 'Evidence required for SOC2' },
   ];
 
+  public complianceContext: any = {
+    page: 'compliance',
+    purpose: 'Guide compliance tasks, policies and evidence collection',
+    frameworks: ['SOC2'],
+    policies: [],
+    tasks: [],
+    deadlines: [],
+    outputs: ['Tasks by framework', 'Upcoming deadlines', 'Evidence checklist']
+  };
+
   constructor() {}
 } 

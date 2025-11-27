@@ -25,5 +25,14 @@ export class QualityPage {
     { icon: 'bi bi-braces', prompt: 'Summarize lint issues by category' },
   ];
 
+  public qualityContext: any = {
+    page: 'quality',
+    purpose: 'Track and improve code quality and test health',
+    coverage: {},
+    lintIssues: [],
+    failingTests: [],
+    outputs: ['Coverage trend', 'Top lint categories', 'Failure breakdown']
+  };
+
   constructor() {}
 } 

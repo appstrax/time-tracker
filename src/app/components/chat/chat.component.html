@@ -13,6 +13,11 @@
         <i class="bi bi-send-fill"></i>
       </button>
     </div>
+    <div class="chat-actions mt-2">
+      <button class="icon-button" type="button" title="View/Edit Context" (click)="openContextModal()">
+        <i class="bi bi-braces"></i>
+      </button>
+    </div>
   </div>
 
   <!-- Conversation: messages at top -->
@@ -36,6 +41,11 @@
       />
       <button class="send-button" type="button" aria-label="Send" (click)="onSend()">
         <i class="bi bi-send-fill"></i>
+      </button>
+    </div>
+    <div class="chat-actions mb-2">
+      <button class="icon-button" type="button" title="View/Edit Context" (click)="openContextModal()">
+        <i class="bi bi-braces"></i>
       </button>
     </div>
   </div>

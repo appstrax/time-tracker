@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.audit.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="auditSuggestions" placeholder="Ask about audit logs..."></app-chat>
+        <app-chat [suggestions]="auditSuggestions" [context]="auditContext" placeholder="Ask about audit logs..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

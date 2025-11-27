@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.guardrails.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="guardrailSuggestions" placeholder="Ask about guardrails..."></app-chat>
+        <app-chat [suggestions]="guardrailSuggestions" [context]="guardrailContext" placeholder="Ask about guardrails..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

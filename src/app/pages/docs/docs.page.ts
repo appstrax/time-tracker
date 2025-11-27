@@ -25,5 +25,13 @@ export class DocsPage {
     { icon: 'bi bi-diagram-3', prompt: 'Create an architecture overview' },
   ];
 
+  public docsContext: any = {
+    page: 'docs',
+    purpose: 'Draft and curate project documentation',
+    documents: [],
+    styleGuide: 'concise',
+    outputs: ['README', 'API outline', 'Architecture overview']
+  };
+
   constructor() {}
 } 

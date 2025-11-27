@@ -38,5 +38,13 @@ export class TicketsPage {
     },
   ];
 
+  public ticketsContext: any = {
+    page: 'tickets',
+    purpose: 'Create, manage and review tickets and timelines',
+    boards: ['Backlog', 'In Progress', 'Done'],
+    priorities: ['Low', 'Medium', 'High', 'Critical'],
+    outputs: ['New tickets', 'Backlog grooming', 'Timesheet generation']
+  };
+
   constructor() {}
 }

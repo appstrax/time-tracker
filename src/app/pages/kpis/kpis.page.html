@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.kpis.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="kpiSuggestions" placeholder="Ask about KPIs..."></app-chat>
+        <app-chat [suggestions]="kpiSuggestions" [context]="kpiContext" placeholder="Ask about KPIs..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

@@ -25,5 +25,15 @@ export class TestingPage {
     { icon: 'bi bi-graph-up', prompt: 'List flaky tests' },
   ];
 
+  public testingContext: any = {
+    page: 'testing',
+    purpose: 'Assist with tests, coverage, flakiness and CI feedback',
+    suites: [],
+    recentRuns: [],
+    coverageTargets: {},
+    flakyTests: [],
+    outputs: ['Test run summary', 'Coverage deltas', 'Flaky test candidates']
+  };
+
   constructor() {}
 } 
