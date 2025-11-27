@@ -1,10 +1,12 @@
 import { CommonModule } from '@angular/common';
 import { Component, ElementRef, Input, ViewChild, AfterViewInit } from '@angular/core';
 import { ModalService } from '../../services/modal.service';
+import { ToastService } from '../../services/toast.service';
+import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-chat',
-  imports: [CommonModule],
+  imports: [CommonModule, NgbTooltip],
   templateUrl: './chat.component.html',
   styleUrl: './chat.component.scss'
 })
@@ -22,7 +24,11 @@ export class ChatComponent implements AfterViewInit {
     return this.messages.length > 0;
   }
 
-  constructor(private modalService: ModalService) {}
+  private pendingTimer?: any;
+  private isListening: boolean = false;
+  private attachedFiles: File[] = [];
+
+  constructor(private modalService: ModalService, private toast: ToastService) {}
 
   public ngAfterViewInit() {
     this.promptInput?.nativeElement.focus();
@@ -41,9 +47,10 @@ export class ChatComponent implements AfterViewInit {
     this.promptInput.nativeElement.value = '';
     this.scrollToBottom();
     // Placeholder assistant echo for now
-    setTimeout(() => {
+    this.pendingTimer = setTimeout(() => {
       this.messages.push({ role: 'assistant', text: 'Thanks! I will process: ' + value });
       this.scrollToBottom();
+      this.pendingTimer = undefined;
     }, 400);
   }
 
@@ -57,6 +64,47 @@ export class ChatComponent implements AfterViewInit {
       },
       () => {}
     );
+  }
+
+  public onFilesSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const files = Array.from(input.files ?? []);
+    if (files.length === 0) return;
+    this.attachedFiles.push(...files);
+    this.toast.info(`${files.length} file(s) attached`);
+    input.value = '';
+  }
+
+  public onVoiceInputToggle() {
+    this.isListening = !this.isListening;
+    this.toast.info(this.isListening ? 'Voice input: listening...' : 'Voice input: stopped');
+  }
+
+  public onRegenerate() {
+    const lastUser = [...this.messages].reverse().find((m) => m.role === 'user');
+    if (!lastUser) return;
+    if (this.pendingTimer) {
+      this.toast.warning('Please stop current response first');
+      return;
+    }
+    this.pendingTimer = setTimeout(() => {
+      this.messages.push({ role: 'assistant', text: 'Regenerated response for: ' + lastUser.text });
+      this.scrollToBottom();
+      this.pendingTimer = undefined;
+    }, 400);
+  }
+
+  public onStop() {
+    if (this.pendingTimer) {
+      clearTimeout(this.pendingTimer);
+      this.pendingTimer = undefined;
+      this.toast.info('Generation stopped');
+    }
+  }
+
+  public onClear() {
+    this.messages = [];
+    this.toast.success('Conversation cleared');
   }
 
   private scrollToBottom() {
