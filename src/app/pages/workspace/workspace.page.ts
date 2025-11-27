@@ -1,10 +1,11 @@
-import { Component, Signal, computed, effect, signal } from '@angular/core';
+import { Component, Signal, TemplateRef, ViewChild, computed, effect, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 import { NgbTooltip } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@state';
 import { ToastService } from '../../services/toast.service';
+import { ModalService } from '../../services/modal.service';
 import { Project, Organization, OrganizationProjects } from '@models';
 
 @Component({
@@ -15,8 +16,10 @@ import { Project, Organization, OrganizationProjects } from '@models';
   imports: [CommonModule, RouterModule, FormsModule, NgbTooltip],
 })
 export class WorkspacePage {
+  @ViewChild('deleteProjectModal') deleteProjectModal!: TemplateRef<any>;
   activeTab: 'projects' | 'organizations' = 'projects';
   search = signal<string>('');
+  deletingProject = false;
 
   projects!: Signal<Project[]>;
   organizations!: Signal<Organization[]>;
@@ -24,6 +27,7 @@ export class WorkspacePage {
 
   private projectUserCounts: Record<string, number> = {};
   private orgUserCounts: Record<string, number> = {};
+  projectPendingDelete: Project | null = null;
 
   filteredProjects = computed(() => {
     const q = (this.search() || '').toLowerCase();
@@ -62,6 +66,8 @@ export class WorkspacePage {
   constructor(
     private store: Store,
     private toast: ToastService,
+    private router: Router,
+    private modal: ModalService,
   ) {
     this.projects = this.store.projects.all;
     this.organizations = this.store.organizations.all;
@@ -100,10 +106,6 @@ export class WorkspacePage {
     if (orgId) this.store.selectedOrganizationId.set(orgId);
   }
 
-  setCurrentOrganization(orgId: string) {
-    this.store.selectedOrganizationId.set(orgId);
-  }
-
   getProjectCountForOrg(orgId: string): number {
     try {
       return this.orgProjects().filter((op: any) => op.organizationId === orgId).length || 0;
@@ -131,14 +133,46 @@ export class WorkspacePage {
     return this.orgUserCounts[orgId] ?? 0;
   }
 
-  async deleteProject(projectId: string) {
-    const ok = confirm('Delete this project? This cannot be undone.');
-    if (!ok) return;
+  openDeleteProjectModal(p: Project) {
+    this.projectPendingDelete = p;
+    this.modal.open(this.deleteProjectModal, { centered: true, backdrop: 'static', keyboard: true });
+  }
+
+  closeDeleteProjectModal() {
+    this.projectPendingDelete = null;
+    this.deletingProject = false;
+    this.modal.dismiss();
+  }
+
+  async confirmDeleteProject() {
+    if (!this.projectPendingDelete) return;
     try {
+      this.deletingProject = true;
+      const projectId = this.projectPendingDelete.id;
+      // Load all related links to ensure full cleanup
+      const [projUsersRes, orgProjRes] = await Promise.all([
+        this.store.projUsers.find({ where: { projectId } as any }),
+        this.store.orgProjects.find({ where: { projectId } as any }),
+      ]);
+      const projUsers = projUsersRes.data ?? [];
+      const orgMappings = orgProjRes.data ?? [];
+      // Delete project-user links
+      for (const link of projUsers) {
+        await this.store.projUsers.delete(link.id);
+      }
+      // Delete organization-project links
+      for (const mapping of orgMappings) {
+        await this.store.orgProjects.delete(mapping.id);
+      }
+      // Finally, delete the project
       await this.store.projects.delete(projectId);
       this.toast.success('Project deleted', 'Success');
+      this.modal.close();
     } catch (e) {
       this.toast.error('Failed to delete project', 'Error');
+    } finally {
+      this.deletingProject = false;
+      this.projectPendingDelete = null;
     }
   }
 
@@ -154,7 +188,9 @@ export class WorkspacePage {
   }
 
   editProject(projectId: string) {
-    this.toast.info('Edit project coming soon', 'Info');
+    this.router.navigate(['/create-project'], {
+      queryParams: { from: 'home', editId: projectId },
+    });
   }
 
   editOrganization(orgId: string) {

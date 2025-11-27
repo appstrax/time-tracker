@@ -64,13 +64,10 @@
                 </td>
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
-                    <button class="btn btn-sm btn-outline-primary" [routerLink]="['/project']" aria-label="Open project" ngbTooltip="Open project" placement="top">
-                      <i class="bi bi-eye"></i>
-                    </button>
                     <button class="btn btn-sm btn-outline-secondary" (click)="editProject(p.id)" aria-label="Edit project" ngbTooltip="Edit project" placement="top">
                       <i class="bi bi-pencil"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-danger" (click)="deleteProject(p.id)" aria-label="Delete project" ngbTooltip="Delete project" placement="top">
+                    <button class="btn btn-sm btn-outline-danger" (click)="openDeleteProjectModal(p)" aria-label="Delete project" ngbTooltip="Delete project" placement="top">
                       <i class="bi bi-trash"></i>
                     </button>
                     <button class="btn btn-sm btn-outline-secondary" (click)="setCurrentProject(p.id)" aria-label="Set as current project" ngbTooltip="Set as current project" placement="top">
@@ -134,9 +131,6 @@
                     <button class="btn btn-sm btn-outline-danger" (click)="deleteOrganization(o.id)" aria-label="Delete organization" ngbTooltip="Delete organization" placement="top">
                       <i class="bi bi-trash"></i>
                     </button>
-                    <button class="btn btn-sm btn-outline-secondary" (click)="setCurrentOrganization(o.id)" aria-label="Set as current organization" ngbTooltip="Set as current organization" placement="top">
-                      <i class="bi bi-check-circle"></i>
-                    </button>
                   </div>
                 </td>
               </tr>
@@ -151,4 +145,23 @@
   </div>
 </div>
 
-
+<ng-template #deleteProjectModal>
+  <div class="modal-header">
+    <h5 class="modal-title">Delete Project</h5>
+    <button type="button" class="btn-close" aria-label="Close" (click)="closeDeleteProjectModal()" [disabled]="deletingProject"></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-0">
+      Are you sure you want to delete
+      <span class="fw-semibold">{{ projectPendingDelete?.name }}</span>?
+      This cannot be undone.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button type="button" class="btn btn-outline-secondary" (click)="closeDeleteProjectModal()" [disabled]="deletingProject">Cancel</button>
+    <button type="button" class="btn btn-danger" (click)="confirmDeleteProject()" [disabled]="deletingProject">
+      <span *ngIf="deletingProject" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+      {{ deletingProject ? 'Deleting...' : 'Delete' }}
+    </button>
+  </div>
+</ng-template>

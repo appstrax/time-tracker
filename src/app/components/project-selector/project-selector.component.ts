@@ -38,6 +38,7 @@ export class ProjectSelectorComponent implements OnInit, OnDestroy {
     this.organizations = this.store.organizations.all;
 
     this.setInitialProject();
+    this.syncSelectedProjectFromStore();
   }
 
   ngOnInit(): void {
@@ -154,6 +155,16 @@ export class ProjectSelectorComponent implements OnInit, OnDestroy {
       clearTimeout(this.idleTimeoutId);
       this.idleTimeoutId = null;
     }
+  }
+
+  private syncSelectedProjectFromStore(): void {
+    effect(() => {
+      const selectedId = this.store.selectedProjectId();
+      const next = selectedId
+        ? this.projects().find((p) => p.id === selectedId) ?? null
+        : null;
+      this.selectedProject = next;
+    });
   }
 
   navToNewProject(): void {
