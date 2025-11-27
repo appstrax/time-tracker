@@ -42,7 +42,7 @@ import { ModalService } from '../../services/modal.service';
         type="button"
         aria-label="Improve prompt"
         ngbTooltip="Improve prompt"
-        placement="bottom"
+        [placement]="tooltipPlacement"
         (click)="openImproveModal()"
       >
         <i class="bi bi-info-circle"></i>
@@ -52,6 +52,7 @@ import { ModalService } from '../../services/modal.service';
 })
 export class PromptAnalyserComponent {
   @Input() text: string = '';
+  @Input() tooltipPlacement: 'top' | 'bottom' | 'left' | 'right' | 'auto' = 'bottom';
 
   constructor(private modalService: ModalService) {}
 

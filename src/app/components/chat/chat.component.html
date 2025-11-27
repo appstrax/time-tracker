@@ -16,28 +16,28 @@
     </div>
     <div class="chat-actions mt-2">
       <div class="chat-actions-left">
-        <button class="icon-button" type="button" aria-label="View/Edit Context" ngbTooltip="View/Edit Context" placement="bottom" (click)="openContextModal()">
+        <button class="icon-button" type="button" aria-label="View/Edit Context" ngbTooltip="View/Edit Context" [placement]="hasConversation ? 'top' : 'bottom'" (click)="openContextModal()">
           <i class="bi bi-braces"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Attach files" ngbTooltip="Attach files" placement="bottom" (click)="fileInput.click()">
+        <button class="icon-button" type="button" aria-label="Attach files" ngbTooltip="Attach files" [placement]="hasConversation ? 'top' : 'bottom'" (click)="fileInput.click()">
           <i class="bi bi-paperclip"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Voice input" ngbTooltip="Voice input" placement="bottom" (click)="onVoiceInputToggle()">
+        <button class="icon-button" type="button" aria-label="Voice input" ngbTooltip="Voice input" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onVoiceInputToggle()">
           <i class="bi bi-mic"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Regenerate last reply" ngbTooltip="Regenerate last reply" placement="bottom" (click)="onRegenerate()">
+        <button class="icon-button" type="button" aria-label="Regenerate last reply" ngbTooltip="Regenerate last reply" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onRegenerate()">
           <i class="bi bi-arrow-repeat"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Stop" ngbTooltip="Stop" placement="bottom" (click)="onStop()">
+        <button class="icon-button" type="button" aria-label="Stop" ngbTooltip="Stop" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onStop()">
           <i class="bi bi-stop-circle"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Clear conversation" ngbTooltip="Clear conversation" placement="bottom" (click)="onClear()">
+        <button class="icon-button" type="button" aria-label="Clear conversation" ngbTooltip="Clear conversation" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onClear()">
           <i class="bi bi-eraser"></i>
         </button>
         <input type="file" #fileInput multiple (change)="onFilesSelected($event)" style="display:none" />
       </div>
       <div class="chat-actions-right">
-        <app-prompt-analyser [text]="currentPrompt"></app-prompt-analyser>
+        <app-prompt-analyser [text]="currentPrompt" [tooltipPlacement]="hasConversation ? 'top' : 'bottom'"></app-prompt-analyser>
       </div>
     </div>
   </div>
@@ -68,28 +68,28 @@
     </div>
     <div class="chat-actions mb-2">
       <div class="chat-actions-left">
-        <button class="icon-button" type="button" aria-label="View/Edit Context" ngbTooltip="View/Edit Context" placement="bottom" (click)="openContextModal()">
+        <button class="icon-button" type="button" aria-label="View/Edit Context" ngbTooltip="View/Edit Context" [placement]="hasConversation ? 'top' : 'bottom'" (click)="openContextModal()">
           <i class="bi bi-braces"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Attach files" ngbTooltip="Attach files" placement="bottom" (click)="fileInput2.click()">
+        <button class="icon-button" type="button" aria-label="Attach files" ngbTooltip="Attach files" [placement]="hasConversation ? 'top' : 'bottom'" (click)="fileInput2.click()">
           <i class="bi bi-paperclip"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Voice input" ngbTooltip="Voice input" placement="bottom" (click)="onVoiceInputToggle()">
+        <button class="icon-button" type="button" aria-label="Voice input" ngbTooltip="Voice input" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onVoiceInputToggle()">
           <i class="bi bi-mic"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Regenerate last reply" ngbTooltip="Regenerate last reply" placement="bottom" (click)="onRegenerate()">
+        <button class="icon-button" type="button" aria-label="Regenerate last reply" ngbTooltip="Regenerate last reply" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onRegenerate()">
           <i class="bi bi-arrow-repeat"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Stop" ngbTooltip="Stop" placement="bottom" (click)="onStop()">
+        <button class="icon-button" type="button" aria-label="Stop" ngbTooltip="Stop" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onStop()">
           <i class="bi bi-stop-circle"></i>
         </button>
-        <button class="icon-button" type="button" aria-label="Clear conversation" ngbTooltip="Clear conversation" placement="bottom" (click)="onClear()">
+        <button class="icon-button" type="button" aria-label="Clear conversation" ngbTooltip="Clear conversation" [placement]="hasConversation ? 'top' : 'bottom'" (click)="onClear()">
           <i class="bi bi-eraser"></i>
         </button>
         <input type="file" #fileInput2 multiple (change)="onFilesSelected($event)" style="display:none" />
       </div>
       <div class="chat-actions-right">
-        <app-prompt-analyser [text]="currentPrompt"></app-prompt-analyser>
+        <app-prompt-analyser [text]="currentPrompt" [tooltipPlacement]="hasConversation ? 'top' : 'bottom'"></app-prompt-analyser>
       </div>
     </div>
   </div>
