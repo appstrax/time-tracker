@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.testing.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="testingSuggestions" placeholder="Ask about tests or run suites..."></app-chat>
+        <app-chat [suggestions]="testingSuggestions" [context]="testingContext" placeholder="Ask about tests or run suites..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

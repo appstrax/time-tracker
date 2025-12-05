@@ -38,4 +38,17 @@
   color: var(--text-primary);
 }
 
+/* Make tables scroll vertically within card (page does not grow) */
+.table-responsive {
+  max-height: calc(100vh - 256px);
+  overflow-y: auto;
+}
+
+/* Keep table headers visible while scrolling */
+.table thead th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
 

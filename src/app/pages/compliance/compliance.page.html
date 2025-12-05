@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.compliance.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="complianceSuggestions" placeholder="Ask about compliance tasks..."></app-chat>
+        <app-chat [suggestions]="complianceSuggestions" [context]="complianceContext" placeholder="Ask about compliance tasks..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

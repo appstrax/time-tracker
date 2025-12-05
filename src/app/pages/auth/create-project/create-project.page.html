@@ -6,8 +6,8 @@
     </a>
     <div class="create-project-content">
       <div class="left-panel">
-        <h1 class="main-title">Create Project</h1>
-        <p class="subtitle">to get started</p>
+        <h1 class="main-title">{{ isEditMode ? 'Edit Project' : 'Create Project' }}</h1>
+        <p class="subtitle">{{ isEditMode ? 'make your changes' : 'to get started' }}</p>
 
         <div class="logo-preview" *ngIf="logoPreviewUrl">
           <img [src]="logoPreviewUrl" alt="Logo preview" />
@@ -21,8 +21,8 @@
           <div class="divider"></div>
           <div class="step" [class.active]="step === 2">2</div>
         </div>
-        <p class="create-project-instruction" *ngIf="step === 1">Create your project</p>
-        <p class="create-project-instruction" *ngIf="step === 2">Enable project features</p>
+        <p class="create-project-instruction" *ngIf="step === 1">{{ isEditMode ? 'Edit your project' : 'Create your project' }}</p>
+        <p class="create-project-instruction" *ngIf="step === 2">{{ isEditMode ? 'Update project features' : 'Enable project features' }}</p>
 
         <form (ngSubmit)="createProject()" #form="ngForm" autocomplete="off">
           <ng-container *ngIf="step === 1">
@@ -169,7 +169,7 @@
 
             <div class="button-row">
               <button type="button" class="btn btn-outline-secondary" (click)="prevStep()">Back</button>
-              <button type="submit" class="btn btn-primary">Create Project</button>
+              <button type="submit" class="btn btn-primary">{{ isEditMode ? 'Update Project' : 'Create Project' }}</button>
             </div>
           </ng-container>
         </form>

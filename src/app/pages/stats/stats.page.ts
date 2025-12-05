@@ -25,5 +25,14 @@ export class StatsPage {
     { icon: 'bi bi-pie-chart', prompt: 'Top contributors this month' },
   ];
 
+  public statsContext: any = {
+    page: 'stats',
+    purpose: 'Explore metrics, trends and insights across the project',
+    metrics: [],
+    timeRange: 'last_30_days',
+    comparisons: [],
+    outputs: ['Charts', 'Trend analysis', 'Highlights and anomalies']
+  };
+
   constructor() {}
 } 

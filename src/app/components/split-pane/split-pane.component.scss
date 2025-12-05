@@ -81,6 +81,9 @@ body.noselect {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.15s ease;
 }
 
 .restore-tag.left {
@@ -95,4 +98,26 @@ body.noselect {
   background: var(--color-surface);
 }
 
+/* Hover zones to reveal the restore tags when cursor is near the edge */
+.restore-hover-zone {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 24px; /* near-edge area */
+  z-index: 1;
+}
+.restore-hover-zone.left { left: 0; }
+.restore-hover-zone.right { right: 0; }
+
+/* Reveal logic: show tag when near or hovering the tag itself */
+.restore-hover-zone.left:hover + .restore-tag.left,
+.restore-tag.left:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
+.restore-hover-zone.right:hover + .restore-tag.right,
+.restore-tag.right:hover {
+  opacity: 1;
+  pointer-events: auto;
+}
 

@@ -25,5 +25,14 @@ export class DevopsPage {
     { icon: 'bi bi-exclamation-triangle', prompt: 'Any failing jobs or errors?' },
   ];
 
+  public devopsContext: any = {
+    page: 'devops',
+    purpose: 'Surface CI/CD pipelines, deployments and errors',
+    pipelines: [],
+    deployments: [],
+    incidents: [],
+    outputs: ['Pipeline summary', 'Deployment history', 'Incident report']
+  };
+
   constructor() {}
 } 

@@ -25,5 +25,13 @@ export class CodePage {
     { icon: 'bi bi-gear', prompt: 'Add a GitHub Action to run tests' },
   ];
 
+  public codeContext: any = {
+    page: 'code',
+    purpose: 'Generate, explain and refactor code with context',
+    languages: ['TypeScript', 'Angular'],
+    frameworks: ['Angular', 'Node'],
+    outputs: ['Code snippets', 'Refactoring suggestions', 'Explanations']
+  };
+
   constructor() {}
 } 

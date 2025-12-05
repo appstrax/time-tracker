@@ -14,10 +14,12 @@
     <ng-content select="[right]"></ng-content>
   </div>
 
+  <div *ngIf="showCollapsedLeft" class="restore-hover-zone left" aria-hidden="true"></div>
   <button *ngIf="showCollapsedLeft" type="button" class="restore-tag left" aria-label="Restore split from left" (click)="restoreFromLeft()">
     <i class="bi bi-chevron-right"></i>
   </button>
 
+  <div *ngIf="showCollapsedRight" class="restore-hover-zone right" aria-hidden="true"></div>
   <button *ngIf="showCollapsedRight" type="button" class="restore-tag right" aria-label="Restore split from right" (click)="restoreFromRight()">
     <i class="bi bi-chevron-left"></i>
   </button>

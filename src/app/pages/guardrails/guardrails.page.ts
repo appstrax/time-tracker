@@ -25,5 +25,14 @@ export class GuardrailsPage {
     { icon: 'bi bi-toggles', prompt: 'Show rule configuration' },
   ];
 
+  public guardrailContext: any = {
+    page: 'guardrails',
+    purpose: 'Manage rules, violations and auto-fixes',
+    rules: [],
+    violations: [],
+    autofixes: [],
+    outputs: ['Violation summary', 'Auto-fix proposals', 'Rule config overview']
+  };
+
   constructor() {}
 } 

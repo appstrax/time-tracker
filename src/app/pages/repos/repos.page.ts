@@ -25,5 +25,13 @@ export class ReposPage {
     { icon: 'bi bi-cpu', prompt: 'What is the build status of main?' },
   ];
 
+  public repoContext: any = {
+    page: 'repos',
+    purpose: 'Help explore repositories, PRs, branches and build status',
+    repositories: [],
+    defaultBranch: 'main',
+    outputs: ['Open PRs', 'Recent commits', 'Build status summary']
+  };
+
   constructor() {}
 } 

@@ -38,6 +38,7 @@ export class CreateProjectPage implements OnInit {
   logoFile: File | null = null;
   logoPreviewUrl: string | null = null;
   backLink: string = '/create-organization';
+  isEditMode: boolean = false;
 
   constructor(
     private store: Store,
@@ -58,6 +59,30 @@ export class CreateProjectPage implements OnInit {
 
     // Default: enable all project features for ease of use
     this.setAllFeatures(true);
+
+    // Edit mode: prefill project and org if editId is present
+    const editId = this.route.snapshot.queryParamMap.get('editId');
+    if (editId) {
+      this.isEditMode = true;
+      try {
+        // Prefer local store; fall back to fetch
+        const existing = this.store.projects.all().find((p) => p.id === editId);
+        this.project = existing ?? (await this.store.projects.findById(editId));
+        // Set preview to current logo if present
+        this.logoPreviewUrl = this.project.logoUrl || null;
+        // Resolve organization from orgProjects mapping
+        const mapping = this.store.orgProjects.all().find((op) => op.projectId === this.project.id) ?? null;
+        if (mapping) {
+          this.orgProject = mapping;
+          const org = this.store.organizations.all().find((o) => o.id === mapping.organizationId) ?? null;
+          if (org) this.organization = org;
+        }
+        // Reflect feature toggles from project
+        this.updateAllFeaturesFlag();
+      } catch (e: any) {
+        this.toast.error('Failed to load project for editing', 'Error');
+      }
+    }
   }
 
   public onOrganizationChanged(organizationId: string) {
@@ -150,39 +175,51 @@ export class CreateProjectPage implements OnInit {
   }
 
   async createProject(): Promise<void> {
-    if (!this.noFieldsToggled()) {
-      this.errorMessage = 'Really...A project with no features?';
-      return;
-    }
-
     this.isLoading = true;
     this.errorMessage = '';
 
     try {
-      const user: User = await appstraxAuth.getUser();
       if (this.logoFile) await this.uploadProjectLogo(this.logoFile);
 
-      this.project = await this.store.projects.save(this.project);
-
-      this.projectUser.projectId = this.project.id;
-      this.projectUser.userId = user.id;
-      this.projectUser.role = ProjectUserRoles.ADMIN;
-
-      this.projectUser = await this.store.projUsers.save(this.projectUser);
-
-      this.orgProject.projectId = this.project.id;
-      this.orgProject.organizationId = this.organization.id;
-      this.orgProject.role = ProjectOrgRoles.PROVIDER;
-
-      this.orgProject = await this.store.orgProjects.save(this.orgProject);
-
-      if (this.project && this.projectUser && this.orgProject) {
-        this.toast.success('Project created successfully', 'Success');
+      if (this.isEditMode) {
+        // Update existing project
+        const originalOrgProject = this.store.orgProjects.all().find((op) => op.projectId === this.project.id) ?? null;
+        this.project = await this.store.projects.save(this.project);
+        // Update org mapping if organization changed
+        if (originalOrgProject && this.organization?.id && originalOrgProject.organizationId !== this.organization.id) {
+          const updated = { ...originalOrgProject, organizationId: this.organization.id } as OrganizationProjects;
+          await this.store.orgProjects.save(updated);
+        }
+        this.toast.success('Project updated successfully', 'Success');
         this.router.navigate(['/home']);
+      } else {
+        if (!this.noFieldsToggled()) {
+          this.errorMessage = 'Really...A project with no features?';
+          return;
+        }
+        const user: User = await appstraxAuth.getUser();
+        this.project = await this.store.projects.save(this.project);
+
+        this.projectUser.projectId = this.project.id;
+        this.projectUser.userId = user.id;
+        this.projectUser.role = ProjectUserRoles.ADMIN;
+
+        this.projectUser = await this.store.projUsers.save(this.projectUser);
+
+        this.orgProject.projectId = this.project.id;
+        this.orgProject.organizationId = this.organization.id;
+        this.orgProject.role = ProjectOrgRoles.PROVIDER;
+
+        this.orgProject = await this.store.orgProjects.save(this.orgProject);
+
+        if (this.project && this.projectUser && this.orgProject) {
+          this.toast.success('Project created successfully', 'Success');
+          this.router.navigate(['/home']);
+        }
       }
     } catch (error: any) {
       this.errorMessage = error.message;
-      this.toast.error(error.message || 'Failed to create project', 'Error');
+      this.toast.error(error.message || (this.isEditMode ? 'Failed to update project' : 'Failed to create project'), 'Error');
     } finally {
       this.isLoading = false;
     }

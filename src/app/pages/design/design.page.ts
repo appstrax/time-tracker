@@ -18,5 +18,13 @@ export class DesignPage {
     { icon: 'bi bi-magic', prompt: 'Design a new Todo List app' },
   ];
 
+  public designContext: any = {
+    page: 'design',
+    purpose: 'Create and iterate on UI/UX design concepts',
+    tools: ['Figma'],
+    designSystem: 'Appstrax',
+    outputs: ['Design brief', 'Wireframes', 'Component list']
+  };
+
   constructor() {}
 }

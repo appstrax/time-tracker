@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.docs.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="docsSuggestions" placeholder="Ask or draft documentation..."></app-chat>
+        <app-chat [suggestions]="docsSuggestions" [context]="docsContext" placeholder="Ask or draft documentation..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

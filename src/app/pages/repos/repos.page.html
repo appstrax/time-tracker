@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.repos.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="repoSuggestions" placeholder="Ask about repositories..."></app-chat>
+        <app-chat [suggestions]="repoSuggestions" [context]="repoContext" placeholder="Ask about repositories..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

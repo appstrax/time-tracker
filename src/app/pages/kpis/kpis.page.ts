@@ -25,5 +25,15 @@ export class KpisPage {
     { icon: 'bi bi-people', prompt: 'Which owners need attention?' },
   ];
 
+  public kpiContext: any = {
+    page: 'kpis',
+    purpose: 'Track KPIs, owners and trends against targets',
+    kpis: [],
+    owners: [],
+    targets: {},
+    timeRange: 'this_month',
+    outputs: ['KPIs status', 'Owner attention list', 'Trend explanations']
+  };
+
   constructor() {}
 } 

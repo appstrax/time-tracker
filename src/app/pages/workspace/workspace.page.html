@@ -40,8 +40,9 @@
         *ngIf="activeTab==='projects'"
         [routerLink]="['/create-project']"
         [queryParams]="{ from: 'home' }"
-        title="Add Project"
         aria-label="Add Project"
+        ngbTooltip="Add Project"
+        placement="bottom"
       >
         <i class="bi bi-plus-lg"></i>
       </button>
@@ -50,8 +51,9 @@
         *ngIf="activeTab==='organizations'"
         [routerLink]="['/create-organization']"
         [queryParams]="{ from: 'home' }"
-        title="Add Organization"
         aria-label="Add Organization"
+        ngbTooltip="Add Organization"
+        placement="bottom"
       >
         <i class="bi bi-plus-lg"></i>
       </button>
@@ -107,34 +109,29 @@
                 <td class="text-end">
                   <div class="d-inline-flex gap-2">
                     <button
-                      class="btn btn-sm btn-outline-primary"
-                      [routerLink]="['/project']"
-                      title="Open project"
-                      aria-label="Open project"
-                    >
-                      <i class="bi bi-eye"></i>
-                    </button>
-                    <button
                       class="btn btn-sm btn-outline-secondary"
                       (click)="editProject(p.id)"
-                      title="Edit project"
                       aria-label="Edit project"
+                      ngbTooltip="Edit project"
+                      placement="top"
                     >
                       <i class="bi bi-pencil"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-danger"
-                      (click)="deleteProject(p.id)"
-                      title="Delete project"
+                      (click)="openDeleteProjectModal(p)"
                       aria-label="Delete project"
+                      ngbTooltip="Delete project"
+                      placement="top"
                     >
                       <i class="bi bi-trash"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-secondary"
                       (click)="setCurrentProject(p.id)"
-                      title="Set as current project"
                       aria-label="Set as current project"
+                      ngbTooltip="Set as current project"
+                      placement="top"
                     >
                       <i class="bi bi-check-circle"></i>
                     </button>
@@ -199,34 +196,29 @@
                     <button
                       class="btn btn-sm btn-outline-primary"
                       [routerLink]="['/users']"
-                      title="Manage users"
                       aria-label="Manage users"
+                      ngbTooltip="Manage users"
+                      placement="top"
                     >
                       <i class="bi bi-people"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-secondary"
                       (click)="editOrganization(o.id)"
-                      title="Edit organization"
                       aria-label="Edit organization"
+                      ngbTooltip="Edit organization"
+                      placement="top"
                     >
                       <i class="bi bi-pencil"></i>
                     </button>
                     <button
                       class="btn btn-sm btn-outline-danger"
                       (click)="deleteOrganization(o.id)"
-                      title="Delete organization"
                       aria-label="Delete organization"
+                      ngbTooltip="Delete organization"
+                      placement="top"
                     >
                       <i class="bi bi-trash"></i>
-                    </button>
-                    <button
-                      class="btn btn-sm btn-outline-secondary"
-                      (click)="setCurrentOrganization(o.id)"
-                      title="Set as current organization"
-                      aria-label="Set as current organization"
-                    >
-                      <i class="bi bi-check-circle"></i>
                     </button>
                   </div>
                 </td>
@@ -244,3 +236,91 @@
     </div>
   </div>
 </div>
+
+<ng-template #deleteProjectModal>
+  <div class="modal-header">
+    <h5 class="modal-title">Delete Project</h5>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="closeDeleteProjectModal()"
+      [disabled]="deletingProject"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-0">
+      Are you sure you want to delete
+      <span class="fw-semibold">{{ projectPendingDelete?.name }}</span>? This
+      cannot be undone.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      (click)="closeDeleteProjectModal()"
+      [disabled]="deletingProject"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-danger"
+      (click)="confirmDeleteProject()"
+      [disabled]="deletingProject"
+    >
+      <span
+        *ngIf="deletingProject"
+        class="spinner-border spinner-border-sm me-2"
+        role="status"
+        aria-hidden="true"
+      ></span>
+      {{ deletingProject ? 'Deleting...' : 'Delete' }}
+    </button>
+  </div>
+</ng-template>
+
+<ng-template #deleteOrganizationModal>
+  <div class="modal-header">
+    <h5 class="modal-title">Delete Organization</h5>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="closeDeleteOrganizationModal()"
+      [disabled]="deletingOrganization"
+    ></button>
+  </div>
+  <div class="modal-body">
+    <p class="mb-0">
+      Are you sure you want to delete
+      <span class="fw-semibold">{{ organizationPendingDelete?.name }}</span>?
+      This cannot be undone.
+    </p>
+  </div>
+  <div class="modal-footer">
+    <button
+      type="button"
+      class="btn btn-outline-secondary"
+      (click)="closeDeleteOrganizationModal()"
+      [disabled]="deletingOrganization"
+    >
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-danger"
+      (click)="confirmDeleteOrganization()"
+      [disabled]="deletingOrganization"
+    >
+      <span
+        *ngIf="deletingOrganization"
+        class="spinner-border spinner-border-sm me-2"
+        role="status"
+        aria-hidden="true"
+      ></span>
+      {{ deletingOrganization ? 'Deleting...' : 'Delete' }}
+    </button>
+  </div>
+</ng-template>

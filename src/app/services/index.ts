@@ -9,3 +9,5 @@ export * from './notifications.service';
 export * from './time-sheet-entry.service';
 
 export * from './interest.service';
+export * from './like.service';
+export * from './modal.service';

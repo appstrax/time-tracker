@@ -7,7 +7,7 @@
   <ng-container left>
     <app-split-pane-vertical storageKey="split.quotations.left" [initialTopRatio]="0.7">
       <ng-container top>
-        <app-chat [suggestions]="quotationsSuggestions" placeholder="Start describing your quotation..."></app-chat>
+        <app-chat [suggestions]="quotationsSuggestions" [context]="quotationsContext" placeholder="Start describing your quotation..."></app-chat>
       </ng-container>
       <ng-container bottom>
         <app-history></app-history>

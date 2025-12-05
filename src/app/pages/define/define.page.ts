@@ -41,5 +41,29 @@ export class DefinePage {
     },
   ];
 
+  public defineContext: any = {
+    page: 'define',
+    purpose: 'Assist in defining a new project with clear scope and deliverables',
+    project: {
+      name: '',
+      description: '',
+      domain: '',
+      targetUsers: '',
+      successCriteria: []
+    },
+    goals: [],
+    features: [],
+    constraints: [],
+    stakeholders: [],
+    assumptions: [],
+    outputs: [
+      'Project summary',
+      'Key features list',
+      'Data models/entities',
+      'High-level architecture',
+      'Initial ticket backlog'
+    ]
+  };
+
   constructor() {}
 }

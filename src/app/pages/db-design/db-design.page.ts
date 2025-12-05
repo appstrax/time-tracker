@@ -27,6 +27,18 @@ export class DbDesignPage {
     { icon: 'bi bi-lightning', prompt: 'Denormalize for analytics and reporting' },
     { icon: 'bi bi-shield-lock', prompt: 'Recommend security and PII handling in the schema' },
   ];
+
+  public dbDesignContext: any = {
+    page: 'db-design',
+    purpose: 'Assist with database modeling, normalization and performance considerations',
+    entities: [],
+    relationships: [],
+    keys: { primary: [], foreign: [] },
+    indexes: [],
+    constraints: [],
+    piiHandling: [],
+    outputs: ['ER diagram', 'DDL/migrations', 'Entity list with fields']
+  };
 }
 
 
