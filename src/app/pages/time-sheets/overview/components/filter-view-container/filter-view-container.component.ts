@@ -59,7 +59,7 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   public isViewSelectionCollapsed: boolean = false;
 
   private destroy$ = new Subject<void>();
-  private isInitializing = false;
+  private isInitializingFilters = false;
 
   public viewTypes: { value: FilterViewType; label: string; icon: string; description: string }[] = [
     { value: 'summary', label: 'Summary', icon: 'bi-bar-chart', description: 'Totals by project' },
@@ -188,12 +188,12 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   }
 
   private loadFiltersFromUrl(params: Params): void {
-    const previousState = this.isInitializing;
-    this.isInitializing = true;
+    const previousState = this.isInitializingFilters;
+    this.isInitializingFilters = true;
     this.filters = this.filterUtils.parseFiltersFromParams(params, this.filters, {
       preserveOrganizationAndProject: true,
     });
-    this.isInitializing = previousState;
+    this.isInitializingFilters = previousState;
   }
 
   private syncOrgAndProjectFromUrl(): void {
@@ -208,7 +208,7 @@ export class FilterViewContainerComponent implements OnInit, OnChanges, OnDestro
   }
 
   private emitFilterChange(): void {
-    if (this.isInitializing) return;
+    if (this.isInitializingFilters) return;
     this.syncOrgAndProjectFromUrl();
     this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
       preserveExistingOrgProject: true,

@@ -71,7 +71,7 @@ export class OverviewComponent implements OnInit, OnDestroy {
   };
 
   private destroy$ = new Subject<void>();
-  private isInitializing = false;
+  private isInitializingFilters = false;
 
   public summaryMetrics: SummaryMetrics = {
     totalHours: 0,
@@ -203,18 +203,18 @@ export class OverviewComponent implements OnInit, OnDestroy {
   }
 
   private loadFiltersFromUrl(params: Params): void {
-    const previousState = this.isInitializing;
-    this.isInitializing = true;
+    const previousState = this.isInitializingFilters;
+    this.isInitializingFilters = true;
     this.filters = this.filterUtils.parseFiltersFromParams(params, this.filters, {
       preserveOrganizationAndProject: true,
     });
     this.selectedOrganization = this.findOrganizationById(this.filters.organizationId);
     this.selectedProject = this.findProjectById(this.filters.projectId);
-    this.isInitializing = previousState;
+    this.isInitializingFilters = previousState;
   }
 
   private syncFiltersToUrl(): void {
-    if (this.isInitializing) return;
+    if (this.isInitializingFilters) return;
     this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
       includeOrganizationAndProject: true,
     });

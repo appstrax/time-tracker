@@ -65,8 +65,8 @@ export class FilterViewSummaryComponent implements OnInit {
     });
 
     return Array.from(projectMap.entries())
-      .map(([projectId, data]) => ({ projectId, ...data }))
-      .sort((a, b) => b.hours - a.hours);
+    .map(([projectId, data]) => ({ projectId, ...data }))
+    .sort((a, b) => b.hours - a.hours);
   }
 }
 
