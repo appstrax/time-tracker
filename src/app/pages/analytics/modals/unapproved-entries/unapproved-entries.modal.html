@@ -1,0 +1,121 @@
+<div class="unapproved-modal">
+  <div class="modal-header align-items-center d-flex justify-content-between">
+    <h4 class="modal-title text-white mb-0">Unapproved Time Entries</h4>
+    <button
+      type="button"
+      class="btn-close btn-close-white"
+      aria-label="Close"
+      (click)="close()"
+    ></button>
+  </div>
+
+  <div class="modal-body">
+    <div class="overview-card mb-4">
+      <div class="overview-item">
+        <span class="label">Date</span>
+        <span class="value text-color">{{ formatDate(date) }}</span>
+      </div>
+      <div class="overview-item">
+        <span class="label">User</span>
+        <span class="value text-color">{{ getUserName(userId) }}</span>
+      </div>
+      <div class="overview-item">
+        <span class="label">Total Hours</span>
+        <span class="value text-color">{{ getTotalHours() }}</span>
+      </div>
+      @if (getUniqueCategories().length) {
+        <div class="overview-item categories">
+          <span class="label">Categories</span>
+          <div class="categories-list">
+            @for (category of getUniqueCategories(); track category) {
+              <span class="badge">
+                {{ category }}
+              </span>
+            }
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="table-responsive entries-table">
+      <table class="table table-sm table-hover mb-0">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th>Hours</th>
+            <th>Category</th>
+            <th>Description</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (entry of entries; track entry) {
+            <tr
+              class="clickable-row"
+              [class.pending]="!entry.approved"
+              [class.approved]="entry.approved"
+              >
+              <td>
+                <span class="badge">{{ getProjectName(entry.projectId) }}</span>
+              </td>
+              <td class="text-color">
+                {{ formatHours(entry.hours) }}
+              </td>
+              <td>
+                <span class="badge">{{ entry.category }}</span>
+              </td>
+              <td>
+                <span
+                  class="text-truncate d-inline-block description text-color"
+                  [title]="entry.description"
+                  >
+                  {{ entry.description }}
+                </span>
+              </td>
+              <td>
+                <span class="status-pill" [class.pending]="!entry.approved">
+                  {{ entry.approved ? 'Approved' : 'Pending' }}
+                </span>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="modal-footer d-flex justify-content-between">
+    <div></div>
+    <div>
+      <button
+        type="button"
+        class="btn btn-outline-secondary"
+        (click)="close()"
+        [disabled]="isApproving"
+        >
+        Close
+      </button>
+      @if (getUnapprovedCount()) {
+        <button
+          type="button"
+          class="btn btn-success ms-3"
+          (click)="approveAll()"
+          [disabled]="isApproving"
+          >
+          @if (isApproving) {
+            <span
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+              >
+              <span class="visually-hidden">Loading...</span>
+            </span>
+          }
+          @if (!isApproving) {
+            <i class="bi bi-check-circle me-1"></i>
+          }
+          Approve All ({{ getUnapprovedCount() }})
+        </button>
+      }
+    </div>
+  </div>
+</div>

@@ -2,12 +2,27 @@
   <div class="login-container">
     <div class="login-content">
       <div class="left-panel">
-        <h1 class="main-title">Log in</h1>
-        <p class="subtitle">to your account</p>
+        <div class="brand-lockup">
+          <div class="brand-mark">
+            <img
+              src="/time-tracker-logo.svg"
+              alt="Time Tracker logo"
+              class="brand-logo"
+            />
+          </div>
+
+          <div class="brand-copy">
+            <p class="brand-eyebrow">Smart time reporting</p>
+            <h1 class="main-title">Time Tracker</h1>
+            <p class="subtitle">
+              Stay focused, capture hours, and keep projects moving.
+            </p>
+          </div>
+        </div>
       </div>
 
       <div class="right-panel">
-        <h2 class="welcome-text">Welcome back!</h2>
+        <h2 class="welcome-text">Login</h2>
         <p class="login-instruction">Log in to your account</p>
 
         <form (ngSubmit)="onSubmit()">
@@ -19,7 +34,8 @@
                 type="email"
                 class="form-control"
                 id="email"
-                [(ngModel)]="email"
+                [ngModel]="email()"
+                (ngModelChange)="email.set($event)"
                 name="email"
                 placeholder="Email address"
                 required
@@ -35,7 +51,8 @@
                 type="password"
                 class="form-control"
                 id="password"
-                [(ngModel)]="password"
+                [ngModel]="password()"
+                (ngModelChange)="password.set($event)"
                 name="password"
                 placeholder="Password"
                 required
@@ -43,9 +60,9 @@
             </div>
           </div>
 
-          <div *ngIf="errorMessage" class="alert alert-danger mb-3">
-            {{ errorMessage }}
-          </div>
+          @if (error()) {
+          <div class="alert alert-danger mb-3">{{ error() }}</div>
+          }
 
           <p class="signup-link">
             Forgot your password? <a href="/forgot-password">Reset password</a>
@@ -56,19 +73,15 @@
             class="btn btn-primary login-btn"
             [disabled]="!isFormValid()"
           >
+            @if (loading()) {
             <span
-              *ngIf="loading"
               class="spinner-border spinner-border-sm me-2"
               role="status"
               aria-hidden="true"
             ></span>
-            Log in
+            } Log in
           </button>
         </form>
-
-        <p class="signup-link">
-          Don't have an account? <a href="/sign-up">Sign up</a>
-        </p>
       </div>
     </div>
   </div>

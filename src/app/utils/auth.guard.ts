@@ -9,7 +9,7 @@ export class AuthGuard implements CanActivate {
   async canActivate(): Promise<boolean> {
     const isAuthenticated = await appstraxAuth.isAuthenticated();
     if (!isAuthenticated) {
-      this.router.navigate(['/login']);
+      this.router.navigate(['']);
       return false;
     }
     return true;

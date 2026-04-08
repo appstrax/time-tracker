@@ -1,8 +1,13 @@
 import { Tooltip } from 'bootstrap';
 import { NgStyle } from '@angular/common';
-import { Component, Input, AfterViewInit } from '@angular/core';
-import { OnDestroy, ElementRef, ViewChild } from '@angular/core';
-import { EventEmitter, Output, OnChanges, SimpleChanges } from '@angular/core';
+import {
+  Component,
+  ElementRef,
+  effect,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
 
 import { TimeSheetEntry, Project } from '@models';
 
@@ -11,81 +16,63 @@ import { TimeSheetEntry, Project } from '@models';
   standalone: true,
   templateUrl: './time-sheet-entry-item.component.html',
   styleUrl: './time-sheet-entry-item.component.scss',
-  imports: [NgStyle]
+  imports: [NgStyle],
 })
-export class TimeSheetEntryItemComponent implements AfterViewInit, OnDestroy, OnChanges {
-  @Input() width: number = 0;
-  @Input() project?: Project;
-  @Input() entry!: TimeSheetEntry;
-  @Input() categoryColor: string = '#6B7280';
+export class TimeSheetEntryItemComponent {
+  public readonly width = input(0);
+  public readonly project = input<Project | undefined>(undefined);
+  public readonly entry = input<TimeSheetEntry | undefined>();
+  public readonly categoryColor = input('#6B7280');
 
-  @Output() onEntryClick: EventEmitter<TimeSheetEntry> = new EventEmitter<TimeSheetEntry>();
+  public readonly onEntryClick = output<TimeSheetEntry>();
 
-  @ViewChild('tooltipElement', { static: false }) tooltipElement!: ElementRef<HTMLElement>;
+  private readonly tooltipElement = viewChild<ElementRef<HTMLElement>>(
+    'tooltipElement',
+  );
 
-  private tooltip?: Tooltip;
-  private viewInitialized: boolean = false;
+  constructor() {
+    effect((onCleanup) => {
+      const tooltipElement = this.tooltipElement();
+      const entry = this.entry();
+      if (!tooltipElement || !entry) return;
 
-  public ngAfterViewInit(): void {
-    this.viewInitialized = true;
-    this.initializeTooltip();
-  }
+      const element = tooltipElement.nativeElement;
+      const tooltip = new Tooltip(element, {
+        html: true,
+        placement: 'left',
+        trigger: 'hover',
+        fallbackPlacements: ['bottom'],
+        title: this.getTooltipContent(entry, this.project()),
+      });
+      const onClick = () => tooltip.hide();
 
-  public ngOnChanges(changes: SimpleChanges): void {
-    if (this.viewInitialized && (changes['entry'] || changes['project']) && this.tooltipElement) {
-      this.updateTooltip();
-    }
-  }
-
-  public ngOnDestroy(): void {
-    this.disposeTooltip();
-  }
-
-  private initializeTooltip(): void {
-    if (!this.tooltipElement) return;
-    const element = this.tooltipElement.nativeElement;
-    const tooltipContent = this.getTooltipContent();
-    this.tooltip = new Tooltip(element, {
-      html: true,
-      placement: 'left',
-      trigger: 'hover',
-      fallbackPlacements: ['bottom'],
-      title: tooltipContent
-    });
-    element.removeAttribute('title');
-    element.addEventListener('click', () => {
-      this.tooltip?.hide();
+      element.removeAttribute('title');
+      element.addEventListener('click', onClick);
+      onCleanup(() => {
+        element.removeEventListener('click', onClick);
+        tooltip.dispose();
+      });
     });
   }
 
-  private updateTooltip(): void {
-    if (!this.tooltip || !this.tooltipElement) return;
-    this.disposeTooltip();
-    this.initializeTooltip();
-  }
-
-  private disposeTooltip(): void {
-    if (this.tooltip) {
-      this.tooltip.dispose();
-      this.tooltip = undefined;
-    }
-  }
-
-  private getTooltipContent(): string {
-    let hours = Math.floor(this.entry.hours);
-    let minutes = (this.entry.hours - hours) * 60;
+  private getTooltipContent(entry: TimeSheetEntry, project?: Project): string {
+    const hours = Math.floor(entry.hours);
+    const minutes = (entry.hours - hours) * 60;
     return `
       <div style="text-align: left;">
-        <div class="mb-2"><strong>Project:</strong><br> ${this.project?.name || 'N/A'}</div>
-        <div class="mb-2"><strong>Category:</strong><br> ${this.entry.category || 'N/A'}</div>
+        <div class="mb-2"><strong>Project:</strong><br> ${project?.name || 'N/A'}</div>
+        <div class="mb-2"><strong>Category:</strong><br> ${entry.category || 'N/A'}</div>
         <div class="mb-2"><strong>Hours:</strong><br> ${hours}h ${minutes}m</div>
-        <div class="mb-2"><strong>Description:</strong><br> ${this.entry.description || 'N/A'}</div>
+        <div class="mb-2"><strong>Description:</strong><br> ${entry.description || 'N/A'}</div>
       </div>
     `;
   }
 
   public onClick(): void {
-    this.onEntryClick.emit(this.entry);
+    const entry = this.entry();
+    if (!entry) return;
+
+    this.onEntryClick.emit(entry);
   }
 }
 

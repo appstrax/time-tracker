@@ -1,75 +1,170 @@
-.home-grid .card {
-  background-color: var(--color-surface);
-  color: var(--text-primary);
-  border: 1px solid var(--color-border);
-}
-
-.home-grid .card-header {
-  background-color: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
-  color: var(--text-primary);
-  border-bottom: 1px solid var(--color-border);
-}
-
-.home-grid .badge {
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
-/* Collapse-all behavior for sections */
-.home-grid .section-collapsed .card .card-body {
-  display: none;
-}
-.home-grid .section-collapsed .card-header {
-  border-bottom-color: transparent;
-}
-
-/* Ensure muted/secondary text is readable in dark mode */
-.home-grid .text-muted,
-.home-grid .card .text-muted,
-.home-grid .card-header .text-muted {
-  color: var(--text-muted) !important;
-}
-
-/* Lists inside cards inherit proper colors */
-.home-grid .card .list-unstyled li {
-  color: var(--text-primary);
-}
-
-.section-heading {
+.home-hours-page {
   display: flex;
-  align-items: center;
-  gap: 10px;
-  font-weight: 600;
+  flex-direction: column;
+  gap: 1.5rem;
   color: var(--text-primary);
-  margin-bottom: 8px;
 }
 
-.section-heading .pill {
-  height: 10px;
-  width: 10px;
-  border-radius: 50%;
-  background: var(--primary-color);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent);
+.page-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
 }
 
-.section-divider {
-  border: 0;
-  border-top: 1px solid var(--color-border);
-  margin: 18px 0;
+.eyebrow {
+  margin: 0 0 0.4rem;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--primary-color);
 }
 
-.home-grid.grid-mode .row {
+.page-header h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.4rem);
+}
+
+.subtitle {
+  margin: 0.5rem 0 0;
+  max-width: 42rem;
+  color: var(--text-muted);
+}
+
+.range-chip {
+  padding: 0.65rem 0.95rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-surface) 90%, var(--primary-color) 10%);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.summary-grid {
   display: grid;
-  /* Use Bootstrap gutter variables set by g-classes for consistent spacing */
-  gap: var(--bs-gutter-y, 1rem) var(--bs-gutter-x, 1rem);
-  margin-left: 0;  /* neutralize Bootstrap row negative margins */
-  margin-right: 0;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 1rem;
 }
 
-/* Reset Bootstrap column width constraints so grid can place items naturally */
-.home-grid.grid-mode .row > [class^='col-'],
-.home-grid.grid-mode .row > [class*=' col-'] {
-  width: auto;
-  max-width: none;
+.summary-card,
+.state-card,
+.graph-card {
+  border: 1px solid var(--color-border);
+  border-radius: 1rem;
+  background: var(--color-surface);
+  box-shadow: 0 10px 30px rgba(15, 23, 42, 0.05);
+}
+
+.summary-card {
+  padding: 1rem 1.1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.summary-label {
+  color: var(--text-muted);
+  font-size: 0.9rem;
+}
+
+.summary-card strong {
+  font-size: 1.35rem;
+  line-height: 1.2;
+}
+
+.state-card {
+  padding: 1.25rem 1.3rem;
+}
+
+.state-card h2,
+.graph-header h2 {
+  margin: 0 0 0.4rem;
+  font-size: 1.15rem;
+}
+
+.state-card p,
+.graph-header p {
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.state-card.muted {
+  background: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg) 8%);
+}
+
+.graph-card {
+  padding: 1.4rem;
+}
+
+.graph-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  margin-top: 1.25rem;
+}
+
+.graph-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.row-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+}
+
+.project-label {
+  font-weight: 600;
+  min-width: 0;
+}
+
+.hours-label {
+  color: var(--text-muted);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.bar-track {
+  height: 1rem;
+  border-radius: 999px;
+  overflow: hidden;
+  background: color-mix(in srgb, var(--color-border) 60%, transparent);
+}
+
+.bar-fill {
+  height: 100%;
+  min-width: 0;
+  border-radius: inherit;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary-color) 72%, white),
+    var(--primary-color)
+  );
+  transition: width 180ms ease-out;
+}
+
+.bar-fill-empty {
+  background: color-mix(in srgb, var(--text-muted) 35%, transparent);
+}
+
+@media (max-width: 767px) {
+  .home-hours-page {
+    gap: 1rem;
+  }
+
+  .graph-card {
+    padding: 1rem;
+  }
+
+  .row-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.3rem;
+  }
 }
 

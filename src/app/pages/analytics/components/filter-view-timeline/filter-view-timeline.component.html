@@ -1,0 +1,50 @@
+<div class="filter-view-timeline">
+  <div class="card">
+    <div class="card-header">
+      <h5 class="mb-0">Timeline View</h5>
+    </div>
+    <div class="card-body">
+      <div class="timeline-container">
+        @for (day of getTimelineData(); track day) {
+          <div class="timeline-day">
+            <div class="timeline-date">
+              <strong>{{ day.date | date : "MMM d, yyyy" }}</strong>
+              <span class="badge bg-secondary ms-2">{{
+                displayUtils.formatHours(day.hours)
+              }}</span>
+            </div>
+            <div class="timeline-bar">
+              <div
+                class="timeline-segment approved"
+                [style.width.%]="(day.approvedHours / getMaxHours()) * 100"
+                [title]="displayUtils.formatHours(day.approvedHours) + ' approved'"
+              ></div>
+              <div
+                class="timeline-segment pending"
+                [style.width.%]="(day.pendingHours / getMaxHours()) * 100"
+                [title]="displayUtils.formatHours(day.pendingHours) + ' pending'"
+              ></div>
+            </div>
+            <div class="timeline-legend">
+              <span class="legend-item">
+                <span class="legend-color approved"></span>
+                Approved: {{ displayUtils.formatHours(day.approvedHours) }}
+              </span>
+              <span class="legend-item">
+                <span class="legend-color pending"></span>
+                Pending: {{ displayUtils.formatHours(day.pendingHours) }}
+              </span>
+            </div>
+          </div>
+        }
+        @if (!getTimelineData().length) {
+          <div
+            class="text-center text-muted py-4"
+            >
+            No entries found
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>

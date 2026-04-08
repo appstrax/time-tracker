@@ -1,54 +1,63 @@
-import { signalStore, withState, withMethods, patchState } from '@ngrx/signals';
+import {
+  signalStore,
+  withState,
+  withMethods,
+  patchState,
+  withHooks,
+} from '@ngrx/signals';
 import { appstraxAuth, User as AuthUser } from '@appstrax/services/auth';
+
 import { User } from '@models';
 
 interface UserState {
-  current: User | null;
+  user: User | null;
+  fetchedAt: Date | null;
   loading: boolean;
-  error: string | null;
 }
 
 const initialState: UserState = {
-  current: null,
+  user: null,
+  fetchedAt: null,
   loading: false,
-  error: null,
 };
 
 export const UserStore = signalStore(
   { providedIn: 'root' },
   withState<UserState>(initialState),
   withMethods((store) => ({
-    async loadCurrent(): Promise<void> {
-      patchState(store, { loading: true, error: null });
+    async initialize(): Promise<void> {
+      patchState(store, { loading: true });
       try {
         const authUser = await appstraxAuth.getUser();
-        const user = new User();
-        user.id = authUser.id;
-        user.email = authUser.email;
-        patchState(store, { current: user });
+        this.setFromAuthUser(authUser);
       } catch (e: any) {
-        patchState(store, { error: e?.message ?? 'Failed to load user' });
+        patchState(store, { fetchedAt: new Date() });
       } finally {
         patchState(store, { loading: false });
       }
     },
-    setCurrentFromAuthUser(authUser: AuthUser) {
-      const user = new User();
-      user.id = authUser.id;
-      user.email = authUser.email;
-      patchState(store, { current: user });
+    setFromAuthUser(authUser: AuthUser) {
+      const user = User.fromAuthUser(authUser);
+      patchState(store, { user, fetchedAt: new Date() });
     },
-    setCurrent(user: User | null) {
-      patchState(store, { current: user });
-    },
+
     clear() {
       patchState(store, initialState);
     },
     setLoading(loading: boolean) {
       patchState(store, { loading });
     },
-    setError(error: string | null) {
-      patchState(store, { error });
+  })),
+
+  withHooks({
+    onInit(store) {
+      const unsubscribe = appstraxAuth.subscribeToUserChanges((user) => {
+        if (user) {
+          store.setFromAuthUser(user);
+        }
+      });
+
+      return () => unsubscribe();
     },
-  }))
+  }),
 );

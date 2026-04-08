@@ -19,7 +19,7 @@
             id="autoCollapseSwitch"
             [checked]="(settings.autoCollapse$ | async) ?? false"
             (change)="toggleAutoCollapse($event)"
-          />
+            />
         </div>
       </div>
     </div>
@@ -72,43 +72,45 @@
             <div class="tile-label">Custom</div>
           </label>
         </div>
-        
-        <div class="custom-theme-editor mt-3" *ngIf="(theme.currentTheme$ | async) === 'custom'">
-          <div class="row g-3">
-            <div class="col-md-3">
-              <label class="form-label">Primary</label>
-              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.primary" />
+
+        @if ((theme.currentTheme$ | async) === 'custom') {
+          <div class="custom-theme-editor mt-3">
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label">Primary</label>
+                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.primary" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Primary Contrast</label>
+                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.primaryContrast" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Background</label>
+                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.bg" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Surface</label>
+                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.surface" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Border</label>
+                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.border" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Text</label>
+                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.text" />
+              </div>
+              <div class="col-md-3">
+                <label class="form-label">Muted Text</label>
+                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.muted" />
+              </div>
             </div>
-            <div class="col-md-3">
-              <label class="form-label">Primary Contrast</label>
-              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.primaryContrast" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Background</label>
-              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.bg" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Surface</label>
-              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.surface" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Border</label>
-              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.border" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Text</label>
-              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.text" />
-            </div>
-            <div class="col-md-3">
-              <label class="form-label">Muted Text</label>
-              <input class="form-control form-control-color" type="color" [(ngModel)]="custom.muted" />
+            <div class="mt-3 d-flex gap-2">
+              <button class="btn btn-primary" (click)="applyCustom()">Apply custom theme</button>
+              <button class="btn btn-light" (click)="resetCustom()">Reset</button>
             </div>
           </div>
-          <div class="mt-3 d-flex gap-2">
-            <button class="btn btn-primary" (click)="applyCustom()">Apply custom theme</button>
-            <button class="btn btn-light" (click)="resetCustom()">Reset</button>
-          </div>
-        </div>
+        }
       </div>
     </div>
   </section>

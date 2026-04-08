@@ -1,8 +1,12 @@
-<div class="side-nav" [class.visible]="isVisible" [class.expanded]="mode === 'expanded'" [class.collapsed]="mode === 'collapsed'">
-  <ng-container *ngIf="mode === 'collapsed'; else expandedTpl">
-    <app-side-nav-collapsed [navItems]="navItems" (logout)="logout()" (toggle)="toggleNav()"></app-side-nav-collapsed>
-  </ng-container>
-  <ng-template #expandedTpl>
-    <app-side-nav-expanded [navItems]="navItems" (logout)="logout()" (toggle)="toggleNav()"></app-side-nav-expanded>
-  </ng-template>
+<div
+  class="side-nav"
+  [class.visible]="isVisible"
+  [class.expanded]="mode === 'expanded'"
+  [class.collapsed]="mode === 'collapsed'"
+>
+  @if (mode === "collapsed") {
+    <app-side-nav-collapsed (logout)="logout()" (toggle)="toggleNav()" />
+  } @else {
+    <app-side-nav-expanded (logout)="logout()" (toggle)="toggleNav()" />
+  }
 </div>

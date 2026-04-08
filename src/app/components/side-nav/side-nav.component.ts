@@ -1,4 +1,3 @@
-import { CommonModule } from '@angular/common';
 import { Component, OnDestroy } from '@angular/core';
 import { RouterModule, Router, NavigationStart } from '@angular/router';
 import { HostListener, AfterViewInit } from '@angular/core';
@@ -8,6 +7,8 @@ import { appstraxAuth } from '@appstrax/services/auth';
 import { SideNavCollapsedComponent } from './collapsed/side-nav-collapsed.component';
 import { SideNavExpandedComponent } from './expanded/side-nav-expanded.component';
 import { SettingsService } from '@services';
+import { Store } from '@state';
+import { UserRole } from '@models';
 
 interface NavItem {
   title: string;
@@ -20,7 +21,7 @@ interface NavItem {
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, SideNavCollapsedComponent, SideNavExpandedComponent],
+  imports: [RouterModule, SideNavCollapsedComponent, SideNavExpandedComponent],
 })
 export class SideNavComponent implements AfterViewInit, OnDestroy {
   isVisible = true;
@@ -30,7 +31,11 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   private readonly BUFFER_ZONE = 100;
   private tooltips: Tooltip[] = [];
 
-  constructor(private router: Router, private settings: SettingsService) {
+  constructor(
+    private router: Router,
+    private settings: SettingsService,
+    private store: Store,
+  ) {
     this.mode = this.settings.getSideNavMode();
   }
 
@@ -62,34 +67,14 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  navItems: NavItem[] = [
-    { title: 'Define', icon: 'bi bi-pencil-square', route: '/define' },
-    { title: 'Design', icon: 'bi bi-palette', route: '/design' },
-    { title: 'DB Design', icon: 'bi bi-database', route: '/db-design' },
-    { title: 'Tickets', icon: 'bi bi-ticket-perforated', route: '/tickets' },
-    { title: 'Repos', icon: 'bi bi-github', route: '/repos' },
-    { title: 'Code', icon: 'bi bi-code-square', route: '/code' },
-    { title: 'Testing', icon: 'bi bi-robot', route: '/testing' },
-    { title: 'Billing', icon: 'bi bi-credit-card', route: '/billing' },
-    { title: 'Workspace', icon: 'bi bi-collection', route: '/workspace' },
-    { title: 'Quotations', icon: 'bi bi-file-earmark-text', route: '/quotations' },
-    { title: 'User Management', icon: 'bi bi-people', route: '/users' },
-    { title: 'Documentation', icon: 'bi bi-file-text', route: '/docs' },
-    { title: 'Compliance', icon: 'bi bi-shield-check', route: '/compliance' },
-    { title: 'Dev-Ops', icon: 'bi bi-gear', route: '/devops' },
-    { title: 'Guard Rails', icon: 'bi bi-shield-lock', route: '/guardrails' },
-    { title: 'Quality', icon: 'bi bi-check-circle', route: '/quality' },
-    { title: 'Audit Trails', icon: 'bi bi-clock-history', route: '/audit' },
-    { title: 'Project State', icon: 'bi bi-kanban', route: '/project' },
-    { title: 'Stats', icon: 'bi bi-graph-up', route: '/stats' },
-    { title: 'Kpis', icon: 'bi bi-bar-chart', route: '/kpis' },
-    { title: 'Marketplace', icon: 'bi bi-cart', route: '/marketplace' },
-  ];
+  get isAdmin(): boolean {
+    return this.store.user.user()?.role === UserRole.ADMIN;
+  }
 
   ngAfterViewInit() {
     setTimeout(() => {
       const tooltipTriggerList = document.querySelectorAll(
-        '[data-bs-toggle="tooltip"]'
+        '[data-bs-toggle="tooltip"]',
       );
       this.tooltips = [...tooltipTriggerList].map((tooltipTriggerEl) => {
         return new Tooltip(tooltipTriggerEl, {

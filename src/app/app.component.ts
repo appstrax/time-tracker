@@ -18,8 +18,8 @@ export class AppComponent implements OnInit {
   constructor(private theme: ThemeService, private store: Store) {}
 
   async ngOnInit(): Promise<void> {
-    const isAuthenticated = await appstraxAuth.isAuthenticated();
-    if (isAuthenticated) {
+    const authenticated = await appstraxAuth.isAuthenticated();
+    if (authenticated) {
       // TODO: handle catch and show error toast if services are down
       await this.store.init();
     }

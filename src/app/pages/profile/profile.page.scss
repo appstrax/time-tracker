@@ -50,6 +50,25 @@
   }
 }
 
+.profile-picture .member-avatar {
+  align-items: center;
+  background: color-mix(in srgb, var(--primary-color) 14%, var(--color-surface));
+  box-shadow: 0 0 20px 0 color-mix(in srgb, var(--color-border) 40%, transparent);
+  color: var(--primary-color-dark);
+  display: inline-flex;
+  font-size: 2.5rem;
+  font-weight: 600;
+  height: 10rem;
+  justify-content: center;
+  text-transform: uppercase;
+  transition: box-shadow 0.3s ease;
+  width: 10rem;
+
+  &:hover {
+    box-shadow: 0 0 10px 0 color-mix(in srgb, var(--primary-color) 25%, transparent);
+  }
+}
+
 .user-name {
   color: var(--primary-color-dark);
   font-size: 1.5rem;

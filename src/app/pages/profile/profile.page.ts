@@ -1,114 +1,82 @@
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
-import { Component, ElementRef, ViewChild, Signal, effect } from '@angular/core';
-
-import { User, Project, Organization, OrganizationProjects } from '@models';
-import { Store } from '@state';
-import { SocialLinkComponent } from './social-link/social-link.component';
-
+import { Component, computed, signal } from '@angular/core';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { appstraxStorage } from '@appstrax/services/storage';
+
+import { User } from '@models';
+import { ToastService } from '@services';
+import { Store } from '@state';
 
 @Component({
   selector: 'app-profile',
   templateUrl: './profile.page.html',
   styleUrls: ['./profile.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, FormsModule, SocialLinkComponent],
+  imports: [RouterModule, FormsModule],
 })
 export class ProfilePage {
-  public user: User = new User();
-  public socialLinks: any[] = [];
+  public user = signal(new User());
+  public name = signal('');
+  public surname = signal('');
 
-  public isSaving = false;
-  public isEditingSocial = false;
-  public isEditingPersonal = false;
+  public saving = signal(false);
+  public editing = signal(false);
 
-  projects!: Signal<Project[]>;
-  organizations!: Signal<Organization[]>;
-  orgProjects!: Signal<OrganizationProjects[]>;
+  projects = computed(() => this.store.projects.projects());
 
-  public projectCount = 0;
-  public organizationCount = 0;
-
-  @ViewChild('fileInput', { static: false })
-  fileInput?: ElementRef<HTMLInputElement>;
-
-  @ViewChild('cvInput', { static: false })
-  cvInput?: ElementRef<HTMLInputElement>;
-
-  constructor(private store: Store) {
-    this.projects = this.store.projects.all;
-    this.organizations = this.store.organizations.all;
-    this.orgProjects = this.store.orgProjects.all;
-
-    effect(() => {
-      this.projectCount = this.projects()?.length ?? 0;
-      this.organizationCount = this.organizations()?.length ?? 0;
-    });
-  }
+  constructor(
+    private store: Store,
+    private toast: ToastService,
+  ) {}
 
   public async ngOnInit(): Promise<void> {
     try {
       const authUser = await appstraxAuth.getUser();
       if (authUser) {
-        const data: any = (authUser as any)?.data ?? {};
-        this.user.email = authUser.email || '';
-        this.user.name = data.name || '';
-        this.user.surname = data.surname || '';
-        this.user.cvPdfUrl = data.cvPdfUrl || '';
-        this.user.tiktokUrl = data.tiktokUrl || '';
-        this.user.githubUrl = data.githubUrl || '';
-        this.user.twitterUrl = data.twitterUrl || '';
-        this.user.youtubeUrl = data.youtubeUrl || '';
-        this.user.facebookUrl = data.facebookUrl || '';
-        this.user.linkedinUrl = data.linkedinUrl || '';
-        this.user.instagramUrl = data.instagramUrl || '';
-        this.user.profilePictureUrl = data.profilePictureUrl || '';
+        const user = User.fromAuthUser(authUser);
+        this.user.set(user);
+        this.resetEditingValues();
       }
     } catch (err) {
       console.error('Failed to load user/profile data', err);
     }
   }
 
+  private resetEditingValues(): void {
+    const user = this.user();
+    this.name.set(user.name);
+    this.surname.set(user.surname);
+  }
+
   onUploadProfilePicture(): void {
     const input = document.querySelector(
-      'input[type="file"][accept^="image/"]'
+      'input[type="file"][accept^="image/"]',
     ) as HTMLInputElement | null;
     input?.click();
-  }
-
-  onUploadCV(): void {
-    const input = document.getElementById('cvInput') as HTMLInputElement | null;
-    input?.click();
-  }
-
-  async onCVSelected(event: Event) {
-    const target = event.target as HTMLInputElement;
-    if (!target.files || target.files.length === 0) return;
-    const file = target.files[0];
-    try {
-      const response = await appstraxStorage.uploadFile(file, 'userResumes');
-      this.user.cvPdfUrl = response.downloadUrl;
-      await this.updateUser();
-    } catch (err) {
-      console.error('CV upload failed', err);
-    } finally {
-      target.value = '';
-    }
   }
 
   async onProfilePictureSelected(event: Event) {
     const target = event.target as HTMLInputElement;
     if (!target.files || target.files.length === 0) return;
-    const file = target.files[0];
+    let file = target.files[0];
+
+    file = new File([file], `${this.user().id}_${file.name}`, {
+      type: file.type,
+    });
+
     try {
       const response = await appstraxStorage.uploadFile(
         file,
-        'userProfilePictures'
+        'user_profile_pictures',
       );
-      this.user.profilePictureUrl = response.downloadUrl;
+
+      this.user.update((user) =>
+        Object.assign(new User(), user, {
+          profilePictureUrl: response.downloadUrl,
+        }),
+      );
+
       await this.updateUser();
     } catch (err) {
       console.error('Profile picture upload failed', err);
@@ -118,36 +86,53 @@ export class ProfilePage {
   }
 
   async updateUser() {
+    this.saving.set(true);
+    const user = this.user();
+    const name = this.name();
+    const surname = this.surname();
+
     try {
-      this.isSaving = true;
       await appstraxAuth.saveUserData({
-        name: this.user.name,
-        email: this.user.email,
-        surname: this.user.surname,
-        cvPdfUrl: this.user.cvPdfUrl,
-        tiktokUrl: this.user.tiktokUrl,
-        githubUrl: this.user.githubUrl,
-        twitterUrl: this.user.twitterUrl,
-        youtubeUrl: this.user.youtubeUrl,
-        facebookUrl: this.user.facebookUrl,
-        linkedinUrl: this.user.linkedinUrl,
-        instagramUrl: this.user.instagramUrl,
-        profilePictureUrl: this.user.profilePictureUrl,
-      } as any);
-      this.isEditingSocial = false;
-      this.isEditingPersonal = false;
+        name,
+        surname,
+        profilePictureUrl: user.profilePictureUrl,
+      });
+
+      this.user.update((currentUser) =>
+        Object.assign(new User(), currentUser, {
+          name,
+          surname,
+        }),
+      );
+      this.resetEditingValues();
+      this.editing.set(false);
+      this.toast.success('User updated successfully', 'Success');
     } catch (err) {
-      console.error('Failed to save', err);
+      this.toast.error('Failed to save', 'Error');
     } finally {
-      this.isSaving = false;
+      this.saving.set(false);
     }
   }
 
-  togglePersonal() {
-    this.isEditingPersonal = !this.isEditingPersonal;
+  toggleEditing() {
+    if (this.editing()) {
+      this.resetEditingValues();
+      this.editing.set(false);
+      return;
+    }
+
+    this.resetEditingValues();
+    this.editing.set(true);
   }
 
-  toggleSocial() {
-    this.isEditingSocial = !this.isEditingSocial;
+  getUserInitials(): string {
+    const user = this.user();
+    const initials = [user.name, user.surname]
+      .map((value) => value?.trim())
+      .filter((value): value is string => Boolean(value))
+      .map((value) => value.charAt(0).toUpperCase())
+      .join('');
+
+    return initials || user.email.charAt(0).toUpperCase() || 'U';
   }
 }

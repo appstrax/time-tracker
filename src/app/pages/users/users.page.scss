@@ -17,18 +17,6 @@
   .form-label { color: var(--text-primary); }
   .text-muted { color: var(--text-muted) !important; }
 
-  .form-control,
-  .form-select {
-    background-color: var(--color-surface);
-    color: var(--text-primary);
-    border: 1px solid var(--color-border);
-  }
-
-  .form-control::placeholder {
-    color: var(--text-muted);
-    opacity: 1;
-  }
-
   .table {
     --bs-table-color: var(--text-primary);
     --bs-table-bg: transparent;

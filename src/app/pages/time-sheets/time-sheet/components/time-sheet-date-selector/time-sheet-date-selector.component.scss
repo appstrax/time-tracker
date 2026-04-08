@@ -1,7 +1,5 @@
 .week-selector {
-  margin-bottom: 2rem;
   width: 350px;
-
   padding: 1rem;
   background-color: var(--color-surface);
   border-radius: 8px;
@@ -34,12 +32,6 @@
   width: 0;
   height: 0;
 }
-
-.spinner-div {
-  width: 20px;
-}
-
-
 
 .week-range-button {
   background-color: var(--primary-color);

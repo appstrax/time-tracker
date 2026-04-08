@@ -1,515 +1,82 @@
-<ng-container *ngIf="!isExpanded; else expandedTpl">
-  <ng-container [ngTemplateOutlet]="grid"></ng-container>
-</ng-container>
+<section class="home-hours-page container py-4">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Home</p>
+      <h1>Project hours</h1>
+      <p class="subtitle">
+        Captured hours for the last 7 days, grouped by project you can access.
+      </p>
+    </div>
+    <div class="range-chip">{{ rangeLabel }}</div>
+  </header>
 
-<ng-template #expandedTpl>
-  <app-split-pane storageKey="split.home" [initialLeftRatio]="0.6" [collapseBreakpointPx]="1024" [collapsedOnSmallScreens]="true">
-    <ng-container left>
-      <ng-container [ngTemplateOutlet]="grid"></ng-container>
-    </ng-container>
-    <ng-container right>
-      <div class="container py-3 ms-2">
-        <div class="d-flex justify-content-between align-items-center section-heading">
-          <div class="d-flex align-items-center gap-2">
-            <span class="pill"></span>
-            <h4 class="m-0">Detailed Overview: {{ selectedSectionTitle }}</h4>
-          </div>
-          <button class="btn btn-sm btn-outline-secondary" (click)="isExpanded = false" aria-label="Close details">
-            <i class="bi bi-x-lg"></i>
-          </button>
-        </div>
-        <div class="card">
-          <div class="card-body">
-            <p class="text-muted mb-0">Detailed overview coming soon.</p>
-          </div>
+  @if (isLoading() && !hasLoaded()) {
+    <section class="state-card">
+      <h2>Loading project hours</h2>
+      <p>Pulling your recent time entries and summarizing them by project.</p>
+    </section>
+  } @else if (!hasProjects()) {
+    <section class="state-card">
+      <h2>No accessible projects</h2>
+      <p>
+        There are no projects available for this account yet, so there is no
+        project-hour graph to display.
+      </p>
+    </section>
+  } @else {
+    <section class="summary-grid">
+      <article class="summary-card">
+        <span class="summary-label">Total captured hours</span>
+        <strong>{{ formatHours(totalHours()) }}</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Projects with hours</span>
+        <strong>{{ activeProjects() }}</strong>
+      </article>
+      <article class="summary-card">
+        <span class="summary-label">Accessible projects</span>
+        <strong>{{ graphData().length }}</strong>
+      </article>
+    </section>
+
+    @if (!hasCapturedHours()) {
+      <section class="state-card muted">
+        <h2>No captured hours in this range</h2>
+        <p>
+          Your accessible projects are still listed below so you can see that
+          each project currently has `0h 00m` recorded for the last 7 days.
+        </p>
+      </section>
+    }
+
+    <section class="graph-card">
+      <div class="graph-header">
+        <div>
+          <h2>Hours by project</h2>
+          <p>Bars are scaled relative to the project with the most captured hours.</p>
         </div>
       </div>
-    </ng-container>
-  </app-split-pane>
-</ng-template>
 
-<ng-template #grid>
-  <div class="container py-3 home-grid" [class.grid-mode]="isExpanded">
-    <div class="section-heading">
-      <span class="pill"></span>
-      <h4 class="m-0">Project: {{ currentProjectName }}</h4>
-      <button
-        class="btn btn-sm btn-outline-secondary ms-auto"
-        (click)="collapseProjects = !collapseProjects"
-        [attr.aria-label]="collapseProjects ? 'Expand all project cards' : 'Collapse all project cards'"
-        title="{{ collapseProjects ? 'Expand all' : 'Collapse all' }}"
-      >
-        <i class="bi" [ngClass]="collapseProjects ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
-      </button>
-    </div>
-    <div class="row g-3" [class.section-collapsed]="collapseProjects">
-    <!-- Overview -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Overview</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Overview')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/project']" aria-label="View project">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex flex-wrap gap-2 mb-3">
-            <span class="badge bg-success">Build: Passing</span>
-            <span class="badge bg-success">Quality: Good</span>
-            <span class="badge bg-warning text-dark">Compliance: Due soon</span>
-            <span class="badge bg-info text-dark">Billing: On track</span>
-          </div>
-          <div class="small text-muted">Last updated {{ overview.lastUpdated }}</div>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['overview'].last7d }}</div>
-        </div>
+      <div class="graph-list" role="list" aria-label="Captured hours by project">
+        @for (item of graphData(); track item.projectId) {
+          <article class="graph-row" role="listitem">
+            <div class="row-header">
+              <div class="project-label">{{ item.projectName }}</div>
+              <div class="hours-label">{{ formatHours(item.hours) }}</div>
+            </div>
+            <div
+              class="bar-track"
+              [attr.aria-label]="item.projectName + ' captured hours'"
+            >
+              <div
+                class="bar-fill"
+                [style.width.%]="item.percent"
+                [class.bar-fill-empty]="item.hours === 0"
+              ></div>
+            </div>
+          </article>
+        }
       </div>
-    </div>
-
-    <!-- Tickets -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Tickets</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Tickets')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/tickets']" aria-label="View tickets">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex flex-wrap gap-3 mb-3">
-            <div><span class="fw-semibold">Open:</span> {{ tickets.open }}</div>
-            <div><span class="fw-semibold">High:</span> {{ tickets.high }}</div>
-            <div><span class="fw-semibold">Due today:</span> {{ tickets.dueToday }}</div>
-          </div>
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let t of tickets.recent">#{{ t.id }} • {{ t.title }} <span class="badge rounded-pill ms-1" [class.bg-success]="t.status==='Open'" [class.bg-secondary]="t.status!=='Open'">{{ t.status }}</span></li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['tickets'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Repos -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Repositories</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Repositories')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/repos']" aria-label="View repos">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="mb-2"><span class="fw-semibold">Open PRs:</span> {{ repos.openPRs }}</div>
-          <div class="mb-3"><span class="fw-semibold me-2">Build:</span> <span class="badge bg-success">{{ repos.build }}</span></div>
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let c of repos.lastCommits">{{ c.repo }} • {{ c.message }} — <span class="text-muted">{{ c.when }}</span></li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['repos'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DevOps -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">DevOps</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('DevOps')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/devops']" aria-label="View pipelines">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="mb-2"><span class="fw-semibold me-2">Last pipeline:</span> <span class="badge bg-success">{{ devops.lastPipeline }}</span></div>
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let d of devops.deployments">{{ d.env }} • {{ d.result }} — <span class="text-muted">{{ d.when }}</span></li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['devops'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quality -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Quality</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Quality')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/quality']" aria-label="View quality">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex flex-wrap gap-3 mb-3">
-            <div><span class="fw-semibold">Coverage:</span> {{ quality.coverage }}%</div>
-            <div><span class="fw-semibold">Failing tests:</span> {{ quality.failingTests }}</div>
-            <div><span class="fw-semibold">Lint issues:</span> {{ quality.lint }}</div>
-          </div>
-          <div class="small text-muted">Trend: {{ quality.trend }}</div>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['quality'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Compliance -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Compliance</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Compliance')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/compliance']" aria-label="View compliance">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex flex-wrap gap-3 mb-3">
-            <div><span class="fw-semibold">Outstanding:</span> {{ compliance.outstanding }}</div>
-            <div><span class="fw-semibold">Failing rules:</span> {{ compliance.failing }}</div>
-          </div>
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let dl of compliance.deadlines">{{ dl.item }} — <span class="text-muted">{{ dl.due }}</span></li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['compliance'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Docs -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Docs</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Docs')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/docs']" aria-label="View docs">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let d of docs.recent">{{ d.title }} — <span class="text-muted">{{ d.when }}</span></li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['docs'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Define -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Define</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Define')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/define']" aria-label="View define">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Requirements, scope, acceptance criteria.</div>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['define'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Design -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Design</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Design')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/design']" aria-label="View design">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">UX/UI and flows.</div>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['design'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- DB Design -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">DB Design</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('DB Design')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/db-design']" aria-label="View DB Design">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Entities and relationships.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Code -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Code</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Code')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/code']" aria-label="View code">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Source and reviews.</div>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['code'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Testing -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Testing</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Testing')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/testing']" aria-label="View testing">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Automation and coverage.</div>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['testing'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Project State -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Project State</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Project State')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/project']" aria-label="View project state">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Status and progress.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- KPIs -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">KPIs</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('KPIs')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/kpis']" aria-label="View KPIs">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Key performance indicators.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Stats -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Stats</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Stats')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/stats']" aria-label="View stats">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Analytics and metrics.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Guard Rails -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Guard Rails</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Guard Rails')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/guardrails']" aria-label="View guard rails">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Policies and controls.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Audit Trails -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Audit Trails</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Audit')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/audit']" aria-label="View audit trails">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Events and history.</div>
-        </div>
-      </div>
-    </div>
-
-    </div>
-    <hr class="section-divider" />
-    <div class="section-heading">
-      <span class="pill"></span>
-      <h4 class="m-0">Organization: {{ currentOrganizationName }}</h4>
-      <button
-        class="btn btn-sm btn-outline-secondary ms-auto"
-        (click)="collapseOrganizations = !collapseOrganizations"
-        [attr.aria-label]="collapseOrganizations ? 'Expand all organization cards' : 'Collapse all organization cards'"
-        title="{{ collapseOrganizations ? 'Expand all' : 'Collapse all' }}"
-      >
-        <i class="bi" [ngClass]="collapseOrganizations ? 'bi-chevron-down' : 'bi-chevron-up'"></i>
-      </button>
-    </div>
-    <div class="row g-3" [class.section-collapsed]="collapseOrganizations">
-    <!-- Users -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Users</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Users')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/users']" aria-label="View users">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="d-flex flex-wrap gap-3 mb-3">
-            <div><span class="fw-semibold">Active:</span> {{ users.active }}</div>
-            <div><span class="fw-semibold">Invites:</span> {{ users.invites }}</div>
-          </div>
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let u of users.recent">{{ u.name }} — <span class="text-muted">{{ u.when }}</span></li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['users'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Billing -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Billing</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Billing')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/billing']" aria-label="View billing">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="mb-2"><span class="fw-semibold">Spend:</span> {{ billing.spend }} / {{ billing.budget }}</div>
-          <div class="small text-muted">Next invoice: {{ billing.nextInvoice }}</div>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['billing'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Notifications / Invites -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Notifications</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Notifications')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/notifications']" aria-label="View notifications">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="mb-2"><span class="fw-semibold">Unread:</span> {{ notifications.unread }}</div>
-          <ul class="list-unstyled small mb-0">
-            <li *ngFor="let n of notifications.top">{{ n.title }} — <span class="text-muted">{{ n.when }}</span></li>
-          </ul>
-          <div class="small mt-2"><i class="bi bi-robot me-1"></i><span class="text-muted">Agent interactions (7d):</span> {{ agentCounts['notifications'].last7d }}</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quotations -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Quotations</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Quotations')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/quotations']" aria-label="View quotations">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Proposals and estimates.</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Marketplace -->
-    <div class="col-12 col-md-6 col-lg-4">
-      <div class="card h-100">
-        <div class="card-header d-flex justify-content-between align-items-center">
-          <span class="fw-semibold">Marketplace</span>
-          <div class="d-flex gap-2">
-            <button class="btn btn-sm btn-outline-secondary" (click)="openSectionDetail('Marketplace')">See more</button>
-            <button class="btn btn-sm btn-outline-primary" [routerLink]="['/marketplace']" aria-label="View marketplace">
-              <i class="bi bi-eye"></i>
-            </button>
-          </div>
-        </div>
-        <div class="card-body">
-          <div class="small text-muted">Add-ons and integrations.</div>
-        </div>
-      </div>
-    </div>
-    </div>
-  </div>
-</ng-template>
+    </section>
+  }
+</section>

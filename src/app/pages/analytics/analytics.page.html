@@ -1,0 +1,19 @@
+@if (!isLoading) {
+  <app-summary-metrics [metrics]="summaryMetrics"></app-summary-metrics>
+
+  <app-filter-view-container
+    [timeSheetEntries]="timeSheetEntries"
+    [filteredEntries]="filteredEntries"
+    [selectedProject]="getSelectedProject() || null"
+    [canApprove]="canApprove"
+    [pendingCount]="summaryMetrics.pendingCount"
+    (filtersChange)="onFiltersChange($event)"
+    (approveAllRequested)="approveAllPending()"
+  ></app-filter-view-container>
+} @else {
+  <div class="text-center py-4">
+    <div class="spinner-border spinner-border-lg" role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+}

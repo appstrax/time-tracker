@@ -1,0 +1,117 @@
+<section class="projects-page container py-4">
+  <header class="page-header">
+    <div>
+      <p class="eyebrow">Admin</p>
+      <h1>Projects</h1>
+      <p class="subtitle">
+        Manage every project in the workspace and jump directly into the existing
+        create or edit flow.
+      </p>
+    </div>
+
+    @if (!isLoading()) {
+      <a
+        class="btn btn-primary"
+        routerLink="/projects/project"
+      >
+        <i class="bi bi-plus-lg"></i>
+        <span>Create project</span>
+      </a>
+    }
+  </header>
+
+  @if (isLoading() && !hasLoaded()) {
+    <section class="loading-card">
+      <div class="text-center py-4">
+        <div class="spinner-border spinner-border-lg" role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+      <p class="loading-copy">Loading all projects...</p>
+    </section>
+  } @else if (!projects().length) {
+    <section class="state-card">
+      <h2>No projects found</h2>
+      <p>There are no projects yet. Create the first one to get started.</p>
+      <div>
+        <a
+          class="btn btn-primary"
+          routerLink="/projects/project"
+          [queryParams]="{ from: 'projects' }"
+        >
+          Create project
+        </a>
+      </div>
+    </section>
+  } @else {
+    <section class="table-shell">
+      <div class="table-toolbar">
+        <div>
+          <h2>All projects</h2>
+          <p>{{ projects().length }} total project{{ projects().length === 1 ? '' : 's' }}</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th scope="col">Project</th>
+              <th scope="col">Description</th>
+              <th scope="col">Members</th>
+              <th scope="col">Updated</th>
+              <th scope="col" class="text-end">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (project of projects(); track project.id) {
+              <tr>
+                <td>
+                  <div class="project-cell">
+                    @if (project.logoUrl) {
+                      <img
+                        class="project-logo"
+                        [src]="project.logoUrl"
+                        [alt]="project.name + ' logo'"
+                      />
+                    } @else {
+                      <div class="project-logo project-logo-fallback" aria-hidden="true">
+                        <i class="bi bi-kanban"></i>
+                      </div>
+                    }
+
+                    <div>
+                      <div class="project-name">
+                        {{ project.name || 'Untitled project' }}
+                      </div>
+                      <div class="project-id">{{ project.id }}</div>
+                    </div>
+                  </div>
+                </td>
+                <td class="description-cell">
+                  {{ project.description || 'No description provided.' }}
+                </td>
+                <td>
+                  <span class="metric-pill">
+                    {{ project.users.length }}
+                    {{ project.users.length === 1 ? 'member' : 'members' }}
+                  </span>
+                </td>
+                <td>{{ formatUpdatedAt(project) }}</td>
+                <td class="text-end">
+                  <a
+                    class="btn btn-sm btn-outline-primary"
+                    [routerLink]="['/projects/project']"
+                    [queryParams]="{ editId: project.id, from: 'projects' }"
+                  >
+                    Edit
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  }
+</section>

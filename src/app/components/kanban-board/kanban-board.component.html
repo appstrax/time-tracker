@@ -6,68 +6,69 @@
   </div>
 
   <div class="kanban-columns" (dragover)="onColumnDragOver($event)">
-    <div
-      class="kanban-column"
-      *ngFor="let col of columns; let colIndex = index"
-      draggable="true"
-      (dragstart)="onColumnDragStart($event, colIndex)"
-      (drop)="onColumnDrop($event, colIndex)"
-    >
-      <div class="column-header">
-        <ng-container *ngIf="editingColumnId !== col.id; else editColTmpl">
-          <h6 class="title" (dblclick)="editingColumnId = col.id">{{ col.title }}</h6>
-          <div class="actions">
-            <button class="btn btn-sm btn-outline-primary" (click)="editingColumnId = col.id" title="Rename">
-              <i class="bi bi-pencil"></i>
-            </button>
-            <button class="btn btn-sm btn-outline-primary" (click)="deleteColumn(col)" title="Delete column">
-              <i class="bi bi-trash"></i>
-            </button>
-            <button class="btn btn-sm btn-primary" (click)="addCard(col)" title="Add card">
-              <i class="bi bi-plus"></i>
-            </button>
-          </div>
-        </ng-container>
-        <ng-template #editColTmpl>
-          <form (submit)="renameColumn(col, titleInput.value)" class="edit-form">
-            <input #titleInput class="form-control form-control-sm" [value]="col.title" />
-          </form>
-        </ng-template>
-      </div>
-
-      <div class="cards" (dragover)="onCardDragOver($event)" (drop)="onCardDrop($event, col.id)">
-        <div
-          class="card-item"
-          *ngFor="let card of col.cards; let cardIndex = index"
-          draggable="true"
-          (dragstart)="onCardDragStart($event, col.id, card.id)"
-          (drop)="onCardDrop($event, col.id, cardIndex)"
+    @for (col of columns; track col; let colIndex = $index) {
+      <div
+        class="kanban-column"
+        draggable="true"
+        (dragstart)="onColumnDragStart($event, colIndex)"
+        (drop)="onColumnDrop($event, colIndex)"
         >
-          <ng-container *ngIf="editingCardId !== card.id; else editCardTmpl">
-            <div class="card-title" (dblclick)="editingCardId = card.id">{{ card.title }}</div>
-            <div *ngIf="card.description" class="card-description">{{ card.description }}</div>
-            <div class="card-actions">
-              <button class="btn btn-sm btn-light" (click)="editingCardId = card.id" title="Edit">
+        <div class="column-header">
+          @if (editingColumnId !== col.id) {
+            <h6 class="title" (dblclick)="editingColumnId = col.id">{{ col.title }}</h6>
+            <div class="actions">
+              <button class="btn btn-sm btn-outline-primary" (click)="editingColumnId = col.id" title="Rename">
                 <i class="bi bi-pencil"></i>
               </button>
-              <button class="btn btn-sm btn-light" (click)="deleteCard(col, card.id)" title="Delete">
+              <button class="btn btn-sm btn-outline-primary" (click)="deleteColumn(col)" title="Delete column">
                 <i class="bi bi-trash"></i>
               </button>
+              <button class="btn btn-sm btn-primary" (click)="addCard(col)" title="Add card">
+                <i class="bi bi-plus"></i>
+              </button>
             </div>
-          </ng-container>
-          <ng-template #editCardTmpl>
-            <form (submit)="editCard(card, title.value, desc.value)" class="edit-form">
-              <input #title class="form-control form-control-sm" [value]="card.title" placeholder="Title" />
-              <textarea #desc class="form-control form-control-sm" [value]="card.description" placeholder="Description"></textarea>
-              <div class="mt-1 d-flex gap-1">
-                <button type="submit" class="btn btn-sm btn-primary">Save</button>
-                <button type="button" class="btn btn-sm btn-light" (click)="editingCardId = null">Cancel</button>
-              </div>
+          } @else {
+            <form (submit)="renameColumn(col, titleInput.value)" class="edit-form">
+              <input #titleInput class="form-control form-control-sm" [value]="col.title" />
             </form>
-          </ng-template>
+          }
+        </div>
+        <div class="cards" (dragover)="onCardDragOver($event)" (drop)="onCardDrop($event, col.id)">
+          @for (card of col.cards; track card; let cardIndex = $index) {
+            <div
+              class="card-item"
+              draggable="true"
+              (dragstart)="onCardDragStart($event, col.id, card.id)"
+              (drop)="onCardDrop($event, col.id, cardIndex)"
+              >
+              @if (editingCardId !== card.id) {
+                <div class="card-title" (dblclick)="editingCardId = card.id">{{ card.title }}</div>
+                @if (card.description) {
+                  <div class="card-description">{{ card.description }}</div>
+                }
+                <div class="card-actions">
+                  <button class="btn btn-sm btn-light" (click)="editingCardId = card.id" title="Edit">
+                    <i class="bi bi-pencil"></i>
+                  </button>
+                  <button class="btn btn-sm btn-light" (click)="deleteCard(col, card.id)" title="Delete">
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              } @else {
+                <form (submit)="editCard(card, title.value, desc.value)" class="edit-form">
+                  <input #title class="form-control form-control-sm" [value]="card.title" placeholder="Title" />
+                  <textarea #desc class="form-control form-control-sm" [value]="card.description" placeholder="Description"></textarea>
+                  <div class="mt-1 d-flex gap-1">
+                    <button type="submit" class="btn btn-sm btn-primary">Save</button>
+                    <button type="button" class="btn btn-sm btn-light" (click)="editingCardId = null">Cancel</button>
+                  </div>
+                </form>
+              }
+            </div>
+          }
         </div>
       </div>
-    </div>
+    }
 
     <div class="kanban-column placeholder" (dragover)="onColumnDragOver($event)" (drop)="onColumnDrop($event, columns.length)">
       <div class="placeholder-inner">Drop column here</div>

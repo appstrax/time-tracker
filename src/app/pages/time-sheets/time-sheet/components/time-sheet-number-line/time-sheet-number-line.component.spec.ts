@@ -1,3 +1,4 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TimeSheetNumberLineComponent } from './time-sheet-number-line.component';
@@ -8,7 +9,8 @@ describe('TimeSheetNumberLineComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimeSheetNumberLineComponent]
+      imports: [TimeSheetNumberLineComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

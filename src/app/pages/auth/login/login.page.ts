@@ -1,10 +1,9 @@
 import { Router } from '@angular/router';
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { CommonModule } from '@angular/common';
-import { AuthErrors } from '@appstrax/services/auth';
 import { AuthStatus, appstraxAuth } from '@appstrax/services/auth';
 
+import { AuthErrorUtil } from '@utils';
 import { Store } from '@state';
 
 @Component({
@@ -12,30 +11,35 @@ import { Store } from '@state';
   templateUrl: './login.page.html',
   styleUrls: ['./login.page.scss'],
   standalone: true,
-  imports: [CommonModule, FormsModule],
+  imports: [FormsModule],
+  providers: [AuthErrorUtil],
 })
 export class LoginPage {
-  email: string = '';
-  password: string = '';
-  errorMessage: string = '';
+  email = signal('');
+  password = signal('');
+  
+  loading = signal(false);
+  error = signal('');
 
-  loading: boolean = false;
-
-  constructor(private router: Router, private store: Store) {}
+  constructor(
+    private router: Router,
+    private authError: AuthErrorUtil,
+    private store: Store,
+  ) {}
 
   async onSubmit(): Promise<void> {
     if (!this.isFormValid()) {
-      this.errorMessage = 'Please enter both email and password';
+      this.error.set('Please enter an email and a password');
       return;
     }
 
-    this.loading = true;
-    this.errorMessage = '';
+    this.loading.set(true);
+    this.error.set('');
 
     try {
       const response = await appstraxAuth.login({
-        email: this.email,
-        password: this.password,
+        email: this.email(),
+        password: this.password(),
       });
 
       if (response.status != AuthStatus.authenticated) {
@@ -44,60 +48,24 @@ export class LoginPage {
 
       // fetch user data
       await this.store.init();
+      const user = this.store.user.user();
+      const hasCompleteProfile = Boolean(
+        user?.name?.trim() && user?.surname?.trim(),
+      );
 
-      const projects = this.store.projects.all();
-      const organizations = this.store.organizations.all();
-
-      if (organizations.length && projects.length) {
+      if (hasCompleteProfile) {
         this.router.navigate(['/home']);
-      } else if (!organizations.length) {
-        this.router.navigate(['/create-organization']);
-      } else if (!projects.length) {
-        this.router.navigate(['/create-project']);
+      } else {
+        this.router.navigate(['/profile']);
       }
     } catch (error: any) {
-      this.errorMessage = this.getErrorMessage(error);
+      this.error.set(this.authError.getMessage(error));
     } finally {
-      this.loading = false;
+      this.loading.set(false);
     }
   }
 
   public isFormValid() {
-    return this.email != '' && this.password != '';
-  }
-
-  public getErrorMessage(err: any) {
-    const message = this.getMessageFromError(err);
-    switch (message) {
-      case AuthErrors.emailAddressAlreadyExists:
-        return 'Email Address Already Exists';
-      case AuthErrors.badlyFormattedEmailAddress:
-        return 'Email Address Badly Formatted';
-      case AuthErrors.noPasswordSupplied:
-        return 'No Password Supplied';
-      case AuthErrors.invalidEmailOrPassword:
-        return 'Invalid Email Or Password';
-      case AuthErrors.userBlocked:
-        return 'User blocked, please reset your password';
-      case AuthErrors.invalidTwoFactorAuthCode:
-        return 'Invalid Two Factor Authentication Code';
-      case AuthErrors.emailAddressDoesNotExist:
-        return 'Email Address Does Not Exist';
-      case AuthErrors.invalidResetCode:
-        return 'Invalid Reset Code';
-      case AuthErrors.unexpectedError:
-        return 'Unexpected error';
-      default:
-        return message;
-    }
-  }
-
-  private getMessageFromError(err: any) {
-    if (typeof err === 'string') return err;
-    if (err.error && typeof err.error === 'string') return err.error;
-    if (err.error?.message) return err.error.message;
-    if (err.error?.error?.message) return err.error.error.message;
-    if (err.message) return err.message;
-    return 'Something went wrong, please try again later';
+    return this.email() != '' && this.password() != '';
   }
 }

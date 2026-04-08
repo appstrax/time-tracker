@@ -1,3 +1,4 @@
+import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TimeSheetDateSelectorComponent } from './time-sheet-date-selector.component';
@@ -8,7 +9,8 @@ describe('TimeSheetDateSelectorComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TimeSheetDateSelectorComponent]
+      imports: [TimeSheetDateSelectorComponent],
+      providers: [provideZonelessChangeDetection()]
     })
     .compileComponents();
 

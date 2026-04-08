@@ -1,15 +1,21 @@
 import { Tooltip } from 'bootstrap';
-import { DatePipe, NgClass } from '@angular/common';
-import { OnInit, Output, OnChanges } from '@angular/core';
-import { SimpleChanges, AfterViewInit } from '@angular/core';
-import { Component, EventEmitter, Input } from '@angular/core';
-import { ViewChild, ElementRef, OnDestroy } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import {
+  Component,
+  ElementRef,
+  computed,
+  effect,
+  input,
+  output,
+  viewChild,
+} from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Project, TimeSheetEntry } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
-import { ModalService } from 'src/app/services/modal.service';
+import { TimeSheetEntryComponent } from '../../../modals/time-sheet-entry/time-sheet-entry.modal';
 
 @Component({
   selector: 'app-time-sheet-day',
@@ -18,74 +24,55 @@ import { ModalService } from 'src/app/services/modal.service';
   styleUrl: './time-sheet-day.component.scss',
   imports: [TimeSheetNumberLineComponent, DatePipe],
 })
-export class TimeSheetDayComponent
-  implements OnInit, OnChanges, AfterViewInit, OnDestroy {
-  @Input() date: Date = new Date();
-  @Input() projects: Project[] = [];
-  @Input() categories: string[] = [];
-  @Input() entries: TimeSheetEntry[] = [];
-  @Input() categoryColors: Map<string, string> = new Map<string, string>();
+export class TimeSheetDayComponent {
+  public readonly date = input(new Date());
+  public readonly projects = input<Project[]>([]);
+  public readonly categories = input<string[]>([]);
+  public readonly entries = input<TimeSheetEntry[]>([]);
+  public readonly categoryColors = input<Map<string, string>>(
+    new Map<string, string>(),
+  );
 
-  @Output() onSave: EventEmitter<TimeSheetEntry | undefined> =
-    new EventEmitter<TimeSheetEntry | undefined>();
-
-  private addEntryTooltip?: Tooltip;
-  private lockIconTooltip?: Tooltip;
-  public isAddEntryButtonVisible: boolean = false;
-  public isApproved: boolean = false;
+  public readonly onSave = output<TimeSheetEntry | undefined>();
+  public readonly isAddEntryButtonVisible = computed(() =>
+    this.isWithinEditableRange(this.date()),
+  );
+  public readonly isApproved = computed(() =>
+    this.entries().some((entry) => entry.approved),
+  );
 
   private readonly MAX_WEEKS_BACK_FOR_ADD_ENTRY: number = 3;
 
-  @ViewChild('addEntryBtn', { static: false })
-  public addEntryBtn?: ElementRef<HTMLButtonElement>;
-  @ViewChild('lockIcon', { static: false })
-  public lockIcon?: ElementRef<HTMLButtonElement>;
+  private readonly addEntryBtn = viewChild<ElementRef<HTMLButtonElement>>(
+    'addEntryBtn',
+  );
+  private readonly lockIcon = viewChild<ElementRef<HTMLElement>>('lockIcon');
 
   constructor(
-    private modalService: ModalService,
+    private modalService: NgbModal,
     private toastService: ToastService,
-    private timeSheetEntryService: TimeSheetEntryService
-  ) { }
+    private timeSheetEntryService: TimeSheetEntryService,
+  ) {
+    effect((onCleanup) => {
+      const addEntryButton = this.addEntryBtn();
+      if (!addEntryButton) return;
 
-  public async ngOnInit(): Promise<void> {
-    this.checkIfWithinLastNumberOfWeeks();
+      const tooltip = new Tooltip(addEntryButton.nativeElement);
+      onCleanup(() => tooltip.dispose());
+    });
+
+    effect((onCleanup) => {
+      if (!this.isApproved()) return;
+
+      const lockIcon = this.lockIcon();
+      if (!lockIcon) return;
+
+      const tooltip = new Tooltip(lockIcon.nativeElement);
+      onCleanup(() => tooltip.dispose());
+    });
   }
 
-  public ngOnDestroy(): void {
-    this.addEntryTooltip?.dispose();
-    this.lockIconTooltip?.dispose();
-  }
-
-  public ngAfterViewInit(): void {
-    if (this.addEntryBtn) {
-      this.addEntryTooltip = new Tooltip(this.addEntryBtn.nativeElement);
-    }
-    this.isApproved = this.entries.some(entry => entry.approved);
-    this.initializeLockIconTooltip();
-  }
-
-  public ngOnChanges(changes: SimpleChanges): void {
-    if (changes['date']) {
-      this.checkIfWithinLastNumberOfWeeks();
-    }
-    const wasApproved = this.isApproved;
-    this.isApproved = this.entries.some(entry => entry.approved);
-
-    if (!wasApproved && this.isApproved) {
-      setTimeout(() => {
-        this.initializeLockIconTooltip();
-      }, 0);
-    }
-  }
-
-  private initializeLockIconTooltip(): void {
-    if (this.lockIcon && this.isApproved) {
-      this.lockIconTooltip?.dispose();
-      this.lockIconTooltip = new Tooltip(this.lockIcon.nativeElement);
-    }
-  }
-
-  private checkIfWithinLastNumberOfWeeks(): void {
+  private isWithinEditableRange(date: Date): boolean {
     const today = new Date();
     const dayOfWeek = today.getUTCDay();
     const diff = !dayOfWeek ? -6 : 1 - dayOfWeek;
@@ -97,18 +84,19 @@ export class TimeSheetDayComponent
     const threeWeeksAgoStart = new Date(currentWeekStart);
     threeWeeksAgoStart.setUTCDate(
       currentWeekStart.getUTCDate() -
-      (this.MAX_WEEKS_BACK_FOR_ADD_ENTRY - 1) * 7
+        (this.MAX_WEEKS_BACK_FOR_ADD_ENTRY - 1) * 7,
     );
 
     const currentWeekEnd = new Date(currentWeekStart);
     currentWeekEnd.setUTCDate(currentWeekStart.getUTCDate() + 6);
     currentWeekEnd.setUTCHours(23, 59, 59, 999);
 
-    this.isAddEntryButtonVisible =
-      this.date >= threeWeeksAgoStart && this.date <= currentWeekEnd;
+    return date >= threeWeeksAgoStart && date <= currentWeekEnd;
   }
 
-  private async saveTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
+  private async saveTimeSheetEntry(
+    timeSheetEntry: TimeSheetEntry,
+  ): Promise<void> {
     try {
       timeSheetEntry = await this.timeSheetEntryService.save(timeSheetEntry);
       this.onSave.emit(timeSheetEntry);
@@ -117,7 +105,9 @@ export class TimeSheetDayComponent
     }
   }
 
-  private async deleteTimeSheetEntry(timeSheetEntry: TimeSheetEntry): Promise<void> {
+  private async deleteTimeSheetEntry(
+    timeSheetEntry: TimeSheetEntry,
+  ): Promise<void> {
     try {
       await this.timeSheetEntryService.delete(timeSheetEntry.id);
       this.onSave.emit(undefined);
@@ -126,21 +116,39 @@ export class TimeSheetDayComponent
     }
   }
 
-  public openTimeSheetEntryModal(timeSheetEntry?: TimeSheetEntry): void {
+  public openTimeSheetEntryModal(timeSheetEntryOrHours?: TimeSheetEntry | number): void {
+    const timeSheetEntry =
+      typeof timeSheetEntryOrHours === 'number'
+        ? this.createSeededTimeSheetEntry(timeSheetEntryOrHours)
+        : timeSheetEntryOrHours?.clone() || new TimeSheetEntry();
+
     const options = {
-      timeSheetEntry: timeSheetEntry?.clone() || new TimeSheetEntry(),
-      date: this.date,
-      categories: this.categories,
+      timeSheetEntry,
+      date: this.date(),
+      categories: this.categories(),
     };
 
-    this.modalService
-      .showTimeSheetEntryModal(options)
-      .result.then((result: any) => {
+    const modalRef = this.modalService.open(TimeSheetEntryComponent, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: true,
+    });
+    Object.assign(modalRef.componentInstance, options);
+    modalRef.result.then(
+      (result: any) => {
         if (result.action === 'save') {
           this.saveTimeSheetEntry(result.timeSheetEntry);
         } else if (result.action === 'delete') {
           this.deleteTimeSheetEntry(result.timeSheetEntry);
         }
-      }, (reason: any) => { },);
+      },
+      (reason: any) => {},
+    );
+  }
+
+  private createSeededTimeSheetEntry(hours: number): TimeSheetEntry {
+    const timeSheetEntry = new TimeSheetEntry();
+    timeSheetEntry.hours = hours;
+    return timeSheetEntry;
   }
 }

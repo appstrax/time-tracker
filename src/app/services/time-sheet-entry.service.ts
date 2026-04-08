@@ -1,5 +1,9 @@
 import { Injectable } from '@angular/core';
-import { CrudService, Operator, OrderDirection } from '@appstrax/services/database';
+import {
+  CrudService,
+  Operator,
+  OrderDirection,
+} from '@appstrax/services/database';
 
 import { TimeSheetEntry } from '../models/time-sheet-entry.model';
 
@@ -9,22 +13,33 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     super('time-sheet-entries', TimeSheetEntry);
   }
 
-  public async getTimeSheetEntriesByUserId(userId: string): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({ where: { userId }, order: { 'createdAt': OrderDirection.ASC} });
+  public async getTimeSheetEntriesByUserId(
+    userId: string,
+  ): Promise<TimeSheetEntry[]> {
+    const timeSheetEntries = await this.find({
+      where: { userId },
+      order: { createdAt: OrderDirection.ASC },
+    });
     return timeSheetEntries.data;
   }
 
-  public async getTimeSheetEntriesByProjectId(projectIds: string[]): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({ where: {  projectId: { [Operator.IN]: projectIds } }, order: { 'createdAt': OrderDirection.ASC} });
+  public async getTimeSheetEntriesByProjectId(
+    projectIds: string[],
+  ): Promise<TimeSheetEntry[]> {
+    const timeSheetEntries = await this.find({
+      where: { projectId: { [Operator.IN]: projectIds } },
+      order: { createdAt: OrderDirection.ASC },
+    });
     return timeSheetEntries.data;
   }
 
   public async getByFilter(filters: any): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({ where: filters, order: { 'createdAt': OrderDirection.ASC} });
+    const timeSheetEntries = await this.find({
+      where: filters,
+      order: { createdAt: OrderDirection.ASC },
+    });
     return timeSheetEntries.data;
   }
-
-
 
   public async getTimeSheetEntriesByUserIdAndDateRange(
     userId: string,
@@ -34,9 +49,9 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     const timeSheetEntries = await this.find({
       where: {
         [Operator.AND]: [
-          { 'userId': userId },
-          { 'date': {[Operator.GTE]: startDate} },
-          { 'date': {[Operator.LTE]: endDate} },
+          { userId: userId },
+          { date: { [Operator.GTE]: startDate } },
+          { date: { [Operator.LTE]: endDate } },
         ],
       },
     });
@@ -57,12 +72,12 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     const timeSheetEntries = await this.find({
       where: {
         [Operator.AND]: [
-          { 'userId': userId },
-          { 'date': { [Operator.GTE]: startOfDay } },
-          { 'date': { [Operator.LTE]: endOfDay } },
+          { userId: userId },
+          { date: { [Operator.GTE]: startOfDay } },
+          { date: { [Operator.LTE]: endOfDay } },
         ],
       },
-      order: { 'createdAt': OrderDirection.ASC }
+      order: { createdAt: OrderDirection.ASC },
     });
     return timeSheetEntries.data;
   }

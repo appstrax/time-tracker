@@ -10,8 +10,9 @@
   width: 100%;
   max-width: 1000px;
   background-color: var(--color-surface);
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  border: 1px solid color-mix(in srgb, var(--color-border) 88%, transparent);
+  border-radius: 24px;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.12);
   overflow: hidden;
 }
 
@@ -26,7 +27,52 @@
   display: flex;
   flex-direction: column;
   justify-content: center;
-  background-color: color-mix(in srgb, var(--color-surface) 92%, var(--color-bg));
+  background:
+    radial-gradient(
+      circle at top left,
+      color-mix(in srgb, var(--primary-color) 14%, transparent),
+      transparent 42%
+    ),
+    linear-gradient(
+      160deg,
+      color-mix(in srgb, var(--color-surface) 96%, var(--color-bg)),
+      color-mix(in srgb, var(--primary-color) 6%, var(--color-surface))
+    );
+}
+
+.brand-lockup {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.brand-mark {
+  width: fit-content;
+  padding: 1rem;
+  border-radius: 24px;
+  background: color-mix(in srgb, var(--color-surface) 82%, transparent);
+  border: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  box-shadow: 0 16px 40px rgba(86, 0, 120, 0.12);
+  backdrop-filter: blur(12px);
+}
+
+.brand-logo {
+  display: block;
+  width: 96px;
+  height: 96px;
+}
+
+.brand-copy {
+  max-width: 280px;
+}
+
+.brand-eyebrow {
+  margin-bottom: 0.75rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--primary-color);
 }
 
 .right-panel {
@@ -37,14 +83,16 @@
 }
 
 .main-title {
-  font-size: 2rem;
+  font-size: 2.4rem;
   font-weight: 700;
   color: var(--text-primary);
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.75rem;
 }
 
 .subtitle {
+  margin-bottom: 0;
   font-size: 1rem;
+  line-height: 1.7;
   color: var(--text-muted);
 }
 
@@ -58,33 +106,6 @@
   font-size: 1.1rem;
   color: var(--text-muted);
   margin-bottom: 2rem;
-}
-
-.form-group {
-  margin-bottom: 1.5rem;
-}
-
-.input-with-icon {
-  position: relative;
-}
-
-.input-with-icon i {
-  position: absolute;
-  left: 15px;
-  top: 50%;
-  transform: translateY(-50%);
-  color: var(--text-muted);
-}
-
-.form-control {
-  height: 52px;
-  padding-left: 45px;
-  border-radius: 6px;
-  background-color: var(--color-surface);
-  color: var(--text-primary);
-  border: 1px solid var(--color-border);
-  
-  &::placeholder { color: var(--text-muted) !important; opacity: 1 !important; }
 }
 
 .form-options {
@@ -139,5 +160,12 @@
   .left-panel {
     text-align: center;
     min-height: 180px;
+    align-items: center;
   }
-} 
+
+  .brand-lockup,
+  .brand-copy {
+    align-items: center;
+    max-width: none;
+  }
+}

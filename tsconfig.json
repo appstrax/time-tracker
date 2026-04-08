@@ -25,8 +25,8 @@
       "@services": ["src/app/services/index.ts"],
       "@state": ["src/app/state/index.ts"],
       "@state/*": ["src/app/state/*"],
+      "@utils": ["src/app/utils/index.ts"],
       // "@enums": ["src/app/enums/index.ts"],
-      // "@utils": ["src/app/utils/index.ts"],
       // "@directives": ["src/app/directives/index.ts"],
       // "@types": ["src/app/types/index.ts"]
     }

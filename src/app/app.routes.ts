@@ -1,19 +1,23 @@
 import { Routes } from '@angular/router';
 
 import { AuthGuard } from './utils/auth.guard';
+import { AdminGuard } from './utils/admin.guard';
 
-import { TimeSheetPage } from '@pages';
-import { CreateProjectPage, VerifyEmailPage } from '@pages';
-import { LoginPage, NotificationsPage, SignupPage } from '@pages';
-import { HomePage, DocsPage, ReposPage, UsersPage } from '@pages';
-import { ForgotPasswordPage, CreateOrganizationPage } from '@pages';
-import { AuditPage, StatsPage, DefinePage, DevopsPage } from '@pages';
-import { TicketsPage, BillingPage, QualityPage, CodePage } from '@pages';
-import { SettingsPage, DesignPage, DbDesignPage, QuotationsPage, KpisPage } from '@pages';
-import { BasePage, ProjectPage, ProfilePage, MarketplacePage, WorkspacePage } from '@pages';
-import { TestingPage, CompliancePage, GuardrailsPage, ContactPage } from '@pages';
-import { OverviewComponent } from '@pages';
-import { LandingPage } from '@pages';
+import { PageLayoutComponent } from '@components';
+
+import {
+  LoginPage,
+  ForgotPasswordPage,
+  ProjectPage,
+  ProjectsPage,
+  TimeSheetPage,
+  HomePage,
+  UsersPage,
+  SettingsPage,
+  ProfilePage,
+  AnalyticsPage,
+  LandingPage,
+} from '@pages';
 
 export const routes: Routes = [
   // PUBLIC LANDING
@@ -21,14 +25,11 @@ export const routes: Routes = [
 
   // AUTH
   { path: 'login', component: LoginPage },
-  { path: 'sign-up', component: SignupPage },
-  { path: 'verify-email', component: VerifyEmailPage },
-  { path: 'create-project', component: CreateProjectPage },
   { path: 'forgot-password', component: ForgotPasswordPage },
-  { path: 'create-organization', component: CreateOrganizationPage },
+
   {
     path: '',
-    component: BasePage,
+    component: PageLayoutComponent,
     canActivate: [AuthGuard],
     children: [
       {
@@ -37,101 +38,20 @@ export const routes: Routes = [
         component: HomePage,
       },
       {
-        path: 'workspace',
-        data: { breadcrumb: 'Workspace' },
-        component: WorkspacePage,
-      },
-      { path: 'audit', data: { breadcrumb: 'Audit' }, component: AuditPage },
-      {
-        path: 'billing',
-        data: { breadcrumb: 'Project Billing' },
-        component: BillingPage,
-      },
-      {
-        path: 'quotations',
-        data: { breadcrumb: 'Quotations' },
-        component: QuotationsPage,
-      },
-      {
-        path: 'testing',
-        data: { breadcrumb: 'Automated Testing' },
-        component: TestingPage,
-      },
-      {
-        path: 'code',
-        data: { breadcrumb: 'Code' },
-        component: CodePage,
-      },
-      {
-        path: 'compliance',
-        data: { breadcrumb: 'Compliance' },
-        component: CompliancePage,
-      },
-      {
-        path: 'define',
-        data: { breadcrumb: 'Project Definition' },
-        component: DefinePage,
-      },
-      {
-        path: 'design',
-        data: { breadcrumb: 'Project Design' },
-        component: DesignPage,
-      },
-      {
-        path: 'db-design',
-        data: { breadcrumb: 'DB Design' },
-        component: DbDesignPage,
-      },
-      {
-        path: 'devops',
-        data: { breadcrumb: 'Dev-Ops' },
-        component: DevopsPage,
-      },
-      { path: 'docs', data: { breadcrumb: 'Documents' }, component: DocsPage },
-      {
-        path: 'guardrails',
-        data: { breadcrumb: 'Guard Rails' },
-        component: GuardrailsPage,
-      },
-      {
         path: 'profile',
         component: ProfilePage,
         data: { breadcrumb: 'User Profile' },
       },
       {
-        path: 'project',
+        path: 'projects',
+        data: { breadcrumb: 'Projects' },
+        canActivate: [AdminGuard],
+        component: ProjectsPage,
+      },
+      {
+        path: 'projects/project',
         data: { breadcrumb: 'Project' },
         component: ProjectPage,
-      },
-      {
-        path: 'quality',
-        data: { breadcrumb: 'Quality' },
-        component: QualityPage,
-      },
-      {
-        path: 'repos',
-        data: { breadcrumb: 'Repositories' },
-        component: ReposPage,
-      },
-      {
-        path: 'stats',
-        data: { breadcrumb: 'Project Statistics' },
-        component: StatsPage,
-      },
-      {
-        path: 'kpis',
-        data: { breadcrumb: 'Kpis' },
-        component: KpisPage,
-      },
-      {
-        path: 'marketplace',
-        data: { breadcrumb: 'Project Marketplace' },
-        component: MarketplacePage,
-      },
-      {
-        path: 'tickets',
-        data: { breadcrumb: 'Tickets' },
-        component: TicketsPage,
       },
       {
         path: 'users',
@@ -144,24 +64,14 @@ export const routes: Routes = [
         component: SettingsPage,
       },
       {
-        path: 'contact',
-        data: { breadcrumb: 'Contact' },
-        component: ContactPage,
-      },
-      {
-        path: 'notifications',
-        data: { breadcrumb: 'Notifications' },
-        component: NotificationsPage,
-      },
-      {
         path: 'time-sheet',
         data: { breadcrumb: 'Time Sheets' },
         component: TimeSheetPage,
       },
       {
-        path: 'time-sheets/overview',
-        data: { breadcrumb: 'Time Sheets Overview' },
-        component: OverviewComponent,
+        path: 'analytics',
+        data: { breadcrumb: 'Analytics' },
+        component: AnalyticsPage,
       },
     ],
   },

@@ -1,11 +1,11 @@
 <div class="time-sheet-day-section">
   <div class="d-flex align-items-center">
     <div class="col-md-2 time-sheet-day-date">
-      <div class="time-sheet-day-title">{{ date | date : "EEEE" }}</div>
-      <div class="day-date">{{ date | date : "d MMM yyyy" }}</div>
+      <div class="time-sheet-day-title">{{ date() | date : "EEEE" }}</div>
+      <div class="day-date">{{ date() | date : "d MMM yyyy" }}</div>
     </div>
     <div class="col-md-1">
-      @if (isAddEntryButtonVisible && !isApproved) {
+      @if (isAddEntryButtonVisible() && !isApproved()) {
       <button
         #addEntryBtn
         type="button"
@@ -24,14 +24,16 @@
       <div class="align-items-center">
         <app-time-sheet-number-line
           (onEntryClick)="openTimeSheetEntryModal($event)"
-          [projects]="projects"
-          [entries]="entries"
-          [categoryColors]="categoryColors"
+          (onCreateEntry)="openTimeSheetEntryModal($event)"
+          [projects]="projects()"
+          [entries]="entries()"
+          [categoryColors]="categoryColors()"
+          [disabled]="isApproved()"
         ></app-time-sheet-number-line>
       </div>
     </div>
   </div>
-  @if(isApproved) {
+  @if(isApproved()) {
   <i
     #lockIcon
     class="lock-icon bi bi-lock"

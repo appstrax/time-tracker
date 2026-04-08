@@ -12,12 +12,13 @@
         #datePicker
         type="date"
         class="date-picker-input"
-        [value]="getDatePickerValue()"
+        [value]="datePickerValue()"
         (change)="onDateSelected($event)"
       />
-      <span class="week-range-label">{{ selectedWeekStart.getFullYear() }}</span>
+      <span class="week-range-label">{{ selectedYear() }}</span>
       <span class="week-range">
-        {{ selectedWeekStart | date: "MMM dd" }} - {{ selectedWeekEnd | date: "MMM dd" }}
+        {{ selectedWeekStart() | date: "MMM dd" }} -
+        {{ selectedWeekEnd() | date: "MMM dd" }}
       </span>
     </div>
 
@@ -36,11 +37,6 @@
       >
         <span>Today</span>
       </button>
-    </div>
-    <div class="spinner-div">
-      @if(isLoading){
-      <span class="spinner-border spinner-border-sm" aria-hidden="true"></span>
-      }
     </div>
   </div>
 </div>

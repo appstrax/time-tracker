@@ -32,24 +32,24 @@
           autocomplete="off"
           [disabled]="timeSheetEntry.approved"
           required
-        />
+          />
         @if (isCategoryDropdownOpen && filteredCategories.length && !timeSheetEntry.approved) {
-        <ul
-          class="dropdown-menu dropdown-menu-end w-100 show category-autocomplete"
-          [attr.data-bs-popper]="'static'"
-        >
-          @for (category of filteredCategories; track category) {
-          <li>
-            <button
-              class="dropdown-item"
-              type="button"
-              (click)="selectCategory(category)"
+          <ul
+            class="dropdown-menu dropdown-menu-end w-100 show category-autocomplete"
+            [attr.data-bs-popper]="'static'"
             >
-              {{ category }}
-            </button>
-          </li>
-          }
-        </ul>
+            @for (category of filteredCategories; track category) {
+              <li>
+                <button
+                  class="dropdown-item"
+                  type="button"
+                  (click)="selectCategory(category)"
+                  >
+                  {{ category }}
+                </button>
+              </li>
+            }
+          </ul>
         }
       </div>
     </div>
@@ -68,7 +68,7 @@
             [disabled]="timeSheetEntry.approved"
 
             required
-          />
+            />
 
           <div class="hours-tooltip visible" #hoursTooltip>
             {{ formatHours(timeSheetEntry.hours) }}
@@ -93,22 +93,24 @@
       </div>
     </div>
 
-    <div *ngIf="errorMessage" class="alert alert-danger mb-3">
-      {{ errorMessage }}
-    </div>
+    @if (errorMessage) {
+      <div class="alert alert-danger mb-3">
+        {{ errorMessage }}
+      </div>
+    }
   </ng-container>
 </div>
 
 <div class="modal-footer d-flex justify-content-between">
   <div>
     @if(timeSheetEntry.id && !timeSheetEntry.approved){
-    <button
-      type="button"
-      class="btn btn-outline-danger"
-      (click)="onDeleteTimeSheetEntry()"
-    >
-      Delete
-    </button>
+      <button
+        type="button"
+        class="btn btn-outline-danger"
+        (click)="onDeleteTimeSheetEntry()"
+        >
+        Delete
+      </button>
     }
   </div>
   <div>
@@ -116,17 +118,17 @@
       type="button"
       class="btn btn-outline-secondary"
       (click)="close()"
-    >
+      >
       Close
     </button>
     @if(!timeSheetEntry.approved){
-    <button
-      type="button"
-      class="btn btn-primary ms-3"
-      (click)="onSaveTimeSheetEntry()"
-    >
-      Save
-    </button>
+      <button
+        type="button"
+        class="btn btn-primary ms-3"
+        (click)="onSaveTimeSheetEntry()"
+        >
+        Save
+      </button>
     }
   </div>
 </div>

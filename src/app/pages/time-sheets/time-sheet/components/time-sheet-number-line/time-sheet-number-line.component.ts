@@ -1,5 +1,11 @@
 import { NgStyle } from '@angular/common';
-import { Component, Input, OnInit, SimpleChanges, Output, EventEmitter } from '@angular/core';
+import {
+  Component,
+  computed,
+  input,
+  output,
+  signal,
+} from '@angular/core';
 
 import { TimeSheetEntry, Project } from '@models';
 
@@ -10,38 +16,39 @@ import { TimeSheetEntryItemComponent } from '../time-sheet-entry-item/time-sheet
   standalone: true,
   templateUrl: './time-sheet-number-line.component.html',
   styleUrl: './time-sheet-number-line.component.scss',
-  imports: [NgStyle, TimeSheetEntryItemComponent]
+  imports: [NgStyle, TimeSheetEntryItemComponent],
 })
-export class TimeSheetNumberLineComponent implements OnInit {
-  @Input() projects: Project[] = [];
-  @Input() entries: TimeSheetEntry[] = [];
-  @Input() categoryColors: Map<string, string> = new Map<string, string>();
+export class TimeSheetNumberLineComponent {
+  public readonly projects = input<Project[]>([]);
+  public readonly entries = input<TimeSheetEntry[]>([]);
+  public readonly categoryColors = input<Map<string, string>>(
+    new Map<string, string>(),
+  );
+  public readonly disabled = input(false);
 
-  @Output() onEntryClick: EventEmitter<TimeSheetEntry> = new EventEmitter<TimeSheetEntry>();
+  public readonly onEntryClick = output<TimeSheetEntry>();
+  public readonly onCreateEntry = output<number>();
 
-  public sizeModifier = 20;
-  public numberLineWidths: Map<TimeSheetEntry, number> = new Map<TimeSheetEntry, number>();
-
-  public ngOnInit(): void {
-    this.calculateSize();
-  }
-
-  public ngOnChanges(changes: SimpleChanges): void {
-    if (changes['entries']) {
-      this.calculateSize();
+  public readonly sizeModifier = signal(20);
+  public readonly hoveredQuarterHours = signal<number | null>(null);
+  public readonly numberLineWidths = computed(() => {
+    const widths = new Map<TimeSheetEntry, number>();
+    const sizeModifier = this.sizeModifier();
+    for (const entry of this.entries()) {
+      const size = entry.hours * 4 * sizeModifier;
+      widths.set(entry, size);
     }
-  }
-
-  private calculateSize(): void {
-    this.numberLineWidths = new Map<TimeSheetEntry, number>();
-    for (const entry of this.entries) {
-      let size = (entry.hours * 4) * this.sizeModifier;
-      this.numberLineWidths.set(entry, size);
-    }
-  }
+    return widths;
+  });
+  public readonly numberLineArray = computed(() =>
+    Array.from({ length: this.getTotalWorkHours() * 4 + 1 }, (_, index) => index),
+  );
+  public readonly hoverPreviewWidth = computed(
+    () => (this.hoveredQuarterHours() || 0) * this.sizeModifier(),
+  );
 
   public getCategoryColor(entry: TimeSheetEntry): string {
-    return this.categoryColors.get(entry.category ?? '') || '#6B7280';
+    return this.categoryColors().get(entry.category ?? '') || '#6B7280';
   }
 
   public getNumberLineValue(i: number): string {
@@ -55,16 +62,26 @@ export class TimeSheetNumberLineComponent implements OnInit {
     return '8px';
   }
 
-  public createNumberLineArray(): number[] {
-    let numberLineArray = [];
-    for (let i = 0; i <= this.getTotalWorkHours() * 4; i++) {
-      numberLineArray.push(i);
-    }
-    return numberLineArray;
+  public onNumberLineHover(i: number): void {
+    if (this.disabled() || i === 0) return;
+    this.hoveredQuarterHours.set(i);
+  }
+
+  public onNumberLineLeave(): void {
+    this.hoveredQuarterHours.set(null);
+  }
+
+  public createEntryAt(i: number): void {
+    if (this.disabled() || i === 0) return;
+    this.hoveredQuarterHours.set(null);
+    this.onCreateEntry.emit(i / 4);
   }
 
   private getTotalWorkHours(): number {
-    let totalWorkHours = this.entries.reduce((sum, entry) => sum + entry.hours, 0);
+    const totalWorkHours = this.entries().reduce(
+      (sum, entry) => sum + entry.hours,
+      0,
+    );
     if (totalWorkHours > 8) return totalWorkHours;
     return 8;
   }
@@ -74,6 +91,6 @@ export class TimeSheetNumberLineComponent implements OnInit {
   }
 
   public getProject(entry: TimeSheetEntry): Project | undefined {
-    return this.projects?.find(project => project.id === entry.projectId);
+    return this.projects().find((project) => project.id === entry.projectId);
   }
 }
