@@ -1,47 +1,50 @@
-<div class="filter-view-summary">
-  <div class="card">
-    <div class="card-header">
-      <h5 class="mb-0">Summary by Project</h5>
-    </div>
-    <div class="card-body">
-      <div class="table-responsive">
-        <table class="table table-sm table-hover">
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th class="text-end">Total Hours</th>
-              <th class="text-end">Approved</th>
-              <th class="text-end">Pending</th>
-              <th class="text-end">Entries</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (project of getEntriesByProject(); track project.projectId) {
-            <tr>
-              <td>
-                <span class="badge bg-secondary">{{
-                  project.projectName
-                }}</span>
-              </td>
-              <td class="text-end fw-semibold text-color">
-                {{ displayUtils.formatHours(project.hours) }}
-              </td>
-              <td class="text-end text-success">
-                {{ displayUtils.formatHours(project.approvedHours) }}
-              </td>
-              <td class="text-end text-warning">
-                {{ displayUtils.formatHours(project.pendingHours) }}
-              </td>
-              <td class="text-end text-color">{{ project.count }}</td>
-            </tr>
-            } @if (!getEntriesByProject().length) {
-            <tr class="text-center text-muted">
-              <td colspan="5">No entries found</td>
-            </tr>
-            }
-          </tbody>
-        </table>
+<section class="filter-view-summary">
+  <div class="table-shell">
+    <div class="table-toolbar">
+      <div>
+        <p class="eyebrow">Summary</p>
+        <h2>Hours by project</h2>
+        <p>Compare total, approved, and pending time across every project in scope.</p>
       </div>
     </div>
+
+    <div class="table-responsive">
+      <table class="table align-middle mb-0">
+        <thead>
+          <tr>
+            <th>Project</th>
+            <th class="text-end">Total Hours</th>
+            <th class="text-end">Approved</th>
+            <th class="text-end">Pending</th>
+            <th class="text-end">Entries</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (project of entriesByProject(); track project.projectId) {
+            <tr>
+              <td>
+                <span class="project-pill">{{ project.projectName }}</span>
+              </td>
+              <td class="text-end value-primary">
+                {{ displayUtils.formatHours(project.hours) }}
+              </td>
+              <td class="text-end value-success">
+                {{ displayUtils.formatHours(project.approvedHours) }}
+              </td>
+              <td class="text-end value-warning">
+                {{ displayUtils.formatHours(project.pendingHours) }}
+              </td>
+              <td class="text-end value-primary">{{ project.count }}</td>
+            </tr>
+          } @if (!entriesByProject().length) {
+            <tr>
+              <td colspan="5" class="empty-state">
+                No entries found for the current filters.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
   </div>
-</div>
+</section>

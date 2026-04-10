@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 @Component({
@@ -9,9 +9,9 @@ import { CommonModule } from '@angular/common';
   styleUrl: './metric-card.component.scss',
 })
 export class MetricCardComponent {
-  @Input() label: string = '';
-  @Input() value: string | number = '';
-  @Input() valueSuffix: string = '';
-  @Input() iconClass: string = 'bi bi-circle';
+  public readonly label = input('');
+  public readonly value = input<string | number>('');
+  public readonly valueSuffix = input('');
+  public readonly iconClass = input('bi bi-circle');
 }
 

@@ -1,29 +1,36 @@
 import {
   Component,
-  Input,
-  Output,
-  EventEmitter,
-  OnInit,
   OnChanges,
-  SimpleChanges,
   OnDestroy,
+  OnInit,
+  SimpleChanges,
+  computed,
   inject,
+  input,
+  output,
+  signal,
 } from '@angular/core';
-
+import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Params } from '@angular/router';
-import { Subject } from 'rxjs';
-import { takeUntil } from 'rxjs/operators';
-import { TimeSheetEntry, Project } from '@models';
+
 import { FilterViewSummaryComponent } from '../filter-view-summary/filter-view-summary.component';
 import { FilterViewDetailsComponent } from '../filter-view-details/filter-view-details.component';
 import { FilterViewTimelineComponent } from '../filter-view-timeline/filter-view-timeline.component';
 import { UnapprovedEntriesComponent } from '../unapproved-entries/unapproved-entries.component';
 import { FilterBlockComponent } from '../filter-block/filter-block.component';
-import { TimeSheetFilterState } from '@models';
+import {
+  TimeSheetEntry,
+  Project,
+  AnalyticsFilter,
+  User,
+  Status,
+  DateRange,
+} from '@models';
 import { TimeSheetFilterUtil, TimeSheetDisplayUtil } from '@utils';
+import { TimeSheetEntryService, ToastService } from '@services';
 
-export type FilterViewType = 'summary' | 'details' | 'timeline' | 'unapproved';
+export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
 
 @Component({
   selector: 'app-filter-view-container',
@@ -43,35 +50,31 @@ export class FilterViewContainerComponent
   implements OnInit, OnChanges, OnDestroy
 {
   private route: ActivatedRoute = inject(ActivatedRoute);
+  private toast: ToastService = inject(ToastService);
   private filterUtils: TimeSheetFilterUtil = inject(TimeSheetFilterUtil);
-  private displayUtils: TimeSheetDisplayUtil = inject(TimeSheetDisplayUtil);
+  private entryService: TimeSheetEntryService = inject(TimeSheetEntryService);
 
-  @Input() timeSheetEntries: TimeSheetEntry[] = [];
-  @Input() filteredEntries: TimeSheetEntry[] = [];
-  @Input() selectedProject: Project | null = null;
-  @Input() canApprove: boolean = false;
-  @Input() pendingCount: number = 0;
+  public readonly projects = input<Project[]>([]);
+  public readonly entries = input<TimeSheetEntry[]>([]);
+  public readonly users = input<User[]>([]);
 
-  @Output() filtersChange = new EventEmitter<TimeSheetFilterState>();
-  @Output() approveAllRequested = new EventEmitter<void>();
+  public readonly entryUpdated = output<TimeSheetEntry>();
 
-  public filters: TimeSheetFilterState = {
-    dateRange: 'month',
-    startDate: null,
-    endDate: null,
+  public readonly filter = signal<AnalyticsFilter>({
     status: 'all',
-    category: '',
-    userId: '',
-  };
+    dateRange: 'month',
+  });
 
-  public currentViewType: FilterViewType = 'summary';
-  public isViewSelectionCollapsed: boolean = false;
+  public readonly filteredEntries = signal<TimeSheetEntry[]>([]);
+  public readonly view = signal<FilterView>('summary');
+  public readonly isViewCollapsed = signal(false);
+  public project = computed(() => this.getProject(this.filter().projectId));
+  public readonly categories = signal<string[]>([]);
 
-  private destroy$ = new Subject<void>();
-  private isInitializingFilters = false;
+  private subscription: Subscription | undefined;
 
-  public viewTypes: {
-    value: FilterViewType;
+  public readonly viewTypes: {
+    value: FilterView;
     label: string;
     icon: string;
     description: string;
@@ -102,91 +105,108 @@ export class FilterViewContainerComponent
     },
   ];
 
-  public categories: string[] = [];
-  public users: { id: string; name: string }[] = [];
-
   ngOnInit(): void {
-    const params = this.route.snapshot.queryParams;
-    this.loadFiltersFromUrl(params);
-
-    let isFirstEmission = true;
-    this.route.queryParams
-      .pipe(takeUntil(this.destroy$))
-      .subscribe((params) => {
-        if (isFirstEmission) {
-          isFirstEmission = false;
-          return;
-        }
-        this.loadFiltersFromUrl(params);
-      });
-
-    this.initialize();
+    this.subscription = this.route.queryParams.subscribe((params) => {
+      const filter = this.filterUtils.parseFilters(params);
+      this.filter.set(filter);
+      this.filterEntries();
+    });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['timeSheetEntries'] || changes['filteredEntries']) {
-      this.initialize();
+    if (changes['entries']) {
+      this.filterEntries();
+      this.populateCategories();
+    }
+
+    if (changes['filter']) {
+      this.filterEntries();
     }
   }
 
   ngOnDestroy(): void {
-    this.destroy$.next();
-    this.destroy$.complete();
+    this.subscription?.unsubscribe();
   }
 
-  public onDateRangeChange(): void {
-    if (this.filters.dateRange === 'custom') {
-      const today = new Date();
-      this.filters.startDate =
-        this.filters.startDate ??
-        new Date(today.getFullYear(), today.getMonth(), today.getDate());
-      this.filters.endDate =
-        this.filters.endDate ?? new Date(this.filters.startDate);
-      this.emitFilterChange();
-      return;
-    }
+  private filterEntries(): void {
+    const entries = this.entries();
+    const filters = this.filter();
 
-    const { startDate, endDate } = this.filterUtils.calculateDateRangeBounds(
-      this.filters.dateRange,
-      this.filters.startDate,
-      this.filters.endDate,
+    const filteredEntries = entries.filter((entry) => {
+      if (filters.start && entry.date < filters.start) return false;
+      if (filters.end && entry.date > filters.end) return false;
+      if (filters.userId && entry.userId !== filters.userId) return false;
+      if (filters.category && entry.category !== filters.category) return false;
+      if (filters.status === 'approved' && !entry.approved) return false;
+      if (filters.status === 'pending' && entry.approved) return false;
+      return true;
+    });
+
+    this.filteredEntries.set(filteredEntries);
+  }
+
+  private getProject(id?: string): Project | null {
+    if (!id) return null;
+    return this.projects().find((project) => project.id === id) ?? null;
+  }
+
+  private populateCategories(): void {
+    const categories = this.entries()
+      .map((entry) => entry.category)
+      .filter((category) => category && category.trim() !== '');
+    this.categories.set([...new Set(categories)].sort());
+  }
+
+  public onViewTypeChange(view: FilterView): void {
+    this.view.set(view);
+  }
+
+  public toggleViewCollapsed(): void {
+    this.isViewCollapsed.update((collapsed) => !collapsed);
+  }
+
+  public onStatusChange(status: Status): void {
+    this.updateFilters({ status });
+  }
+
+  public onCategoryChange(category: string): void {
+    this.updateFilters({ category });
+  }
+
+  public onUserChange(userId: string): void {
+    this.updateFilters({ userId });
+  }
+
+  public onDateRangeChange(dateRange: DateRange): void {
+    const { start, end } = this.filterUtils.calculateDateRangeBounds(
+      dateRange,
+      this.filter().start,
+      this.filter().end,
     );
-    this.filters.startDate = startDate;
-    this.filters.endDate = endDate;
-    this.emitFilterChange();
-  }
-
-  public onViewTypeChange(viewType: FilterViewType): void {
-    this.currentViewType = viewType;
-  }
-
-  public toggleViewSelection(): void {
-    this.isViewSelectionCollapsed = !this.isViewSelectionCollapsed;
-  }
-
-  public getEntriesForView(): TimeSheetEntry[] {
-    return this.filteredEntries;
-  }
-
-  public onEmitFilterChange(): void {
-    this.emitFilterChange();
+    this.updateFilters({ dateRange, start, end });
   }
 
   public onCustomStartDateChange(value: string): void {
-    this.filters.startDate = this.parseDateFromInput(value);
-    this.emitFilterChange();
+    this.updateFilters({ start: this.parseDateFromInput(value) });
   }
 
   public onCustomEndDateChange(value: string): void {
-    this.filters.endDate = this.parseDateFromInput(value);
-    this.emitFilterChange();
+    this.updateFilters({ end: this.parseDateFromInput(value) });
   }
 
-  public onApproveAll(): void {
-    this.approveAllRequested.emit();
+  private parseDateFromInput(value: string): Date | undefined {
+    if (!value) return undefined;
+    const [year, month, day] = value.split('-').map(Number);
+    if (![year, month, day].every((v) => !isNaN(v))) return undefined;
+    return new Date(year, month - 1, day, 0, 0, 0, 0);
   }
 
-  public toDateInput(date: Date | null): string {
+  private updateFilters(partial: Partial<AnalyticsFilter>): void {
+    const filters = { ...this.filter(), ...partial };
+    this.filterUtils.updateQueryParams(this.route, filters);
+  }
+
+  public formatDate(date?: Date): string {
     if (!date) return '';
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -194,76 +214,25 @@ export class FilterViewContainerComponent
     return `${year}-${month}-${day}`;
   }
 
-  private initialize(): void {
-    this.updateAvailableCategories();
-    this.updateAvailableUsers();
-  }
+  public async onApproveAll(): Promise<void> {
+    const pendingEntries = this.filteredEntries().filter(
+      (entry) => !entry.approved,
+    );
+    if (!pendingEntries.length) {
+      this.toast.info('No pending entries to approve');
+      return;
+    }
 
-  private updateAvailableCategories(): void {
-    const categories = this.timeSheetEntries
-      .map((e) => e.category)
-      .filter((c) => c && c.trim() !== '');
-    this.categories = [...new Set(categories)].sort();
-  }
-
-  private updateAvailableUsers(): void {
-    const entriesToUse = this.timeSheetEntries;
-    const userIds = new Set<string>();
-    entriesToUse.forEach((entry) => {
-      if (entry.userId && entry.userId.trim() !== '') {
-        userIds.add(entry.userId);
+    try {
+      for (const entry of pendingEntries) {
+        entry.approved = true;
+        const savedEntry = await this.entryService.save(entry);
+        this.entryUpdated.emit(savedEntry);
       }
-    });
-    this.users = Array.from(userIds)
-      .map((userId) => ({
-        id: userId,
-        name: this.displayUtils.getUserName(userId, {
-          maxLength: 20,
-          addEllipsis: true,
-        }),
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name));
-  }
 
-  private loadFiltersFromUrl(params: Params): void {
-    const previousState = this.isInitializingFilters;
-    this.isInitializingFilters = true;
-    this.filters = this.filterUtils.parseFiltersFromParams(
-      params,
-      this.filters,
-      {
-        preserveOrganizationAndProject: true,
-      },
-    );
-    this.isInitializingFilters = previousState;
-  }
-
-  private syncOrgAndProjectFromUrl(): void {
-    const params = this.route.snapshot.queryParams;
-    this.filters.organizationId = this.normalizeNullableParam(
-      params['organizationId'],
-    );
-    this.filters.projectId = this.normalizeNullableParam(params['projectId']);
-  }
-
-  private normalizeNullableParam(value: any): string | null {
-    if (value === undefined || value === null || value === '') return null;
-    return value;
-  }
-
-  private emitFilterChange(): void {
-    if (this.isInitializingFilters) return;
-    this.syncOrgAndProjectFromUrl();
-    this.filterUtils.syncFiltersToUrl(this.route, this.filters, {
-      preserveExistingOrgProject: true,
-    });
-    this.filtersChange.emit({ ...this.filters });
-  }
-
-  private parseDateFromInput(value: string): Date | null {
-    if (!value) return null;
-    const [year, month, day] = value.split('-').map(Number);
-    if (![year, month, day].every((v) => !isNaN(v))) return null;
-    return new Date(year, month - 1, day, 0, 0, 0, 0);
+      this.toast.success(`Approved ${pendingEntries.length} time entries`);
+    } catch (error) {
+      this.toast.error('Error approving time entries');
+    }
   }
 }

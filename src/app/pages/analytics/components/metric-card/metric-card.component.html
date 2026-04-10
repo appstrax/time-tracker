@@ -1,17 +1,16 @@
-<div class="card h-100 metric-card" style="width: 200px;">
-  <div class="card-body">
-    <div class="d-flex align-items-center justify-content-between">
-      <div>
-        <div class="text-muted small mb-1">{{ label }}</div>
-        <div class="h4 mb-0">
-          {{ value }}
-          @if (valueSuffix) {
-          <span class="value-suffix">{{ valueSuffix }}</span>
-          }
-        </div>
-      </div>
-      <i class="fs-1 opacity-50" [ngClass]="iconClass"></i>
+<article class="metric-card">
+  <div class="metric-copy">
+    <p class="metric-label">{{ label() }}</p>
+    <div class="metric-value">
+      {{ value() }}
+      @if (valueSuffix()) {
+        <span class="value-suffix">{{ valueSuffix() }}</span>
+      }
     </div>
   </div>
-</div>
+
+  <div class="metric-icon" aria-hidden="true">
+    <i [ngClass]="iconClass()"></i>
+  </div>
+</article>
 

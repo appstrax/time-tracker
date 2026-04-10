@@ -1,6 +1,6 @@
 import { FormsModule } from '@angular/forms';
 import { appstraxAuth } from '@appstrax/services/auth';
-import { Component, computed, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, computed, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Store } from '@state';
@@ -22,8 +22,8 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   @Input() onApprove?: () => Promise<void>;
 
   public projects = computed(() => this.store.projects.projects());
-  public currentUserId: string = '';
-  public isApproving: boolean = false;
+  public readonly currentUserId = signal('');
+  public readonly isApproving = signal(false);
 
   constructor(
     public activeModal: NgbActiveModal,
@@ -34,7 +34,7 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   async ngOnInit(): Promise<void> {
     const user = await appstraxAuth.getUser();
     if (user) {
-      this.currentUserId = user.id;
+      this.currentUserId.set(user.id);
     }
   }
 
@@ -44,7 +44,7 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   }
 
   public getUserName(userId: string): string {
-    if (userId === this.currentUserId) {
+    if (userId === this.currentUserId()) {
       return 'You';
     }
     return userId.substring(0, 8);
@@ -63,7 +63,7 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   }
 
   public getTotalHours(): string {
-    let totalHours = this.entries.reduce((sum, entry) => sum + entry.hours, 0);
+    const totalHours = this.entries.reduce((sum, entry) => sum + entry.hours, 0);
     return this.formatHours(totalHours);
   }
 
@@ -86,13 +86,13 @@ export class UnapprovedEntriesModalComponent implements OnInit {
     if (!this.onApprove) return;
 
     try {
-      this.isApproving = true;
+      this.isApproving.set(true);
       await this.onApprove();
       this.activeModal.close({ action: 'approved' });
     } catch (error) {
       console.error('Error approving entries:', error);
     } finally {
-      this.isApproving = false;
+      this.isApproving.set(false);
     }
   }
 

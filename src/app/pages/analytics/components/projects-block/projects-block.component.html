@@ -1,12 +1,12 @@
 <div
   class="project-block"
-  [class.selected]="isSelected"
+  [class.selected]="isSelected()"
   (click)="onBlockClick()"
-  [title]="getDisplayName()"
+  [title]="displayName()"
 >
   <div class="d-flex align-items-center justify-content-between">
-    <span class="project-name">{{ getDisplayName() }}</span>
-    @if (isSelected) {
+    <span class="project-name">{{ displayName() }}</span>
+    @if (isSelected()) {
     <i class="bi bi-check-circle-fill text-success"></i>
     }
   </div>

@@ -1,12 +1,10 @@
-<div class="d-flex flex-wrap gap-2">
-  @for (card of metricCardConfigs; track card.label) {
-  <div>
+<section class="metrics-grid">
+  @for (card of cards(); track card.label) {
     <app-metric-card
       [label]="card.label"
-      [value]="formatCardValue(card)"
+      [value]="card.value"
       [valueSuffix]="card.valueSuffix || ''"
-      [iconClass]="card.iconClass + ' opacity-50'"
+      [iconClass]="card.iconClass"
     ></app-metric-card>
-  </div>
   }
-</div>
+</section>

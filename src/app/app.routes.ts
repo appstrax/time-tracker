@@ -59,6 +59,7 @@ export const routes: Routes = [
       },
       {
         path: 'analytics',
+        canActivate: [AdminGuard],
         component: AnalyticsPage,
       },
     ],

@@ -1,10 +1,10 @@
 import {
   Component,
-  Input,
   OnInit,
-  OnChanges,
-  SimpleChanges,
+  computed,
   inject,
+  input,
+  signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { appstraxAuth } from '@appstrax/services/auth';
@@ -29,13 +29,39 @@ interface UnapprovedEntryGroup {
   templateUrl: './unapproved-entries.component.html',
   styleUrl: './unapproved-entries.component.scss',
 })
-export class UnapprovedEntriesComponent implements OnInit, OnChanges {
-  @Input() timeSheetEntries: TimeSheetEntry[] = [];
-  @Input() canApprove: boolean = false;
+export class UnapprovedEntriesComponent implements OnInit {
+  public readonly timeSheetEntries = input<TimeSheetEntry[]>([]);
+  public readonly canApprove = input(false);
+  public readonly groupedEntries = computed(() => {
+    const groupsMap = new Map<string, UnapprovedEntryGroup>();
 
-  public groupedEntries: UnapprovedEntryGroup[] = [];
-  public currentUserId: string = '';
-  public isLoading: boolean = false;
+    this.timeSheetEntries()
+      .filter((entry) => !entry.approved)
+      .forEach((entry) => {
+        const entryDate = new Date(entry.date);
+        const dateKey = entryDate.toISOString().split('T')[0];
+        const groupKey = `${dateKey}_${entry.userId}`;
+
+        if (!groupsMap.has(groupKey)) {
+          groupsMap.set(groupKey, {
+            date: entryDate,
+            userId: entry.userId,
+            totalHours: 0,
+            entries: [],
+          });
+        }
+
+        const group = groupsMap.get(groupKey)!;
+        group.entries.push(entry);
+        group.totalHours += entry.hours;
+      });
+
+    return Array.from(groupsMap.values()).sort(
+      (a, b) => b.date.getTime() - a.date.getTime(),
+    );
+  });
+  public readonly currentUserId = signal('');
+  public readonly isLoading = signal(false);
 
   private timeSheetEntryService = inject(TimeSheetEntryService);
   private toastService = inject(ToastService);
@@ -45,17 +71,7 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
   async ngOnInit(): Promise<void> {
     const user = await appstraxAuth.getUser();
     if (user) {
-      this.currentUserId = user.id;
-    }
-    await this.groupUnapprovedEntries();
-  }
-
-  async ngOnChanges(changes: SimpleChanges): Promise<void> {
-    if (
-      changes['timeSheetEntries'] &&
-      !changes['timeSheetEntries'].firstChange
-    ) {
-      await this.groupUnapprovedEntries();
+      this.currentUserId.set(user.id);
     }
   }
 
@@ -100,96 +116,24 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
         },
       });
 
-      modalRef.result.then(
-        async () => {
-          await this.groupUnapprovedEntries();
-        },
-        () => {},
-      );
+      modalRef.result.then(() => {}, () => {});
     } catch (error) {
       this.toastService.error('Error loading time entries');
     }
   }
 
-  private async groupUnapprovedEntries(): Promise<void> {
-    const unapproved = this.timeSheetEntries.filter((entry) => !entry.approved);
-    let groupsMap = await this.createDateGroups(unapproved);
-    groupsMap = await this.groupUnapprovedEntriesByDates(groupsMap, unapproved);
-
-    this.groupedEntries = Array.from(groupsMap.values()).sort(
-      (a, b) => b.date.getTime() - a.date.getTime(),
-    );
-  }
-
-  private async createDateGroups(
-    entries: TimeSheetEntry[],
-  ): Promise<Map<string, UnapprovedEntryGroup>> {
-    const groupsMap = new Map<string, UnapprovedEntryGroup>();
-
-    entries.forEach((entry) => {
-      const entryDate = new Date(entry.date);
-      const dateKey = entryDate.toISOString().split('T')[0]; // YYYY-MM-DD
-      const groupKey = `${dateKey}_${entry.userId}`;
-
-      if (!groupsMap.has(groupKey)) {
-        groupsMap.set(groupKey, {
-          date: entryDate,
-          userId: entry.userId,
-          totalHours: 0,
-          entries: [],
-        });
-      }
-
-      const group = groupsMap.get(groupKey)!;
-      group.entries.push(entry);
-    });
-    return groupsMap;
-  }
-
-  private async groupUnapprovedEntriesByDates(
-    groupsMap: Map<string, UnapprovedEntryGroup>,
-    unapprovedEntries: TimeSheetEntry[],
-  ): Promise<Map<string, UnapprovedEntryGroup>> {
-    for (const [groupKey, group] of groupsMap.entries()) {
-      const allEntriesForDay = this.filterUnapprovedByDateAndUser(
-        unapprovedEntries,
-        group.userId,
-        groupKey.split('_')[0],
-      );
-
-      group.totalHours = allEntriesForDay.reduce(
-        (sum, entry) => sum + entry.hours,
-        0,
-      );
-    }
-    return groupsMap;
-  }
-
-  private filterUnapprovedByDateAndUser(
-    unapprovedEntries: TimeSheetEntry[],
-    userId: string,
-    groupDate: String,
-  ): TimeSheetEntry[] {
-    return unapprovedEntries.filter((entry) => {
-      const entryDate = new Date(entry.date);
-      const dateKey = entryDate.toISOString().split('T')[0];
-      return entry.userId === userId && dateKey === groupDate;
-    });
-  }
-
   private async approveEntries(entries: TimeSheetEntry[]): Promise<void> {
     try {
-      this.isLoading = true;
+      this.isLoading.set(true);
       for (const entry of entries) {
         entry.approved = true;
         await this.timeSheetEntryService.save(entry);
       }
       this.toastService.success(`Approved ${entries.length} time entries`);
-      await this.groupUnapprovedEntries();
     } catch (error) {
       this.toastService.error('Error approving time entries');
     } finally {
-      this.isLoading = false;
+      this.isLoading.set(false);
     }
   }
 }

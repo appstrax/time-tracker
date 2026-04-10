@@ -1,7 +1,11 @@
 <div class="expanded-nav">
   <div class="logo-row">
     <a routerLink="/home" class="brand">
-      <img src="/time-tracker-logo.svg" alt="Time Tracker Logo" class="site-logo" />
+      <img
+        src="/time-tracker-logo.svg"
+        alt="Time Tracker Logo"
+        class="site-logo"
+      />
       <span class="brand-name">Time Tracker</span>
     </a>
     <button
@@ -23,11 +27,12 @@
       <i class="bi bi-stopwatch"></i>
       <span class="label">Time Sheets</span>
     </a>
-    <a routerLink="/analytics" routerLinkActive="active" class="menu-item">
-      <i class="bi bi-graph-up"></i>
-      <span class="label">Analytics</span>
-    </a>
     @if (admin()) {
+      <a routerLink="/analytics" routerLinkActive="active" class="menu-item">
+        <i class="bi bi-graph-up"></i>
+        <span class="label">Analytics</span>
+      </a>
+
       <a routerLink="/projects" routerLinkActive="active" class="menu-item">
         <i class="bi bi-folder2-open"></i>
         <span class="label">Projects</span>

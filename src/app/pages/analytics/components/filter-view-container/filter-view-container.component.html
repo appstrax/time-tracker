@@ -1,153 +1,188 @@
 <div class="filter-view-container">
-  <!-- View Selection Section -->
-  <div class="card mb-3">
-    <div class="card-header d-flex align-items-center justify-content-between">
-      <span class="fw-semibold">Filter</span>
-      <button
-        type="button"
-        class="btn btn-sm btn-link text-decoration-none p-0"
-        (click)="toggleViewSelection()"
-        [attr.aria-expanded]="!isViewSelectionCollapsed"
-        aria-controls="viewSelectionCollapse"
-      >
-        <i
-          [class]="
-            'bi ' +
-            (isViewSelectionCollapsed ? 'bi-chevron-down' : 'bi-chevron-up')
-          "
-        ></i>
-      </button>
+  <section class="filter-panel">
+    <div class="panel-header">
+      <div>
+        <p class="eyebrow">Explore data</p>
+        <h2>Filters and views</h2>
+        <p>
+          Switch between summary, detail, timeline, and approval-focused views,
+          then narrow the results by status, teammate, category, and date range.
+        </p>
+      </div>
+
+      <div class="panel-actions">
+        <span class="metric-pill">
+          {{ filteredEntries().length }} {{ filteredEntries().length === 1 ? 'entry' : 'entries' }}
+        </span>
+
+        <button
+          type="button"
+          class="collapse-button"
+          (click)="toggleViewCollapsed()"
+          [attr.aria-expanded]="!isViewCollapsed()"
+          aria-controls="viewSelectionCollapse"
+        >
+          <span>{{ isViewCollapsed() ? 'Show controls' : 'Hide controls' }}</span>
+          <i
+            [class]="
+              'bi ' + (isViewCollapsed() ? 'bi-chevron-down' : 'bi-chevron-up')
+            "
+          ></i>
+        </button>
+      </div>
     </div>
+
     <div
       id="viewSelectionCollapse"
       [class.collapse]="true"
-      [class.show]="!isViewSelectionCollapsed"
+      [class.show]="!isViewCollapsed()"
+      class="panel-content"
     >
-      <div class="card-body">
-        <div class="d-flex flex-wrap gap-2">
+      <div class="panel-section">
+        <div class="section-heading">
+          <div>
+            <h3>Choose a view</h3>
+            <p>Pick the perspective that best fits the question you are answering.</p>
+          </div>
+        </div>
+
+        <div class="view-type-grid">
           @for (viewType of viewTypes; track viewType.value) {
-          <button
-            type="button"
-            class="view-type-option btn"
-            [class.active]="currentViewType === viewType.value"
-            (click)="onViewTypeChange(viewType.value)"
-          >
-            <div class="icon-wrapper">
-              <i [class]="'bi ' + viewType.icon"></i>
-            </div>
-            <div class="text-start">
-              <div class="view-label">{{ viewType.label }}</div>
-              <div class="view-description">{{ viewType.description }}</div>
-            </div>
-          </button>
+            <button
+              type="button"
+              class="view-type-option"
+              [class.active]="view() === viewType.value"
+              (click)="onViewTypeChange(viewType.value)"
+            >
+              <div class="icon-wrapper">
+                <i [class]="'bi ' + viewType.icon"></i>
+              </div>
+              <div class="text-start">
+                <div class="view-label">{{ viewType.label }}</div>
+                <div class="view-description">{{ viewType.description }}</div>
+              </div>
+            </button>
           }
         </div>
       </div>
 
-      <div class="d-flex flex-wrap gap-2 card-body">
-
-
-        <app-filter-block label="Status">
-          <select
-            class="form-select form-select-sm"
-            [(ngModel)]="filters.status"
-            (change)="onEmitFilterChange()"
-          >
-            <option value="all">All</option>
-            <option value="approved">Approved</option>
-            <option value="pending">Pending</option>
-          </select>
-        </app-filter-block>
-
-        <app-filter-block label="Category">
-          <select
-            class="form-select form-select-sm"
-            [(ngModel)]="filters.category"
-            (change)="onEmitFilterChange()"
-          >
-            <option [value]="''">All Categories</option>
-            @for (category of categories; track category) {
-            <option [value]="category">
-              {{ category }}
-            </option>
-            }
-          </select>
-        </app-filter-block>
-
-        <app-filter-block label="User">
-          <select
-            class="form-select form-select-sm"
-            [(ngModel)]="filters.userId"
-            (change)="onEmitFilterChange()"
-          >
-            <option [value]="''">All Users</option>
-            @for (user of users; track user.id) {
-            <option [value]="user.id">
-              {{ user.name }}
-            </option>
-            }
-          </select>
-        </app-filter-block>
-
-        <app-filter-block label="Date Range">
-          <select
-            class="form-select form-select-sm"
-            [(ngModel)]="filters.dateRange"
-            (change)="onDateRangeChange()"
-          >
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-            <option value="all">All</option>
-            <option value="custom">Custom</option>
-          </select>
-
-          @if (filters.dateRange === 'custom') {
-          <div class="custom-date-range mt-2">
-            <div class="custom-date-field">
-              <label class="form-label small fw-semibold mb-1">Start</label>
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                [ngModel]="toDateInput(filters.startDate)"
-                (ngModelChange)="onCustomStartDateChange($event)"
-              />
-            </div>
-            <div class="custom-date-field">
-              <label class="form-label small fw-semibold mb-1">End</label>
-              <input
-                type="date"
-                class="form-control form-control-sm"
-                [ngModel]="toDateInput(filters.endDate)"
-                (ngModelChange)="onCustomEndDateChange($event)"
-              />
-            </div>
+      <div class="panel-section">
+        <div class="section-heading">
+          <div>
+            <h3>Refine results</h3>
+            <p>Adjust the filters to focus the analytics output.</p>
           </div>
-          }
-        </app-filter-block>
+        </div>
+
+        <div class="filters-grid">
+          <app-filter-block label="Status">
+            <select
+              class="form-select"
+              [ngModel]="filter().status"
+              (ngModelChange)="onStatusChange($event)"
+            >
+              <option value="all">All</option>
+              <option value="approved">Approved</option>
+              <option value="pending">Pending</option>
+            </select>
+          </app-filter-block>
+
+          <app-filter-block label="Category">
+            <select
+              class="form-select"
+              [ngModel]="filter().category"
+              (ngModelChange)="onCategoryChange($event)"
+            >
+              <option [value]="''">All Categories</option>
+              @for (category of categories(); track category) {
+                <option [value]="category">
+                  {{ category }}
+                </option>
+              }
+            </select>
+          </app-filter-block>
+
+          <app-filter-block label="User">
+            <select
+              class="form-select"
+              [ngModel]="filter().userId"
+              (ngModelChange)="onUserChange($event)"
+            >
+              <option [value]="''">All Users</option>
+              @for (user of users(); track user.id) {
+                <option [value]="user.id">
+                  {{ user.name }}
+                </option>
+              }
+            </select>
+          </app-filter-block>
+
+          <app-filter-block
+            label="Date Range"
+            [hint]="
+              filter().dateRange === 'custom'
+                ? 'Set a start and end date for a custom reporting window.'
+                : ''
+            "
+          >
+            <select
+              class="form-select"
+              [ngModel]="filter().dateRange"
+              (ngModelChange)="onDateRangeChange($event)"
+            >
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+              <option value="all">All</option>
+              <option value="custom">Custom</option>
+            </select>
+
+            @if (filter().dateRange === "custom") {
+              <div class="custom-date-range">
+                <div class="custom-date-field">
+                  <label class="form-label">Start</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    [ngModel]="formatDate(filter().start)"
+                    (ngModelChange)="onCustomStartDateChange($event)"
+                  />
+                </div>
+                <div class="custom-date-field">
+                  <label class="form-label">End</label>
+                  <input
+                    type="date"
+                    class="form-control"
+                    [ngModel]="formatDate(filter().end)"
+                    (ngModelChange)="onCustomEndDateChange($event)"
+                  />
+                </div>
+              </div>
+            }
+          </app-filter-block>
+        </div>
       </div>
     </div>
-  </div>
+  </section>
 
-  <!-- View Content -->
   <div class="view-content">
-    @if(currentViewType === 'summary') {
-    <app-filter-view-summary
-      [entries]="getEntriesForView()"
-    ></app-filter-view-summary>
-    } @else if(currentViewType === 'details') {
-    <app-filter-view-details
-      [entries]="getEntriesForView()"
-    ></app-filter-view-details>
-    } @else if(currentViewType === 'timeline') {
-    <app-filter-view-timeline
-      [entries]="getEntriesForView()"
-    ></app-filter-view-timeline>
-    } @else if(currentViewType === 'unapproved') {
-    <app-unapproved-entries
-      [timeSheetEntries]="timeSheetEntries"
-      [canApprove]="canApprove"
-    ></app-unapproved-entries>
+    @if (view() === "summary") {
+      <app-filter-view-summary
+        [entries]="filteredEntries()"
+        [projects]="projects()"
+      ></app-filter-view-summary>
+    } @else if (view() === "details") {
+      <app-filter-view-details
+        [entries]="filteredEntries()"
+        [projects]="projects()"
+      ></app-filter-view-details>
+    } @else if (view() === "timeline") {
+      <app-filter-view-timeline
+        [entries]="filteredEntries()"
+        [projects]="projects()"
+      ></app-filter-view-timeline>
+    } @else if (view() === "unapproved") {
+      <app-unapproved-entries [timeSheetEntries]="filteredEntries()" />
     }
   </div>
 </div>

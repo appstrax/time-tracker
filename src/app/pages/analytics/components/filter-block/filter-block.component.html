@@ -1,12 +1,12 @@
 <div class="filter-block">
-  @if (label) {
-    <label class="form-label small fw-semibold">{{ label }}</label>
+  @if (label()) {
+    <label class="form-label small fw-semibold">{{ label() }}</label>
   }
   <div class="filter-block-control">
     <ng-content></ng-content>
   </div>
-  @if (hint) {
-    <div class="filter-block-hint">{{ hint }}</div>
+  @if (hint()) {
+    <div class="filter-block-hint">{{ hint() }}</div>
   }
 </div>
 

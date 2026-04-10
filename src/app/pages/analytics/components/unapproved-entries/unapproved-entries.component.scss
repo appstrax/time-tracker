@@ -1,33 +1,107 @@
-.unapproved-entries {
-  .table {
-    font-size: 0.9rem;
-    margin-bottom: 0;
+.table-shell {
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
 
-    th {
-      font-weight: 600;
-      font-size: 0.85rem;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      color: var(--bs-secondary);
-    }
+.table-toolbar {
+  padding: 1.5rem 1.5rem 0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
   }
 
-  .text-color {
-    color: var(--bs-primary);
+  p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
   }
+}
 
-  .clickable-row {
-    cursor: pointer;
-    transition: background-color 0.2s;
+.eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
 
-    &:hover {
-      background-color: rgba(var(--bs-primary-rgb), 0.1);
-    }
+.table-responsive {
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.table {
+  --bs-table-color: var(--text-primary);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--color-border);
+
+  th {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
   }
+}
 
-  .badge {
-    background-color: var(--bs-secondary);
-    color: #fff;
+.date-cell,
+.hours {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.user-cell {
+  color: var(--text-primary);
+}
+
+.category-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.category-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-border) 55%, transparent);
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary-color) 6%, var(--color-surface));
+  }
+}
+
+.row-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  color: var(--primary-color);
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+@media (max-width: 767px) {
+  .table-toolbar,
+  .table-responsive {
+    padding-left: 1rem;
+    padding-right: 1rem;
   }
 }
 

@@ -1,7 +1,11 @@
 <div class="collapsed-nav">
   <div class="logo-section">
     <a routerLink="/home">
-      <img src="/time-tracker-logo.svg" alt="Time Tracker Logo" class="site-logo" />
+      <img
+        src="/time-tracker-logo.svg"
+        alt="Time Tracker Logo"
+        class="site-logo"
+      />
     </a>
   </div>
 
@@ -30,19 +34,20 @@
         <i class="bi bi-stopwatch"></i>
       </div>
     </a>
-    <a
-      routerLink="/analytics"
-      routerLinkActive="active"
-      class="nav-item"
-      data-bs-toggle="tooltip"
-      data-bs-title="Analytics"
-      data-bs-placement="right"
-    >
-      <div class="icon-box">
-        <i class="bi bi-graph-up"></i>
-      </div>
-    </a>
     @if (admin()) {
+      <a
+        routerLink="/analytics"
+        routerLinkActive="active"
+        class="nav-item"
+        data-bs-toggle="tooltip"
+        data-bs-title="Analytics"
+        data-bs-placement="right"
+      >
+        <div class="icon-box">
+          <i class="bi bi-graph-up"></i>
+        </div>
+      </a>
+
       <a
         routerLink="/projects"
         routerLinkActive="active"

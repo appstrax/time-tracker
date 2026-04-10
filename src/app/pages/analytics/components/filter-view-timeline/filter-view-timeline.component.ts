@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { TimeSheetEntry, Project } from '@models';
@@ -12,23 +12,18 @@ import { TimeSheetDisplayUtil } from '@utils';
   styleUrl: './filter-view-timeline.component.scss',
 })
 export class FilterViewTimelineComponent {
-  @Input() entries: TimeSheetEntry[] = [];
-  @Input() projects: Project[] = [];
+  public readonly entries = input<TimeSheetEntry[]>([]);
+  public readonly projects = input<Project[]>([]);
 
   public displayUtils = inject(TimeSheetDisplayUtil);
 
-  public getTimelineData(): {
-    date: Date;
-    hours: number;
-    approvedHours: number;
-    pendingHours: number;
-  }[] {
+  public readonly timelineData = computed(() => {
     const dateMap = new Map<
       string,
       { hours: number; approvedHours: number; pendingHours: number }
     >();
 
-    this.entries.forEach((entry) => {
+    this.entries().forEach((entry) => {
       const dateKey = new Date(entry.date).toISOString().split('T')[0];
       if (!dateMap.has(dateKey)) {
         dateMap.set(dateKey, { hours: 0, approvedHours: 0, pendingHours: 0 });
@@ -48,11 +43,11 @@ export class FilterViewTimelineComponent {
         ...data,
       }))
       .sort((a, b) => b.date.getTime() - a.date.getTime());
-  }
+  });
 
-  public getMaxHours(): number {
-    const timeline = this.getTimelineData();
+  public readonly maxHours = computed(() => {
+    const timeline = this.timelineData();
     if (!timeline.length) return 1;
-    return Math.max(...timeline.map((d) => d.hours), 1);
-  }
+    return Math.max(...timeline.map((day) => day.hours), 1);
+  });
 }

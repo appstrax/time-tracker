@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { TimeSheetEntry, Project } from '@models';
@@ -12,15 +12,15 @@ import { TimeSheetDisplayUtil } from '@utils';
   styleUrl: './filter-view-details.component.scss',
 })
 export class FilterViewDetailsComponent {
-  @Input() entries: TimeSheetEntry[] = [];
-  @Input() projects: Project[] = [];
+  public readonly entries = input<TimeSheetEntry[]>([]);
+  public readonly projects = input<Project[]>([]);
 
   public displayUtils = inject(TimeSheetDisplayUtil);
 
-  public getEntriesByDate(): { date: Date; entries: TimeSheetEntry[] }[] {
+  public readonly entriesByDate = computed(() => {
     const dateMap = new Map<string, TimeSheetEntry[]>();
 
-    this.entries.forEach((entry) => {
+    this.entries().forEach((entry) => {
       const dateKey = new Date(entry.date).toISOString().split('T')[0];
       if (!dateMap.has(dateKey)) {
         dateMap.set(dateKey, []);
@@ -36,5 +36,5 @@ export class FilterViewDetailsComponent {
         ),
       }))
       .sort((a, b) => b.date.getTime() - a.date.getTime());
-  }
+  });
 }

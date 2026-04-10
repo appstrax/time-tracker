@@ -2,96 +2,57 @@ import { Injectable } from '@angular/core';
 import { ActivatedRoute, Params, Router } from '@angular/router';
 
 import {
-  TimeSheetDateRangeFilter,
-  TimeSheetFilterState,
-  TimeSheetStatusFilter,
-} from '../models/time-sheet-filter-state.model';
-
-interface FilterParseOptions {
-  preserveOrganizationAndProject?: boolean;
-  defaultStatus?: TimeSheetStatusFilter;
-  defaultDateRange?: TimeSheetDateRangeFilter;
-}
-
-interface FilterQueryParamOptions {
-  includeOrganizationAndProject?: boolean;
-  preserveExistingOrgProject?: boolean;
-  organizationId?: string | null;
-  projectId?: string | null;
-}
+  DateRange,
+  AnalyticsFilter,
+  Status,
+} from '../models/analytics-filter.model';
 
 @Injectable({ providedIn: 'root' })
 export class TimeSheetFilterUtil {
-  private readonly allowedStatuses: TimeSheetStatusFilter[] = ['all', 'approved', 'pending'];
-  private readonly allowedDateRanges: TimeSheetDateRangeFilter[] = ['week', 'month', 'year', 'all', 'custom'];
+  private readonly allowedStatuses: Status[] = ['all', 'approved', 'pending'];
+  private readonly allowedDateRanges: DateRange[] = [
+    'week',
+    'month',
+    'year',
+    'all',
+    'custom',
+  ];
 
   constructor(private router: Router) {}
 
-  public parseFiltersFromParams(
-    params: Params,
-    current: TimeSheetFilterState,
-    options?: FilterParseOptions
-  ): TimeSheetFilterState {
-    const defaults: Required<FilterParseOptions> = {
-      preserveOrganizationAndProject: true,
-      defaultStatus: 'all',
-      defaultDateRange: 'month',
-      ...options,
+  public parseFilters(params: Params): AnalyticsFilter {
+    return {
+      projectId: params['projectId'] ?? undefined,
+      userId: params['userId'] ?? undefined,
+      category: params['category'] ?? undefined,
+      status: this.parseStatus(params['status']),
+      dateRange: this.parseDateRange(params['dateRange']),
+      start: this.parseDate(params['start']),
+      end: this.parseDate(params['end']),
     };
-
-    const next: TimeSheetFilterState = { ...current };
-
-    // Organization
-    if (params['organizationId'] !== undefined) {
-      next.organizationId = this.normalizeNullable(params['organizationId']);
-    } else if (!defaults.preserveOrganizationAndProject) {
-      next.organizationId = null;
-    }
-
-    // Project
-    if (params['projectId'] !== undefined) {
-      next.projectId = this.normalizeNullable(params['projectId']);
-    } else if (!defaults.preserveOrganizationAndProject) {
-      next.projectId = null;
-    }
-
-    // Simple text fields
-    next.userId = this.normalizeString(params['userId']);
-    next.category = this.normalizeString(params['category']);
-
-    // Status
-    const statusParam = params['status'];
-    next.status = this.allowedStatuses.includes(statusParam) ? statusParam : defaults.defaultStatus;
-
-    // Date range
-    const dateRangeParam = params['dateRange'];
-    next.dateRange = this.allowedDateRanges.includes(dateRangeParam)
-      ? dateRangeParam
-      : defaults.defaultDateRange;
-
-    const startParam = this.parseDate(params['startDate']);
-    const endParam = this.parseDate(params['endDate']);
-
-    const { startDate, endDate } = this.calculateDateRangeBounds(
-      next.dateRange,
-      startParam,
-      endParam,
-      next.startDate,
-      next.endDate
-    );
-
-    next.startDate = startDate;
-    next.endDate = endDate;
-
-    return next;
   }
 
-  public async syncFiltersToUrl(
+  private parseStatus(status: Status | undefined): Status {
+    if (!status) return 'all';
+    return this.allowedStatuses.includes(status) ? status : 'all';
+  }
+
+  private parseDateRange(dateRange: DateRange | undefined): DateRange {
+    if (!dateRange) return 'month';
+    return this.allowedDateRanges.includes(dateRange) ? dateRange : 'month';
+  }
+
+  private parseDate(value: any): Date | undefined {
+    if (!value) return undefined;
+    const parsed = new Date(value);
+    return isNaN(parsed.getTime()) ? undefined : parsed;
+  }
+
+  public updateQueryParams(
     route: ActivatedRoute,
-    filters: TimeSheetFilterState,
-    options?: FilterQueryParamOptions
+    filter: AnalyticsFilter,
   ): Promise<boolean> {
-    const queryParams = this.buildQueryParams(route, filters, options);
+    const queryParams = this.buildQueryParams(filter);
     return this.router.navigate([], {
       relativeTo: route,
       queryParams,
@@ -100,105 +61,59 @@ export class TimeSheetFilterUtil {
     });
   }
 
-  public buildQueryParams(
-    route: ActivatedRoute,
-    filters: TimeSheetFilterState,
-    options?: FilterQueryParamOptions
-  ): Params {
-    const existingParams = route.snapshot.queryParams ?? {};
+  public buildQueryParams(filter: AnalyticsFilter): Params {
     const queryParams: Params = {};
 
-    const { organizationId, projectId } = this.resolveOrganizationProjectParams(filters, existingParams, options);
-
-    if (organizationId !== undefined) {
-      queryParams['organizationId'] = this.normalizeNullable(organizationId);
-    }
-    if (projectId !== undefined) {
-      queryParams['projectId'] = this.normalizeNullable(projectId);
-    }
-
-    queryParams['userId'] = this.stringOrNull(filters.userId);
-    queryParams['status'] = filters.status === 'all' ? null : filters.status;
-    queryParams['dateRange'] = filters.dateRange === 'month' ? null : filters.dateRange;
-    queryParams['category'] = this.stringOrNull(filters.category);
-    queryParams['startDate'] = filters.startDate ? filters.startDate.toISOString() : null;
-    queryParams['endDate'] = filters.endDate ? filters.endDate.toISOString() : null;
+    if (filter.projectId) queryParams['projectId'] = filter.projectId;
+    if (filter.userId) queryParams['userId'] = filter.userId;
+    if (filter.status) queryParams['status'] = filter.status;
+    if (filter.dateRange) queryParams['dateRange'] = filter.dateRange;
+    if (filter.category) queryParams['category'] = filter.category;
+    if (filter.start) queryParams['start'] = filter.start.toISOString();
+    if (filter.end) queryParams['end'] = filter.end.toISOString();
 
     return queryParams;
   }
 
   public calculateDateRangeBounds(
-    dateRange: TimeSheetDateRangeFilter,
-    startInput?: Date | null,
-    endInput?: Date | null,
-    fallbackStart?: Date | null,
-    fallbackEnd?: Date | null
-  ): { startDate: Date; endDate: Date } {
+    dateRange: DateRange,
+    start?: Date,
+    end?: Date,
+  ): { start: Date; end: Date } {
     const today = new Date();
     switch (dateRange) {
       case 'week': {
         return {
-          startDate: this.startOfWeek(today),
-          endDate: this.endOfWeek(today),
+          start: this.startOfWeek(today),
+          end: this.endOfWeek(today),
         };
       }
       case 'month': {
         return {
-          startDate: this.startOfMonth(today),
-          endDate: this.endOfMonth(today),
+          start: this.startOfMonth(today),
+          end: this.endOfMonth(today),
         };
       }
       case 'year': {
         return {
-          startDate: this.startOfYear(today),
-          endDate: this.endOfYear(today),
+          start: this.startOfYear(today),
+          end: this.endOfYear(today),
         };
       }
       case 'all': {
         return {
-          startDate: new Date(0),
-          endDate: this.endOfDay(today),
+          start: new Date(0),
+          end: this.endOfDay(today),
         };
       }
       case 'custom':
       default: {
-        const startDate = startInput ?? fallbackStart ?? this.startOfDay(today);
-        const endDate = endInput ?? fallbackEnd ?? this.endOfDay(today);
         return {
-          startDate,
-          endDate,
+          start: start ?? this.startOfDay(today),
+          end: end ?? this.endOfDay(today),
         };
       }
     }
-  }
-
-  private resolveOrganizationProjectParams(
-    filters: TimeSheetFilterState,
-    existingParams: Params,
-    options?: FilterQueryParamOptions
-  ): { organizationId?: string | null; projectId?: string | null } {
-    if (options?.includeOrganizationAndProject) {
-      return {
-        organizationId: filters.organizationId ?? null,
-        projectId: filters.projectId ?? null,
-      };
-    }
-
-    if (options?.organizationId !== undefined || options?.projectId !== undefined) {
-      return {
-        organizationId: options.organizationId ?? null,
-        projectId: options.projectId ?? null,
-      };
-    }
-
-    if (options?.preserveExistingOrgProject) {
-      return {
-        organizationId: existingParams['organizationId'] ?? null,
-        projectId: existingParams['projectId'] ?? null,
-      };
-    }
-
-    return {};
   }
 
   private startOfWeek(date: Date): Date {
@@ -222,7 +137,15 @@ export class TimeSheetFilterUtil {
   }
 
   private endOfMonth(date: Date): Date {
-    return new Date(date.getFullYear(), date.getMonth() + 1, 0, 23, 59, 59, 999);
+    return new Date(
+      date.getFullYear(),
+      date.getMonth() + 1,
+      0,
+      23,
+      59,
+      59,
+      999,
+    );
   }
 
   private startOfYear(date: Date): Date {
@@ -244,25 +167,4 @@ export class TimeSheetFilterUtil {
     copy.setHours(23, 59, 59, 999);
     return copy;
   }
-
-  private parseDate(value: any): Date | null {
-    if (!value) return null;
-    const parsed = new Date(value);
-    return isNaN(parsed.getTime()) ? null : parsed;
-  }
-
-  private normalizeNullable(value: any): string | null {
-    if (value === undefined || value === null || value === '') return null;
-    return value;
-  }
-
-  private normalizeString(value: any, defaultValue: string = ''): string {
-    return typeof value === 'string' ? value : defaultValue;
-  }
-
-  private stringOrNull(value?: string | null): string | null {
-    if (!value) return null;
-    return !value.trim().length ? null : value;
-  }
 }
-

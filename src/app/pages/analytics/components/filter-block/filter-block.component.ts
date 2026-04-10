@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, input } from '@angular/core';
 
 
 @Component({
@@ -9,7 +9,7 @@ import { Component, Input } from '@angular/core';
   styleUrl: './filter-block.component.scss',
 })
 export class FilterBlockComponent {
-  @Input() label: string = '';
-  @Input() hint?: string;
+  public readonly label = input('');
+  public readonly hint = input<string | undefined>(undefined);
 }
 

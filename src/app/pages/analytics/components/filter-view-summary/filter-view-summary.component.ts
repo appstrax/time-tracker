@@ -1,4 +1,4 @@
-import { Component, Input, inject } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
 
 import { TimeSheetEntry, Project } from '@models';
 import { TimeSheetDisplayUtil } from '@utils';
@@ -11,19 +11,21 @@ import { TimeSheetDisplayUtil } from '@utils';
   styleUrl: './filter-view-summary.component.scss',
 })
 export class FilterViewSummaryComponent {
-  @Input() entries: TimeSheetEntry[] = [];
-  @Input() projects: Project[] = [];
+  public readonly entries = input<TimeSheetEntry[]>([]);
+  public readonly projects = input<Project[]>([]);
 
   public displayUtils = inject(TimeSheetDisplayUtil);
 
-  public getEntriesByProject(): {
-    projectId: string;
-    projectName: string;
-    hours: number;
-    approvedHours: number;
-    pendingHours: number;
-    count: number;
-  }[] {
+  public readonly entriesByProject = computed<
+    {
+      projectId: string;
+      projectName: string;
+      hours: number;
+      approvedHours: number;
+      pendingHours: number;
+      count: number;
+    }[]
+  >(() => {
     const projectMap = new Map<
       string,
       {
@@ -35,10 +37,10 @@ export class FilterViewSummaryComponent {
       }
     >();
 
-    this.entries.forEach((entry) => {
+    this.entries().forEach((entry) => {
       const projectName = this.displayUtils.getProjectName(
         entry.projectId,
-        this.projects,
+        this.projects(),
       );
       if (!projectMap.has(entry.projectId)) {
         projectMap.set(entry.projectId, {
@@ -49,6 +51,7 @@ export class FilterViewSummaryComponent {
           count: 0,
         });
       }
+
       const project = projectMap.get(entry.projectId)!;
       project.hours += entry.hours;
       if (entry.approved) {
@@ -62,5 +65,5 @@ export class FilterViewSummaryComponent {
     return Array.from(projectMap.entries())
       .map(([projectId, data]) => ({ projectId, ...data }))
       .sort((a, b) => b.hours - a.hours);
-  }
+  });
 }

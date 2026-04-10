@@ -1,19 +1,40 @@
-@if (!isLoading) {
-  <app-summary-metrics [metrics]="summaryMetrics"></app-summary-metrics>
+<section class="analytics-page">
+  <div class="analytics-shell">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">Workspace insights</p>
+        <h1 class="main-title">Analytics</h1>
+        <p class="subtitle">
+          Review hours, approvals, and project activity in one place with
+          flexible views for summaries, timelines, and pending work.
+        </p>
+      </div>
 
-  <app-filter-view-container
-    [timeSheetEntries]="timeSheetEntries"
-    [filteredEntries]="filteredEntries"
-    [selectedProject]="getSelectedProject() || null"
-    [canApprove]="canApprove"
-    [pendingCount]="summaryMetrics.pendingCount"
-    (filtersChange)="onFiltersChange($event)"
-    (approveAllRequested)="approveAllPending()"
-  ></app-filter-view-container>
-} @else {
-  <div class="text-center py-4">
-    <div class="spinner-border spinner-border-lg" role="status">
-      <span class="visually-hidden">Loading...</span>
-    </div>
+      @if (!loading()) {
+        <span class="metric-pill">
+          {{ projects().length }} {{ projects().length === 1 ? 'project' : 'projects' }}
+        </span>
+      }
+    </header>
+
+    @if (!loading()) {
+      <app-summary-metrics [entries]="entries()" [projects]="projects()" />
+
+      <app-filter-view-container
+        [projects]="projects()"
+        [entries]="entries()"
+        [users]="users()"
+        (entryUpdated)="onEntryUpdated($event)"
+      />
+    } @else {
+      <section class="loading-card">
+        <div class="text-center py-4">
+          <div class="spinner-border spinner-border-lg" role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+        <p class="loading-copy">Loading analytics data...</p>
+      </section>
+    }
   </div>
-}
+</section>
