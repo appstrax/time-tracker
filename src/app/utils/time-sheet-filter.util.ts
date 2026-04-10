@@ -56,7 +56,6 @@ export class TimeSheetFilterUtil {
     return this.router.navigate([], {
       relativeTo: route,
       queryParams,
-      queryParamsHandling: 'merge',
       replaceUrl: true,
     });
   }

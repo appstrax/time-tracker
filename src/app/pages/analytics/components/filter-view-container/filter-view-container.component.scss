@@ -89,7 +89,7 @@
   }
 }
 
-.panel-content {
+.panel-content.show {
   display: flex;
   flex-direction: column;
 }
@@ -120,6 +120,27 @@
 .filters-grid {
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   align-items: start;
+}
+
+.filter-select-wrap {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.filter-select {
+  padding-right: 2.35rem;
+  background-image: none;
+}
+
+.filter-select-caret {
+  position: absolute;
+  top: 50%;
+  right: 0.85rem;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  pointer-events: none;
 }
 
 .view-type-option {

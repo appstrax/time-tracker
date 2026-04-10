@@ -7,9 +7,6 @@
 .filter-block {
   min-height: 100%;
   border-radius: 20px;
-  border: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
-  padding: 1rem;
   font-size: 0.9rem;
   display: flex;
   flex-direction: column;

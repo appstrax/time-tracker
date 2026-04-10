@@ -12,7 +12,7 @@ import {
 } from '@angular/core';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute } from '@angular/router';
 
 import { FilterViewSummaryComponent } from '../filter-view-summary/filter-view-summary.component';
 import { FilterViewDetailsComponent } from '../filter-view-details/filter-view-details.component';
@@ -27,7 +27,7 @@ import {
   Status,
   DateRange,
 } from '@models';
-import { TimeSheetFilterUtil, TimeSheetDisplayUtil } from '@utils';
+import { TimeSheetFilterUtil, getUserDisplayName } from '@utils';
 import { TimeSheetEntryService, ToastService } from '@services';
 
 export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
@@ -118,10 +118,6 @@ export class FilterViewContainerComponent
       this.filterEntries();
       this.populateCategories();
     }
-
-    if (changes['filter']) {
-      this.filterEntries();
-    }
   }
 
   ngOnDestroy(): void {
@@ -175,6 +171,10 @@ export class FilterViewContainerComponent
 
   public onUserChange(userId: string): void {
     this.updateFilters({ userId });
+  }
+
+  public getDisplayName(user: User | null): string {
+    return getUserDisplayName(user);
   }
 
   public onDateRangeChange(dateRange: DateRange): void {
