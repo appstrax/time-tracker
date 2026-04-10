@@ -93,6 +93,27 @@
             </div>
           </app-filter-block>
 
+          <app-filter-block label="Project">
+            <div class="filter-select-wrap">
+              <select
+                class="form-select filter-select"
+                [ngModel]="filter().projectId ?? ''"
+                (ngModelChange)="onProjectChange($event)"
+              >
+                <option [value]="''">All Projects</option>
+                @for (project of projects(); track project.id) {
+                  <option [value]="project.id">
+                    {{ project.name }}
+                  </option>
+                }
+              </select>
+              <i
+                class="bi bi-chevron-down filter-select-caret"
+                aria-hidden="true"
+              ></i>
+            </div>
+          </app-filter-block>
+
           <app-filter-block label="Category">
             <div class="filter-select-wrap">
               <select

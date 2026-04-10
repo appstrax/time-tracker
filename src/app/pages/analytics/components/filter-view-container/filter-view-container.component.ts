@@ -68,7 +68,6 @@ export class FilterViewContainerComponent
   public readonly filteredEntries = signal<TimeSheetEntry[]>([]);
   public readonly view = signal<FilterView>('summary');
   public readonly isViewCollapsed = signal(false);
-  public project = computed(() => this.getProject(this.filter().projectId));
   public readonly categories = signal<string[]>([]);
 
   private subscription: Subscription | undefined;
@@ -128,22 +127,18 @@ export class FilterViewContainerComponent
     const entries = this.entries();
     const filters = this.filter();
 
-    const filteredEntries = entries.filter((entry) => {
-      if (filters.start && entry.date < filters.start) return false;
-      if (filters.end && entry.date > filters.end) return false;
-      if (filters.userId && entry.userId !== filters.userId) return false;
-      if (filters.category && entry.category !== filters.category) return false;
-      if (filters.status === 'approved' && !entry.approved) return false;
-      if (filters.status === 'pending' && entry.approved) return false;
+    const filteredEntries = entries.filter((e) => {
+      if (filters.start && e.date < filters.start) return false;
+      if (filters.end && e.date > filters.end) return false;
+      if (filters.projectId && e.projectId !== filters.projectId) return false;
+      if (filters.userId && e.userId !== filters.userId) return false;
+      if (filters.category && e.category !== filters.category) return false;
+      if (filters.status === 'approved' && !e.approved) return false;
+      if (filters.status === 'pending' && e.approved) return false;
       return true;
     });
 
     this.filteredEntries.set(filteredEntries);
-  }
-
-  private getProject(id?: string): Project | null {
-    if (!id) return null;
-    return this.projects().find((project) => project.id === id) ?? null;
   }
 
   private populateCategories(): void {
@@ -159,6 +154,10 @@ export class FilterViewContainerComponent
 
   public toggleViewCollapsed(): void {
     this.isViewCollapsed.update((collapsed) => !collapsed);
+  }
+
+  public onProjectChange(projectId: string): void {
+    this.updateFilters({ projectId: projectId || undefined });
   }
 
   public onStatusChange(status: Status): void {
