@@ -12,7 +12,6 @@ import {
   ProjectsPage,
   TimeSheetPage,
   HomePage,
-  UsersPage,
   SettingsPage,
   ProfilePage,
   AnalyticsPage,
@@ -34,43 +33,32 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
-        data: { breadcrumb: 'Summary' },
         component: HomePage,
       },
       {
         path: 'profile',
         component: ProfilePage,
-        data: { breadcrumb: 'User Profile' },
       },
       {
         path: 'projects',
-        data: { breadcrumb: 'Projects' },
         canActivate: [AdminGuard],
         component: ProjectsPage,
       },
       {
         path: 'projects/project',
-        data: { breadcrumb: 'Project' },
+        canActivate: [AdminGuard],
         component: ProjectPage,
       },
       {
-        path: 'users',
-        data: { breadcrumb: 'User Management' },
-        component: UsersPage,
-      },
-      {
         path: 'settings',
-        data: { breadcrumb: 'Settings' },
         component: SettingsPage,
       },
       {
         path: 'time-sheet',
-        data: { breadcrumb: 'Time Sheets' },
         component: TimeSheetPage,
       },
       {
         path: 'analytics',
-        data: { breadcrumb: 'Analytics' },
         component: AnalyticsPage,
       },
     ],

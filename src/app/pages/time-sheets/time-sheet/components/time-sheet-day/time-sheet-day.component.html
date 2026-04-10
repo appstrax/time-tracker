@@ -1,45 +1,19 @@
 <div class="time-sheet-day-section">
   <div class="d-flex align-items-center">
-    <div class="col-md-2 time-sheet-day-date">
-      <div class="time-sheet-day-title">{{ date() | date : "EEEE" }}</div>
-      <div class="day-date">{{ date() | date : "d MMM yyyy" }}</div>
+    <div class="time-sheet-day-date">
+      <div class="time-sheet-day-title">{{ date() | date: "EEEE" }}</div>
+      <div class="day-date">{{ date() | date: "d MMM yyyy" }}</div>
     </div>
-    <div class="col-md-1">
-      @if (isAddEntryButtonVisible() && !isApproved()) {
-      <button
-        #addEntryBtn
-        type="button"
-        class="add-entry-btn"
-        (click)="openTimeSheetEntryModal()"
-        aria-label="Add time sheet entry"
-        data-bs-toggle="tooltip"
-        data-bs-placement="top"
-        title="Add Entry"
-      >
-        <i class="bi bi-plus"></i>
-      </button>
-      }
-    </div>
-    <div class="col-12 col-md-9">
-      <div class="align-items-center">
-        <app-time-sheet-number-line
-          (onEntryClick)="openTimeSheetEntryModal($event)"
-          (onCreateEntry)="openTimeSheetEntryModal($event)"
-          [projects]="projects()"
-          [entries]="entries()"
-          [categoryColors]="categoryColors()"
-          [disabled]="isApproved()"
-        ></app-time-sheet-number-line>
-      </div>
+
+    <div class="w-100">
+      <app-time-sheet-number-line
+        [colorIndex]="date().getDay()"
+        (onEntryClick)="openTimeSheetEntryModal($event)"
+        (onCreateEntry)="openTimeSheetEntryModal($event)"
+        [projects]="projects()"
+        [entries]="sortedEntries()"
+        [disabled]="approved()"
+      />
     </div>
   </div>
-  @if(isApproved()) {
-  <i
-    #lockIcon
-    class="lock-icon bi bi-lock"
-    data-bs-toggle="tooltip"
-    data-bs-placement="top"
-    title="Approved"
-  ></i>
-  }
 </div>

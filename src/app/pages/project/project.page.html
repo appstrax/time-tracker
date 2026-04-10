@@ -7,21 +7,21 @@
           Back
         </a>
         <p class="eyebrow">
-          {{ isEditMode ? 'Project workspace' : 'New project' }}
+          {{ editing() ? 'Project workspace' : 'New project' }}
         </p>
         <h1 class="main-title">
-          {{ isEditMode ? 'Edit Project' : 'Create Project' }}
+          {{ editing() ? 'Edit Project' : 'Create Project' }}
         </h1>
         <p class="subtitle">
-          {{ isEditMode ? 'Refine the details and manage who can collaborate on
-          this project.' : 'Set up the essentials now, then invite collaborators
-          once the project is live.' }}
+          @if (editing()) { Refine the details and manage who can collaborate on
+          this project. } @else { Set up the essentials now, then invite
+          collaborators once the project is created. }
         </p>
       </div>
 
-      @if (isEditMode) {
+      @if (editing()) {
       <span class="metric-pill">
-        {{ projectUsersCount }} {{ projectUsersCount === 1 ? 'member' :
+        {{ projectUsersCount() }} {{ projectUsersCount() === 1 ? 'member' :
         'members' }}
       </span>
       }
@@ -37,7 +37,7 @@
           </div>
         </div>
 
-        <form (ngSubmit)="createProject()" #form="ngForm" autocomplete="off">
+        <form (ngSubmit)="saveProject()" #form="ngForm" autocomplete="off">
           <div class="form-group">
             <label for="name">Project name</label>
             <div class="input-with-icon">
@@ -47,7 +47,8 @@
                 class="form-control"
                 id="name"
                 name="name"
-                [(ngModel)]="project.name"
+                [ngModel]="project().name"
+                (ngModelChange)="updateProjectName($event)"
                 placeholder="Project name"
                 required
               />
@@ -63,7 +64,8 @@
                 class="form-control"
                 id="description"
                 name="description"
-                [(ngModel)]="project.description"
+                [ngModel]="project().description"
+                (ngModelChange)="updateProjectDescription($event)"
                 placeholder="What is this project about?"
                 required
               />
@@ -79,12 +81,12 @@
                 (click)="logoFileInput.click()"
               >
                 <i class="bi bi-image me-2"></i>
-                {{ logoPreviewUrl ? 'Change logo' : 'Choose logo' }}
+                {{ logoPreviewUrl() ? 'Change logo' : 'Choose logo' }}
               </button>
 
-              @if (logoFile) {
-              <span class="file-pill">{{ logoFile.name }}</span>
-              } @else if (logoPreviewUrl) {
+              @if (logoFile()) {
+              <span class="file-pill">{{ logoFile()?.name }}</span>
+              } @else if (logoPreviewUrl()) {
               <span class="file-pill">Existing logo</span>
               } @else {
               <span class="file-pill muted">Optional</span>
@@ -101,21 +103,21 @@
             />
           </div>
 
-          @if (errorMessage) {
-          <div class="alert alert-danger mb-3">{{ errorMessage }}</div>
+          @if (error()) {
+          <div class="alert alert-danger mb-3">{{ error() }}</div>
           }
 
           <button
             type="submit"
-            class="btn btn-primary submit-button"
-            [disabled]="isLoading"
+            class="btn btn-primary submit-button mt-2"
+            [disabled]="saving()"
           >
-            @if (isLoading) {
+            @if (saving()) {
             <span
               class="spinner-border spinner-border-sm me-2"
               aria-hidden="true"
             ></span>
-            } {{ isEditMode ? 'Update Project' : 'Create Project' }}
+            } {{ editing() ? 'Update Project' : 'Create Project' }}
           </button>
         </form>
       </section>
@@ -133,9 +135,9 @@
         </div>
 
         <div class="project-preview-tile">
-          @if (logoPreviewUrl) {
+          @if (logoPreviewUrl()) {
           <img
-            [src]="logoPreviewUrl"
+            [src]="logoPreviewUrl()"
             alt="Logo preview"
             class="logo-preview-image"
           />
@@ -147,10 +149,10 @@
 
           <div>
             <div class="preview-title">
-              {{ project.name || 'Your project name' }}
+              {{ project().name || 'Your project name' }}
             </div>
             <p class="preview-description">
-              {{ project.description || 'Add a short description to help
+              {{ project().description || 'Add a short description to help
               teammates understand the project at a glance.' }}
             </p>
           </div>
@@ -182,223 +184,11 @@
       </aside>
     </div>
 
-    @if (isEditMode && project.id) {
-    <section class="members-card">
-      <div class="card-header members-header">
-        <div>
-          <p class="eyebrow">Project Users</p>
-          <h2>Manage access</h2>
-          <p>
-            Search workspace users, assign project roles, and keep your
-            collaborator list up to date.
-          </p>
-        </div>
-        <span class="metric-pill">
-          {{ projectUsersCount }} {{ projectUsersCount === 1 ? 'member' :
-          'members' }}
-        </span>
-      </div>
-
-      <div class="members-toolbar">
-        <div class="user-search-stack">
-          <label for="project-user-search" class="toolbar-label"
-            >Search users</label
-          >
-          <div class="user-search-grid">
-            <div class="input-with-icon search-field">
-              <i class="bi bi-search"></i>
-              <input
-                id="project-user-search"
-                type="text"
-                class="form-control"
-                [(ngModel)]="projectUserSearchTerm"
-                (input)="onProjectUserSearchInput()"
-                (focus)="onProjectUserSearchFocus()"
-                (blur)="onProjectUserSearchBlur()"
-                placeholder="Search by name or email"
-                autocomplete="off"
-              />
-
-              @if (isProjectUserSearchOpen) {
-              <div class="search-results">
-                @if (isSearchingUsers) {
-                <div class="search-state">Searching users...</div>
-                } @else if (!projectUserSearchResults.length &&
-                projectUserSearchTerm.trim().length >= 2) {
-                <div class="search-state">No matching users found.</div>
-                } @else { @for (user of projectUserSearchResults; track user.id)
-                {
-                <button
-                  type="button"
-                  class="search-result"
-                  (click)="selectProjectUser(user)"
-                >
-                  <span class="search-result-avatar">
-                    @if (user.profilePictureUrl) {
-                    <img
-                      [src]="user.profilePictureUrl"
-                      [alt]="getDisplayName(user)"
-                    />
-                    } @else {
-                    <span>{{ getUserInitials(user) }}</span>
-                    }
-                  </span>
-                  <span class="search-result-copy">
-                    <span class="search-result-title"
-                      >{{ getDisplayName(user) }}</span
-                    >
-                    <span class="search-result-subtitle"
-                      >{{ getUserSecondaryText(user) }}</span
-                    >
-                  </span>
-                </button>
-                } }
-              </div>
-              }
-            </div>
-
-            <div class="role-field">
-              <label
-                for="project-user-role"
-                class="toolbar-label toolbar-label--inline"
-              >
-                Role
-              </label>
-              <select
-                id="project-user-role"
-                class="form-select"
-                [(ngModel)]="selectedProjectUserRole"
-              >
-                @for (role of projectUserRoles; track role) {
-                <option [ngValue]="role">{{ formatRole(role) }}</option>
-                }
-              </select>
-            </div>
-
-            <button
-              type="button"
-              class="btn btn-primary add-user-button"
-              (click)="addProjectUser()"
-              [disabled]="!canAddProjectUser"
-            >
-              @if (isAddingProjectUser) {
-              <span
-                class="spinner-border spinner-border-sm me-2"
-                aria-hidden="true"
-              ></span>
-              } Add user
-            </button>
-          </div>
-
-          @if (selectedProjectUser) {
-          <div class="selected-user-pill">
-            <span>Selected: {{ getDisplayName(selectedProjectUser) }}</span>
-            <span class="selected-user-email"
-              >{{ getUserSecondaryText(selectedProjectUser) }}</span
-            >
-          </div>
-          } @else {
-          <p class="helper-text">
-            Choose a user from the search results, then assign the role you want
-            to grant.
-          </p>
-          }
-        </div>
-      </div>
-
-      @if (projectUsersErrorMessage) {
-      <div class="alert alert-danger mb-0">{{ projectUsersErrorMessage }}</div>
-      } @if (isProjectUsersLoading) {
-      <div class="members-state">
-        <div class="spinner-border" role="status">
-          <span class="visually-hidden">Loading...</span>
-        </div>
-        <p>Loading project users...</p>
-      </div>
-      } @else if (!projectMembers.length) {
-      <div class="members-state">
-        <div class="state-icon">
-          <i class="bi bi-people"></i>
-        </div>
-        <h3>No project users yet</h3>
-        <p>Search for a workspace user above to add the first collaborator.</p>
-      </div>
-      } @else {
-      <div class="table-shell">
-        <div class="table-responsive">
-          <table class="table align-middle mb-0">
-            <thead>
-              <tr>
-                <th scope="col">User</th>
-                <th scope="col">Email</th>
-                <th scope="col">Role</th>
-                <th scope="col" class="text-end">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (member of projectMembers; track member.membership.id) {
-              <tr>
-                <td>
-                  <div class="member-cell">
-                    <span class="member-avatar">
-                      @if (member.user?.profilePictureUrl) {
-                      <img
-                        [src]="member.user?.profilePictureUrl"
-                        [alt]="getDisplayName(member.user)"
-                      />
-                      } @else {
-                      <span>{{ getUserInitials(member.user) }}</span>
-                      }
-                    </span>
-
-                    <div>
-                      <div class="member-name">
-                        {{ getDisplayName(member.user) }}
-                      </div>
-                      <div class="member-meta">
-                        User ID: {{ member.membership.userId }}
-                      </div>
-                    </div>
-                  </div>
-                </td>
-                <td class="member-email">
-                  {{ getUserSecondaryText(member.user) }}
-                </td>
-                <td>
-                  <select
-                    class="form-select form-select-sm role-select"
-                    [ngModel]="member.membership.role"
-                    (ngModelChange)="updateProjectUserRole(member, $event)"
-                    [disabled]="isMemberBusy(member)"
-                  >
-                    @for (role of projectUserRoles; track role) {
-                    <option [ngValue]="role">{{ formatRole(role) }}</option>
-                    }
-                  </select>
-                </td>
-                <td class="text-end">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    (click)="removeProjectUser(member)"
-                    [disabled]="isMemberBusy(member)"
-                  >
-                    @if (isMemberBusy(member)) {
-                    <span
-                      class="spinner-border spinner-border-sm me-2"
-                      aria-hidden="true"
-                    ></span>
-                    } Remove
-                  </button>
-                </td>
-              </tr>
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-      }
-    </section>
+    @if (editing() && project().id) {
+    <app-project-users
+      [project]="project()"
+      (projectChange)="onProjectUsersChange($event)"
+    />
     } @else {
     <section class="members-card members-card--placeholder">
       <div class="card-header">

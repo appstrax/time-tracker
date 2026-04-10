@@ -1,12 +1,5 @@
 .time-sheet-day-section {
-  position: relative;
-  border-radius: 20px;
-  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
   width: 100%;
-  min-width: 200px;
-  padding: 20px 30px;
-  margin-top: 1rem;
-  margin-bottom: 2rem;
   background-color: var(--color-surface);
 }
 
@@ -17,77 +10,12 @@
 }
 
 .time-sheet-day-date {
-  width: 150px;
-}
-
-.time-sheet-day-card .time-sheet-day-title {
-  color: var(--text-primary);
-  font-weight: 600;
-}
-
-.time-sheet-day-card .time-sheet-day-desc {
-  font-size: 0.9rem;
-  color: var(--text-muted);
-}
-
-.add-entry-btn {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  border: none;
-  background-color: var(--primary-color);
-  color: var(--color-primary-contrast);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  padding: 0;
-  font-size: 2rem;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.add-entry-btn:hover {
-  background-color: var(--primary-color-dark);
-  transform: scale(1.05);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
-}
-
-.add-entry-btn:active {
-  transform: scale(0.95);
-}
-
-.add-entry-btn:focus {
-  outline: none;
-  box-shadow: 0 0 0 3px
-    color-mix(in srgb, var(--primary-color) 30%, transparent);
-}
-
-.lock-icon {
-  position: absolute;
-  top: 10px;
-  right: 10px;
-  z-index: 10;
+  width: 170px;
 }
 
 @media (max-width: 1200px) {
   .time-sheet-day-section > .d-flex {
     flex-flow: row wrap;
     padding: 0px 0px;
-  }
-
-  .time-sheet-day-section .col-2,
-  .time-sheet-day-section .col-1 {
-    width: 50%;
-  }
-
-  .time-sheet-day-section .col-9 {
-    padding: 0px;
-    margin: 0px;
-  }
-
-  .lock-icon {
-    top: 20px;
-    right: 20px;
   }
 }

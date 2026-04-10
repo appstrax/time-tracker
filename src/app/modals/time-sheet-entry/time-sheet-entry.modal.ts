@@ -1,30 +1,27 @@
-import { Store } from '@state';
 import { FormsModule } from '@angular/forms';
-
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { appstraxAuth } from '@appstrax/services/auth';
 import {
   Component,
   Input,
   OnInit,
-  Signal,
   ViewChild,
   ElementRef,
   computed,
 } from '@angular/core';
+import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
+import { Store } from '@state';
 import { Project, TimeSheetEntry } from '@models';
 import { ProjectDropdownComponent } from '@components';
 import { TimeSheetDisplayUtil } from '@utils';
 
 @Component({
-  selector: 'app-add-project-user',
   standalone: true,
   templateUrl: './time-sheet-entry.modal.html',
   styleUrl: './time-sheet-entry.modal.scss',
   imports: [FormsModule, ProjectDropdownComponent],
 })
-export class TimeSheetEntryComponent implements OnInit {
+export class TimeSheetEntryModal implements OnInit {
   private static readonly LAST_SELECTED_PROJECT_KEY = 'timeSheet.lastProjectId';
 
   @Input() timeSheetEntry = new TimeSheetEntry();
@@ -179,7 +176,9 @@ export class TimeSheetEntryComponent implements OnInit {
 
   private getStoredProjectId(): string | null {
     try {
-      return localStorage.getItem(TimeSheetEntryComponent.LAST_SELECTED_PROJECT_KEY);
+      return localStorage.getItem(
+        TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY,
+      );
     } catch {
       return null;
     }
@@ -189,7 +188,7 @@ export class TimeSheetEntryComponent implements OnInit {
     if (!projectId) return;
     try {
       localStorage.setItem(
-        TimeSheetEntryComponent.LAST_SELECTED_PROJECT_KEY,
+        TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY,
         projectId,
       );
     } catch {}
@@ -197,7 +196,7 @@ export class TimeSheetEntryComponent implements OnInit {
 
   private clearStoredProjectId(): void {
     try {
-      localStorage.removeItem(TimeSheetEntryComponent.LAST_SELECTED_PROJECT_KEY);
+      localStorage.removeItem(TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY);
     } catch {}
   }
 }

@@ -1,21 +1,12 @@
-import { Tooltip } from 'bootstrap';
 import { DatePipe } from '@angular/common';
-import {
-  Component,
-  ElementRef,
-  computed,
-  effect,
-  input,
-  output,
-  viewChild,
-} from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Project, TimeSheetEntry } from '@models';
+import { TimeSheetEntryModal } from '@modals';
 import { TimeSheetEntryService, ToastService } from '@services';
 
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
-import { TimeSheetEntryComponent } from '../../../modals/time-sheet-entry/time-sheet-entry.modal';
 
 @Component({
   selector: 'app-time-sheet-day',
@@ -29,98 +20,44 @@ export class TimeSheetDayComponent {
   public readonly projects = input<Project[]>([]);
   public readonly categories = input<string[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
-  public readonly categoryColors = input<Map<string, string>>(
-    new Map<string, string>(),
-  );
 
-  public readonly onSave = output<TimeSheetEntry | undefined>();
-  public readonly isAddEntryButtonVisible = computed(() =>
-    this.isWithinEditableRange(this.date()),
-  );
-  public readonly isApproved = computed(() =>
+  public readonly save = output<TimeSheetEntry | undefined>();
+  public readonly approved = computed(() =>
     this.entries().some((entry) => entry.approved),
   );
-
-  private readonly MAX_WEEKS_BACK_FOR_ADD_ENTRY: number = 3;
-
-  private readonly addEntryBtn = viewChild<ElementRef<HTMLButtonElement>>(
-    'addEntryBtn',
+  public readonly sortedEntries = computed(() =>
+    this.entries().sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
   );
-  private readonly lockIcon = viewChild<ElementRef<HTMLElement>>('lockIcon');
 
   constructor(
     private modalService: NgbModal,
     private toastService: ToastService,
-    private timeSheetEntryService: TimeSheetEntryService,
-  ) {
-    effect((onCleanup) => {
-      const addEntryButton = this.addEntryBtn();
-      if (!addEntryButton) return;
+    private entryService: TimeSheetEntryService,
+  ) {}
 
-      const tooltip = new Tooltip(addEntryButton.nativeElement);
-      onCleanup(() => tooltip.dispose());
-    });
-
-    effect((onCleanup) => {
-      if (!this.isApproved()) return;
-
-      const lockIcon = this.lockIcon();
-      if (!lockIcon) return;
-
-      const tooltip = new Tooltip(lockIcon.nativeElement);
-      onCleanup(() => tooltip.dispose());
-    });
-  }
-
-  private isWithinEditableRange(date: Date): boolean {
-    const today = new Date();
-    const dayOfWeek = today.getUTCDay();
-    const diff = !dayOfWeek ? -6 : 1 - dayOfWeek;
-
-    const currentWeekStart = new Date(today);
-    currentWeekStart.setUTCDate(today.getUTCDate() + diff);
-    currentWeekStart.setUTCHours(0, 0, 0, 0);
-
-    const threeWeeksAgoStart = new Date(currentWeekStart);
-    threeWeeksAgoStart.setUTCDate(
-      currentWeekStart.getUTCDate() -
-        (this.MAX_WEEKS_BACK_FOR_ADD_ENTRY - 1) * 7,
-    );
-
-    const currentWeekEnd = new Date(currentWeekStart);
-    currentWeekEnd.setUTCDate(currentWeekStart.getUTCDate() + 6);
-    currentWeekEnd.setUTCHours(23, 59, 59, 999);
-
-    return date >= threeWeeksAgoStart && date <= currentWeekEnd;
-  }
-
-  private async saveTimeSheetEntry(
-    timeSheetEntry: TimeSheetEntry,
-  ): Promise<void> {
+  private async saveTimeSheetEntry(entry: TimeSheetEntry): Promise<void> {
     try {
-      timeSheetEntry = await this.timeSheetEntryService.save(timeSheetEntry);
-      this.onSave.emit(timeSheetEntry);
+      entry = await this.entryService.save(entry);
+      this.save.emit(entry);
     } catch (error) {
       this.toastService.error('Error saving time sheet entry');
     }
   }
 
-  private async deleteTimeSheetEntry(
-    timeSheetEntry: TimeSheetEntry,
-  ): Promise<void> {
+  private async deleteTimeSheetEntry(entry: TimeSheetEntry): Promise<void> {
     try {
-      await this.timeSheetEntryService.delete(timeSheetEntry.id);
-      this.onSave.emit(undefined);
+      await this.entryService.delete(entry.id);
+      this.save.emit(undefined);
     } catch (error) {
       this.toastService.error('Error deleting time sheet entry');
     }
   }
 
-  public openTimeSheetEntryModal(timeSheetEntryOrHours?: TimeSheetEntry | number): void {
+  public openTimeSheetEntryModal(entryOrHours?: TimeSheetEntry | number): void {
     const timeSheetEntry =
-      typeof timeSheetEntryOrHours === 'number'
-        ? this.createSeededTimeSheetEntry(timeSheetEntryOrHours)
-        : timeSheetEntryOrHours?.clone() || new TimeSheetEntry();
+      typeof entryOrHours === 'number'
+        ? this.createSeededTimeSheetEntry(entryOrHours)
+        : entryOrHours?.clone() || new TimeSheetEntry();
 
     const options = {
       timeSheetEntry,
@@ -128,7 +65,7 @@ export class TimeSheetDayComponent {
       categories: this.categories(),
     };
 
-    const modalRef = this.modalService.open(TimeSheetEntryComponent, {
+    const modalRef = this.modalService.open(TimeSheetEntryModal, {
       centered: true,
       backdrop: 'static',
       keyboard: true,
@@ -146,9 +83,14 @@ export class TimeSheetDayComponent {
     );
   }
 
-  private createSeededTimeSheetEntry(hours: number): TimeSheetEntry {
+  private createSeededTimeSheetEntry(totalHours: number): TimeSheetEntry {
     const timeSheetEntry = new TimeSheetEntry();
-    timeSheetEntry.hours = hours;
+    const loggedHours = this.entries().reduce(
+      (sum, entry) => sum + entry.hours,
+      0,
+    );
+    const nextHours = Math.max(0, totalHours - loggedHours);
+    timeSheetEntry.hours = Math.round(nextHours * 4) / 4;
     return timeSheetEntry;
   }
 }

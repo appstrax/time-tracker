@@ -1,5 +1,8 @@
-<div class="toast-container position-fixed top-offset end-0 p-3" style="z-index: 1080;">
-  @for (t of toasts; track t) {
+<div
+  class="toast-container position-fixed top-offset end-0 p-3"
+  style="z-index: 1080"
+>
+  @for (t of toasts(); track t) {
     <div
       class="toast show mb-2"
       role="alert"
@@ -10,14 +13,17 @@
       [class.toast-info]="t.type === 'info'"
       [class.toast-warning]="t.type === 'warning'"
       [class.toast-exit]="t.closing"
-      >
+    >
       <div class="toast-header">
         <strong class="me-auto">{{ t.title || (t.type | titlecase) }}</strong>
-        <button type="button" class="btn-close" aria-label="Close" (click)="beginDismiss(t.id)"></button>
+        <button
+          type="button"
+          class="btn-close"
+          aria-label="Close"
+          (click)="beginDismiss(t.id)"
+        ></button>
       </div>
       <div class="toast-body">{{ t.message }}</div>
     </div>
   }
 </div>
-
-

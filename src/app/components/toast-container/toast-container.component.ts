@@ -1,4 +1,4 @@
-import { Component, effect } from '@angular/core';
+import { Component, computed } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ToastService, ToastItem } from '../../services/toast.service';
 
@@ -10,13 +10,9 @@ import { ToastService, ToastItem } from '../../services/toast.service';
   styleUrls: ['./toast-container.component.scss'],
 })
 export class ToastContainerComponent {
-  toasts: ToastItem[] = [];
+  public readonly toasts = computed<ToastItem[]>(() => this.toast.toasts());
 
-  constructor(private toast: ToastService) {
-    effect(() => {
-      this.toasts = this.toast.toasts();
-    });
-  }
+  constructor(private toast: ToastService) {}
 
   dismiss(id: number) {
     this.toast.dismiss(id);

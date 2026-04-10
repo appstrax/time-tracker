@@ -1,42 +1,35 @@
 <div class="time-sheet">
-  @if (hoveredQuarterHours()) {
-    <div
-      class="entry-log-item hover-preview"
-      [ngStyle]="{
-        width: hoverPreviewWidth() + 'px'
-      }"
-    ></div>
-  }
-  <div class="d-flex no-wrap entry-log-items">
-    @for (entry of numberLineWidths().keys(); track entry.id) {
-      <app-time-sheet-entry-item
-        [entry]="entry"
-        [width]="numberLineWidths().get(entry) || 0"
-        [categoryColor]="getCategoryColor(entry)"
-        [project]="getProject(entry)"
-        (onEntryClick)="openEntryLogItem($event)"
-      ></app-time-sheet-entry-item>
-    }
-  </div>
-  <div
-    class="d-flex entry-log align-items-start number-line"
-    (mouseleave)="onNumberLineLeave()"
-  >
-    @for (i of numberLineArray(); track i) {
-      <div
-        class="number-line-item"
-        [class.number-line-item-disabled]="disabled() || i === 0"
-        [class.number-line-item-hovered]="hoveredQuarterHours() === i"
-        [ngStyle]="{
-          width: sizeModifier() + 'px',
-          height: getNumberLineHeight(i)
-        }"
-        (mouseenter)="onNumberLineHover(i)"
-        (focus)="onNumberLineHover(i)"
-        (click)="createEntryAt(i)"
-      >
-        {{ getNumberLineValue(i) }}
-      </div>
-    }
+  <div class="time-sheet-card" [class.time-sheet-card-disabled]="disabled()">
+    <div class="time-sheet-card-header">
+      <div class="time-sheet-card-total">{{ totalLoggedLabel() }}</div>
+    </div>
+
+    <div class="number-line" (mouseleave)="onNumberLineLeave()">
+      @for (i of numberLineArray(); track i) {
+        <div
+          class="number-line-item"
+          [class.d-none]="i == 0"
+          [class.number-line-item-disabled]="disabled()"
+          [class.number-line-item-logged]="isTickLogged(i)"
+          [class.number-line-item-hovered]="isTickHovered(i)"
+          [style.background-color]="getColor(i)"
+          [attr.tabindex]="isTickInteractive(i) ? 0 : -1"
+          (mouseenter)="onNumberLineHover(i, $event)"
+          (focus)="onNumberLineHover(i, $event)"
+          (click)="onNumberLineClick(i)"
+        >
+          @if (getNumberLineValue(i)) {
+            <span class="tick-label">{{ getNumberLineValue(i) }}</span>
+          }
+          <span
+            class="tick-mark"
+            [ngStyle]="{
+              height: getNumberLineHeight(i),
+            }"
+          >
+          </span>
+        </div>
+      }
+    </div>
   </div>
 </div>

@@ -7,7 +7,7 @@ import { Project } from '@models';
 import { Store } from '@state';
 import { TimeSheetDisplayUtil } from '@utils';
 
-import { TimeSheetEntryComponent } from './time-sheet-entry.modal';
+import { TimeSheetEntryModal } from './time-sheet-entry.modal';
 
 describe('TimeSheetEntryComponent', () => {
   const storageKey = 'timeSheet.lastProjectId';
@@ -16,8 +16,8 @@ describe('TimeSheetEntryComponent', () => {
     name: 'Alpha',
   } as Project;
 
-  let component: TimeSheetEntryComponent;
-  let fixture: ComponentFixture<TimeSheetEntryComponent>;
+  let component: TimeSheetEntryModal;
+  let fixture: ComponentFixture<TimeSheetEntryModal>;
   let activeModal: jasmine.SpyObj<NgbActiveModal>;
   let displayUtil: jasmine.SpyObj<TimeSheetDisplayUtil>;
 
@@ -34,7 +34,7 @@ describe('TimeSheetEntryComponent', () => {
     displayUtil.formatHours.and.returnValue('0h 00m');
 
     await TestBed.configureTestingModule({
-      imports: [TimeSheetEntryComponent],
+      imports: [TimeSheetEntryModal],
       providers: [
         provideZonelessChangeDetection(),
         { provide: NgbActiveModal, useValue: activeModal },
@@ -59,7 +59,7 @@ describe('TimeSheetEntryComponent', () => {
   });
 
   async function createComponent(): Promise<void> {
-    fixture = TestBed.createComponent(TimeSheetEntryComponent);
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
     component.categories = [];
     component.date = new Date();

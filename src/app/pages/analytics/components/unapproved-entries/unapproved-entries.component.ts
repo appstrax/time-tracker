@@ -77,7 +77,7 @@ export class UnapprovedEntriesComponent implements OnInit, OnChanges {
   public async onEntryClick(group: UnapprovedEntryGroup): Promise<void> {
     try {
       const allEntries =
-        await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDate(
+        await this.timeSheetEntryService.findByUserAndDate(
           group.userId,
           group.date,
         );

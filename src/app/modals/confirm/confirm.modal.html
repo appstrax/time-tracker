@@ -1,0 +1,23 @@
+<div class="modal-header {{ headerClass }} align-items-center d-flex justify-content-between">
+  <h4 class="modal-title mb-0">{{ title }}</h4>
+  <button
+    type="button"
+    class="btn-close btn-close-white"
+    aria-label="Close"
+    (click)="close()"
+  ></button>
+</div>
+
+<div class="modal-body">
+  {{ message }}
+</div>
+
+<div class="modal-footer d-flex justify-content-end">
+  <button type="button" class="btn btn-outline-secondary" (click)="close()">
+    {{ cancelButtonText }}
+  </button>
+
+  <button type="button" class="btn {{ confirmButtonClass }}" (click)="onConfirmClick()">
+    {{ confirmButtonText }}
+  </button>
+</div>

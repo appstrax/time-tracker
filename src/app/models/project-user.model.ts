@@ -10,5 +10,5 @@ export enum ProjectUserRole {
 export class ProjectUser extends Model {
   projectId: string = '';
   userId: string = '';
-  role: ProjectUserRole = ProjectUserRole.CONTRIBUTOR;
+  role: ProjectUserRole = ProjectUserRole.VIEWER;
 }

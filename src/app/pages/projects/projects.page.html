@@ -9,18 +9,18 @@
       </p>
     </div>
 
-    @if (!isLoading()) {
+    @if (!loading() || loaded()) {
       <a
         class="btn btn-primary"
         routerLink="/projects/project"
       >
-        <i class="bi bi-plus-lg"></i>
+        <i class="bi bi-plus-lg me-1"></i>
         <span>Create project</span>
       </a>
     }
   </header>
 
-  @if (isLoading() && !hasLoaded()) {
+  @if (loading() && !loaded()) {
     <section class="loading-card">
       <div class="text-center py-4">
         <div class="spinner-border spinner-border-lg" role="status">
@@ -102,7 +102,7 @@
                   <a
                     class="btn btn-sm btn-outline-primary"
                     [routerLink]="['/projects/project']"
-                    [queryParams]="{ editId: project.id, from: 'projects' }"
+                    [queryParams]="{ id: project.id }"
                   >
                     Edit
                   </a>

@@ -5,3 +5,4 @@ export * from './side-nav/collapsed/side-nav-collapsed.component';
 export * from './toast-container/toast-container.component';
 export * from './project-dropdown/project-dropdown.component';
 export * from './page-layout/page-layout.component';
+export * from './project-users/project-users.component';

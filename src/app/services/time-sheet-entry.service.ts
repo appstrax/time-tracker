@@ -13,68 +13,58 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     super('time-sheet-entries', TimeSheetEntry);
   }
 
-  public async getTimeSheetEntriesByUserId(
-    userId: string,
-  ): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({
+  public async findByUserId(userId: string): Promise<TimeSheetEntry[]> {
+    const res = await this.find({
       where: { userId },
       order: { createdAt: OrderDirection.ASC },
     });
-    return timeSheetEntries.data;
+    return res.data;
   }
 
-  public async getTimeSheetEntriesByProjectId(
+  public async findByProjectId(
     projectIds: string[],
   ): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({
+    const res = await this.find({
       where: { projectId: { [Operator.IN]: projectIds } },
       order: { createdAt: OrderDirection.ASC },
     });
-    return timeSheetEntries.data;
+    return res.data;
   }
 
-  public async getByFilter(filters: any): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({
-      where: filters,
-      order: { createdAt: OrderDirection.ASC },
-    });
-    return timeSheetEntries.data;
-  }
-
-  public async getTimeSheetEntriesByUserIdAndDateRange(
+  public async findByUserAndDateRange(
     userId: string,
-    startDate: Date,
-    endDate: Date,
+    start: Date,
+    end: Date,
   ): Promise<TimeSheetEntry[]> {
-    const timeSheetEntries = await this.find({
+    const res = await this.find({
       where: {
         [Operator.AND]: [
           { userId: userId },
-          { date: { [Operator.GTE]: startDate } },
-          { date: { [Operator.LTE]: endDate } },
+          { date: { [Operator.GTE]: start } },
+          { date: { [Operator.LTE]: end } },
         ],
       },
     });
-    return timeSheetEntries.data;
+    return res.data;
   }
 
-  public async getTimeSheetEntriesByUserIdAndDate(
+  public async findByUserAndDate(
     userId: string,
     date: Date,
   ): Promise<TimeSheetEntry[]> {
     // Get start and end of the day
-    const startOfDay = new Date(date);
-    startOfDay.setHours(0, 0, 0, 0);
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
 
-    const endOfDay = new Date(date);
-    endOfDay.setHours(23, 59, 59, 999);
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
 
     const timeSheetEntries = await this.find({
       where: {
         [Operator.AND]: [
           { userId: userId },
-          { date: { [Operator.GTE]: startOfDay } },
-          { date: { [Operator.LTE]: endOfDay } },
+          { date: { [Operator.GTE]: start } },
+          { date: { [Operator.LTE]: end } },
         ],
       },
       order: { createdAt: OrderDirection.ASC },

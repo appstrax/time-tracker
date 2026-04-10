@@ -1,5 +1,4 @@
 export * from './home/home.page';
-export * from './users/users.page';
 export * from './profile/profile.page';
 export * from './project/project.page';
 export * from './projects/projects.page';

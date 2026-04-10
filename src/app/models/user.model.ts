@@ -16,7 +16,11 @@ export class User extends Model {
     user.name = authUser.data?.name ?? '';
     user.surname = authUser.data?.surname ?? '';
     user.profilePictureUrl = authUser.data?.profilePictureUrl ?? '';
-    user.role = authUser.roles[0] as UserRole ?? UserRole.USER;
+    if (authUser.roles.includes(UserRole.ADMIN)) {
+      user.role = UserRole.ADMIN;
+    } else {
+      user.role = UserRole.USER;
+    }
 
     return user;
   }

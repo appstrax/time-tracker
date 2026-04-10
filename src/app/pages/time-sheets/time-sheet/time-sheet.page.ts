@@ -1,54 +1,46 @@
-import { Component, computed, OnInit, signal } from '@angular/core';
-import { appstraxAuth, User } from '@appstrax/services/auth';
+import { Component, computed, signal } from '@angular/core';
 
 import { TimeSheetEntry } from '@models';
 import { ToastService, TimeSheetEntryService } from '@services';
 import { Store } from '@state';
 import { ColorList } from '@utils';
 
-import { TimeSheetDayComponent } from './components/time-sheet-day/time-sheet-day.component';
-import { TimeSheetDateSelectorComponent } from './components/time-sheet-date-selector/time-sheet-date-selector.component';
+import { TimeSheetDayComponent } from './components';
+import { TimeSheetDateSelectorComponent } from './components';
 
 @Component({
-  selector: 'app-time-sheet',
   standalone: true,
   templateUrl: './time-sheet.page.html',
   styleUrl: './time-sheet.page.scss',
-  imports: [
-    TimeSheetDayComponent,
-    TimeSheetDateSelectorComponent,
-  ],
+  imports: [TimeSheetDayComponent, TimeSheetDateSelectorComponent],
 })
-export class TimeSheetPage implements OnInit {
-  private readonly user = signal<User | null>(null);
-
-  private readonly currentWeekStart = signal(new Date());
-  private readonly currentWeekEnd = signal(new Date());
+export class TimeSheetPage {
+  private readonly weekStart = signal(new Date());
+  private readonly weekEnd = signal(new Date());
 
   public readonly projects = computed(() => this.store.projects.projects());
 
   public readonly weekDays = computed(() => {
-    const currentWeekStart = this.currentWeekStart();
+    const weekStart = this.weekStart();
     return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(currentWeekStart);
-      date.setUTCDate(currentWeekStart.getUTCDate() + index);
+      const date = new Date(weekStart);
+      date.setUTCDate(weekStart.getUTCDate() + index);
       return date;
     });
   });
 
-  public readonly isLoading = signal(true);
-  public readonly isLoadingEntries = signal(true);
-  public readonly isSheetLoading = computed(
-    () => this.isLoading() || this.isLoadingEntries(),
+  public readonly fetching = signal(false);
+  public readonly loading = computed(
+    () => this.fetching() || !this.store.projects.fetchedAt(),
   );
 
-  private readonly timeSheetEntries = signal<TimeSheetEntry[]>([]);
-  public readonly timeSheetCategories = computed(() => [
-    ...new Set(this.timeSheetEntries().map((entry) => entry.category)),
+  private readonly entries = signal<TimeSheetEntry[]>([]);
+  public readonly categories = computed(() => [
+    ...new Set(this.entries().map((entry) => entry.category)),
   ]);
-  public readonly categoryColors = computed(() => {
+  public readonly colors = computed(() => {
     const colors = new Map<string, string>();
-    this.timeSheetCategories().forEach((category, index) => {
+    this.categories().forEach((category, index) => {
       colors.set(
         category,
         ColorList.colors[index % ColorList.colors.length] ?? '#6B7280',
@@ -58,7 +50,7 @@ export class TimeSheetPage implements OnInit {
   });
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
-    for (const entry of this.timeSheetEntries()) {
+    for (const entry of this.entries()) {
       const dateKey = entry.date.toDateString();
       const entries = entriesByDate.get(dateKey) ?? [];
       entries.push(entry);
@@ -70,66 +62,55 @@ export class TimeSheetPage implements OnInit {
   constructor(
     private store: Store,
     private toastService: ToastService,
-    private timeSheetEntryService: TimeSheetEntryService,
+    private entryService: TimeSheetEntryService,
   ) {}
 
-  public async ngOnInit(): Promise<void> {
-    if (!this.projects().length) return;
-    this.isLoading.set(true);
-
-    const user = await appstraxAuth.getUser();
-    if (!user) return;
-    this.user.set(user);
-    await this.initializeTimeSheetEntries();
-
-    this.isLoading.set(false);
-  }
-
-  public async initializeTimeSheetEntries(): Promise<void> {
-    this.isLoadingEntries.set(true);
-    await this.fetchTimeSheetEntries();
-    this.isLoadingEntries.set(false);
-  }
-
-  public async onTimeSheetEntrySaved(
-    _entry: TimeSheetEntry | undefined,
-  ): Promise<void> {
-    await this.initializeTimeSheetEntries();
-  }
-
-  private async fetchTimeSheetEntries(): Promise<void> {
-    const user = this.user();
-    if (!user?.id) return;
-
-    try {
-      const currentWeekStart = this.currentWeekStart();
-      const currentWeekEnd = this.currentWeekEnd();
-      const monthStart = new Date(currentWeekStart);
-      monthStart.setUTCDate(currentWeekStart.getUTCDate() - 21);
-      monthStart.setUTCHours(0, 0, 0, 0);
-
-      const monthEnd = new Date(currentWeekEnd);
-      monthEnd.setUTCDate(currentWeekEnd.getUTCDate() + 21);
-      monthEnd.setUTCHours(23, 59, 59, 999);
-
-      this.timeSheetEntries.set(
-        await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
-          user.id,
-          monthStart,
-          monthEnd,
-        ),
-      );
-    } catch (error) {
-      this.toastService.error('Error initializing time sheet entries');
+  private async waitForProjects(): Promise<void> {
+    if (this.store.projects.fetchedAt()) return;
+    while (true) {
+      if (this.store.projects.fetchedAt()) break;
+      await new Promise((resolve) => setTimeout(resolve, 100));
     }
   }
 
-  public async onWeekChange(weekRange: {
-    start: Date;
-    end: Date;
-  }): Promise<void> {
-    this.currentWeekStart.set(weekRange.start);
-    this.currentWeekEnd.set(weekRange.end);
-    await this.initializeTimeSheetEntries();
+  public onTimeSheetEntrySaved() {
+    this.fetchTimeSheetEntries();
+  }
+
+  private async fetchTimeSheetEntries(): Promise<void> {
+    this.fetching.set(true);
+
+    await this.waitForProjects();
+    if (!this.projects().length) {
+      this.fetching.set(false);
+      return;
+    }
+
+    const user = this.store.user.user();
+    if (!user) return;
+
+    try {
+      const start = this.weekStart();
+      const end = this.weekEnd();
+
+      const entries = await this.entryService.findByUserAndDateRange(
+        user.id,
+        start,
+        end,
+      );
+
+      this.entries.set(entries);
+    } catch (error) {
+      this.toastService.error('Error initializing time sheet entries');
+    } finally {
+      this.fetching.set(false);
+    }
+  }
+
+  public onWeekChange(range: { start: Date; end: Date }) {
+    this.weekStart.set(range.start);
+    this.weekEnd.set(range.end);
+
+    this.fetchTimeSheetEntries();
   }
 }

@@ -12,7 +12,7 @@ export class Store {
     try {
       await this.user.initialize();
       if (this.user.user()) {
-        await this.projects.fetchUserProjects(this.user.user()!.id);
+        await this.projects.fetchUserProjects(this.user.user()!);
       }
     } catch (e: any) {
       throw e;

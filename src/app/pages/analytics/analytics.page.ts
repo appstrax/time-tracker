@@ -209,12 +209,12 @@ export class AnalyticsPage implements OnInit, OnDestroy {
         }
 
         this.allTimeSheetEntries =
-          await this.timeSheetEntryService.getTimeSheetEntriesByProjectId(
+          await this.timeSheetEntryService.findByProjectId(
             accessibleProjectIds,
           );
       } else {
         const result =
-          await this.timeSheetEntryService.getTimeSheetEntriesByUserId(
+          await this.timeSheetEntryService.findByUserId(
             this.currentUserId,
           );
         this.allTimeSheetEntries = result || [];
@@ -239,12 +239,12 @@ export class AnalyticsPage implements OnInit, OnDestroy {
     if (this.canViewAllEntries) {
       const projectIds = this.getFilteredProjectIds();
       if (!projectIds.length) return [];
-      return await this.timeSheetEntryService.getTimeSheetEntriesByProjectId(
+      return await this.timeSheetEntryService.findByProjectId(
         projectIds,
       );
     }
 
-    const entries = await this.timeSheetEntryService.getTimeSheetEntriesByUserId(
+    const entries = await this.timeSheetEntryService.findByUserId(
       this.currentUserId,
     );
 

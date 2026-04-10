@@ -80,7 +80,7 @@ export class HomePage {
 
     try {
       const entries =
-        await this.timeSheetEntryService.getTimeSheetEntriesByUserIdAndDateRange(
+        await this.timeSheetEntryService.findByUserAndDateRange(
           userId,
           this.rangeStart,
           this.rangeEnd,

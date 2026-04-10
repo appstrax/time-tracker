@@ -26,6 +26,7 @@
       "@state": ["src/app/state/index.ts"],
       "@state/*": ["src/app/state/*"],
       "@utils": ["src/app/utils/index.ts"],
+      "@modals": ["src/app/modals/index.ts"],
       // "@enums": ["src/app/enums/index.ts"],
       // "@directives": ["src/app/directives/index.ts"],
       // "@types": ["src/app/types/index.ts"]
