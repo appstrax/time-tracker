@@ -1,7 +1,8 @@
 import { Injectable } from '@angular/core';
 import { CrudService } from '@appstrax/services/database';
-import { Operator } from '@appstrax/services/auth';
+import { appstraxAuth, Operator } from '@appstrax/services/auth';
 
+import { UserRole } from '@models';
 import { ProjectUser } from '../models/project-user.model';
 import { Project } from '../models/project.model';
 import { UsersService } from './user.service';
@@ -60,6 +61,14 @@ export class ProjectService extends CrudService<Project> {
 
   private async populateProjectUsers(projects: Project[]): Promise<Project[]> {
     if (!projects.length) return [];
+
+    const authUser = await appstraxAuth.getUser();
+    if (!authUser?.roles?.includes(UserRole.ADMIN)) {
+      for (const project of projects) {
+        project.users = [];
+      }
+      return projects;
+    }
 
     const projectIds = projects.map((x) => x.id);
     const projectUsers =
