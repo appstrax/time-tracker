@@ -1,4 +1,5 @@
 import { ApplicationConfig, provideZonelessChangeDetection } from '@angular/core';
+import { provideHttpClient } from '@angular/common/http';
 import { provideRouter } from '@angular/router';
 import { AppstraxServices } from '@appstrax/services';
 
@@ -14,5 +15,9 @@ AppstraxServices.init({
 });
 
 export const appConfig: ApplicationConfig = {
-  providers: [provideZonelessChangeDetection(), provideRouter(routes)]
+  providers: [
+    provideZonelessChangeDetection(),
+    provideRouter(routes),
+    provideHttpClient(),
+  ],
 };
