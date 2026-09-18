@@ -64,7 +64,7 @@ export class AgentTokenService {
   }
 
   async revokeToken(id: string): Promise<void> {
-    await this.request('DELETE', `/api/agent-tokens/${id}`);
+    await this.request<void>('DELETE', `/api/agent-tokens/${id}`);
   }
 
   private async request<T>(
@@ -78,22 +78,22 @@ export class AgentTokenService {
       headers: { Authorization: `Bearer ${token}` },
     };
 
-    let response: ApiResponse<T>;
+    let response: ApiResponse<T> | null;
     if (method === 'GET') {
       response = await firstValueFrom(
-        this.http.get<ApiResponse<T>>(url, options),
+        this.http.get<ApiResponse<T> | null>(url, options),
       );
     } else if (method === 'POST') {
       response = await firstValueFrom(
-        this.http.post<ApiResponse<T>>(url, body, options),
+        this.http.post<ApiResponse<T> | null>(url, body, options),
       );
     } else {
       response = await firstValueFrom(
-        this.http.delete<ApiResponse<T>>(url, options),
+        this.http.delete<ApiResponse<T> | null>(url, options),
       );
     }
 
-    return response.data;
+    return response?.data as T;
   }
 
   static readErrorMessage(error: unknown, fallback: string): string {
