@@ -13,6 +13,7 @@ import {
   TimeSheetPage,
   HomePage,
   SettingsPage,
+  AgentTokensPage,
   ProfilePage,
   AnalyticsPage,
   LandingPage,
@@ -52,6 +53,10 @@ export const routes: Routes = [
       {
         path: 'settings',
         component: SettingsPage,
+      },
+      {
+        path: 'settings/agent-tokens',
+        component: AgentTokensPage,
       },
       {
         path: 'time-sheet',

@@ -53,8 +53,14 @@ export class TimeSheetPage {
   );
 
   private readonly entries = signal<TimeSheetEntry[]>([]);
+  private readonly filteredEntries = computed(() => {
+    const projectId = this.workingOnProjectId();
+    const entries = this.entries();
+    if (!projectId) return entries;
+    return entries.filter((entry) => entry.projectId === projectId);
+  });
   public readonly categories = computed(() => [
-    ...new Set(this.entries().map((entry) => entry.category)),
+    ...new Set(this.filteredEntries().map((entry) => entry.category)),
   ]);
   public readonly colors = computed(() => {
     const colors = new Map<string, string>();
@@ -68,7 +74,7 @@ export class TimeSheetPage {
   });
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
-    for (const entry of this.entries()) {
+    for (const entry of this.filteredEntries()) {
       const dateKey = entry.date.toDateString();
       const entries = entriesByDate.get(dateKey) ?? [];
       entries.push(entry);
