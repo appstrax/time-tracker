@@ -77,13 +77,7 @@ export class TimeSheetEntryModal implements OnInit {
 
   onProjectSelected(project: Project | null): void {
     this.project = project || undefined;
-    if (!project) {
-      this.timeSheetEntry.projectId = '';
-      clearStoredTimeSheetProjectId();
-      return;
-    }
-    this.timeSheetEntry.projectId = project.id;
-    storeTimeSheetProjectId(project.id);
+    this.timeSheetEntry.projectId = project ? project.id : '';
   }
 
   onCategoryInput(event: Event): void {

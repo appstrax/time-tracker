@@ -14,6 +14,7 @@
           <app-project-dropdown
             class="working-on-dropdown"
             [selectedProject]="workingOnProject()"
+            [allowNull]="true"
             (projectSelected)="onWorkingOnProjectSelected($event)"
           />
         </div>
