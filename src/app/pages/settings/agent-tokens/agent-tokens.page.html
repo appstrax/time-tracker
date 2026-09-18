@@ -17,35 +17,7 @@
   @if (loading()) {
     <p class="text-muted">Loading…</p>
   } @else {
-    @if (createdToken()) {
-      <section class="token-success-card">
-        <div class="success-block">
-          <h2 class="success-heading">Your new token</h2>
-          <p class="success-warning">
-            This is the only time you will see it. Copy it now — if you lose it, revoke it
-            and mint another.
-          </p>
-          <div class="copy-field" tabindex="0">{{ createdToken() }}</div>
-          <button type="button" class="btn btn-copy-block" (click)="copyCreatedToken()">
-            Copy token
-          </button>
-        </div>
-
-        <div class="success-block">
-          <h2 class="success-heading">Connect Claude Code to timetracker</h2>
-          <div class="copy-field copy-field-command" tabindex="0">{{ claudeConnectCommand() }}</div>
-          <button type="button" class="btn btn-copy-block" (click)="copyClaudeConnectCommand()">
-            Copy command
-          </button>
-        </div>
-
-        <button type="button" class="btn btn-acknowledge" (click)="acknowledgeTokenCopied()">
-          I have copied it
-        </button>
-      </section>
-    }
-
-    <div class="layout-grid" [class.layout-grid-dimmed]="createdToken()">
+    <div class="layout-grid">
       <section class="panel new-token-panel">
         <h2 class="panel-title">New token</h2>
 
@@ -120,7 +92,7 @@
         <button
           class="btn btn-primary create-btn"
           type="button"
-          [disabled]="creating() || !name.trim() || createdToken()"
+          [disabled]="creating() || !name.trim()"
           (click)="createToken()"
         >
           {{ creating() ? 'Creating…' : 'Create token' }}

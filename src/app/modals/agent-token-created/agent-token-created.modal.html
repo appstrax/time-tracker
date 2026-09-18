@@ -1,0 +1,105 @@
+<div class="modal-header align-items-center d-flex justify-content-between">
+  <h4 class="modal-title text-white mb-0">Your new token</h4>
+</div>
+
+<div class="modal-body">
+  <p class="success-warning">
+    This is the only time you will see it. Copy it now — if you lose it, revoke it
+    and mint another.
+  </p>
+  <div class="copy-field-row">
+    <div class="copy-field" tabindex="0">{{ token }}</div>
+    <button
+      type="button"
+      class="btn btn-copy-icon"
+      aria-label="Copy token"
+      (click)="copyToken()"
+    >
+      <i class="bi bi-clipboard" aria-hidden="true"></i>
+    </button>
+  </div>
+
+  <h3 class="success-heading">Connect your agent</h3>
+  <div class="connect-tool-switch" role="tablist" aria-label="Agent setup">
+    <button
+      type="button"
+      role="tab"
+      class="connect-tool-btn"
+      [class.active]="connectTool() === 'cursor'"
+      [attr.aria-selected]="connectTool() === 'cursor'"
+      (click)="setConnectTool('cursor')"
+    >
+      Cursor
+    </button>
+    <button
+      type="button"
+      role="tab"
+      class="connect-tool-btn"
+      [class.active]="connectTool() === 'claude'"
+      [attr.aria-selected]="connectTool() === 'claude'"
+      (click)="setConnectTool('claude')"
+    >
+      Claude Code
+    </button>
+  </div>
+
+  @if (connectTool() === 'cursor') {
+    <ol class="connect-steps">
+      <li>
+        Create or open <code>~/.cursor/mcp.json</code> (all projects) or
+        <code>.cursor/mcp.json</code> in a repo (project-only).
+      </li>
+      <li>
+        Merge the block below into <code>mcpServers</code>. If that name already
+        exists, pick a different key or replace the entry.
+      </li>
+      <li>
+        In Cursor, open <strong>Settings → MCP</strong> and confirm
+        <strong>{{ mcpServerName }}</strong> is enabled, then reload the window if
+        it does not connect.
+      </li>
+      <li>
+        Do not commit this file with a live token — prefer an environment
+        variable in the <code>Authorization</code> header after setup.
+      </li>
+    </ol>
+    <div class="copy-field-row">
+      <div class="copy-field copy-field-command" tabindex="0">
+        {{ cursorMcpConfig() }}
+      </div>
+      <button
+        type="button"
+        class="btn btn-copy-icon"
+        aria-label="Copy Cursor config"
+        (click)="copyConnectSnippet()"
+      >
+        <i class="bi bi-clipboard" aria-hidden="true"></i>
+      </button>
+    </div>
+  } @else {
+    <ol class="connect-steps">
+      <li>Install the Claude Code CLI if you have not already.</li>
+      <li>Run the command below in your terminal.</li>
+      <li>Restart Claude Code or refresh MCP so <strong>{{ mcpServerName }}</strong> appears.</li>
+    </ol>
+    <div class="copy-field-row">
+      <div class="copy-field copy-field-command" tabindex="0">
+        {{ claudeConnectCommand() }}
+      </div>
+      <button
+        type="button"
+        class="btn btn-copy-icon"
+        aria-label="Copy Claude command"
+        (click)="copyConnectSnippet()"
+      >
+        <i class="bi bi-clipboard" aria-hidden="true"></i>
+      </button>
+    </div>
+  }
+</div>
+
+<div class="modal-footer d-flex justify-content-end">
+  <button type="button" class="btn btn-primary" (click)="acknowledge()">
+    I have copied it
+  </button>
+</div>

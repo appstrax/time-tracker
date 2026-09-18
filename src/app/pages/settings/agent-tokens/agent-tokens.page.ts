@@ -2,8 +2,10 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectComponent } from '@ng-select/ng-select';
 
+import { AgentTokenCreatedModal } from '@modals';
 import {
   AgentTokenRecord,
   AgentTokenScopeDefinition,
@@ -26,25 +28,16 @@ export class AgentTokensPage implements OnInit {
   private readonly agentTokenService = inject(AgentTokenService);
   private readonly toast = inject(ToastService);
   private readonly store = inject(Store);
+  private readonly modalService = inject(NgbModal);
 
   readonly loading = signal(true);
   readonly creating = signal(false);
   readonly tokens = signal<AgentTokenRecord[]>([]);
   readonly scopeDefinitions = signal<AgentTokenScopeDefinition[]>([]);
-  readonly createdToken = signal<string | null>(null);
 
-  readonly mcpServerName = 'timetracker';
+  private readonly mcpServerName = 'timetracker';
 
   readonly projects = computed(() => this.store.projects.projects());
-
-  readonly claudeConnectCommand = computed(() => {
-    const token = this.createdToken();
-    if (!token) {
-      return '';
-    }
-    const mcpUrl = this.mcpEndpoint();
-    return `claude mcp add --transport http ${this.mcpServerName} ${mcpUrl} --header "Authorization: Bearer ${token}"`;
-  });
 
   name = '';
   expiresAt = '';
@@ -145,12 +138,11 @@ export class AgentTokensPage implements OnInit {
     };
 
     this.creating.set(true);
-    this.createdToken.set(null);
     try {
       const result = await this.agentTokenService.createToken(payload);
-      this.createdToken.set(result.token);
       this.tokens.update((list) => [result.record, ...list]);
       this.name = '';
+      this.openCreatedTokenModal(result.token);
       this.toast.success('Agent token created. Copy it now — it will not be shown again.');
     } catch (error) {
       this.toast.error(
@@ -190,31 +182,17 @@ export class AgentTokensPage implements OnInit {
     }).format(new Date(value));
   }
 
-  mcpEndpoint(): string {
+  private openCreatedTokenModal(token: string): void {
+    const modalRef = this.modalService.open(AgentTokenCreatedModal, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+      size: 'lg',
+    });
     const base = environment.apiUrl.replace(/\/$/, '');
-    return `${base}/mcp`;
-  }
-
-  copyCreatedToken(): void {
-    const token = this.createdToken();
-    if (!token) {
-      return;
-    }
-    void navigator.clipboard.writeText(token);
-    this.toast.success('Token copied to clipboard.');
-  }
-
-  copyClaudeConnectCommand(): void {
-    const command = this.claudeConnectCommand();
-    if (!command) {
-      return;
-    }
-    void navigator.clipboard.writeText(command);
-    this.toast.success('Command copied to clipboard.');
-  }
-
-  acknowledgeTokenCopied(): void {
-    this.createdToken.set(null);
+    modalRef.componentInstance.token = token;
+    modalRef.componentInstance.mcpUrl = `${base}/mcp`;
+    modalRef.componentInstance.mcpServerName = this.mcpServerName;
   }
 
 }
