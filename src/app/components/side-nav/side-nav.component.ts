@@ -1,4 +1,4 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, OnDestroy, effect } from '@angular/core';
 import { RouterModule, Router, NavigationStart } from '@angular/router';
 import { HostListener, AfterViewInit } from '@angular/core';
 
@@ -9,6 +9,7 @@ import { SideNavExpandedComponent } from './expanded/side-nav-expanded.component
 import { SettingsService } from '@services';
 import { Store } from '@state';
 import { UserRole } from '@models';
+import { getUserDisplayName } from '@utils';
 
 interface NavItem {
   title: string;
@@ -30,6 +31,7 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   private readonly THRESHOLD = 50;
   private readonly BUFFER_ZONE = 100;
   private tooltips: Tooltip[] = [];
+  private profileTooltip: Tooltip | null = null;
 
   constructor(
     private router: Router,
@@ -37,6 +39,13 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
     private store: Store,
   ) {
     this.mode = this.settings.getSideNavMode();
+
+    // Bootstrap tooltips cache their title at construction time, so the profile
+    // tooltip needs to be refreshed explicitly once the user's name loads/changes.
+    effect(() => {
+      const label = getUserDisplayName(this.store.user.user());
+      this.profileTooltip?.setContent({ '.tooltip-inner': label });
+    });
   }
 
   @HostListener('document:mousemove', ['$event'])
@@ -77,13 +86,22 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
         '[data-bs-toggle="tooltip"]',
       );
       this.tooltips = [...tooltipTriggerList].map((tooltipTriggerEl) => {
-        return new Tooltip(tooltipTriggerEl, {
+        const tooltip = new Tooltip(tooltipTriggerEl, {
           placement: 'right',
           trigger: 'hover',
           delay: { show: 300, hide: 100 },
           container: 'body',
           boundary: document.body as any,
         });
+
+        if (tooltipTriggerEl.hasAttribute('data-profile-tooltip')) {
+          this.profileTooltip = tooltip;
+          tooltip.setContent({
+            '.tooltip-inner': getUserDisplayName(this.store.user.user()),
+          });
+        }
+
+        return tooltip;
       });
     }, 100);
 
