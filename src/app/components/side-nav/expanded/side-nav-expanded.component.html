@@ -45,9 +45,14 @@
       <i class="bi bi-gear"></i>
       <span class="label">Settings</span>
     </a>
-    <a routerLink="/profile" routerLinkActive="active" class="menu-item">
+    <a
+      routerLink="/profile"
+      routerLinkActive="active"
+      class="menu-item"
+      title="{{ userDisplayName() }}"
+    >
       <i class="bi bi-person-circle"></i>
-      <span class="label">Profile</span>
+      <span class="label">{{ userDisplayName() }}</span>
     </a>
     <button class="menu-item" type="button" (click)="logout.emit()">
       <i class="bi bi-box-arrow-right"></i>

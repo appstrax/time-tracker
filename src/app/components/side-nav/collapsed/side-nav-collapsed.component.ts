@@ -3,6 +3,7 @@ import { RouterModule } from '@angular/router';
 
 import { UserRole } from '@models';
 import { Store } from '@state';
+import { getUserDisplayName } from '@utils';
 
 @Component({
   selector: 'app-side-nav-collapsed',
@@ -17,6 +18,7 @@ export class SideNavCollapsedComponent {
 
   user = computed(() => this.store.user.user());
   admin = computed(() => this.user()?.role === UserRole.ADMIN);
+  userDisplayName = computed(() => getUserDisplayName(this.user()));
 
   constructor(private store: Store) {}
 }

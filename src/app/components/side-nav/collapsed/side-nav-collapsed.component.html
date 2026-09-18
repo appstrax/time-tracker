@@ -81,7 +81,7 @@
       routerLinkActive="active"
       class="nav-item"
       data-bs-toggle="tooltip"
-      data-bs-title="Profile"
+      [attr.data-bs-title]="userDisplayName()"
       data-bs-placement="right"
     >
       <div class="icon-box">

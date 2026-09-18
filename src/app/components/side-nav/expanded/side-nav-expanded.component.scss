@@ -88,6 +88,13 @@
     background-color: var(--primary-color);
     color: #fff;
   }
+
+  .label {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+  }
 }
 
 .group-header {
