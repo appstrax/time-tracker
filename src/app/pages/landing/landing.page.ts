@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
-import { appstraxAuth } from '@appstrax/services/auth';
+import { isAuthenticatedAfterReady } from '@utils';
 
 @Component({
   templateUrl: './landing.page.html',
@@ -13,7 +13,7 @@ export class LandingPage implements OnInit {
   constructor(private router: Router) {}
 
   async ngOnInit(): Promise<void> {
-    const isAuthenticated = await appstraxAuth.isAuthenticated();
+    const isAuthenticated = await isAuthenticatedAfterReady();
     await this.router.navigate([isAuthenticated ? '/home' : '/login']);
   }
 }

@@ -1,4 +1,5 @@
 export * from './auth-error.util';
+export * from './auth-ready.util';
 export * from './color-list';
 export * from './auth.guard';
 export * from './admin.guard';

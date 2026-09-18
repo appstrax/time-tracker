@@ -25,6 +25,50 @@
         <h2 class="welcome-text">Login</h2>
         <p class="login-instruction">Log in to your account</p>
 
+        @if (linkRequired()) {
+        <div class="link-account-panel">
+          <p class="link-account-copy">
+            A Google account with this email already exists. Enter your password
+            to link Google sign-in to your existing account.
+          </p>
+
+          <div class="form-group">
+            <label for="link-password" class="visually-hidden">Password</label>
+            <div class="input-with-icon">
+              <i class="bi bi-lock"></i>
+              <input
+                type="password"
+                class="form-control"
+                id="link-password"
+                [ngModel]="linkPassword()"
+                (ngModelChange)="linkPassword.set($event)"
+                name="linkPassword"
+                placeholder="Password"
+                required
+              />
+            </div>
+          </div>
+
+          @if (error()) {
+          <div class="alert alert-danger mb-3">{{ error() }}</div>
+          }
+
+          <button
+            type="button"
+            class="btn btn-primary login-btn"
+            [disabled]="!linkPassword() || linkLoading()"
+            (click)="onLinkAccount()"
+          >
+            @if (linkLoading()) {
+            <span
+              class="spinner-border spinner-border-sm me-2"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            } Link and continue
+          </button>
+        </div>
+        } @else {
         <form (ngSubmit)="onSubmit()">
           <div class="form-group">
             <label for="email" class="visually-hidden">Email address</label>
@@ -71,7 +115,7 @@
           <button
             type="submit"
             class="btn btn-primary login-btn"
-            [disabled]="!isFormValid()"
+            [disabled]="!isFormValid() || loading()"
           >
             @if (loading()) {
             <span
@@ -82,6 +126,30 @@
             } Log in
           </button>
         </form>
+
+        @if (googleEnabled()) {
+        <div class="sso-divider">
+          <span>or</span>
+        </div>
+
+        <button
+          type="button"
+          class="btn btn-outline-secondary google-btn"
+          [disabled]="googleLoading() || loading()"
+          (click)="onGoogleLogin()"
+        >
+          @if (googleLoading()) {
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            role="status"
+            aria-hidden="true"
+          ></span>
+          }
+          <i class="bi bi-google me-2"></i>
+          Continue with Google
+        </button>
+        }
+        }
       </div>
     </div>
   </div>
