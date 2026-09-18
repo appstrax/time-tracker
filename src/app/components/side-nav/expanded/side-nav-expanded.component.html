@@ -51,7 +51,13 @@
       class="menu-item"
       title="{{ userDisplayName() }}"
     >
-      <i class="bi bi-person-circle"></i>
+      <span class="avatar" aria-hidden="true">
+        @if (user()?.profilePictureUrl) {
+          <img [src]="user()?.profilePictureUrl" alt="" class="avatar-img" />
+        } @else {
+          <span class="avatar-initials">{{ userInitials() }}</span>
+        }
+      </span>
       <span class="label">{{ userDisplayName() }}</span>
     </a>
     <button class="menu-item" type="button" (click)="logout.emit()">

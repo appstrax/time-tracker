@@ -84,8 +84,12 @@
       [attr.data-bs-title]="userDisplayName()"
       data-bs-placement="right"
     >
-      <div class="icon-box">
-        <i class="bi bi-person-circle"></i>
+      <div class="icon-box avatar-box">
+        @if (user()?.profilePictureUrl) {
+          <img [src]="user()?.profilePictureUrl" alt="" class="avatar-img" />
+        } @else {
+          <span class="avatar-initials">{{ userInitials() }}</span>
+        }
       </div>
     </a>
     <div
