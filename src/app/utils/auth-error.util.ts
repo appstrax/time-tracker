@@ -19,10 +19,12 @@ export class AuthErrorUtil {
         return 'User blocked, please reset your password';
       case AuthErrors.invalidTwoFactorAuthCode:
         return 'Invalid Two Factor Authentication Code';
-      case AuthErrors.emailAddressDoesNotExist:
-        return 'Email Address Does Not Exist';
       case AuthErrors.invalidResetCode:
         return 'Invalid Reset Code';
+      case 'tooManyAttempts':
+        return 'Too many login attempts. Please wait a few minutes and try again.';
+      case 'tooManyRequests':
+        return 'Too many requests. Please try again later.';
       case AuthErrors.unexpectedError:
         return 'Unexpected error';
       default:
