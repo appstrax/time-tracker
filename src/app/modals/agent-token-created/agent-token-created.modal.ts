@@ -54,15 +54,26 @@ export class AgentTokenCreatedModal {
   }
 
   copyToken(): void {
-    void navigator.clipboard.writeText(this.token);
-    this.toast.success('Token copied to clipboard.');
+    void this.copyToClipboard(this.token, 'Token copied to clipboard.');
   }
 
   copyConnectSnippet(): void {
-    void navigator.clipboard.writeText(this.activeConnectSnippet());
     const label =
       this.connectTool() === 'claude' ? 'Command copied.' : 'Config copied.';
-    this.toast.success(label);
+    void this.copyToClipboard(this.activeConnectSnippet(), label);
+  }
+
+  private async copyToClipboard(text: string, successMessage: string): Promise<void> {
+    if (!navigator.clipboard) {
+      this.toast.error('Clipboard is not available. Please copy manually.');
+      return;
+    }
+    try {
+      await navigator.clipboard.writeText(text);
+      this.toast.success(successMessage);
+    } catch {
+      this.toast.error('Could not copy to clipboard. Please copy manually.');
+    }
   }
 
   acknowledge(): void {
