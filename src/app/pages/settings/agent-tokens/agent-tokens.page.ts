@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { NgSelectComponent } from '@ng-select/ng-select';
 
-import { AgentTokenCreatedModal } from '@modals';
+import { AgentTokenCreatedModal, ConfirmModalComponent } from '@modals';
 import {
   AgentTokenRecord,
   AgentTokenScopeDefinition,
@@ -153,7 +153,20 @@ export class AgentTokensPage implements OnInit {
     }
   }
 
-  async revokeToken(token: AgentTokenRecord): Promise<void> {
+  confirmRevokeToken(token: AgentTokenRecord): void {
+    const modal = this.modalService.open(ConfirmModalComponent, {
+      centered: true,
+    });
+    modal.componentInstance.title = 'Revoke agent token';
+    modal.componentInstance.headerClass = 'bg-danger text-white';
+    modal.componentInstance.confirmButtonClass = 'btn-danger';
+    modal.componentInstance.confirmButtonText = 'Revoke';
+    modal.componentInstance.cancelButtonText = 'Cancel';
+    modal.componentInstance.message = `Revoke "${token.name}"? Any agent using this token will lose access immediately. This cannot be undone.`;
+    modal.componentInstance.onConfirm = () => void this.revokeToken(token);
+  }
+
+  private async revokeToken(token: AgentTokenRecord): Promise<void> {
     try {
       await this.agentTokenService.revokeToken(token.id);
       this.tokens.update((list) => list.filter((t) => t.id !== token.id));
