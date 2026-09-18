@@ -2,8 +2,8 @@ import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { NgSelectComponent } from '@ng-select/ng-select';
 
-import { Project } from '@models';
 import {
   AgentTokenRecord,
   AgentTokenScopeDefinition,
@@ -18,7 +18,7 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-agent-tokens',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule],
+  imports: [CommonModule, FormsModule, RouterModule, NgSelectComponent],
   templateUrl: './agent-tokens.page.html',
   styleUrls: ['./agent-tokens.page.scss'],
 })
@@ -113,20 +113,19 @@ export class AgentTokensPage implements OnInit {
     this.selectedScopes.update((current) => ({ ...current, [scopeId]: checked }));
   }
 
-  toggleProject(projectId: string, checked: boolean): void {
-    this.selectedProjectIds.update((ids) => {
-      if (checked) {
-        return ids.includes(projectId) ? ids : [...ids, projectId];
-      }
-      return ids.filter((id) => id !== projectId);
-    });
-  }
-
-  isProjectSelected(projectId: string): boolean {
-    return this.selectedProjectIds().includes(projectId);
+  onSelectedProjectsChange(projectIds: string[] | null): void {
+    this.selectedProjectIds.set(projectIds ?? []);
   }
 
   async createToken(): Promise<void> {
+    if (
+      this.projectScope === 'selected' &&
+      !this.selectedProjectIds().length
+    ) {
+      this.toast.error('Choose at least one project, or allow every project.');
+      return;
+    }
+
     let scopes = Object.entries(this.selectedScopes())
       .filter(([, enabled]) => enabled)
       .map(([id]) => id);
@@ -218,7 +217,4 @@ export class AgentTokensPage implements OnInit {
     this.createdToken.set(null);
   }
 
-  projectLabel(project: Project): string {
-    return project.name;
-  }
 }

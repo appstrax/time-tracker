@@ -96,18 +96,21 @@
         </div>
 
         @if (projectScope === 'selected') {
-          <div class="project-pick-list">
-            @for (project of projects(); track project.id) {
-              <label class="scope-row">
-                <input
-                  type="checkbox"
-                  [checked]="isProjectSelected(project.id)"
-                  (change)="toggleProject(project.id, $any($event.target).checked)"
-                />
-                <span>{{ projectLabel(project) }}</span>
-              </label>
-            }
-          </div>
+          <label class="form-label" for="projectIds">Projects</label>
+          <ng-select
+            id="projectIds"
+            class="project-ng-select"
+            [items]="projects()"
+            bindLabel="name"
+            bindValue="id"
+            [multiple]="true"
+            [closeOnSelect]="false"
+            [searchable]="true"
+            placeholder="Search and select projects…"
+            notFoundText="No projects match your search"
+            [ngModel]="selectedProjectIds()"
+            (ngModelChange)="onSelectedProjectsChange($event)"
+          />
         }
 
         <label class="form-label mt-3" for="expiresAt">Expires</label>
