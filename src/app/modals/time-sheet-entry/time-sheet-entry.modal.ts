@@ -13,7 +13,12 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@state';
 import { Project, TimeSheetEntry } from '@models';
 import { ProjectDropdownComponent } from '@components';
-import { TimeSheetDisplayUtil } from '@utils';
+import {
+  clearStoredTimeSheetProjectId,
+  getStoredTimeSheetProjectId,
+  storeTimeSheetProjectId,
+  TimeSheetDisplayUtil,
+} from '@utils';
 
 @Component({
   standalone: true,
@@ -22,8 +27,6 @@ import { TimeSheetDisplayUtil } from '@utils';
   imports: [FormsModule, ProjectDropdownComponent],
 })
 export class TimeSheetEntryModal implements OnInit {
-  private static readonly LAST_SELECTED_PROJECT_KEY = 'timeSheet.lastProjectId';
-
   @Input() timeSheetEntry = new TimeSheetEntry();
   @Input() categories!: string[];
   @Input() date!: Date;
@@ -51,13 +54,13 @@ export class TimeSheetEntryModal implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const projectId =
-      this.timeSheetEntry.projectId || this.getStoredProjectId();
+      this.timeSheetEntry.projectId || getStoredTimeSheetProjectId();
     if (projectId) {
       this.project = this.projects().find((x) => x.id === projectId);
       if (this.project) {
         this.timeSheetEntry.projectId = this.project.id;
       } else if (!this.timeSheetEntry.projectId) {
-        this.clearStoredProjectId();
+        clearStoredTimeSheetProjectId();
       }
     }
 
@@ -76,11 +79,11 @@ export class TimeSheetEntryModal implements OnInit {
     this.project = project || undefined;
     if (!project) {
       this.timeSheetEntry.projectId = '';
-      this.clearStoredProjectId();
+      clearStoredTimeSheetProjectId();
       return;
     }
     this.timeSheetEntry.projectId = project.id;
-    this.storeProjectId(project.id);
+    storeTimeSheetProjectId(project.id);
   }
 
   onCategoryInput(event: Event): void {
@@ -132,7 +135,7 @@ export class TimeSheetEntryModal implements OnInit {
         return;
       }
 
-      this.storeProjectId(this.timeSheetEntry.projectId);
+      storeTimeSheetProjectId(this.timeSheetEntry.projectId);
       this.activeModal.close({
         action: 'save',
         timeSheetEntry: this.timeSheetEntry,
@@ -174,31 +177,6 @@ export class TimeSheetEntryModal implements OnInit {
     return false;
   }
 
-  private getStoredProjectId(): string | null {
-    try {
-      return localStorage.getItem(
-        TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY,
-      );
-    } catch {
-      return null;
-    }
-  }
-
-  private storeProjectId(projectId: string): void {
-    if (!projectId) return;
-    try {
-      localStorage.setItem(
-        TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY,
-        projectId,
-      );
-    } catch {}
-  }
-
-  private clearStoredProjectId(): void {
-    try {
-      localStorage.removeItem(TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY);
-    } catch {}
-  }
 }
 
 export interface TimeSheetEntryModalOptions {
