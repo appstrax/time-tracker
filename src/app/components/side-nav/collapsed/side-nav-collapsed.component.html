@@ -86,11 +86,7 @@
       data-bs-placement="right"
     >
       <div class="icon-box avatar-box">
-        @if (user()?.profilePictureUrl) {
-          <img [src]="user()?.profilePictureUrl" alt="" class="avatar-img" />
-        } @else {
-          <span class="avatar-initials">{{ userInitials() }}</span>
-        }
+        <app-user-avatar [user]="user()" [sizePx]="35" [fontSizePx]="13" />
       </div>
     </a>
     <div

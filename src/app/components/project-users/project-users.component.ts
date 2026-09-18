@@ -12,7 +12,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { ConfirmModalComponent } from '@modals';
 import { Project, ProjectUser, ProjectUserRole, User } from '@models';
-import { getUserDisplayName } from '@utils';
+import { getUserDisplayName, getUserInitials } from '@utils';
 import { ProjectUserService, ToastService, UsersService } from '@services';
 import { Store } from '@state';
 
@@ -274,15 +274,7 @@ export class ProjectUsersComponent implements OnInit {
   }
 
   public getUserInitials(user: User | null): string {
-    const fallback = this.getDisplayName(user);
-    const initials = fallback
-      .split(' ')
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0]?.toUpperCase() ?? '')
-      .join('');
-
-    return initials || '?';
+    return getUserInitials(user);
   }
 
   public formatRole(role: ProjectUserRole): string {
