@@ -1,5 +1,5 @@
 import { Router } from '@angular/router';
-import { Component, OnInit, signal } from '@angular/core';
+import { Component, HostListener, OnInit, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   AuthResult,
@@ -39,7 +39,15 @@ export class LoginPage implements OnInit {
     private store: Store,
   ) {}
 
+  @HostListener('window:pageshow', ['$event'])
+  onPageShow(event: PageTransitionEvent): void {
+    if (event.persisted) {
+      this.googleLoading.set(false);
+    }
+  }
+
   async ngOnInit(): Promise<void> {
+    this.googleLoading.set(false);
     this.loading.set(true);
     this.error.set('');
 
