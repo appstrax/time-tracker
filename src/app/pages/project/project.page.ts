@@ -4,7 +4,7 @@ import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { appstraxStorage } from '@appstrax/services/storage';
 
 import { ToastService, ProjectService, ProjectUserService } from '@services';
-import { Project, ProjectUser, ProjectUserRole } from '@models';
+import { Project, ProjectField, ProjectFieldType, ProjectUser, ProjectUserRole } from '@models';
 import { Store } from '@state';
 import { ProjectUsersComponent } from '@components';
 
@@ -25,6 +25,14 @@ export class ProjectPage implements OnInit {
   readonly logoFile = signal<File | null>(null);
   readonly logoPreviewUrl = signal<string | null>(null);
   readonly projectUsersCount = computed(() => this.project().users.length);
+
+  readonly fieldTypeOptions: { value: ProjectFieldType; label: string }[] = [
+    { value: 'text', label: 'Text' },
+    { value: 'number', label: 'Number' },
+    { value: 'date', label: 'Date' },
+    { value: 'select', label: 'Select' },
+    { value: 'boolean', label: 'Yes/No' },
+  ];
 
   constructor(
     private store: Store,
@@ -60,6 +68,10 @@ export class ProjectPage implements OnInit {
     this.error.set('');
 
     try {
+      if (!this.isFormValid()) {
+        return;
+      }
+
       const logoFile = this.logoFile();
       if (logoFile) {
         await this.uploadProjectLogo(logoFile);
@@ -115,7 +127,32 @@ export class ProjectPage implements OnInit {
 
   public isFormValid(): boolean {
     const project = this.project();
-    return project.name != '' && project.description != '';
+    if (project.name == '' || project.description == '') {
+      this.error.set('Project name and description are required');
+      return false;
+    }
+
+    const seenKeys = new Set<string>();
+    for (const field of project.fields) {
+      if (!field.key.trim()) {
+        this.error.set('Every custom field needs a key');
+        return false;
+      }
+      if (seenKeys.has(field.key)) {
+        this.error.set(`Duplicate field key: "${field.key}"`);
+        return false;
+      }
+      seenKeys.add(field.key);
+
+      if (field.type === 'select' && field.options.length === 0) {
+        this.error.set(
+          `Field "${field.key}" is a select field but has no options`,
+        );
+        return false;
+      }
+    }
+
+    return true;
   }
 
   public updateProjectName(name: string): void {
@@ -127,6 +164,82 @@ export class ProjectPage implements OnInit {
   public updateProjectDescription(description: string): void {
     this.updateProject((project) => {
       project.description = description;
+    });
+  }
+
+  public addField(): void {
+    this.updateProject((project) => {
+      project.fields = [
+        ...project.fields,
+        { key: '', label: '', type: 'text', required: false, options: [] },
+      ];
+    });
+  }
+
+  public removeField(index: number): void {
+    this.updateProject((project) => {
+      project.fields = project.fields.filter((_, i) => i !== index);
+    });
+  }
+
+  public moveFieldUp(index: number): void {
+    if (index <= 0) return;
+    this.updateProject((project) => {
+      const fields = [...project.fields];
+      [fields[index - 1], fields[index]] = [fields[index], fields[index - 1]];
+      project.fields = fields;
+    });
+  }
+
+  public moveFieldDown(index: number): void {
+    this.updateProject((project) => {
+      if (index >= project.fields.length - 1) return;
+      const fields = [...project.fields];
+      [fields[index], fields[index + 1]] = [fields[index + 1], fields[index]];
+      project.fields = fields;
+    });
+  }
+
+  public updateFieldKey(index: number, key: string): void {
+    this.updateFieldAt(index, (field) => (field.key = key.trim()));
+  }
+
+  public updateFieldLabel(index: number, label: string): void {
+    this.updateFieldAt(index, (field) => (field.label = label));
+  }
+
+  public updateFieldType(index: number, type: ProjectFieldType): void {
+    this.updateFieldAt(index, (field) => {
+      field.type = type;
+      if (type !== 'select') {
+        field.options = [];
+      }
+    });
+  }
+
+  public updateFieldRequired(index: number, required: boolean): void {
+    this.updateFieldAt(index, (field) => (field.required = required));
+  }
+
+  public updateFieldOptionsText(index: number, optionsText: string): void {
+    const options = optionsText
+      .split(',')
+      .map((option) => option.trim())
+      .filter((option) => option.length > 0);
+    this.updateFieldAt(index, (field) => (field.options = options));
+  }
+
+  public fieldOptionsText(field: ProjectField): string {
+    return field.options.join(', ');
+  }
+
+  private updateFieldAt(index: number, updateFn: (field: ProjectField) => void): void {
+    this.updateProject((project) => {
+      const fields = project.fields.map((field, i) =>
+        i === index ? { ...field } : field,
+      );
+      updateFn(fields[index]);
+      project.fields = fields;
     });
   }
 
