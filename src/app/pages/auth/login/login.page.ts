@@ -8,7 +8,7 @@ import {
   appstraxAuth,
 } from '@appstrax/services/auth';
 
-import { AuthErrorUtil } from '@utils';
+import { AuthErrorUtil, waitForAuthReady } from '@utils';
 import { Store } from '@state';
 
 @Component({
@@ -44,16 +44,26 @@ export class LoginPage implements OnInit {
     this.error.set('');
 
     try {
-      const ssoResult = await appstraxAuth.handleSsoRedirect();
-      const ssoError = appstraxAuth.getSsoRedirectError();
+      await waitForAuthReady();
 
+      const ssoError = appstraxAuth.getSsoRedirectError();
       if (ssoError) {
         this.error.set(this.authError.getMessage(ssoError));
-      } else if (ssoResult) {
+      }
+
+      const ssoResult = await appstraxAuth.handleSsoRedirect();
+      if (ssoResult) {
         await this.handleAuthResult(ssoResult);
-        if (ssoResult.status === AuthStatus.authenticated) {
+        if (
+          ssoResult.status === AuthStatus.authenticated ||
+          ssoResult.status === AuthStatus.linkRequired
+        ) {
+          await this.loadSsoProviders();
           return;
         }
+      } else if (await this.reconcilePostSsoAuthState()) {
+        await this.loadSsoProviders();
+        return;
       }
 
       await this.loadSsoProviders();
@@ -135,6 +145,22 @@ export class LoginPage implements OnInit {
     }
   }
 
+  private async reconcilePostSsoAuthState(): Promise<boolean> {
+    const status = await appstraxAuth.getAuthStatus();
+
+    if (status === AuthStatus.linkRequired) {
+      this.linkRequired.set(true);
+      return true;
+    }
+
+    if (status === AuthStatus.authenticated) {
+      await this.completeSuccessfulLogin();
+      return true;
+    }
+
+    return false;
+  }
+
   private async handleAuthResult(response: AuthResult): Promise<void> {
     if (response.status === AuthStatus.linkRequired) {
       this.linkRequired.set(true);
@@ -150,6 +176,10 @@ export class LoginPage implements OnInit {
       throw new Error(response.status);
     }
 
+    await this.completeSuccessfulLogin();
+  }
+
+  private async completeSuccessfulLogin(): Promise<void> {
     this.linkRequired.set(false);
     this.pendingLinkToken.set(undefined);
 
