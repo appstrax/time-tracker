@@ -13,7 +13,7 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { TimeSheetEntry } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
-import { UnapprovedEntriesModalComponent } from '../../modals/unapproved-entries/unapproved-entries.modal';
+import { UnapprovedEntriesModalComponent } from '../../../modals/unapproved-entries/unapproved-entries.modal';
 
 interface UnapprovedEntryGroup {
   date: Date;

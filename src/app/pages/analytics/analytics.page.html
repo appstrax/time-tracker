@@ -18,6 +18,7 @@
     </header>
 
     @if (!loading()) {
+      <p class="all-time-note">All-time totals across every project — not affected by the filters below.</p>
       <app-summary-metrics [entries]="entries()" [projects]="projects()" />
 
       <app-filter-view-container
