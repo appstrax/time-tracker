@@ -1,6 +1,7 @@
 /* You can add global styles to this file, and also import other style files */
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "bootstrap-icons/font/bootstrap-icons.css";
+@import "@ng-select/ng-select/themes/default.theme.css";
 
 :root {
   --primary-color: #560078;
@@ -158,6 +159,175 @@ select:-webkit-autofill {
   --bs-body-color: var(--text-primary);
   --bs-primary: var(--color-primary);
   --bs-border-color: var(--color-border);
+}
+
+/* ng-select — align with app tokens in dark mode (dropdown may render on body) */
+:root[data-theme="dark"] {
+  .ng-select .ng-select-container {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--color-surface) 94%,
+      var(--color-bg)
+    );
+    border-color: var(--color-border);
+  }
+
+  .ng-select.ng-select-opened > .ng-select-container {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  .ng-select.ng-select-opened > .ng-select-container .ng-arrow {
+    border-color: transparent transparent var(--text-muted);
+  }
+
+  .ng-select.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
+    border-color: color-mix(
+      in srgb,
+      var(--primary-color) 45%,
+      var(--color-border)
+    );
+    box-shadow: 0 0 0 0.2rem
+      color-mix(in srgb, var(--primary-color) 22%, transparent);
+  }
+
+  .ng-select.ng-select-disabled > .ng-select-container {
+    background-color: var(--color-bg);
+    opacity: 0.65;
+  }
+
+  .ng-select .ng-select-container .ng-value-container .ng-placeholder {
+    color: var(--text-muted);
+  }
+
+  .ng-select .ng-clear-wrapper {
+    color: var(--text-muted);
+  }
+
+  .ng-select .ng-arrow-wrapper .ng-arrow {
+    border-top-color: var(--text-muted);
+  }
+
+  .ng-select .ng-arrow-wrapper:hover .ng-arrow {
+    border-top-color: var(--text-primary);
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 18%,
+      var(--color-surface)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--primary-color) 32%, var(--color-border));
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value
+    .ng-value-icon:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 28%,
+      var(--color-surface)
+    );
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value
+    .ng-value-icon.left {
+    border-right-color: color-mix(
+      in srgb,
+      var(--primary-color) 32%,
+      var(--color-border)
+    );
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value
+    .ng-value-icon.right {
+    border-left-color: color-mix(
+      in srgb,
+      var(--primary-color) 32%,
+      var(--color-border)
+    );
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-input
+    > input {
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-header,
+  .ng-dropdown-panel .ng-dropdown-footer {
+    border-color: var(--color-border);
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+    background-color: var(--color-surface);
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked {
+    background-color: color-mix(in srgb, var(--color-border) 55%, transparent);
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected,
+  .ng-dropdown-panel
+    .ng-dropdown-panel-items
+    .ng-option.ng-option-selected.ng-option-marked {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 22%,
+      var(--color-surface)
+    );
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-disabled {
+    color: var(--text-muted);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-optgroup {
+    color: var(--text-muted);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-optgroup.ng-option-marked {
+    background-color: color-mix(in srgb, var(--color-border) 55%, transparent);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-optgroup.ng-option-selected,
+  .ng-dropdown-panel
+    .ng-dropdown-panel-items
+    .ng-optgroup.ng-option-selected.ng-option-marked {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 22%,
+      var(--color-surface)
+    );
+  }
 }
 
 /* Global button color overrides to unify primary buttons */
