@@ -14,7 +14,17 @@ describe('TimeSheetEntryComponent', () => {
   const project = {
     id: 'project-1',
     name: 'Alpha',
-  } as Project;
+    fields: [],
+  } as any as Project;
+
+  const projectWithFields = {
+    id: 'project-2',
+    name: 'Beta',
+    fields: [
+      { key: 'notes', label: 'Notes', type: 'text', required: true, options: [] },
+      { key: 'optional-tag', label: 'Tag', type: 'text', required: false, options: [] },
+    ],
+  } as any as Project;
 
   let component: TimeSheetEntryModal;
   let fixture: ComponentFixture<TimeSheetEntryModal>;
@@ -42,7 +52,7 @@ describe('TimeSheetEntryComponent', () => {
           provide: Store,
           useValue: {
             projects: {
-              projects: signal([project]),
+              projects: signal([project, projectWithFields]),
             },
           },
         },
@@ -67,6 +77,12 @@ describe('TimeSheetEntryComponent', () => {
     await fixture.whenStable();
   }
 
+  function fillRequiredBaseFields(): void {
+    component.timeSheetEntry.hours = 1;
+    component.timeSheetEntry.description = 'did work';
+    component.timeSheetEntry.category = 'General';
+  }
+
   it('should create', async () => {
     await createComponent();
     expect(component).toBeTruthy();
@@ -81,12 +97,97 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.timeSheetEntry.projectId).toBe(project.id);
   });
 
-  it('should store the selected project id', async () => {
+  it('should not write to storage merely by selecting a project', async () => {
     await createComponent();
 
     component.onProjectSelected(project);
 
     expect(component.timeSheetEntry.projectId).toBe(project.id);
+    expect(localStorage.getItem(storageKey)).toBeNull();
+  });
+
+  it('should store the selected project id only on save', async () => {
+    await createComponent();
+
+    component.onProjectSelected(project);
+    fillRequiredBaseFields();
+    component.onSaveTimeSheetEntry();
+
     expect(localStorage.getItem(storageKey)).toBe(project.id);
+    expect(activeModal.close).toHaveBeenCalledWith(
+      jasmine.objectContaining({ action: 'save' }),
+    );
+  });
+
+  it('should expose no configured fields for a project with none', async () => {
+    await createComponent();
+    component.onProjectSelected(project);
+
+    expect(component.projectFields).toEqual([]);
+  });
+
+  it('should expose the selected project\'s configured fields', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithFields);
+
+    expect(component.projectFields.map((f) => f.key)).toEqual([
+      'notes',
+      'optional-tag',
+    ]);
+  });
+
+  it('should block saving a new entry when a required configured field is empty', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithFields);
+    fillRequiredBaseFields();
+
+    const isValid = component.isFormValid();
+
+    expect(isValid).toBe(false);
+    expect(component.errorMessage).toContain('Notes is required');
+  });
+
+  it('should allow saving once the required configured field is filled', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithFields);
+    fillRequiredBaseFields();
+    component.setFieldValue('notes', 'some notes');
+
+    expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should preserve a typed field value when switching project and back', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithFields);
+    component.setFieldValue('notes', 'kept across switches');
+
+    component.onProjectSelected(project);
+    component.onProjectSelected(projectWithFields);
+
+    expect(component.getFieldValue('notes')).toBe('kept across switches');
+  });
+
+  it('should drop values for fields outside the currently selected project on save', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithFields);
+    component.setFieldValue('notes', 'a note');
+    component.setFieldValue('leftover-from-elsewhere', 'stale');
+    fillRequiredBaseFields();
+
+    component.onSaveTimeSheetEntry();
+
+    const keys = component.timeSheetEntry.fieldValues.map((fv) => fv.key);
+    expect(keys).toEqual(['notes']);
+  });
+
+  it('should skip required-configured-field validation for a pre-existing entry (capture-forward)', async () => {
+    await createComponent();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.wasExistingEntryOnOpen = true;
+    component.onProjectSelected(projectWithFields);
+    fillRequiredBaseFields();
+    // 'notes' (required) deliberately left blank.
+
+    expect(component.isFormValid()).toBe(true);
   });
 });

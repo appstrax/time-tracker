@@ -11,7 +11,7 @@ import {
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Store } from '@state';
-import { Project, TimeSheetEntry } from '@models';
+import { Project, TimeSheetEntry, ProjectField } from '@models';
 import { ProjectDropdownComponent } from '@components';
 import {
   clearStoredTimeSheetProjectId,
@@ -40,6 +40,8 @@ export class TimeSheetEntryModal implements OnInit {
 
   errorMessage: string = '';
 
+  wasExistingEntryOnOpen: boolean = false;
+
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
 
   get hours(): number {
@@ -53,6 +55,8 @@ export class TimeSheetEntryModal implements OnInit {
   ) {}
 
   async ngOnInit(): Promise<void> {
+    this.wasExistingEntryOnOpen = !!this.timeSheetEntry.id;
+
     const projectId =
       this.timeSheetEntry.projectId || getStoredTimeSheetProjectId();
     if (projectId) {
@@ -78,6 +82,38 @@ export class TimeSheetEntryModal implements OnInit {
   onProjectSelected(project: Project | null): void {
     this.project = project || undefined;
     this.timeSheetEntry.projectId = project ? project.id : '';
+  }
+
+  get projectFields(): ProjectField[] {
+    return this.project?.fields ?? [];
+  }
+
+  getFieldValue(key: string): string {
+    return (
+      this.timeSheetEntry.fieldValues.find((fv) => fv.key === key)?.value ?? ''
+    );
+  }
+
+  setFieldValue(key: string, value: string): void {
+    const existing = this.timeSheetEntry.fieldValues.find(
+      (fv) => fv.key === key,
+    );
+    if (existing) {
+      existing.value = value;
+    } else {
+      this.timeSheetEntry.fieldValues = [
+        ...this.timeSheetEntry.fieldValues,
+        { key, value },
+      ];
+    }
+  }
+
+  isFieldBoolean(field: ProjectField): boolean {
+    return this.getFieldValue(field.key) === 'true';
+  }
+
+  setFieldBoolean(key: string, checked: boolean): void {
+    this.setFieldValue(key, checked ? 'true' : 'false');
   }
 
   onCategoryInput(event: Event): void {
@@ -129,6 +165,7 @@ export class TimeSheetEntryModal implements OnInit {
         return;
       }
 
+      this.pruneStaleFieldValues();
       storeTimeSheetProjectId(this.timeSheetEntry.projectId);
       this.activeModal.close({
         action: 'save',
@@ -151,11 +188,18 @@ export class TimeSheetEntryModal implements OnInit {
   }
 
   isFormValid(): boolean {
+    const missingFields = this.wasExistingEntryOnOpen
+      ? []
+      : this.projectFields.filter(
+          (field) => field.required && !this.getFieldValue(field.key).trim(),
+        );
+
     let isValid =
       this.timeSheetEntry.projectId &&
       this.timeSheetEntry.hours &&
       this.timeSheetEntry.description &&
-      this.timeSheetEntry.category;
+      this.timeSheetEntry.category &&
+      missingFields.length === 0;
 
     if (isValid) return true;
     let errorMessage = 'Please fill in all required fields';
@@ -167,8 +211,18 @@ export class TimeSheetEntryModal implements OnInit {
       errorMessage += '\n\t• Hours must be greater than 0';
     if (!this.timeSheetEntry.description)
       errorMessage += '\n\t• Description is required';
+    for (const field of missingFields) {
+      errorMessage += `\n\t• ${field.label || field.key} is required`;
+    }
     this.errorMessage = errorMessage;
     return false;
+  }
+
+  private pruneStaleFieldValues(): void {
+    const currentKeys = new Set(this.projectFields.map((field) => field.key));
+    this.timeSheetEntry.fieldValues = this.timeSheetEntry.fieldValues.filter(
+      (fv) => currentKeys.has(fv.key),
+    );
   }
 
 }
