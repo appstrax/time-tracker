@@ -14,7 +14,18 @@ export class UserAvatarComponent {
   @Input() sizePx = 32;
   @Input() fontSizePx = 12;
 
+  private failedUrl: string | null = null;
+
   get initials(): string {
     return getUserInitials(this.user);
+  }
+
+  get showImage(): boolean {
+    const url = this.user?.profilePictureUrl;
+    return Boolean(url) && url !== this.failedUrl;
+  }
+
+  onImageError(): void {
+    this.failedUrl = this.user?.profilePictureUrl ?? null;
   }
 }

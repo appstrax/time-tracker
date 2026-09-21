@@ -3,7 +3,7 @@ import { RouterModule } from '@angular/router';
 
 import { UserRole } from '@models';
 import { Store } from '@state';
-import { getUserDisplayName } from '@utils';
+import { getProfileLinkLabel, getUserDisplayName } from '@utils';
 import { UserAvatarComponent } from '../../user-avatar/user-avatar.component';
 
 @Component({
@@ -19,7 +19,8 @@ export class SideNavExpandedComponent {
 
   user = computed(() => this.store.user.user());
   admin = computed(() => this.user()?.role === UserRole.ADMIN);
-  userDisplayName = computed(() => getUserDisplayName(this.user()));
+  userDisplayName = computed(() => getUserDisplayName(this.user(), 'Profile'));
+  profileAriaLabel = computed(() => getProfileLinkLabel(this.user()));
 
   constructor(private store: Store) {}
 }

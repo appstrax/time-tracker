@@ -49,7 +49,8 @@
       routerLink="/profile"
       routerLinkActive="active"
       class="menu-item"
-      title="{{ userDisplayName() }}"
+      [title]="userDisplayName()"
+      [attr.aria-label]="profileAriaLabel()"
     >
       <app-user-avatar [user]="user()" [sizePx]="24" [fontSizePx]="11" />
       <span class="label">{{ userDisplayName() }}</span>

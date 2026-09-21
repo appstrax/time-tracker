@@ -1,12 +1,20 @@
 import { User } from '@models';
 
-export function getUserDisplayName(user: User | null): string {
+export function getUserDisplayName(
+  user: User | null,
+  fallback = 'Unknown user',
+): string {
   if (!user) {
-    return 'Unknown user';
+    return fallback;
   }
 
   const fullName = `${user.name} ${user.surname}`.trim();
   return fullName || user.email || user.id;
+}
+
+export function getProfileLinkLabel(user: User | null): string {
+  const name = getUserDisplayName(user, '');
+  return name ? `Profile, ${name}` : 'Profile';
 }
 
 export function getUserInitials(user: User | null): string {

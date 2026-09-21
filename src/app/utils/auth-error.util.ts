@@ -19,7 +19,7 @@ export class AuthErrorUtil {
         return 'User blocked, please reset your password';
       case AuthErrors.invalidTwoFactorAuthCode:
         return 'Invalid Two Factor Authentication Code';
-      case AuthErrors.emailAddressDoesNotExist:
+      case 'emailAddressDoesNotExist':
         return 'Email Address Does Not Exist';
       case AuthErrors.invalidResetCode:
         return 'Invalid Reset Code';

@@ -52,6 +52,10 @@
         color: #ffffff;
       }
     }
+
+    .icon-box.avatar-box {
+      box-shadow: 0 0 0 2px var(--primary-color), 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
   }
 
   .icon-box {
@@ -90,7 +94,6 @@
 
   .icon-box.avatar-box {
     border-radius: 50%;
-    overflow: hidden;
   }
 }
 

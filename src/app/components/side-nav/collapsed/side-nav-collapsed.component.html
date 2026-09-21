@@ -81,8 +81,8 @@
       routerLinkActive="active"
       class="nav-item"
       data-bs-toggle="tooltip"
-      data-profile-tooltip
-      [attr.data-bs-title]="userDisplayName()"
+      [attr.data-bs-title]="profileAriaLabel()"
+      [attr.aria-label]="profileAriaLabel()"
       data-bs-placement="right"
     >
       <div class="icon-box avatar-box">
