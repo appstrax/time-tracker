@@ -1,11 +1,15 @@
 import { Injectable } from '@angular/core';
 import {
   CrudService,
+  FetchQuery,
   Operator,
   OrderDirection,
 } from '@appstrax/services/database';
 
 import { TimeSheetEntry } from '../models/time-sheet-entry.model';
+
+/** API default/max page size when `limit` is omitted (see DatabaseService). */
+const ENTRY_FETCH_PAGE_SIZE = 1000;
 
 @Injectable({ providedIn: 'root' })
 export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
@@ -14,21 +18,48 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
   }
 
   public async findByUserId(userId: string): Promise<TimeSheetEntry[]> {
-    const res = await this.find({
+    return this.findAllPages({
       where: { userId },
       order: { createdAt: OrderDirection.ASC },
     });
-    return res.data;
   }
 
   public async findByProjectId(
     projectIds: string[],
   ): Promise<TimeSheetEntry[]> {
-    const res = await this.find({
+    return this.findAllPages({
       where: { projectId: { [Operator.IN]: projectIds } },
       order: { createdAt: OrderDirection.ASC },
     });
-    return res.data;
+  }
+
+  /**
+   * Fetches every row matching `query`. A single `find()` without `limit` only
+   * returns the first API page (default 1000, ordered as requested), which
+   * silently drops newer rows when ordered by `createdAt` ASC.
+   */
+  private async findAllPages(
+    query: Omit<FetchQuery, 'limit' | 'offset'>,
+  ): Promise<TimeSheetEntry[]> {
+    const entries: TimeSheetEntry[] = [];
+    let offset = 0;
+    let totalCount = Number.POSITIVE_INFINITY;
+
+    while (entries.length < totalCount) {
+      const res = await this.find({
+        ...query,
+        limit: ENTRY_FETCH_PAGE_SIZE,
+        offset,
+      });
+      totalCount = res.count;
+      if (!res.data.length) {
+        break;
+      }
+      entries.push(...res.data);
+      offset += res.data.length;
+    }
+
+    return entries;
   }
 
   public async findByUserAndDateRange(
