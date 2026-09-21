@@ -3,3 +3,4 @@ export * from './project.model';
 export * from './project-user.model';
 export * from './time-sheet-entry.model';
 export * from './analytics-filter.model';
+export * from './time-sheet-field.model';
