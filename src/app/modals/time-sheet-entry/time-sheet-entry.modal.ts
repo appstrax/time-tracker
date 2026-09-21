@@ -94,16 +94,17 @@ export class TimeSheetEntryModal implements OnInit {
     );
   }
 
-  setFieldValue(key: string, value: string): void {
+  setFieldValue(key: string, value: string | number | null): void {
+    const normalizedValue = value == null ? '' : String(value);
     const existing = this.timeSheetEntry.fieldValues.find(
       (fv) => fv.key === key,
     );
     if (existing) {
-      existing.value = value;
+      existing.value = normalizedValue;
     } else {
       this.timeSheetEntry.fieldValues = [
         ...this.timeSheetEntry.fieldValues,
-        { key, value },
+        { key, value: normalizedValue },
       ];
     }
   }
@@ -191,7 +192,10 @@ export class TimeSheetEntryModal implements OnInit {
     const missingFields = this.wasExistingEntryOnOpen
       ? []
       : this.projectFields.filter(
-          (field) => field.required && !this.getFieldValue(field.key).trim(),
+          (field) =>
+            field.required &&
+            field.type !== 'boolean' &&
+            !this.getFieldValue(field.key).trim(),
         );
 
     let isValid =

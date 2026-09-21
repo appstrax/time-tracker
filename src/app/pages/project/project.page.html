@@ -248,7 +248,7 @@
                     <input
                       type="text"
                       class="form-control"
-                      [ngModel]="fieldOptionsText(field)"
+                      [ngModel]="fieldOptionsText($index, field)"
                       (ngModelChange)="updateFieldOptionsText($index, $event)"
                       name="fieldOptions{{ $index }}"
                       placeholder="e.g. Draft, Final"

@@ -34,6 +34,8 @@ export class ProjectPage implements OnInit {
     { value: 'boolean', label: 'Yes/No' },
   ];
 
+  private fieldOptionsDrafts: Record<number, string> = {};
+
   constructor(
     private store: Store,
     private router: Router,
@@ -177,6 +179,7 @@ export class ProjectPage implements OnInit {
   }
 
   public removeField(index: number): void {
+    this.fieldOptionsDrafts = {};
     this.updateProject((project) => {
       project.fields = project.fields.filter((_, i) => i !== index);
     });
@@ -184,6 +187,7 @@ export class ProjectPage implements OnInit {
 
   public moveFieldUp(index: number): void {
     if (index <= 0) return;
+    this.fieldOptionsDrafts = {};
     this.updateProject((project) => {
       const fields = [...project.fields];
       [fields[index - 1], fields[index]] = [fields[index], fields[index - 1]];
@@ -194,6 +198,7 @@ export class ProjectPage implements OnInit {
   public moveFieldDown(index: number): void {
     this.updateProject((project) => {
       if (index >= project.fields.length - 1) return;
+      this.fieldOptionsDrafts = {};
       const fields = [...project.fields];
       [fields[index], fields[index + 1]] = [fields[index + 1], fields[index]];
       project.fields = fields;
@@ -222,6 +227,7 @@ export class ProjectPage implements OnInit {
   }
 
   public updateFieldOptionsText(index: number, optionsText: string): void {
+    this.fieldOptionsDrafts[index] = optionsText;
     const options = optionsText
       .split(',')
       .map((option) => option.trim())
@@ -229,8 +235,8 @@ export class ProjectPage implements OnInit {
     this.updateFieldAt(index, (field) => (field.options = options));
   }
 
-  public fieldOptionsText(field: ProjectField): string {
-    return field.options.join(', ');
+  public fieldOptionsText(index: number, field: ProjectField): string {
+    return this.fieldOptionsDrafts[index] ?? field.options.join(', ');
   }
 
   private updateFieldAt(index: number, updateFn: (field: ProjectField) => void): void {

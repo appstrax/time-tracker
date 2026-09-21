@@ -26,6 +26,14 @@ describe('TimeSheetEntryComponent', () => {
     ],
   } as any as Project;
 
+  const projectWithBooleanField = {
+    id: 'project-3',
+    name: 'Gamma',
+    fields: [
+      { key: 'signed-off', label: 'Signed off', type: 'boolean', required: true, options: [] },
+    ],
+  } as any as Project;
+
   let component: TimeSheetEntryModal;
   let fixture: ComponentFixture<TimeSheetEntryModal>;
   let activeModal: jasmine.SpyObj<NgbActiveModal>;
@@ -52,7 +60,11 @@ describe('TimeSheetEntryComponent', () => {
           provide: Store,
           useValue: {
             projects: {
-              projects: signal([project, projectWithFields]),
+              projects: signal([
+                project,
+                projectWithFields,
+                projectWithBooleanField,
+              ]),
             },
           },
         },
@@ -152,6 +164,24 @@ describe('TimeSheetEntryComponent', () => {
     component.onProjectSelected(projectWithFields);
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'some notes');
+
+    expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should store an empty value, not the string "null", when a number field is cleared', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithFields);
+    component.setFieldValue('optional-tag', 5);
+    component.setFieldValue('optional-tag', null);
+
+    expect(component.getFieldValue('optional-tag')).toBe('');
+  });
+
+  it('should not require a boolean field to be actively toggled to satisfy required validation', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithBooleanField);
+    fillRequiredBaseFields();
+    // 'signed-off' left at its default unchecked/false state.
 
     expect(component.isFormValid()).toBe(true);
   });
