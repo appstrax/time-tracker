@@ -2,81 +2,31 @@
   <header class="page-header">
     <div>
       <p class="eyebrow">Home</p>
-      <h1>Project hours</h1>
+      <h1>My time</h1>
       <p class="subtitle">
-        Captured hours for the last 7 days, grouped by project you can access.
+        Review your captured hours. Switch views and filter by project,
+        category, or date range.
       </p>
     </div>
-    <div class="range-chip">{{ rangeLabel }}</div>
   </header>
 
   @if (isLoading() && !hasLoaded()) {
     <section class="state-card">
-      <h2>Loading project hours</h2>
-      <p>Pulling your recent time entries and summarizing them by project.</p>
+      <h2>Loading your time entries</h2>
+      <p>Pulling your captured hours.</p>
     </section>
   } @else if (!hasProjects()) {
     <section class="state-card">
       <h2>No accessible projects</h2>
-      <p>
-        There are no projects available for this account yet, so there is no
-        project-hour graph to display.
-      </p>
+      <p>There are no projects available for this account yet.</p>
     </section>
   } @else {
-    <section class="summary-grid">
-      <article class="summary-card">
-        <span class="summary-label">Total captured hours</span>
-        <strong>{{ formatHours(totalHours()) }}</strong>
-      </article>
-      <article class="summary-card">
-        <span class="summary-label">Projects with hours</span>
-        <strong>{{ activeProjects() }}</strong>
-      </article>
-      <article class="summary-card">
-        <span class="summary-label">Accessible projects</span>
-        <strong>{{ graphData().length }}</strong>
-      </article>
-    </section>
-
-    @if (!hasCapturedHours()) {
-      <section class="state-card muted">
-        <h2>No captured hours in this range</h2>
-        <p>
-          Your accessible projects are still listed below so you can see that
-          each project currently has `0h 00m` recorded for the last 7 days.
-        </p>
-      </section>
-    }
-
-    <section class="graph-card">
-      <div class="graph-header">
-        <div>
-          <h2>Hours by project</h2>
-          <p>Bars are scaled relative to the project with the most captured hours.</p>
-        </div>
-      </div>
-
-      <div class="graph-list" role="list" aria-label="Captured hours by project">
-        @for (item of graphData(); track item.projectId) {
-          <article class="graph-row" role="listitem">
-            <div class="row-header">
-              <div class="project-label">{{ item.projectName }}</div>
-              <div class="hours-label">{{ formatHours(item.hours) }}</div>
-            </div>
-            <div
-              class="bar-track"
-              [attr.aria-label]="item.projectName + ' captured hours'"
-            >
-              <div
-                class="bar-fill"
-                [style.width.%]="item.percent"
-                [class.bar-fill-empty]="item.hours === 0"
-              ></div>
-            </div>
-          </article>
-        }
-      </div>
-    </section>
+    <app-filter-view-container
+      [projects]="projects()"
+      [entries]="entries()"
+      [users]="noUsers"
+      [showUserFilter]="false"
+      [availableViews]="homeAvailableViews"
+    />
   }
 </section>
