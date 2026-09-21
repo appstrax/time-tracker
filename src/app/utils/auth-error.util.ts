@@ -21,10 +21,10 @@ export class AuthErrorUtil {
         return 'Invalid Two Factor Authentication Code';
       case AuthErrors.invalidResetCode:
         return 'Invalid Reset Code';
-      case AuthErrors.tooManyAttempts:
-        return 'Too many attempts, please try again later';
-      case AuthErrors.tooManyRequests:
-        return 'Too many requests, please try again later';
+      case 'tooManyAttempts':
+        return 'Too many login attempts. Please wait a few minutes and try again.';
+      case 'tooManyRequests':
+        return 'Too many requests. Please try again later.';
       case AuthErrors.unexpectedError:
         return 'Unexpected error';
       default:

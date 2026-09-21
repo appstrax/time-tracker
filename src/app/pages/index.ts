@@ -5,6 +5,7 @@ export * from './projects/projects.page';
 export * from './landing/landing.page';
 export * from './auth/login/login.page';
 export * from './settings/settings.page';
+export * from './settings/agent-tokens/agent-tokens.page';
 export * from './time-sheets/time-sheet/time-sheet.page';
 export * from './analytics/analytics.page';
 export * from './auth/forgot-password/forgot-password.page';

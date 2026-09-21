@@ -52,6 +52,10 @@
         color: #ffffff;
       }
     }
+
+    .icon-box.avatar-box {
+      box-shadow: 0 0 0 2px var(--primary-color), 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
   }
 
   .icon-box {
@@ -86,6 +90,10 @@
       justify-content: center;
       line-height: 1;
     }
+  }
+
+  .icon-box.avatar-box {
+    border-radius: 50%;
   }
 }
 

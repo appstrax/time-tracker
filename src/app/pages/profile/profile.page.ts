@@ -7,6 +7,7 @@ import { appstraxStorage } from '@appstrax/services/storage';
 import { User } from '@models';
 import { ToastService } from '@services';
 import { Store } from '@state';
+import { getUserInitials } from '@utils';
 
 @Component({
   selector: 'app-profile',
@@ -24,6 +25,7 @@ export class ProfilePage {
   public editing = signal(false);
 
   projects = computed(() => this.store.projects.projects());
+  userInitials = computed(() => getUserInitials(this.user()));
 
   constructor(
     private store: Store,
@@ -123,16 +125,5 @@ export class ProfilePage {
 
     this.resetEditingValues();
     this.editing.set(true);
-  }
-
-  getUserInitials(): string {
-    const user = this.user();
-    const initials = [user.name, user.surname]
-      .map((value) => value?.trim())
-      .filter((value): value is string => Boolean(value))
-      .map((value) => value.charAt(0).toUpperCase())
-      .join('');
-
-    return initials || user.email.charAt(0).toUpperCase() || 'U';
   }
 }

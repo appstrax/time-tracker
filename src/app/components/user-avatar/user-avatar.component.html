@@ -1,0 +1,19 @@
+<span
+  class="user-avatar"
+  aria-hidden="true"
+  [style.width.px]="sizePx"
+  [style.height.px]="sizePx"
+>
+  @if (showImage) {
+    <img
+      [src]="user?.profilePictureUrl"
+      alt=""
+      class="user-avatar-img"
+      (error)="onImageError()"
+    />
+  } @else {
+    <span class="user-avatar-initials" [style.font-size.px]="fontSizePx">
+      {{ initials }}
+    </span>
+  }
+</span>

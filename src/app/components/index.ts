@@ -6,3 +6,4 @@ export * from './toast-container/toast-container.component';
 export * from './project-dropdown/project-dropdown.component';
 export * from './page-layout/page-layout.component';
 export * from './project-users/project-users.component';
+export * from './user-avatar/user-avatar.component';
