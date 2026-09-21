@@ -144,8 +144,8 @@ export class TimeSheetNumberLineComponent implements OnDestroy {
     return this.projects().find((project) => project.id === entry.projectId);
   }
 
-  private escapeHtml(value: string): string {
-    return value
+  private escapeHtml(value: unknown): string {
+    return String(value ?? '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
       .replace(/>/g, '&gt;')

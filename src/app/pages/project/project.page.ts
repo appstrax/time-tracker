@@ -201,7 +201,7 @@ export class ProjectPage implements OnInit {
   }
 
   public updateFieldKey(index: number, key: string): void {
-    this.updateFieldAt(index, (field) => (field.key = key.trim()));
+    this.updateFieldAt(index, (field) => (field.key = key));
   }
 
   public updateFieldLabel(index: number, label: string): void {
