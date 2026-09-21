@@ -2,7 +2,7 @@
   class="toast-container position-fixed top-offset end-0 p-3"
   style="z-index: 1080"
 >
-  @for (t of toasts(); track t) {
+  @for (t of toasts(); track t.id) {
     <div
       class="toast show mb-2"
       role="alert"
