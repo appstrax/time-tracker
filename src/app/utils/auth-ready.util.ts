@@ -2,14 +2,20 @@ import { appstraxAuth, AuthStatus } from '@appstrax/services/auth';
 
 const POLL_MS = 50;
 
+export const MAX_AUTH_READY_WAIT_MS = 15_000;
+
 export async function waitForAuthReady(): Promise<void> {
-  while (true) {
+  const deadline = Date.now() + MAX_AUTH_READY_WAIT_MS;
+
+  while (Date.now() < deadline) {
     const status = await appstraxAuth.getAuthStatus();
-    if (status === AuthStatus.initializing || appstraxAuth.isSessionUnconfirmed()) {
-      await sleep(POLL_MS);
-      continue;
+    if (
+      status !== AuthStatus.initializing &&
+      !appstraxAuth.isSessionUnconfirmed()
+    ) {
+      return;
     }
-    return;
+    await sleep(POLL_MS);
   }
 }
 

@@ -14,6 +14,13 @@ export class LandingPage implements OnInit {
 
   async ngOnInit(): Promise<void> {
     const isAuthenticated = await isAuthenticatedAfterReady();
-    await this.router.navigate([isAuthenticated ? '/home' : '/login']);
+    if (isAuthenticated) {
+      await this.router.navigate(['/home']);
+      return;
+    }
+
+    await this.router.navigate(['/login'], {
+      queryParamsHandling: 'preserve',
+    });
   }
 }
