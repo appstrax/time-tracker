@@ -81,11 +81,12 @@
       routerLinkActive="active"
       class="nav-item"
       data-bs-toggle="tooltip"
-      data-bs-title="Profile"
+      [attr.data-bs-title]="profileAriaLabel()"
+      [attr.aria-label]="profileAriaLabel()"
       data-bs-placement="right"
     >
-      <div class="icon-box">
-        <i class="bi bi-person-circle"></i>
+      <div class="icon-box avatar-box">
+        <app-user-avatar [user]="user()" [sizePx]="35" [fontSizePx]="13" />
       </div>
     </a>
     <div
