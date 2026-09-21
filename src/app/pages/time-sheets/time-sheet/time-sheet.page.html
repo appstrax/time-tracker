@@ -7,7 +7,20 @@
         Capture and review your hours for each day in the selected week.
       </p>
     </div>
-    <app-time-sheet-date-selector (weekChange)="onWeekChange($event)" />
+    <div class="page-header-tools">
+      @if (!loading() && projects().length) {
+        <div class="working-on-inline" aria-label="Current project">
+          <span class="working-on-label">Working on</span>
+          <app-project-dropdown
+            class="working-on-dropdown"
+            [selectedProject]="workingOnProject()"
+            [allowNull]="true"
+            (projectSelected)="onWorkingOnProjectSelected($event)"
+          />
+        </div>
+      }
+      <app-time-sheet-date-selector (weekChange)="onWeekChange($event)" />
+    </div>
   </header>
   <section class="time-sheet-section">
     @if (loading()) {

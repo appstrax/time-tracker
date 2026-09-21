@@ -1,0 +1,154 @@
+<div class="container agent-tokens-page">
+  <nav class="breadcrumb-nav" aria-label="Breadcrumb">
+    <a routerLink="/settings">Settings</a>
+    <span class="sep">/</span>
+    <span class="current">Agent tokens</span>
+  </nav>
+
+  <header class="page-header">
+    <h1>Agent tokens</h1>
+    <p class="lead">
+      Create tokens so an AI agent (for example in Cursor) can track time and read project
+      details on your behalf. Actions are recorded under your account within the limits you set
+      here.
+    </p>
+  </header>
+
+  @if (loading()) {
+    <p class="text-muted">Loading…</p>
+  } @else {
+    <div class="layout-grid">
+      <section class="panel new-token-panel">
+        <h2 class="panel-title">New token</h2>
+
+        <label class="form-label" for="tokenName">Name</label>
+        <input
+          id="tokenName"
+          class="form-control"
+          type="text"
+          placeholder="Cursor on my laptop"
+          [(ngModel)]="name"
+        />
+
+        <h3 class="subsection-title">What it may do</h3>
+        <div class="scope-list">
+          @for (scope of scopeDefinitions(); track scope.id) {
+            <label class="scope-row">
+              <input
+                type="checkbox"
+                [checked]="selectedScopes()[scope.id]"
+                (change)="toggleScope(scope.id, $any($event.target).checked)"
+              />
+              <span class="scope-chip">{{ scope.label }}</span>
+              <span class="scope-desc">{{ scope.description }}</span>
+            </label>
+          }
+        </div>
+
+        <h3 class="subsection-title">Which projects</h3>
+        <div class="project-scope-options">
+          <label class="radio-row">
+            <input
+              type="radio"
+              name="projectScope"
+              value="all"
+              [(ngModel)]="projectScope"
+            />
+            Every project I can reach
+          </label>
+          <label class="radio-row">
+            <input
+              type="radio"
+              name="projectScope"
+              value="selected"
+              [(ngModel)]="projectScope"
+            />
+            Only the ones I choose
+          </label>
+        </div>
+
+        @if (projectScope === 'selected') {
+          <label class="form-label" for="projectIds">Projects</label>
+          <ng-select
+            id="projectIds"
+            class="project-ng-select"
+            [items]="projects()"
+            bindLabel="name"
+            bindValue="id"
+            [multiple]="true"
+            [closeOnSelect]="false"
+            [searchable]="true"
+            placeholder="Search and select projects…"
+            notFoundText="No projects match your search"
+            [ngModel]="selectedProjectIds()"
+            (ngModelChange)="onSelectedProjectsChange($event)"
+          />
+        }
+
+        <label class="form-label mt-3" for="expiresAt">Expires</label>
+        <input id="expiresAt" class="form-control" type="date" [(ngModel)]="expiresAt" />
+        <p class="field-hint">Leave empty to keep the token until you revoke it.</p>
+
+        <button
+          class="btn btn-primary create-btn"
+          type="button"
+          [disabled]="creating() || !name.trim()"
+          (click)="createToken()"
+        >
+          {{ creating() ? 'Creating…' : 'Create token' }}
+        </button>
+      </section>
+
+      <section class="panel tokens-panel">
+        <h2 class="panel-title">Your tokens</h2>
+
+        @if (!tokens().length) {
+          <p class="text-muted empty-state">No agent tokens yet.</p>
+        } @else {
+          <div class="table-responsive">
+            <table class="tokens-table">
+              <thead>
+                <tr>
+                  <th>Name</th>
+                  <th>Prefix</th>
+                  <th>Scopes</th>
+                  <th>Projects</th>
+                  <th>Last used</th>
+                  <th>Expires</th>
+                  <th></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (token of tokens(); track token.id) {
+                  <tr>
+                    <td>{{ token.name }}</td>
+                    <td><code>{{ token.tokenPrefix }}</code></td>
+                    <td>
+                      <div class="scope-badges">
+                        @for (scope of token.scopes; track scope) {
+                          <span class="scope-badge">{{ scope }}</span>
+                        }
+                      </div>
+                    </td>
+                    <td>{{ formatProjects(token) }}</td>
+                    <td>{{ formatDate(token.lastUsedAt) }}</td>
+                    <td>{{ formatDate(token.expiresAt) }}</td>
+                    <td>
+                      <button
+                        type="button"
+                        class="btn btn-link revoke-btn"
+                        (click)="confirmRevokeToken(token)"
+                      >
+                        Revoke
+                      </button>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    </div>
+  }
+</div>
