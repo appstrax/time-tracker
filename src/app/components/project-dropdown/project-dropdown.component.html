@@ -1,12 +1,17 @@
-<div class="project-dropdown form-group" [class.show]="isProjectDropdownOpen">
+<div
+  class="project-dropdown form-group"
+  [class.show]="isProjectDropdownOpen"
+  [class.project-dropdown--compact]="compact"
+>
     <button
       type="button"
-      class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between form-select"
+      class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+      [class.form-select]="!compact"
       (click)="toggleProjectDropdown()"
       [disabled]="disabled"
       aria-expanded="isProjectMenuOpen"
     >
-      <span class="d-flex align-items-center gap-2">
+      <span class="project-dropdown-selection d-flex align-items-center gap-2">
         @if (selectedProject) { @if (selectedProject.logoUrl) {
         <img
           [src]="selectedProject.logoUrl"
@@ -17,14 +22,17 @@
         } @else {
         <i class="bi bi-image proj-thumb-fallback"></i>
         }
-        <span>{{ selectedProject.name }}</span>
+        <span
+          class="project-dropdown-name"
+          [attr.title]="selectedProject.name"
+          >{{ selectedProject.name }}</span>
         } @else {
         <i class="bi bi-image proj-thumb-fallback"></i>
-        <span>Select a project</span>
+        <span class="project-dropdown-name">Select a project</span>
         }
       </span>
       <i
-        class="bi"
+        class="bi project-dropdown-chevron flex-shrink-0"
         [ngClass]="isProjectDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
       ></i>
     </button>

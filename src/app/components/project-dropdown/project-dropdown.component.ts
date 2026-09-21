@@ -21,6 +21,7 @@ export class ProjectDropdownComponent {
   @Input() selectedProject?: Project | null;
   @Input() disabled: boolean = false;
   @Input() allowNull: boolean = false;
+  @Input() compact: boolean = false;
 
   @Output() projectSelected = new EventEmitter<Project | null>();
 
