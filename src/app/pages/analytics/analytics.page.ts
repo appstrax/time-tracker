@@ -1,14 +1,12 @@
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit, inject, signal } from '@angular/core';
 
+import { FilterViewContainerComponent } from '@components';
 import { TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService, UsersService } from '@services';
 import { Store } from '@state';
 
-import {
-  FilterViewContainerComponent,
-  SummaryMetricsComponent,
-} from './components';
+import { SummaryMetricsComponent } from './components';
 
 @Component({
   standalone: true,
