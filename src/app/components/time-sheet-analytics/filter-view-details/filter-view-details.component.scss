@@ -121,6 +121,21 @@
   }
 }
 
+.field-value-pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.field-value-pill {
+  display: inline-flex;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--color-border) 60%, transparent);
+  font-size: 0.8rem;
+  white-space: nowrap;
+}
+
 .empty-state {
   padding: 2rem 1rem;
   text-align: center;

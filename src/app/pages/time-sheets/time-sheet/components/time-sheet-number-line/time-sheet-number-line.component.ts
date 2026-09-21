@@ -144,17 +144,40 @@ export class TimeSheetNumberLineComponent implements OnDestroy {
     return this.projects().find((project) => project.id === entry.projectId);
   }
 
+  private escapeHtml(value: string): string {
+    return value
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   private getTooltipContent(entry: TimeSheetEntry, project?: Project): string {
     const hours = Math.floor(entry.hours);
     const minutes = (entry.hours - hours) * 60;
     return `
       <div class="p-2">
-        <div class="mb-2"><strong>Project:</strong><br> ${project?.name || 'N/A'}</div>
-        <div class="mb-2"><strong>Category:</strong><br> ${entry.category || 'N/A'}</div>
+        <div class="mb-2"><strong>Project:</strong><br> ${this.escapeHtml(project?.name || 'N/A')}</div>
+        <div class="mb-2"><strong>Category:</strong><br> ${this.escapeHtml(entry.category || 'N/A')}</div>
         <div class="mb-2"><strong>Hours:</strong><br> ${hours}h ${minutes}m</div>
-        <div><strong>Description:</strong><br> ${entry.description || 'N/A'}</div>
+        <div><strong>Description:</strong><br> ${this.escapeHtml(entry.description || 'N/A')}</div>
+        ${this.getFieldValuesHtml(entry, project)}
       </div>
     `;
+  }
+
+  private getFieldValuesHtml(entry: TimeSheetEntry, project?: Project): string {
+    const fields = project?.fields ?? [];
+    const rows = fields
+      .map((field) => {
+        const value = entry.fieldValues.find((fv) => fv.key === field.key)?.value;
+        if (!value) return '';
+        return `<div class="mb-2"><strong>${this.escapeHtml(field.label || field.key)}:</strong><br> ${this.escapeHtml(value)}</div>`;
+      })
+      .filter((row) => row.length > 0);
+
+    return rows.join('');
   }
 
   public onNumberLineLeave(): void {
