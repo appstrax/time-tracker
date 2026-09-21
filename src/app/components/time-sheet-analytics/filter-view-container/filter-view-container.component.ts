@@ -57,6 +57,13 @@ export class FilterViewContainerComponent
   public readonly projects = input<Project[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
   public readonly users = input<User[]>([]);
+  public readonly availableViews = input<FilterView[]>([
+    'summary',
+    'details',
+    'timeline',
+    'unapproved',
+  ]);
+  public readonly showUserFilter = input(true);
 
   public readonly entryUpdated = output<TimeSheetEntry>();
 
@@ -103,6 +110,18 @@ export class FilterViewContainerComponent
       description: 'Pending items',
     },
   ];
+
+  public readonly visibleViewTypes = computed(() =>
+    this.viewTypes.filter((viewType) =>
+      this.availableViews().includes(viewType.value),
+    ),
+  );
+
+  public readonly activeView = computed<FilterView>(() => {
+    const available = this.availableViews();
+    const current = this.view();
+    return available.includes(current) ? current : available[0];
+  });
 
   ngOnInit(): void {
     this.subscription = this.route.queryParams.subscribe((params) => {

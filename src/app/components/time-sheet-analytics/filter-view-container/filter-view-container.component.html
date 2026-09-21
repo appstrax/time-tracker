@@ -47,11 +47,11 @@
         </div>
 
         <div class="view-type-grid">
-          @for (viewType of viewTypes; track viewType.value) {
+          @for (viewType of visibleViewTypes(); track viewType.value) {
             <button
               type="button"
               class="view-type-option"
-              [class.active]="view() === viewType.value"
+              [class.active]="activeView() === viewType.value"
               (click)="onViewTypeChange(viewType.value)"
             >
               <div class="icon-wrapper">
@@ -135,26 +135,28 @@
             </div>
           </app-filter-block>
 
-          <app-filter-block label="User">
-            <div class="filter-select-wrap">
-              <select
-                class="form-select filter-select"
-                [ngModel]="filter().userId ?? ''"
-                (ngModelChange)="onUserChange($event)"
-              >
-                <option [value]="''">All Users</option>
-                @for (user of users(); track user.id) {
-                  <option [value]="user.id">
-                    {{ getDisplayName(user) }}
-                  </option>
-                }
-              </select>
-              <i
-                class="bi bi-chevron-down filter-select-caret"
-                aria-hidden="true"
-              ></i>
-            </div>
-          </app-filter-block>
+          @if (showUserFilter()) {
+            <app-filter-block label="User">
+              <div class="filter-select-wrap">
+                <select
+                  class="form-select filter-select"
+                  [ngModel]="filter().userId ?? ''"
+                  (ngModelChange)="onUserChange($event)"
+                >
+                  <option [value]="''">All Users</option>
+                  @for (user of users(); track user.id) {
+                    <option [value]="user.id">
+                      {{ getDisplayName(user) }}
+                    </option>
+                  }
+                </select>
+                <i
+                  class="bi bi-chevron-down filter-select-caret"
+                  aria-hidden="true"
+                ></i>
+              </div>
+            </app-filter-block>
+          }
 
           <app-filter-block
             label="Date Range"
@@ -211,22 +213,22 @@
   </section>
 
   <div class="view-content">
-    @if (view() === "summary") {
+    @if (activeView() === "summary") {
       <app-filter-view-summary
         [entries]="filteredEntries()"
         [projects]="projects()"
       ></app-filter-view-summary>
-    } @else if (view() === "details") {
+    } @else if (activeView() === "details") {
       <app-filter-view-details
         [entries]="filteredEntries()"
         [projects]="projects()"
       ></app-filter-view-details>
-    } @else if (view() === "timeline") {
+    } @else if (activeView() === "timeline") {
       <app-filter-view-timeline
         [entries]="filteredEntries()"
         [projects]="projects()"
       ></app-filter-view-timeline>
-    } @else if (view() === "unapproved") {
+    } @else if (activeView() === "unapproved") {
       <app-unapproved-entries [timeSheetEntries]="filteredEntries()" />
     }
   </div>
