@@ -52,7 +52,7 @@
       [title]="userDisplayName()"
       [attr.aria-label]="profileAriaLabel()"
     >
-      <app-user-avatar [user]="user()" [sizePx]="24" [fontSizePx]="11" />
+      <app-user-avatar [user]="user()" [sizePx]="18" [fontSizePx]="9" />
       <span class="label">{{ userDisplayName() }}</span>
     </a>
     <button class="menu-item" type="button" (click)="logout.emit()">
