@@ -1,10 +1,12 @@
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { appstraxStorage } from '@appstrax/services/storage';
 
 import { User } from '@models';
+import { ChangePasswordModal } from '@modals';
 import { ToastService } from '@services';
 import { Store } from '@state';
 import { getUserInitials } from '@utils';
@@ -26,6 +28,8 @@ export class ProfilePage {
 
   projects = computed(() => this.store.projects.projects());
   userInitials = computed(() => getUserInitials(this.user()));
+
+  private readonly modalService = inject(NgbModal);
 
   constructor(
     private store: Store,
@@ -125,5 +129,17 @@ export class ProfilePage {
 
     this.resetEditingValues();
     this.editing.set(true);
+  }
+
+  openChangePasswordModal(): void {
+    const modal = this.modalService.open(ChangePasswordModal, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+    modal.result.then(
+      () => this.toast.success('Password updated successfully', 'Success'),
+      () => {},
+    );
   }
 }

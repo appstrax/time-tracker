@@ -4,7 +4,11 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { appstraxAuth } from '@appstrax/services/auth';
 
-import { AuthErrorUtil } from '@utils';
+import {
+  AuthErrorUtil,
+  isPasswordValid,
+  PASSWORD_REQUIREMENTS,
+} from '@utils';
 
 @Component({
   selector: 'app-forgot-password',
@@ -15,6 +19,8 @@ import { AuthErrorUtil } from '@utils';
   providers: [AuthErrorUtil],
 })
 export class ForgotPasswordPage {
+  readonly passwordRequirements = PASSWORD_REQUIREMENTS;
+
   readonly error = signal('');
   readonly loading = signal(false);
   readonly showResetPassword = signal(false);
@@ -55,8 +61,15 @@ export class ForgotPasswordPage {
   }
 
   public async resetPassword() {
-    if (!this.isResetPasswordFormValid()) {
+    if (!this.email() || !this.code() || !this.password()) {
       this.error.set('Please enter your email, code and password');
+      return;
+    }
+
+    if (!isPasswordValid(this.password())) {
+      this.error.set(
+        `Password does not meet requirements: ${PASSWORD_REQUIREMENTS}`,
+      );
       return;
     }
 
@@ -81,5 +94,9 @@ export class ForgotPasswordPage {
 
   public isResetPasswordFormValid() {
     return !!(this.email() && this.code() && this.password());
+  }
+
+  public showPasswordRequirementsWarning(): boolean {
+    return !!this.password() && !isPasswordValid(this.password());
   }
 }
