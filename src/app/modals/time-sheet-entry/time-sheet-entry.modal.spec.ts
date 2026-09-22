@@ -26,6 +26,20 @@ describe('TimeSheetEntryComponent', () => {
     ],
   } as any as Project;
 
+  const projectWithOptionalBoolean = {
+    id: 'project-4',
+    name: 'Delta',
+    fields: [
+      {
+        key: 'urgent',
+        label: 'Urgent',
+        type: 'boolean',
+        required: false,
+        options: [],
+      },
+    ],
+  } as any as Project;
+
   const projectWithRequiredBoolean = {
     id: 'project-3',
     name: 'Gamma',
@@ -70,6 +84,7 @@ describe('TimeSheetEntryComponent', () => {
               projects: signal([
                 project,
                 projectWithFields,
+                projectWithOptionalBoolean,
                 projectWithRequiredBoolean,
               ]),
             },
@@ -224,6 +239,30 @@ describe('TimeSheetEntryComponent', () => {
     ).toBe('ACME-1');
   });
 
+  it('should drop orphaned field values when a pre-existing entry is moved to another project', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectWithFields.id;
+    component.timeSheetEntry.fieldValues = [
+      { key: 'client-ref', value: 'ACME' },
+      { key: 'notes', value: 'historical note' },
+    ];
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onProjectSelected(project);
+    fillRequiredBaseFields();
+
+    component.onSaveTimeSheetEntry();
+
+    const keys = component.timeSheetEntry.fieldValues.map((fv) => fv.key);
+    expect(keys).not.toContain('client-ref');
+    expect(keys).not.toContain('notes');
+  });
+
   it('should drop values for fields outside the currently selected project on save', async () => {
     await createComponent();
     component.onProjectSelected(projectWithFields);
@@ -237,11 +276,31 @@ describe('TimeSheetEntryComponent', () => {
     expect(keys).toEqual(['notes']);
   });
 
-  it('should treat an untouched required boolean as "No" for a new entry', async () => {
+  it('should default an untouched optional boolean to "No" for a new entry', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithOptionalBoolean);
+
+    expect(component.getFieldValue('urgent')).toBe('false');
+    expect(component.isFormValid()).toBe(false); // base fields still unfilled
+  });
+
+  it('should block saving a new entry when a required boolean is left untouched', async () => {
     await createComponent();
     component.onProjectSelected(projectWithRequiredBoolean);
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
+
+    expect(component.getFieldValue('billable')).toBe('');
+    expect(component.isFormValid()).toBe(false);
+    expect(component.errorMessage).toContain('Billable is required');
+  });
+
+  it('should allow saving a required boolean once explicitly set to No', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithRequiredBoolean);
+    fillRequiredBaseFields();
+    component.setFieldValue('notes', 'done');
+    component.setFieldBoolean('billable', false);
 
     expect(component.getFieldValue('billable')).toBe('false');
     expect(component.isFormValid()).toBe(true);

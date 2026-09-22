@@ -42,8 +42,9 @@ export class TimeSheetEntryModal implements OnInit {
 
   wasExistingEntryOnOpen: boolean = false;
 
-  /** Keys present when the modal opened — kept on save even if project config no longer lists them. */
+  /** Keys present when the modal opened — kept on save only if the project is unchanged. */
   private fieldValueKeysAtOpen = new Set<string>();
+  private projectIdAtOpen = '';
 
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
 
@@ -80,6 +81,7 @@ export class TimeSheetEntryModal implements OnInit {
     this.timeSheetEntry.userId = user.id;
     this.timeSheetEntry.date = this.date;
 
+    this.projectIdAtOpen = this.timeSheetEntry.projectId;
     this.initializeBooleanFieldDefaults();
   }
 
@@ -243,7 +245,7 @@ export class TimeSheetEntryModal implements OnInit {
     if (this.wasExistingEntryOnOpen) return;
 
     for (const field of this.projectFields) {
-      if (field.type !== 'boolean') continue;
+      if (field.type !== 'boolean' || field.required) continue;
       const value = this.getFieldValue(field.key);
       if (value !== 'true' && value !== 'false') {
         this.setFieldValue(field.key, 'false');
@@ -253,9 +255,12 @@ export class TimeSheetEntryModal implements OnInit {
 
   private pruneStaleFieldValues(): void {
     const currentKeys = new Set(this.projectFields.map((field) => field.key));
+    const preserveOrphanedKeys =
+      this.timeSheetEntry.projectId === this.projectIdAtOpen;
     this.timeSheetEntry.fieldValues = this.timeSheetEntry.fieldValues.filter(
       (fv) =>
-        currentKeys.has(fv.key) || this.fieldValueKeysAtOpen.has(fv.key),
+        currentKeys.has(fv.key) ||
+        (preserveOrphanedKeys && this.fieldValueKeysAtOpen.has(fv.key)),
     );
   }
 
