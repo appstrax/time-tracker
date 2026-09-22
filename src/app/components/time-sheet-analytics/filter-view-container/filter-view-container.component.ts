@@ -74,7 +74,6 @@ export class FilterViewContainerComponent
 
   public readonly filteredEntries = signal<TimeSheetEntry[]>([]);
   public readonly view = signal<FilterView>('summary');
-  public readonly isViewCollapsed = signal(false);
   public readonly categories = signal<string[]>([]);
 
   private subscription: Subscription | undefined;
@@ -178,10 +177,6 @@ export class FilterViewContainerComponent
 
   public onViewTypeChange(view: FilterView): void {
     this.view.set(view);
-  }
-
-  public toggleViewCollapsed(): void {
-    this.isViewCollapsed.update((collapsed) => !collapsed);
   }
 
   public onProjectChange(projectId: string): void {
