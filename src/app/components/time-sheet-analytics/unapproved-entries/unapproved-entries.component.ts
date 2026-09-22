@@ -61,6 +61,8 @@ export class UnapprovedEntriesComponent {
   });
   public readonly isLoading = signal(false);
   public readonly usersById = signal<Map<string, User>>(new Map());
+  public readonly pendingUserIds = signal<Set<string>>(new Set());
+  public readonly failedUserIds = signal<Set<string>>(new Set());
 
   private timeSheetEntryService = inject(TimeSheetEntryService);
   private usersService = inject(UsersService);
@@ -69,6 +71,7 @@ export class UnapprovedEntriesComponent {
   public displayUtils = inject(TimeSheetDisplayUtil);
 
   private userFetchGeneration = 0;
+  private userLoadErrorToastShown = false;
 
   constructor() {
     effect(() => {
@@ -77,10 +80,29 @@ export class UnapprovedEntriesComponent {
     });
   }
 
+  public isUserNameLoading(userId: string): boolean {
+    return (
+      this.pendingUserIds().has(userId) && !this.usersById().has(userId)
+    );
+  }
+
+  public getDisplayUserName(userId: string): string {
+    return this.displayUtils.getUserName(
+      userId,
+      this.usersById().get(userId),
+    );
+  }
+
   private async loadUsers(userIds: string[]): Promise<void> {
-    const missingUserIds = userIds.filter((id) => !this.usersById().has(id));
+    const missingUserIds = userIds.filter(
+      (id) =>
+        !this.usersById().has(id) &&
+        !this.failedUserIds().has(id) &&
+        !this.pendingUserIds().has(id),
+    );
     if (!missingUserIds.length) return;
 
+    this.addPendingUserIds(missingUserIds);
     const generation = ++this.userFetchGeneration;
 
     try {
@@ -92,12 +114,44 @@ export class UnapprovedEntriesComponent {
       const updated = new Map(this.usersById());
       users.forEach((user) => updated.set(user.id, user));
       this.usersById.set(updated);
+
+      const returnedIds = new Set(users.map((user) => user.id));
+      const unresolvedIds = missingUserIds.filter((id) => !returnedIds.has(id));
+      if (unresolvedIds.length) {
+        this.addFailedUserIds(unresolvedIds);
+      }
     } catch {
       if (generation !== this.userFetchGeneration) {
         return;
       }
-      this.toastService.error('Error loading user details');
+      this.addFailedUserIds(missingUserIds);
+      if (!this.userLoadErrorToastShown) {
+        this.userLoadErrorToastShown = true;
+        this.toastService.error('Error loading user details');
+      }
+    } finally {
+      if (generation === this.userFetchGeneration) {
+        this.removePendingUserIds(missingUserIds);
+      }
     }
+  }
+
+  private addPendingUserIds(userIds: string[]): void {
+    const next = new Set(this.pendingUserIds());
+    userIds.forEach((id) => next.add(id));
+    this.pendingUserIds.set(next);
+  }
+
+  private removePendingUserIds(userIds: string[]): void {
+    const next = new Set(this.pendingUserIds());
+    userIds.forEach((id) => next.delete(id));
+    this.pendingUserIds.set(next);
+  }
+
+  private addFailedUserIds(userIds: string[]): void {
+    const next = new Set(this.failedUserIds());
+    userIds.forEach((id) => next.add(id));
+    this.failedUserIds.set(next);
   }
 
   public getUniqueCategories(entries: TimeSheetEntry[]): string {

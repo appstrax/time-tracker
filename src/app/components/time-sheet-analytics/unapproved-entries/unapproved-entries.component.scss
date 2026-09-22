@@ -1,3 +1,10 @@
+.user-name-loading {
+  display: inline-flex;
+  align-items: center;
+  min-height: 1.25rem;
+  color: var(--text-muted);
+}
+
 .table-shell {
   border: 1px solid var(--color-border);
   border-radius: 24px;

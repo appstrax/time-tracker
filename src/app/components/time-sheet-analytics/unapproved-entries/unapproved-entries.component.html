@@ -52,7 +52,20 @@
                 </div>
               </td>
               <td class="user-cell">
-                {{ displayUtils.getUserName(group.userId, usersById().get(group.userId)) }}
+                @if (isUserNameLoading(group.userId)) {
+                  <span
+                    class="user-name-loading"
+                    aria-label="Loading user name"
+                  >
+                    <span
+                      class="spinner-border spinner-border-sm"
+                      role="status"
+                      aria-hidden="true"
+                    ></span>
+                  </span>
+                } @else {
+                  {{ getDisplayUserName(group.userId) }}
+                }
               </td>
               <td class="text-end hours">
                 {{ displayUtils.formatHours(group.totalHours) }}
