@@ -44,13 +44,24 @@
       <div class="d-flex align-items-center justify-content-between">
         <h2 class="section-title">Personal Information</h2>
         @if (!editing()) {
-        <button
-          class="btn btn-primary d-flex align-items-center gap-3"
-          (click)="toggleEditing()"
-        >
-          Edit
-          <i class="bi bi-pencil"></i>
-        </button>
+        <div class="d-flex align-items-center gap-2">
+          <button
+            type="button"
+            class="btn btn-primary d-flex align-items-center gap-2"
+            (click)="openChangePasswordModal()"
+          >
+            Change password
+            <i class="bi bi-shield-lock"></i>
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary d-flex align-items-center gap-2"
+            (click)="toggleEditing()"
+          >
+            Edit
+            <i class="bi bi-pencil"></i>
+          </button>
+        </div>
         } @else {
         <div class="d-flex gap-2">
           <button class="btn btn-light" type="button" (click)="toggleEditing()">
@@ -109,19 +120,7 @@
             <div class="text-muted fw-light">Email</div>
             <div class="fw-500">{{ user().email }}</div>
           </div>
-          <div class="col-md-4">
-            <div class="text-muted fw-light">Password</div>
-            <div class="d-flex align-items-center gap-3">
-              <div class="fw-500">********</div>
-              <button
-                class="btn btn-link p-0"
-                type="button"
-                (click)="openChangePasswordModal()"
-              >
-                Change
-              </button>
-            </div>
-          </div>
+          
         </div>
       </div>
     </section>
