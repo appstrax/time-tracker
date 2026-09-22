@@ -61,7 +61,7 @@ export class UnapprovedEntriesComponent {
   });
   public readonly isLoading = signal(false);
   public readonly usersById = signal<Map<string, User>>(new Map());
-  public readonly pendingUserIds = signal<Set<string>>(new Set());
+  private readonly pendingUserIds = signal<Map<string, number>>(new Map());
   public readonly failedUserIds = signal<Set<string>>(new Set());
 
   private timeSheetEntryService = inject(TimeSheetEntryService);
@@ -77,9 +77,13 @@ export class UnapprovedEntriesComponent {
 
   constructor() {
     effect(() => {
-      const userIds = [...new Set(this.groupedEntries().map((g) => g.userId))];
-      void this.loadUsers(userIds);
+      const userIds = this.getGroupedUserIds();
+      queueMicrotask(() => void this.loadUsers(userIds));
     });
+  }
+
+  private getGroupedUserIds(): string[] {
+    return [...new Set(this.groupedEntries().map((g) => g.userId))];
   }
 
   public isUserNameLoading(userId: string): boolean {
@@ -101,8 +105,8 @@ export class UnapprovedEntriesComponent {
     );
     if (!missingUserIds.length) return;
 
-    this.addPendingUserIds(missingUserIds);
     const generation = ++this.userFetchGeneration;
+    this.addPendingUserIds(missingUserIds, generation);
 
     try {
       const users = await this.usersService.findByUserIds(missingUserIds);
@@ -110,6 +114,7 @@ export class UnapprovedEntriesComponent {
       const updated = new Map(this.usersById());
       users.forEach((user) => updated.set(user.id, user));
       this.usersById.set(updated);
+      this.userLoadErrorToastShown = false;
 
       if (generation !== this.userFetchGeneration) {
         return;
@@ -139,32 +144,29 @@ export class UnapprovedEntriesComponent {
         }
       }
     } finally {
-      const pendingToClear = missingUserIds.filter(
-        (id) =>
-          this.usersById().has(id) ||
-          this.failedUserIds().has(id) ||
-          generation === this.userFetchGeneration,
-      );
-      this.removePendingUserIds(pendingToClear);
+      this.removePendingUserIds(missingUserIds, generation);
     }
   }
 
   private scheduleLoadUsersForGroupedEntries(): void {
     queueMicrotask(() => {
-      const userIds = [...new Set(this.groupedEntries().map((g) => g.userId))];
-      void this.loadUsers(userIds);
+      void this.loadUsers(this.getGroupedUserIds());
     });
   }
 
-  private addPendingUserIds(userIds: string[]): void {
-    const next = new Set(this.pendingUserIds());
-    userIds.forEach((id) => next.add(id));
+  private addPendingUserIds(userIds: string[], generation: number): void {
+    const next = new Map(this.pendingUserIds());
+    userIds.forEach((id) => next.set(id, generation));
     this.pendingUserIds.set(next);
   }
 
-  private removePendingUserIds(userIds: string[]): void {
-    const next = new Set(this.pendingUserIds());
-    userIds.forEach((id) => next.delete(id));
+  private removePendingUserIds(userIds: string[], generation: number): void {
+    const next = new Map(this.pendingUserIds());
+    userIds.forEach((id) => {
+      if (next.get(id) === generation) {
+        next.delete(id);
+      }
+    });
     this.pendingUserIds.set(next);
   }
 
