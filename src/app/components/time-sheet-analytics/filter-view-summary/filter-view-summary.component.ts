@@ -22,6 +22,7 @@ export class FilterViewSummaryComponent {
   public readonly users = input<User[]>([]);
   public readonly showExport = input(false);
   public readonly linkProjectsToTimeSheet = input(false);
+  public readonly compact = input(false);
 
   public displayUtils = inject(TimeSheetDisplayUtil);
   private readonly exportUtil = inject(TimeSheetExportUtil);

@@ -1,5 +1,5 @@
 <div class="filter-view-container" [class.compact]="compact()">
-  <section class="filter-panel">
+  <section class="filter-panel" [class.workspace-panel]="compact()">
     @if (!compact()) {
       <div class="panel-header">
         <div>
@@ -59,10 +59,22 @@
                 </button>
               }
             </div>
-            <span class="metric-pill metric-pill--compact">
-              {{ filteredEntries().length }}
-              {{ filteredEntries().length === 1 ? 'match' : 'matches' }}
-            </span>
+            <div class="compact-toolbar-actions">
+              <span class="metric-pill metric-pill--compact">
+                {{ filteredEntries().length }}
+                {{ filteredEntries().length === 1 ? 'match' : 'matches' }}
+              </span>
+              @if (showExport()) {
+                <button
+                  type="button"
+                  class="export-all-button export-all-button--compact"
+                  (click)="exportAllProjects()"
+                >
+                  <i class="bi bi-download" aria-hidden="true"></i>
+                  Export
+                </button>
+              }
+            </div>
           </div>
         }
 
@@ -234,29 +246,47 @@
         </div>
       </div>
     </div>
+
+    @if (compact()) {
+      <div class="workspace-results">
+        <ng-container *ngTemplateOutlet="viewResults" />
+      </div>
+    }
   </section>
 
-  <div class="view-content">
-    @if (activeView() === "summary") {
-      <app-filter-view-summary
-        [entries]="filteredEntries()"
-        [projects]="projects()"
-        [users]="users()"
-        [showExport]="showExport()"
-        [linkProjectsToTimeSheet]="linkProjectsToTimeSheet()"
-      ></app-filter-view-summary>
-    } @else if (activeView() === "details") {
-      <app-filter-view-details
-        [entries]="filteredEntries()"
-        [projects]="projects()"
-      ></app-filter-view-details>
-    } @else if (activeView() === "timeline") {
-      <app-filter-view-timeline
-        [entries]="filteredEntries()"
-        [projects]="projects()"
-      ></app-filter-view-timeline>
-    } @else if (activeView() === "unapproved") {
-      <app-unapproved-entries [timeSheetEntries]="filteredEntries()" />
-    }
-  </div>
+  @if (!compact()) {
+    <div class="view-content">
+      <ng-container *ngTemplateOutlet="viewResults" />
+    </div>
+  }
 </div>
+
+<ng-template #viewResults>
+  @if (activeView() === "summary") {
+    <app-filter-view-summary
+      [entries]="filteredEntries()"
+      [projects]="projects()"
+      [users]="users()"
+      [showExport]="showExport()"
+      [linkProjectsToTimeSheet]="linkProjectsToTimeSheet()"
+      [compact]="compact()"
+    ></app-filter-view-summary>
+  } @else if (activeView() === "details") {
+    <app-filter-view-details
+      [entries]="filteredEntries()"
+      [projects]="projects()"
+      [compact]="compact()"
+    ></app-filter-view-details>
+  } @else if (activeView() === "timeline") {
+    <app-filter-view-timeline
+      [entries]="filteredEntries()"
+      [projects]="projects()"
+      [compact]="compact()"
+    ></app-filter-view-timeline>
+  } @else if (activeView() === "unapproved") {
+    <app-unapproved-entries
+      [timeSheetEntries]="filteredEntries()"
+      [compact]="compact()"
+    />
+  }
+</ng-template>

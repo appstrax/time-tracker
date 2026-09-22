@@ -10,6 +10,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -36,6 +37,7 @@ export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
   selector: 'app-filter-view-container',
   standalone: true,
   imports: [
+    NgTemplateOutlet,
     FormsModule,
     FilterBlockComponent,
     FilterViewSummaryComponent,

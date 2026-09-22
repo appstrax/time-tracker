@@ -1,76 +1,157 @@
-<section class="unapproved-entries">
-  <div class="table-shell">
-    <div class="table-toolbar">
-      <div>
-        <p class="eyebrow">Approvals</p>
-        <h2>Unapproved entries</h2>
-        <p>Open a grouped day to review pending time and approve it from one place.</p>
+<section class="unapproved-entries" [class.workspace-view]="compact()">
+  @if (compact()) {
+    <div class="ws-tab ws-tab--unapproved">
+      <div class="ws-tab-head">
+        <div>
+          <h2 class="ws-tab-title">Pending approvals</h2>
+          <p class="ws-tab-sub">Tap a group to review and approve entries for that day.</p>
+        </div>
+        @if (!isLoading() && groupedEntries().length) {
+          <span class="ws-tab-badge ws-tab-badge--warn">
+            {{ groupedEntries().length }}
+            {{ groupedEntries().length === 1 ? 'group' : 'groups' }}
+          </span>
+        }
+      </div>
+
+      @if (isLoading()) {
+        <div class="ws-empty" aria-busy="true">
+          <span class="spinner-border spinner-border-sm" role="status"></span>
+          <p>Loading pending entries…</p>
+        </div>
+      } @else if (!groupedEntries().length) {
+        <div class="ws-empty">
+          <i class="bi bi-check2-circle" aria-hidden="true"></i>
+          <p>Nothing waiting for approval with the current filters.</p>
+        </div>
+      } @else {
+        <ul class="ws-list ws-approval-list">
+          @for (
+            group of groupedEntries();
+            track group.date.toISOString() + '_' + group.userId
+          ) {
+            <li>
+              <button
+                type="button"
+                class="ws-approval-card"
+                (click)="onEntryClick(group)"
+              >
+                <div class="ws-approval-main">
+                  <span class="ws-approval-date">
+                    {{ group.date | date : 'EEE, MMM d, yyyy' }}
+                  </span>
+                  <span class="ws-approval-user">
+                    {{
+                      displayUtils.getUserName(group.userId, {
+                        currentUserId: currentUserId(),
+                      })
+                    }}
+                  </span>
+                  <div class="ws-approval-tags">
+                    @for (
+                      category of getUniqueCategoriesList(group.entries);
+                      track category
+                    ) {
+                      <span class="ws-tag">{{ category }}</span>
+                    }
+                  </div>
+                </div>
+                <div class="ws-approval-meta">
+                  <span class="ws-hours">
+                    {{ displayUtils.formatHours(group.totalHours) }}
+                  </span>
+                  <span class="ws-meta-line">
+                    Review {{ group.entries.length }}
+                    <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                  </span>
+                </div>
+              </button>
+            </li>
+          }
+        </ul>
+      }
+    </div>
+  } @else {
+    <div class="table-shell">
+      <div class="table-toolbar">
+        <div>
+          <p class="eyebrow">Approvals</p>
+          <h2>Unapproved entries</h2>
+          <p>Open a grouped day to review pending time and approve it from one place.</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Category</th>
+              <th>User</th>
+              <th class="text-end">Hours</th>
+              <th class="text-end">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading()) {
+              <tr>
+                <td colspan="5" class="empty-state">
+                  <div class="spinner-border spinner-border-sm" role="status">
+                    <span class="visually-hidden">Loading...</span>
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (!isLoading() && !groupedEntries().length) {
+              <tr>
+                <td colspan="5" class="empty-state">No unapproved entries.</td>
+              </tr>
+            }
+            @for (
+              group of groupedEntries();
+              track group.date.toISOString() + '_' + group.userId
+            ) {
+              <tr
+                class="clickable-row"
+                (click)="onEntryClick(group)"
+                [title]="
+                  'Click to view and approve ' + group.entries.length + ' entries'
+                "
+              >
+                <td class="date-cell">
+                  {{ group.date | date : 'MMM d, yyyy' }}
+                </td>
+                <td>
+                  <div class="category-list">
+                    @for (
+                      category of getUniqueCategoriesList(group.entries);
+                      track category
+                    ) {
+                      <span class="category-pill">{{ category }}</span>
+                    }
+                  </div>
+                </td>
+                <td class="user-cell">
+                  {{
+                    displayUtils.getUserName(group.userId, {
+                      currentUserId: currentUserId(),
+                    })
+                  }}
+                </td>
+                <td class="text-end hours">
+                  {{ displayUtils.formatHours(group.totalHours) }}
+                </td>
+                <td class="text-end">
+                  <span class="row-action">
+                    Review
+                    <i class="bi bi-arrow-right"></i>
+                  </span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
       </div>
     </div>
-
-    <div class="table-responsive">
-      <table class="table align-middle mb-0">
-        <thead>
-          <tr>
-            <th>Date</th>
-            <th>Category</th>
-            <th>User</th>
-            <th class="text-end">Hours</th>
-            <th class="text-end">Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          @if (isLoading()) {
-            <tr>
-              <td colspan="5" class="empty-state">
-                <div class="spinner-border spinner-border-sm" role="status">
-                  <span class="visually-hidden">Loading...</span>
-                </div>
-              </td>
-            </tr>
-          }
-          @if (!isLoading() && !groupedEntries().length) {
-            <tr>
-              <td colspan="5" class="empty-state">No unapproved entries.</td>
-            </tr>
-          } @for (group of groupedEntries(); track group.date.toISOString() + '_' + group.userId) {
-            <tr
-              class="clickable-row"
-              (click)="onEntryClick(group)"
-              [title]="
-                'Click to view and approve ' + group.entries.length + ' entries'
-              "
-            >
-              <td class="date-cell">
-                {{ group.date | date : "MMM d, yyyy" }}
-              </td>
-              <td>
-                <div class="category-list">
-                  @for (category of getUniqueCategoriesList(group.entries); track category) {
-                    <span class="category-pill">{{ category }}</span>
-                  }
-                </div>
-              </td>
-              <td class="user-cell">
-                {{
-                  displayUtils.getUserName(group.userId, {
-                    currentUserId: currentUserId()
-                  })
-                }}
-              </td>
-              <td class="text-end hours">
-                {{ displayUtils.formatHours(group.totalHours) }}
-              </td>
-              <td class="text-end">
-                <span class="row-action">
-                  Review
-                  <i class="bi bi-arrow-right"></i>
-                </span>
-              </td>
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
-  </div>
+  }
 </section>

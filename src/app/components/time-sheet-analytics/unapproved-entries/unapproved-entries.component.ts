@@ -31,6 +31,7 @@ interface UnapprovedEntryGroup {
 })
 export class UnapprovedEntriesComponent implements OnInit {
   public readonly timeSheetEntries = input<TimeSheetEntry[]>([]);
+  public readonly compact = input(false);
   public readonly canApprove = input(false);
   public readonly groupedEntries = computed(() => {
     const groupsMap = new Map<string, UnapprovedEntryGroup>();

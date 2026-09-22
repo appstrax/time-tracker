@@ -2,5 +2,15 @@
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 1rem;
-}
 
+  &.compact {
+    gap: 0;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    padding: 0.35rem 0.5rem 0.5rem;
+
+    @media (max-width: 767px) {
+      grid-template-columns: 1fr;
+      padding: 0.35rem 0.65rem 0.65rem;
+    }
+  }
+}

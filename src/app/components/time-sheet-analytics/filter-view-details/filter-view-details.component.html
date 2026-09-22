@@ -1,80 +1,174 @@
-<section class="filter-view-details">
-  <div class="table-shell">
-    <div class="table-toolbar">
-      <div>
-        <p class="eyebrow">Details</p>
-        <h2>Entries by day</h2>
-        <p>Review each reporting day with project, category, hours, and approval state.</p>
+<section class="filter-view-details" [class.workspace-view]="compact()">
+  @if (compact()) {
+    <div class="ws-tab">
+      <div class="ws-tab-head">
+        <div>
+          <h2 class="ws-tab-title">Daily entries</h2>
+          <p class="ws-tab-sub">Each row is one time entry in the filtered range.</p>
+        </div>
+        @if (entriesByDate().length) {
+          <span class="ws-tab-badge">
+            {{ entriesByDate().length }}
+            {{ entriesByDate().length === 1 ? 'day' : 'days' }}
+          </span>
+        }
       </div>
-    </div>
-
-    <div class="entries-list">
-      @for (dateGroup of entriesByDate(); track dateGroup.date.toISOString()) {
-        <section class="date-group">
-          <div class="date-header">
-            <div>
-              <h3>{{ dateGroup.date | date:'MMM d, yyyy' }}</h3>
-              <p>Detailed breakdown for this reporting day.</p>
-            </div>
-            <span class="metric-pill">
-              {{ dateGroup.entries.length }}
-              {{ dateGroup.entries.length === 1 ? 'entry' : 'entries' }}
-            </span>
-          </div>
-
-          <div class="table-responsive">
-            <table class="table align-middle mb-0">
-              <thead>
-                <tr>
-                  <th>Project</th>
-                  <th>Hours</th>
-                  <th>Category</th>
-                  <th>Details</th>
-                  <th>Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                @for (entry of dateGroup.entries; track entry) {
-                  <tr>
-                    <td>
-                      <span class="project-pill">
-                        {{ displayUtils.getProjectName(entry.projectId, projects()) }}
-                      </span>
-                    </td>
-                    <td class="hours">{{ displayUtils.formatHours(entry.hours) }}</td>
-                    <td>
-                      <span class="category-pill">{{ entry.category }}</span>
-                    </td>
-                    <td>
-                      @if (entry.fieldValues.length) {
-                        <div class="field-value-pills">
-                          @for (fieldValue of entry.fieldValues; track fieldValue.key) {
-                            @if (fieldValue.value) {
-                              <span class="field-value-pill">{{ getFieldLabel(entry, fieldValue.key) }}: {{ fieldValue.value }}</span>
-                            }
-                          }
-                        </div>
-                      } @else {
-                        <span class="text-muted">—</span>
-                      }
-                    </td>
-                    <td>
-                      <span class="status-pill" [class.pending]="!entry.approved">
-                        {{ entry.approved ? 'Approved' : 'Pending' }}
-                      </span>
-                    </td>
-                  </tr>
-                }
-              </tbody>
-            </table>
-          </div>
-        </section>
-      }
 
       @if (!entriesByDate().length) {
-        <div class="empty-state">No entries found for the current filters.</div>
+        <div class="ws-empty">
+          <i class="bi bi-list-ul" aria-hidden="true"></i>
+          <p>No entries match the current filters.</p>
+        </div>
+      } @else {
+        @for (dateGroup of entriesByDate(); track dateGroup.date.toISOString()) {
+          <section class="ws-day-block">
+            <div class="ws-day-head">
+              <span>{{ dateGroup.date | date : 'EEEE, MMM d' }}</span>
+              <span class="ws-tab-badge">
+                {{ dateGroup.entries.length }}
+                {{ dateGroup.entries.length === 1 ? 'entry' : 'entries' }}
+              </span>
+            </div>
+            <ul class="ws-entry-list">
+              @for (entry of dateGroup.entries; track entry) {
+                <li class="ws-entry-row">
+                  <span
+                    class="ws-entry-project ws-project-label"
+                    [title]="
+                      displayUtils.getProjectName(entry.projectId, projects())
+                    "
+                  >
+                    {{
+                      displayUtils.getProjectName(entry.projectId, projects())
+                    }}
+                  </span>
+                  <span class="ws-entry-hours ws-num ws-num--total">
+                    {{ displayUtils.formatHours(entry.hours) }}
+                  </span>
+                  <span class="ws-entry-category ws-tag" [title]="entry.category">
+                    {{ entry.category }}
+                  </span>
+                  <span
+                    class="ws-entry-status ws-status"
+                    [class.ws-status--pending]="!entry.approved"
+                  >
+                    {{ entry.approved ? 'Approved' : 'Pending' }}
+                  </span>
+                  @if (entry.fieldValues.length) {
+                    <p class="ws-field-hint">
+                      @for (
+                        fieldValue of entry.fieldValues;
+                        track fieldValue.key
+                      ) {
+                        @if (fieldValue.value) {
+                          <span>
+                            {{ getFieldLabel(entry, fieldValue.key) }}:
+                            {{ fieldValue.value }}
+                          </span>
+                        }
+                      }
+                    </p>
+                  }
+                </li>
+              }
+            </ul>
+          </section>
+        }
       }
     </div>
-  </div>
-</section>
+  } @else {
+    <div class="table-shell">
+      <div class="table-toolbar">
+        <div>
+          <p class="eyebrow">Details</p>
+          <h2>Entries by day</h2>
+          <p>Review each reporting day with project, category, hours, and approval state.</p>
+        </div>
+      </div>
 
+      <div class="entries-list">
+        @for (dateGroup of entriesByDate(); track dateGroup.date.toISOString()) {
+          <section class="date-group">
+            <div class="date-header">
+              <div>
+                <h3>{{ dateGroup.date | date : 'MMM d, yyyy' }}</h3>
+                <p>Detailed breakdown for this reporting day.</p>
+              </div>
+              <span class="metric-pill">
+                {{ dateGroup.entries.length }}
+                {{ dateGroup.entries.length === 1 ? 'entry' : 'entries' }}
+              </span>
+            </div>
+
+            <div class="table-responsive">
+              <table class="table align-middle mb-0">
+                <thead>
+                  <tr>
+                    <th>Project</th>
+                    <th>Hours</th>
+                    <th>Category</th>
+                    <th>Details</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (entry of dateGroup.entries; track entry) {
+                    <tr>
+                      <td>
+                        <span class="project-pill">
+                          {{
+                            displayUtils.getProjectName(
+                              entry.projectId,
+                              projects()
+                            )
+                          }}
+                        </span>
+                      </td>
+                      <td class="hours">
+                        {{ displayUtils.formatHours(entry.hours) }}
+                      </td>
+                      <td>
+                        <span class="category-pill">{{ entry.category }}</span>
+                      </td>
+                      <td>
+                        @if (entry.fieldValues.length) {
+                          <div class="field-value-pills">
+                            @for (
+                              fieldValue of entry.fieldValues;
+                              track fieldValue.key
+                            ) {
+                              @if (fieldValue.value) {
+                                <span class="field-value-pill">
+                                  {{ getFieldLabel(entry, fieldValue.key) }}:
+                                  {{ fieldValue.value }}
+                                </span>
+                              }
+                            }
+                          </div>
+                        } @else {
+                          <span class="text-muted">—</span>
+                        }
+                      </td>
+                      <td>
+                        <span
+                          class="status-pill"
+                          [class.pending]="!entry.approved"
+                        >
+                          {{ entry.approved ? 'Approved' : 'Pending' }}
+                        </span>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          </section>
+        }
+
+        @if (!entriesByDate().length) {
+          <div class="empty-state">No entries found for the current filters.</div>
+        }
+      </div>
+    </div>
+  }
+</section>

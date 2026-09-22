@@ -1,55 +1,120 @@
-<section class="filter-view-timeline">
-  <div class="timeline-shell">
-    <div class="timeline-toolbar">
-      <div>
-        <p class="eyebrow">Timeline</p>
-        <h2>Daily activity</h2>
-        <p>See how approved and pending time is distributed across each day.</p>
+<section class="filter-view-timeline" [class.workspace-view]="compact()">
+  @if (compact()) {
+    <div class="ws-tab">
+      <div class="ws-tab-head">
+        <div>
+          <h2 class="ws-tab-title">Daily totals</h2>
+          <p class="ws-tab-sub">Approved vs pending hours per day.</p>
+        </div>
+        @if (timelineData().length) {
+          <span class="ws-tab-badge">
+            {{ timelineData().length }}
+            {{ timelineData().length === 1 ? 'day' : 'days' }}
+          </span>
+        }
       </div>
-    </div>
-
-    <div class="timeline-container">
-      @for (day of timelineData(); track day.date.toISOString()) {
-        <section class="timeline-day">
-          <div class="timeline-header">
-            <div>
-              <h3>{{ day.date | date : "MMM d, yyyy" }}</h3>
-              <p>Daily total across all matching entries.</p>
-            </div>
-            <span class="metric-pill">
-              {{ displayUtils.formatHours(day.hours) }}
-            </span>
-          </div>
-
-          <div class="timeline-bar">
-            <div
-              class="timeline-segment approved"
-              [style.width.%]="(day.approvedHours / maxHours()) * 100"
-              [title]="displayUtils.formatHours(day.approvedHours) + ' approved'"
-            ></div>
-            <div
-              class="timeline-segment pending"
-              [style.width.%]="(day.pendingHours / maxHours()) * 100"
-              [title]="displayUtils.formatHours(day.pendingHours) + ' pending'"
-            ></div>
-          </div>
-
-          <div class="timeline-legend">
-            <span class="legend-item">
-              <span class="legend-color approved"></span>
-              <span>Approved: {{ displayUtils.formatHours(day.approvedHours) }}</span>
-            </span>
-            <span class="legend-item">
-              <span class="legend-color pending"></span>
-              <span>Pending: {{ displayUtils.formatHours(day.pendingHours) }}</span>
-            </span>
-          </div>
-        </section>
-      }
 
       @if (!timelineData().length) {
-        <div class="empty-state">No entries found for the current filters.</div>
+        <div class="ws-empty">
+          <i class="bi bi-calendar3" aria-hidden="true"></i>
+          <p>No entries match the current filters.</p>
+        </div>
+      } @else {
+        <div class="ws-timeline-list">
+          @for (day of timelineData(); track day.date.toISOString()) {
+            <article class="ws-timeline-row">
+              <div class="ws-timeline-top">
+                <span>{{ day.date | date : 'EEE, MMM d' }}</span>
+                <span class="ws-hours">
+                  {{ displayUtils.formatHours(day.hours) }}
+                </span>
+              </div>
+              <div class="ws-timeline-bar" aria-hidden="true">
+                <div
+                  class="ws-timeline-seg ws-timeline-seg--approved"
+                  [style.width.%]="(day.approvedHours / maxHours()) * 100"
+                ></div>
+                <div
+                  class="ws-timeline-seg ws-timeline-seg--pending"
+                  [style.width.%]="(day.pendingHours / maxHours()) * 100"
+                ></div>
+              </div>
+              <div class="ws-timeline-foot">
+                <span>
+                  Approved
+                  {{ displayUtils.formatHours(day.approvedHours) }}
+                </span>
+                <span>
+                  Pending
+                  {{ displayUtils.formatHours(day.pendingHours) }}
+                </span>
+              </div>
+            </article>
+          }
+        </div>
       }
     </div>
-  </div>
+  } @else {
+    <div class="timeline-shell">
+      <div class="timeline-toolbar">
+        <div>
+          <p class="eyebrow">Timeline</p>
+          <h2>Daily activity</h2>
+          <p>See how approved and pending time is distributed across each day.</p>
+        </div>
+      </div>
+
+      <div class="timeline-container">
+        @for (day of timelineData(); track day.date.toISOString()) {
+          <section class="timeline-day">
+            <div class="timeline-header">
+              <div>
+                <h3>{{ day.date | date : 'MMM d, yyyy' }}</h3>
+                <p>Daily total across all matching entries.</p>
+              </div>
+              <span class="metric-pill">
+                {{ displayUtils.formatHours(day.hours) }}
+              </span>
+            </div>
+
+            <div class="timeline-bar">
+              <div
+                class="timeline-segment approved"
+                [style.width.%]="(day.approvedHours / maxHours()) * 100"
+                [title]="
+                  displayUtils.formatHours(day.approvedHours) + ' approved'
+                "
+              ></div>
+              <div
+                class="timeline-segment pending"
+                [style.width.%]="(day.pendingHours / maxHours()) * 100"
+                [title]="
+                  displayUtils.formatHours(day.pendingHours) + ' pending'
+                "
+              ></div>
+            </div>
+
+            <div class="timeline-legend">
+              <span class="legend-item">
+                <span class="legend-color approved"></span>
+                <span>
+                  Approved: {{ displayUtils.formatHours(day.approvedHours) }}
+                </span>
+              </span>
+              <span class="legend-item">
+                <span class="legend-color pending"></span>
+                <span>
+                  Pending: {{ displayUtils.formatHours(day.pendingHours) }}
+                </span>
+              </span>
+            </div>
+          </section>
+        }
+
+        @if (!timelineData().length) {
+          <div class="empty-state">No entries found for the current filters.</div>
+        }
+      </div>
+    </div>
+  }
 </section>
