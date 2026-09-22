@@ -121,18 +121,12 @@ export class UnapprovedEntriesComponent {
         this.addFailedUserIds(unresolvedIds);
       }
     } catch {
-      if (generation !== this.userFetchGeneration) {
-        return;
-      }
-      this.addFailedUserIds(missingUserIds);
-      if (!this.userLoadErrorToastShown) {
+      if (generation === this.userFetchGeneration && !this.userLoadErrorToastShown) {
         this.userLoadErrorToastShown = true;
         this.toastService.error('Error loading user details');
       }
     } finally {
-      if (generation === this.userFetchGeneration) {
-        this.removePendingUserIds(missingUserIds);
-      }
+      this.removePendingUserIds(missingUserIds);
     }
   }
 
