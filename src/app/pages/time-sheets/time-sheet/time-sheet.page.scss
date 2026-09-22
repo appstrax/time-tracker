@@ -32,7 +32,9 @@
   --page-header-control-height: 2.35rem;
   display: flex;
   align-items: center;
-  gap: 0.65rem;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 0.65rem 0.75rem;
   flex-shrink: 0;
 
   app-time-sheet-date-selector,

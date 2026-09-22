@@ -286,6 +286,7 @@
   } @else if (activeView() === "unapproved") {
     <app-unapproved-entries
       [timeSheetEntries]="filteredEntries()"
+      [users]="users()"
       [compact]="compact()"
     />
   }

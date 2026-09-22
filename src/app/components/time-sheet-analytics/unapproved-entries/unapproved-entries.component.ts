@@ -1,18 +1,16 @@
 import {
   Component,
-  OnInit,
   computed,
   inject,
   input,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { appstraxAuth } from '@appstrax/services/auth';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { TimeSheetEntry } from '@models';
+import { TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
-import { TimeSheetDisplayUtil } from '@utils';
+import { getUserDisplayName, TimeSheetDisplayUtil } from '@utils';
 import { UnapprovedEntriesModalComponent } from '../../../modals/unapproved-entries/unapproved-entries.modal';
 
 interface UnapprovedEntryGroup {
@@ -29,9 +27,10 @@ interface UnapprovedEntryGroup {
   templateUrl: './unapproved-entries.component.html',
   styleUrl: './unapproved-entries.component.scss',
 })
-export class UnapprovedEntriesComponent implements OnInit {
+export class UnapprovedEntriesComponent {
   public readonly timeSheetEntries = input<TimeSheetEntry[]>([]);
   public readonly compact = input(false);
+  public readonly users = input<User[]>([]);
   public readonly canApprove = input(false);
   public readonly groupedEntries = computed(() => {
     const groupsMap = new Map<string, UnapprovedEntryGroup>();
@@ -61,7 +60,9 @@ export class UnapprovedEntriesComponent implements OnInit {
       (a, b) => b.date.getTime() - a.date.getTime(),
     );
   });
-  public readonly currentUserId = signal('');
+  public readonly usersById = computed(
+    () => new Map(this.users().map((user) => [user.id, user])),
+  );
   public readonly isLoading = signal(false);
 
   private timeSheetEntryService = inject(TimeSheetEntryService);
@@ -69,11 +70,9 @@ export class UnapprovedEntriesComponent implements OnInit {
   private modalService = inject(NgbModal);
   public displayUtils = inject(TimeSheetDisplayUtil);
 
-  async ngOnInit(): Promise<void> {
-    const user = await appstraxAuth.getUser();
-    if (user) {
-      this.currentUserId.set(user.id);
-    }
+  public getDisplayUserName(userId: string): string {
+    const user = this.usersById().get(userId) ?? null;
+    return getUserDisplayName(user, userId);
   }
 
   public getUniqueCategories(entries: TimeSheetEntry[]): string {
@@ -112,6 +111,7 @@ export class UnapprovedEntriesComponent implements OnInit {
         unapprovedEntries: unapprovedEntries,
         date: group.date,
         userId: group.userId,
+        preloadedUser: this.usersById().get(group.userId),
         onApprove: async () => {
           await this.approveEntries(unapprovedEntries);
         },
