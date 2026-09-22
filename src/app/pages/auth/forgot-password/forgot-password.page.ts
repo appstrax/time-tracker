@@ -19,6 +19,8 @@ import {
   providers: [AuthErrorUtil],
 })
 export class ForgotPasswordPage {
+  readonly passwordRequirements = PASSWORD_REQUIREMENTS;
+
   readonly error = signal('');
   readonly loading = signal(false);
   readonly showResetPassword = signal(false);
@@ -59,7 +61,7 @@ export class ForgotPasswordPage {
   }
 
   public async resetPassword() {
-    if (!this.isResetPasswordFormValid()) {
+    if (!this.email() || !this.code() || !this.password()) {
       this.error.set('Please enter your email, code and password');
       return;
     }
@@ -91,11 +93,10 @@ export class ForgotPasswordPage {
   }
 
   public isResetPasswordFormValid() {
-    return !!(
-      this.email() &&
-      this.code() &&
-      this.password() &&
-      isPasswordValid(this.password())
-    );
+    return !!(this.email() && this.code() && this.password());
+  }
+
+  public showPasswordRequirementsWarning(): boolean {
+    return !!this.password() && !isPasswordValid(this.password());
   }
 }
