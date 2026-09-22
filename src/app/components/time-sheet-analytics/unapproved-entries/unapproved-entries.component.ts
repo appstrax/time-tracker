@@ -71,7 +71,9 @@ export class UnapprovedEntriesComponent {
   public displayUtils = inject(TimeSheetDisplayUtil);
 
   private userFetchGeneration = 0;
+  private userFetchRetryAttempts = 0;
   private userLoadErrorToastShown = false;
+  private static readonly MAX_USER_FETCH_RETRIES = 3;
 
   constructor() {
     effect(() => {
@@ -95,10 +97,7 @@ export class UnapprovedEntriesComponent {
 
   private async loadUsers(userIds: string[]): Promise<void> {
     const missingUserIds = userIds.filter(
-      (id) =>
-        !this.usersById().has(id) &&
-        !this.failedUserIds().has(id) &&
-        !this.pendingUserIds().has(id),
+      (id) => !this.usersById().has(id) && !this.failedUserIds().has(id),
     );
     if (!missingUserIds.length) return;
 
@@ -107,13 +106,16 @@ export class UnapprovedEntriesComponent {
 
     try {
       const users = await this.usersService.findByUserIds(missingUserIds);
-      if (generation !== this.userFetchGeneration) {
-        return;
-      }
 
       const updated = new Map(this.usersById());
       users.forEach((user) => updated.set(user.id, user));
       this.usersById.set(updated);
+
+      if (generation !== this.userFetchGeneration) {
+        return;
+      }
+
+      this.userFetchRetryAttempts = 0;
 
       const returnedIds = new Set(users.map((user) => user.id));
       const unresolvedIds = missingUserIds.filter((id) => !returnedIds.has(id));
@@ -121,13 +123,37 @@ export class UnapprovedEntriesComponent {
         this.addFailedUserIds(unresolvedIds);
       }
     } catch {
-      if (generation === this.userFetchGeneration && !this.userLoadErrorToastShown) {
-        this.userLoadErrorToastShown = true;
-        this.toastService.error('Error loading user details');
+      if (generation === this.userFetchGeneration) {
+        if (!this.userLoadErrorToastShown) {
+          this.userLoadErrorToastShown = true;
+          this.toastService.error('Error loading user details');
+        }
+        if (
+          this.userFetchRetryAttempts <
+          UnapprovedEntriesComponent.MAX_USER_FETCH_RETRIES
+        ) {
+          this.userFetchRetryAttempts++;
+          this.scheduleLoadUsersForGroupedEntries();
+        } else {
+          this.addFailedUserIds(missingUserIds);
+        }
       }
     } finally {
-      this.removePendingUserIds(missingUserIds);
+      const pendingToClear = missingUserIds.filter(
+        (id) =>
+          this.usersById().has(id) ||
+          this.failedUserIds().has(id) ||
+          generation === this.userFetchGeneration,
+      );
+      this.removePendingUserIds(pendingToClear);
     }
+  }
+
+  private scheduleLoadUsersForGroupedEntries(): void {
+    queueMicrotask(() => {
+      const userIds = [...new Set(this.groupedEntries().map((g) => g.userId))];
+      void this.loadUsers(userIds);
+    });
   }
 
   private addPendingUserIds(userIds: string[]): void {
