@@ -1,18 +1,29 @@
 import { FormsModule } from '@angular/forms';
 import { Component, signal } from '@angular/core';
-import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
+import { NgbActiveModal, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { appstraxAuth } from '@appstrax/services/auth';
 
 import { AuthErrorUtil } from '@utils';
+
+export const PASSWORD_REQUIREMENTS =
+  'At least 8 characters, including 1 uppercase letter and 1 number.';
+
+const PASSWORD_PATTERN = /^(?=.*[A-Z])(?=.*\d).{8,}$/;
+
+export function isPasswordValid(password: string): boolean {
+  return PASSWORD_PATTERN.test(password);
+}
 
 @Component({
   standalone: true,
   templateUrl: './change-password.modal.html',
   styleUrl: './change-password.modal.scss',
-  imports: [FormsModule],
+  imports: [FormsModule, NgbTooltipModule],
   providers: [AuthErrorUtil],
 })
 export class ChangePasswordModal {
+  readonly passwordRequirements = PASSWORD_REQUIREMENTS;
+
   readonly currentPassword = signal('');
   readonly newPassword = signal('');
   readonly confirmPassword = signal('');
@@ -28,7 +39,7 @@ export class ChangePasswordModal {
   isFormValid(): boolean {
     return !!(
       this.currentPassword() &&
-      this.newPassword() &&
+      isPasswordValid(this.newPassword()) &&
       this.newPassword() === this.confirmPassword()
     );
   }
@@ -36,6 +47,11 @@ export class ChangePasswordModal {
   async submit(): Promise<void> {
     if (!this.currentPassword() || !this.newPassword() || !this.confirmPassword()) {
       this.error.set('Please fill in all fields');
+      return;
+    }
+
+    if (!isPasswordValid(this.newPassword())) {
+      this.error.set(`New password does not meet requirements: ${PASSWORD_REQUIREMENTS}`);
       return;
     }
 
