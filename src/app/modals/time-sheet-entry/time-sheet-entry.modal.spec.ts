@@ -26,6 +26,21 @@ describe('TimeSheetEntryComponent', () => {
     ],
   } as any as Project;
 
+  const projectWithRequiredBoolean = {
+    id: 'project-3',
+    name: 'Gamma',
+    fields: [
+      { key: 'notes', label: 'Notes', type: 'text', required: true, options: [] },
+      {
+        key: 'billable',
+        label: 'Billable',
+        type: 'boolean',
+        required: true,
+        options: [],
+      },
+    ],
+  } as any as Project;
+
   let component: TimeSheetEntryModal;
   let fixture: ComponentFixture<TimeSheetEntryModal>;
   let activeModal: jasmine.SpyObj<NgbActiveModal>;
@@ -52,7 +67,11 @@ describe('TimeSheetEntryComponent', () => {
           provide: Store,
           useValue: {
             projects: {
-              projects: signal([project, projectWithFields]),
+              projects: signal([
+                project,
+                projectWithFields,
+                projectWithRequiredBoolean,
+              ]),
             },
           },
         },
@@ -178,6 +197,33 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.getFieldValue('notes')).toBe('kept across switches');
   });
 
+  it('should preserve field values for keys that existed when editing a pre-existing entry', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectWithFields.id;
+    component.timeSheetEntry.fieldValues = [
+      { key: 'legacy-client-ref', value: 'ACME-1' },
+      { key: 'notes', value: 'historical note' },
+    ];
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fillRequiredBaseFields();
+
+    component.onSaveTimeSheetEntry();
+
+    const keys = component.timeSheetEntry.fieldValues.map((fv) => fv.key);
+    expect(keys).toContain('legacy-client-ref');
+    expect(
+      component.timeSheetEntry.fieldValues.find(
+        (fv) => fv.key === 'legacy-client-ref',
+      )?.value,
+    ).toBe('ACME-1');
+  });
+
   it('should drop values for fields outside the currently selected project on save', async () => {
     await createComponent();
     component.onProjectSelected(projectWithFields);
@@ -189,6 +235,16 @@ describe('TimeSheetEntryComponent', () => {
 
     const keys = component.timeSheetEntry.fieldValues.map((fv) => fv.key);
     expect(keys).toEqual(['notes']);
+  });
+
+  it('should treat an untouched required boolean as "No" for a new entry', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithRequiredBoolean);
+    fillRequiredBaseFields();
+    component.setFieldValue('notes', 'done');
+
+    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.isFormValid()).toBe(true);
   });
 
   it('should skip required-configured-field validation for a pre-existing entry (capture-forward)', async () => {
