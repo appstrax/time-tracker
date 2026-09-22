@@ -68,10 +68,12 @@ export class UnapprovedEntriesComponent {
   private modalService = inject(NgbModal);
   public displayUtils = inject(TimeSheetDisplayUtil);
 
+  private userFetchGeneration = 0;
+
   constructor() {
     effect(() => {
       const userIds = [...new Set(this.groupedEntries().map((g) => g.userId))];
-      this.loadUsers(userIds);
+      void this.loadUsers(userIds);
     });
   }
 
@@ -79,12 +81,21 @@ export class UnapprovedEntriesComponent {
     const missingUserIds = userIds.filter((id) => !this.usersById().has(id));
     if (!missingUserIds.length) return;
 
+    const generation = ++this.userFetchGeneration;
+
     try {
       const users = await this.usersService.findByUserIds(missingUserIds);
+      if (generation !== this.userFetchGeneration) {
+        return;
+      }
+
       const updated = new Map(this.usersById());
       users.forEach((user) => updated.set(user.id, user));
       this.usersById.set(updated);
-    } catch (error) {
+    } catch {
+      if (generation !== this.userFetchGeneration) {
+        return;
+      }
       this.toastService.error('Error loading user details');
     }
   }
@@ -125,6 +136,7 @@ export class UnapprovedEntriesComponent {
         unapprovedEntries: unapprovedEntries,
         date: group.date,
         userId: group.userId,
+        preloadedUser: this.usersById().get(group.userId),
         onApprove: async () => {
           await this.approveEntries(unapprovedEntries);
         },

@@ -4,7 +4,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Store } from '@state';
 import { TimeSheetEntry, User } from '@models';
-import { UsersService } from '@services';
+import { ToastService, UsersService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
 
 @Component({
@@ -19,6 +19,7 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   @Input() unapprovedEntries: TimeSheetEntry[] = []; // Only unapproved entries (for approve button)
   @Input() date!: Date;
   @Input() userId!: string;
+  @Input() preloadedUser?: User;
   @Input() onApprove?: () => Promise<void>;
 
   public projects = computed(() => this.store.projects.projects());
@@ -29,12 +30,22 @@ export class UnapprovedEntriesModalComponent implements OnInit {
     public activeModal: NgbActiveModal,
     private store: Store,
     private usersService: UsersService,
+    private toastService: ToastService,
     private displayUtils: TimeSheetDisplayUtil,
   ) {}
 
   async ngOnInit(): Promise<void> {
-    const [user] = await this.usersService.findByUserIds([this.userId]);
-    this.user.set(user);
+    if (this.preloadedUser) {
+      this.user.set(this.preloadedUser);
+      return;
+    }
+
+    try {
+      const [user] = await this.usersService.findByUserIds([this.userId]);
+      this.user.set(user);
+    } catch {
+      this.toastService.error('Error loading user details');
+    }
   }
 
   public getProjectName(projectId: string): string {
@@ -108,5 +119,6 @@ export interface UnapprovedEntriesModalOptions {
   unapprovedEntries?: TimeSheetEntry[]; // Only unapproved entries (for approve button)
   date: Date;
   userId: string;
+  preloadedUser?: User;
   onApprove?: () => Promise<void>;
 }
