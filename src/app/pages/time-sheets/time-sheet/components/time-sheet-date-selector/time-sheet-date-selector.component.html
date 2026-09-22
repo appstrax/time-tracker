@@ -1,40 +1,51 @@
 @if (layout() === 'pill') {
-  <div class="week-pill">
-    <button
-      type="button"
-      class="week-pill-nav"
-      aria-label="Previous week"
-      (click)="previousWeek()"
-    >
-      <i class="bi bi-chevron-left" aria-hidden="true"></i>
-    </button>
+  <div class="week-controls">
+    <div class="week-pill">
+      <button
+        type="button"
+        class="week-pill-nav"
+        aria-label="Previous week"
+        (click)="previousWeek()"
+      >
+        <i class="bi bi-chevron-left" aria-hidden="true"></i>
+      </button>
+
+      <button
+        type="button"
+        class="week-pill-label"
+        aria-label="Choose week"
+        (click)="openDatePicker()"
+      >
+        {{ selectedWeekStart() | date: "MMM d" }} –
+        {{ selectedWeekEnd() | date: "MMM d, y" }}
+      </button>
+
+      <button
+        type="button"
+        class="week-pill-nav"
+        aria-label="Next week"
+        (click)="nextWeek()"
+      >
+        <i class="bi bi-chevron-right" aria-hidden="true"></i>
+      </button>
+
+      <input
+        #datePicker
+        type="date"
+        class="date-picker-input"
+        [value]="datePickerValue()"
+        (change)="onDateSelected($event)"
+      />
+    </div>
 
     <button
       type="button"
-      class="week-pill-label"
-      aria-label="Choose week"
-      (click)="openDatePicker()"
+      class="week-today-btn"
+      [disabled]="isCurrentWeek()"
+      (click)="initializeCurrentWeek()"
     >
-      {{ selectedWeekStart() | date: "MMM d" }} –
-      {{ selectedWeekEnd() | date: "MMM d, y" }}
+      Today
     </button>
-
-    <button
-      type="button"
-      class="week-pill-nav"
-      aria-label="Next week"
-      (click)="nextWeek()"
-    >
-      <i class="bi bi-chevron-right" aria-hidden="true"></i>
-    </button>
-
-    <input
-      #datePicker
-      type="date"
-      class="date-picker-input"
-      [value]="datePickerValue()"
-      (change)="onDateSelected($event)"
-    />
   </div>
 } @else {
   <div class="week-selector">

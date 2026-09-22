@@ -1,7 +1,7 @@
 <div class="timeline" [class.timeline-disabled]="disabled()" [style.--scale-hours]="scaleHours()">
   <div class="timeline-ruler-header" aria-hidden="true">
     @for (hour of hourMarkers(); track hour) {
-      <span class="ruler-hour" [style.--hour]="hour">{{ hour }}h</span>
+      <span class="ruler-hour" [style.--hour]="hour">{{ hour }}</span>
     }
   </div>
 
@@ -23,6 +23,7 @@
         type="button"
         class="timeline-block"
         [class.timeline-block-compact]="!segment.showInlineDetail"
+        [style.left.%]="segment.leftPercent"
         [style.width.%]="segment.widthPercent"
         [style.background-color]="segment.backgroundColor"
         [disabled]="disabled()"
@@ -33,9 +34,8 @@
         (click)="onBlockClick(segment.entry, $event)"
       >
         @if (segment.showInlineDetail) {
-          <span class="timeline-block-name">{{ segment.descriptionLabel }}</span>
+          <span class="timeline-block-name">{{ segment.label }}</span>
         }
-        <span class="timeline-block-hours">{{ segment.durationLabel }}</span>
       </button>
     }
 

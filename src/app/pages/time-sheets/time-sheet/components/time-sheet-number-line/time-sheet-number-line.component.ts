@@ -10,16 +10,16 @@ import {
 } from '@angular/core';
 
 import { Project, TimeSheetEntry } from '@models';
-import { TimeSheetDisplayUtil } from '@utils';
+import { TimeSheetDisplayUtil, getProjectColor } from '@utils';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 interface TimelineSegment {
   entry: TimeSheetEntry;
+  leftPercent: number;
   widthPercent: number;
   color: string;
   backgroundColor: string;
-  descriptionLabel: string;
-  durationLabel: string;
+  label: string;
   showInlineDetail: boolean;
   tooltipText: string;
 }
@@ -34,8 +34,8 @@ interface TimelineSegment {
 export class TimeSheetNumberLineComponent {
   private readonly displayUtil = inject(TimeSheetDisplayUtil);
 
-  public readonly colorIndex = input(0);
   public readonly projects = input<Project[]>([]);
+  public readonly projectColorById = input<Map<string, string>>(new Map());
   public readonly entries = input<TimeSheetEntry[]>([]);
   public readonly disabled = input(false);
 
@@ -57,29 +57,39 @@ export class TimeSheetNumberLineComponent {
   );
 
   public readonly scaleHours = computed(() =>
-    Math.max(12, this.loggedHours()),
+    Math.max(11, Math.ceil(this.loggedHours())),
   );
 
   public readonly hourMarkers = computed(() =>
-    Array.from({ length: 12 }, (_, index) => index + 1),
+    Array.from({ length: this.scaleHours() }, (_, index) => index + 1),
   );
 
   public readonly quarterSlotCount = computed(() => this.scaleHours() * 4);
 
   public readonly segments = computed((): TimelineSegment[] => {
     const scale = this.scaleHours();
-    if (!scale) return [];
+    const entries = this.sortedEntries();
+    if (!scale || !entries.length) return [];
 
-    return this.sortedEntries().map((entry, index) => ({
-      entry,
-      widthPercent: (entry.hours / scale) * 100,
-      color: this.getEntryColor(entry, index),
-      descriptionLabel: this.getEntryDescription(entry),
-      durationLabel: this.formatBlockHours(entry.hours),
-      backgroundColor: this.getBlockBackground(this.getEntryColor(entry, index)),
-      showInlineDetail: entry.hours > 1,
-      tooltipText: this.getBlockTooltipText(entry),
-    }));
+    let timeCursor = 0;
+
+    return entries.map((entry) => {
+      const color = this.getEntryColor(entry);
+      const leftPercent = (timeCursor / scale) * 100;
+      const widthPercent = (entry.hours / scale) * 100;
+      timeCursor += entry.hours;
+
+      return {
+        entry,
+        leftPercent,
+        widthPercent,
+        color,
+        label: this.getProjectName(entry),
+        backgroundColor: color,
+        showInlineDetail: entry.hours >= 0.75,
+        tooltipText: this.getBlockTooltipText(entry),
+      };
+    });
   });
 
   public readonly previewLeftPercent = computed(() => {
@@ -156,6 +166,10 @@ export class TimeSheetNumberLineComponent {
     return Math.round(rawHours * 4) / 4;
   }
 
+  private getProjectName(entry: TimeSheetEntry): string {
+    return this.displayUtil.getProjectName(entry.projectId, this.projects());
+  }
+
   private getEntryDescription(entry: TimeSheetEntry): string {
     const description = entry.description?.trim();
     return description || 'No description';
@@ -171,8 +185,10 @@ export class TimeSheetNumberLineComponent {
     return lines.join('\n');
   }
 
-  private getEntryColor(_entry: TimeSheetEntry, _index: number): string {
-    return 'var(--color-primary)';
+  private getEntryColor(entry: TimeSheetEntry): string {
+    const fromMap = this.projectColorById().get(entry.projectId);
+    if (fromMap) return fromMap;
+    return getProjectColor(entry.projectId, this.projects());
   }
 
   private getBlockBackground(color: string): string {

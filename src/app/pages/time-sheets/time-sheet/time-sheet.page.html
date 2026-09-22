@@ -1,7 +1,8 @@
 <section class="time-sheet-page">
   <header class="page-header">
     <div class="page-header-copy">
-      <h1>Timesheet Overview</h1>
+      <h1>Weekly timesheet</h1>
+      <p class="subtitle">Capture and review logged hours for each day.</p>
     </div>
 
     <div class="page-header-actions">
@@ -12,53 +13,35 @@
       @if (projects().length) {
         <app-project-dropdown
           class="header-project-dropdown"
-          [selectedProject]="workingOnProject()"
-          [allowNull]="false"
+          [selectedProject]="filterProject()"
+          [allowNull]="true"
+          [nullOptionLabel]="'All projects'"
           [compact]="true"
           [disabled]="loading()"
-          (projectSelected)="onWorkingOnProjectSelected($event)"
+          (projectSelected)="onFilterProjectSelected($event)"
         />
       }
     </div>
   </header>
 
-  <section class="timeline-panel">
-    @if (loading()) {
-      <div
-        class="time-sheet-spinner d-flex justify-content-center align-items-center"
-      >
-        <span class="spinner-border" aria-hidden="true"></span>
-      </div>
-    } @else {
-      <header class="timeline-panel-header">
-        <div>
-          <h2>Weekly Timeline &amp; Hour Breakdown</h2>
-        </div>
-        <div class="weekly-total">
-          <span class="weekly-total-label">Weekly Total:</span>
-          <span class="weekly-total-value">{{ weeklyTotalLabel() }}</span>
-        </div>
-      </header>
-
-      <div class="timeline-table" role="table" aria-label="Weekly timesheet">
-        <div class="timeline-table-head" role="row">
-          <div class="head-day" role="columnheader">Day &amp; Details</div>
-          <div class="head-logged" role="columnheader">Logged</div>
-          <div class="head-ruler" role="columnheader">Visual Ruler (1h – 12h)</div>
-        </div>
-
-        <div class="timeline-table-body">
-          @for (day of weekDays(); track day.getTime()) {
-            <app-time-sheet-day
-              [date]="day"
-              [projects]="projects()"
-              [entries]="entriesByDate().get(day.toDateString()) ?? []"
-              [categories]="categories()"
-              (save)="onTimeSheetEntrySaved()"
-            />
-          }
-        </div>
-      </div>
-    }
-  </section>
+  @if (loading()) {
+    <div
+      class="time-sheet-spinner d-flex justify-content-center align-items-center"
+    >
+      <span class="spinner-border" aria-hidden="true"></span>
+    </div>
+  } @else {
+    <div class="week-days" aria-label="Weekly timesheet">
+      @for (day of weekDays(); track day.getTime()) {
+        <app-time-sheet-day
+          [date]="day"
+          [projects]="projects()"
+          [projectColorById]="projectColorById()"
+          [entries]="entriesByDate().get(day.toDateString()) ?? []"
+          [categories]="categories()"
+          (save)="onTimeSheetEntrySaved()"
+        />
+      }
+    </div>
+  }
 </section>

@@ -112,6 +112,12 @@ $control-height: var(--page-header-control-height, 2.25rem);
   }
 }
 
+.week-controls {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
 .week-pill {
   display: inline-flex;
   align-items: center;
@@ -159,5 +165,34 @@ $control-height: var(--page-header-control-height, 2.25rem);
 
   &:hover {
     color: var(--color-primary);
+  }
+}
+
+.week-today-btn {
+  min-height: $control-height;
+  height: $control-height;
+  padding: 0 0.95rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--text-primary);
+  font: inherit;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+
+  &:hover:not(:disabled) {
+    border-color: color-mix(
+      in srgb,
+      var(--color-primary) 45%,
+      var(--color-border)
+    );
+    color: var(--color-primary);
+  }
+
+  &:disabled {
+    opacity: 0.45;
+    cursor: default;
   }
 }

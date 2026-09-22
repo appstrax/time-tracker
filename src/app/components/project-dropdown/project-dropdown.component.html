@@ -28,7 +28,7 @@
           >{{ selectedProject.name }}</span>
         } @else {
         <i class="bi bi-image proj-thumb-fallback"></i>
-        <span class="project-dropdown-name">Select a project</span>
+        <span class="project-dropdown-name">{{ nullOptionLabel }}</span>
         }
       </span>
       <i
@@ -51,7 +51,7 @@
           [disabled]="disabled"
         >
           <i class="bi bi-image proj-thumb-fallback"></i>
-          <span>Select a project</span>
+          <span>{{ nullOptionLabel }}</span>
         </button>
       </li>
       }

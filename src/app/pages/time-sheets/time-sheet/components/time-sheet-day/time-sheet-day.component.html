@@ -1,22 +1,69 @@
-<div class="col-day">
-  <div class="day-name">{{ date() | date: "EEE, MMM d" }}</div>
-</div>
+<article class="day-card">
+  <header class="day-card-header">
+    <div class="day-heading">
+      <span class="day-name">{{ date() | date: "EEEE" }}</span>
+      <span class="day-date">{{ date() | date: "d MMM y" }}</span>
+    </div>
+    @if (loggedHours()) {
+      <span class="day-total-badge">{{ formatLoggedBadge() }}</span>
+    }
+  </header>
 
-<div class="col-logged">
-  @if (loggedHours()) {
-    <span class="logged-value">{{ formatLoggedTotal() }}</span>
-  } @else {
-    <span class="logged-empty">—</span>
-  }
-</div>
-
-<div class="col-ruler">
   <app-time-sheet-number-line
-    [colorIndex]="date().getDay()"
+    [projectColorById]="projectColorById()"
     (onEntryClick)="openTimeSheetEntryModal($event)"
     (onCreateEntry)="openTimeSheetEntryModal($event)"
     [projects]="projects()"
     [entries]="sortedEntries()"
     [disabled]="approved()"
   />
-</div>
+
+  @if (sortedEntries().length) {
+    <button
+      type="button"
+      class="entries-toggle"
+      [attr.aria-expanded]="entriesExpanded()"
+      (click)="toggleEntriesExpanded()"
+    >
+      <i
+        class="bi entries-toggle-icon"
+        [class.bi-chevron-right]="!entriesExpanded()"
+        [class.bi-chevron-down]="entriesExpanded()"
+        aria-hidden="true"
+      ></i>
+      @if (entriesExpanded()) {
+        Hide {{ entryCountLabel() }}
+      } @else {
+        Show {{ entryCountLabel() }}
+      }
+    </button>
+
+    @if (entriesExpanded()) {
+      <ul class="entry-list">
+        @for (entry of sortedEntries(); track entry.id) {
+          <li>
+            <button
+              type="button"
+              class="entry-row"
+              [disabled]="approved()"
+              (click)="openTimeSheetEntryModal(entry)"
+            >
+              <span
+                class="entry-project-dot"
+                [style.background-color]="projectColor(entry)"
+                aria-hidden="true"
+              ></span>
+              <span class="entry-project">{{ projectName(entry) }}</span>
+              <span class="entry-meta">
+                {{ formatEntryHours(entry.hours) }}
+                @if (entry.description.trim()) {
+                  · {{ entry.description.trim() }}
+                }
+              </span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</article>

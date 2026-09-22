@@ -8,10 +8,10 @@
 
 .page-header {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
   justify-content: space-between;
   gap: 1.25rem;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1.5rem;
 }
 
 .page-header-copy h1 {
@@ -20,8 +20,7 @@
   font-weight: 700;
 }
 
-.subtitle,
-.section-subtitle {
+.subtitle {
   margin: 0;
   max-width: 36rem;
   color: var(--text-muted);
@@ -91,83 +90,17 @@
   }
 }
 
-.timeline-panel {
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card, 10px);
-  background: var(--color-surface);
-  box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
-  overflow: hidden;
-}
-
-.timeline-panel-header {
+.week-days {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 1rem;
-  padding: 1.1rem 1.25rem;
-  border-bottom: 1px solid var(--color-border);
-}
-
-.timeline-panel-header h2 {
-  margin: 0;
-  font-size: 1.05rem;
-  font-weight: 700;
-}
-
-.weekly-total {
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  white-space: nowrap;
-  font-size: 0.88rem;
-}
-
-.weekly-total-label {
-  color: var(--text-muted);
-}
-
-.weekly-total-value {
-  display: inline-flex;
-  align-items: center;
-  padding: 0.25rem 0.65rem;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
-  background: var(--primary-color-light, color-mix(in srgb, var(--color-primary) 10%, transparent));
-  color: var(--color-primary);
-  font-weight: 700;
-}
-
-.timeline-table {
-  display: grid;
-  grid-template-columns: minmax(9rem, 12rem) minmax(4.5rem, 5.5rem) minmax(0, 1fr);
-}
-
-.timeline-table-head,
-.timeline-table-body {
-  display: contents;
-}
-
-.head-day,
-.head-logged,
-.head-ruler {
-  display: flex;
-  align-items: flex-end;
-  padding: 0.65rem 1rem;
-  border-bottom: 1px solid var(--color-border);
-  background: color-mix(in srgb, var(--color-bg) 65%, var(--color-surface));
-  font-size: 0.68rem;
-  font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
-  color: var(--text-muted);
-}
-
-.head-ruler {
-  text-align: left;
+  flex-direction: column;
+  gap: 0.85rem;
 }
 
 .time-sheet-spinner {
   min-height: 14rem;
+  border-radius: var(--radius-card, 12px);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
 }
 
 @media (max-width: 900px) {
@@ -178,25 +111,7 @@
 
   .page-header-actions {
     flex-wrap: wrap;
-  }
-
-  .timeline-panel-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .timeline-table {
-    display: block;
-    overflow-x: auto;
-  }
-
-  .timeline-table-head {
-    display: none;
-  }
-
-  .timeline-table-body {
-    display: block;
-    min-width: 640px;
+    justify-content: flex-start;
   }
 }
 
