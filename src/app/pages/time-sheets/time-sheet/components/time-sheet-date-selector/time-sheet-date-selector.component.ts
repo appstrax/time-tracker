@@ -22,14 +22,8 @@ export class TimeSheetDateSelectorComponent implements OnInit {
   @ViewChild('datePicker')
   public datePicker?: ElementRef<HTMLInputElement>;
 
-  private readonly maxDate = signal(new Date());
   public readonly selectedWeekEnd = signal(new Date());
   public readonly selectedWeekStart = signal(new Date());
-  public readonly canGoToNextWeek = computed(() => {
-    const nextWeekStart = new Date(this.selectedWeekStart());
-    nextWeekStart.setUTCDate(this.selectedWeekStart().getUTCDate() + 7);
-    return nextWeekStart.getTime() <= this.maxDate().getTime();
-  });
   public readonly isCurrentWeek = computed(() => {
     const newDate = new Date();
     newDate.setUTCHours(0, 0, 0, 0);
@@ -50,7 +44,6 @@ export class TimeSheetDateSelectorComponent implements OnInit {
   );
 
   public ngOnInit(): void {
-    this.calculateDateRange();
     this.initializeCurrentWeek();
   }
 
@@ -59,25 +52,12 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     this.navigateToWeek(today);
   }
 
-  private calculateDateRange(): void {
-    const today = new Date();
-    const dayOfWeek = today.getUTCDay();
-    const diff = !dayOfWeek ? -6 : 1 - dayOfWeek;
-
-    const maxDate = new Date(today);
-    maxDate.setUTCDate(today.getUTCDate() + diff);
-    maxDate.setUTCHours(0, 0, 0, 0);
-    this.maxDate.set(maxDate);
-  }
-
   public previousWeek(): void {
     this.updateWeekRange(-7);
   }
 
   public nextWeek(): void {
-    if (this.canGoToNextWeek()) {
-      this.updateWeekRange(7);
-    }
+    this.updateWeekRange(7);
   }
 
   private updateWeekRange(increment: number): void {
@@ -102,13 +82,8 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     weekEnd.setUTCDate(weekStart.getUTCDate() + 6);
     weekEnd.setUTCHours(0, 0, 0, 0);
 
-    if (weekStart.getTime() > this.maxDate().getTime()) {
-      const today = new Date();
-      this.navigateToWeek(today);
-    } else {
-      this.selectedWeekStart.set(weekStart);
-      this.selectedWeekEnd.set(weekEnd);
-    }
+    this.selectedWeekStart.set(weekStart);
+    this.selectedWeekEnd.set(weekEnd);
     this.emitWeekChange();
   }
 

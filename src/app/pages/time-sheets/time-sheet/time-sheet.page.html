@@ -9,17 +9,24 @@
     </div>
     <div class="page-header-tools">
       @if (!loading() && projects().length) {
-        <div class="working-on-inline" aria-label="Current project">
-          <span class="working-on-label">Working on</span>
+        <div class="page-header-tool" aria-label="Current project">
+          <span class="page-header-tool-label">Working on</span>
           <app-project-dropdown
-            class="working-on-dropdown"
+            class="page-header-tool-control working-on-dropdown"
             [selectedProject]="workingOnProject()"
             [allowNull]="true"
+            [compact]="true"
             (projectSelected)="onWorkingOnProjectSelected($event)"
           />
         </div>
       }
-      <app-time-sheet-date-selector (weekChange)="onWeekChange($event)" />
+      <div class="page-header-tool" aria-label="Selected week">
+        <span class="page-header-tool-label">Week</span>
+        <app-time-sheet-date-selector
+          class="page-header-tool-control"
+          (weekChange)="onWeekChange($event)"
+        />
+      </div>
     </div>
   </header>
   <section class="time-sheet-section">
