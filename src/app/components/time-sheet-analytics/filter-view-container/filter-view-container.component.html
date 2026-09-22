@@ -212,7 +212,10 @@
         [projects]="projects()"
       ></app-filter-view-timeline>
     } @else if (activeView() === "unapproved") {
-      <app-unapproved-entries [timeSheetEntries]="filteredEntries()" />
+      <app-unapproved-entries
+        [timeSheetEntries]="filteredEntries()"
+        [users]="users()"
+      />
     }
   </div>
 </div>

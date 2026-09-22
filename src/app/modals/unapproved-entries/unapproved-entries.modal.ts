@@ -1,11 +1,10 @@
 import { FormsModule } from '@angular/forms';
-import { appstraxAuth } from '@appstrax/services/auth';
-import { Component, Input, OnInit, computed, signal } from '@angular/core';
+import { Component, Input, computed, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Store } from '@state';
-import { TimeSheetEntry } from '@models';
-import { TimeSheetDisplayUtil } from '@utils';
+import { TimeSheetEntry, User } from '@models';
+import { getUserDisplayName, TimeSheetDisplayUtil } from '@utils';
 
 @Component({
   selector: 'app-unapproved-entries-modal',
@@ -14,15 +13,15 @@ import { TimeSheetDisplayUtil } from '@utils';
   templateUrl: './unapproved-entries.modal.html',
   styleUrl: './unapproved-entries.modal.scss',
 })
-export class UnapprovedEntriesModalComponent implements OnInit {
+export class UnapprovedEntriesModalComponent {
   @Input() entries: TimeSheetEntry[] = []; // All entries for the user on this day
   @Input() unapprovedEntries: TimeSheetEntry[] = []; // Only unapproved entries (for approve button)
   @Input() date!: Date;
   @Input() userId!: string;
+  @Input() preloadedUser?: User;
   @Input() onApprove?: () => Promise<void>;
 
   public projects = computed(() => this.store.projects.projects());
-  public readonly currentUserId = signal('');
   public readonly isApproving = signal(false);
 
   constructor(
@@ -30,13 +29,6 @@ export class UnapprovedEntriesModalComponent implements OnInit {
     private store: Store,
     private displayUtils: TimeSheetDisplayUtil,
   ) {}
-
-  async ngOnInit(): Promise<void> {
-    const user = await appstraxAuth.getUser();
-    if (user) {
-      this.currentUserId.set(user.id);
-    }
-  }
 
   public getProjectName(projectId: string): string {
     const project = this.projects().find((p) => p.id === projectId);
@@ -50,10 +42,7 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   }
 
   public getUserName(userId: string): string {
-    if (userId === this.currentUserId()) {
-      return 'You';
-    }
-    return userId.substring(0, 8);
+    return getUserDisplayName(this.preloadedUser ?? null, userId);
   }
 
   public formatDate(date: Date): string {
@@ -112,5 +101,6 @@ export interface UnapprovedEntriesModalOptions {
   unapprovedEntries?: TimeSheetEntry[]; // Only unapproved entries (for approve button)
   date: Date;
   userId: string;
+  preloadedUser?: User;
   onApprove?: () => Promise<void>;
 }
