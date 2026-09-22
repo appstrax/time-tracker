@@ -1,16 +1,10 @@
 import { Injectable } from '@angular/core';
-import { Project } from '@models';
-
-interface GetUserNameOptions {
-  currentUserId?: string;
-  maxLength?: number;
-  addEllipsis?: boolean;
-}
+import { Project, User } from '@models';
 
 @Injectable({ providedIn: 'root' })
 export class TimeSheetDisplayUtil {
-  private readonly defaultUserLabel = 'You';
   private readonly defaultUnknownProject = 'Unknown Project';
+  private readonly defaultUnknownUser = 'Unknown User';
 
   public formatHours(hours: number): string {
     const wholeHours = Math.floor(hours);
@@ -32,24 +26,16 @@ export class TimeSheetDisplayUtil {
     return project?.name || this.defaultUnknownProject;
   }
 
-  public getUserName(userId: string, options?: GetUserNameOptions): string {
-    const currentUserId = options?.currentUserId;
-    const maxLength = options?.maxLength ?? 8;
-    const addEllipsis = options?.addEllipsis ?? false;
-
+  public getUserName(userId: string, user?: User): string {
     if (!userId) {
       return '';
     }
 
-    if (currentUserId && userId === currentUserId) {
-      return this.defaultUserLabel;
+    if (!user) {
+      return this.defaultUnknownUser;
     }
 
-    if (!maxLength || userId.length <= maxLength) {
-      return userId;
-    }
-
-    const truncated = userId.substring(0, maxLength);
-    return addEllipsis ? `${truncated}...` : truncated;
+    const fullName = `${user.name} ${user.surname}`.trim();
+    return fullName || user.email || this.defaultUnknownUser;
   }
 }

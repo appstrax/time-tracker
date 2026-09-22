@@ -1,10 +1,10 @@
 import { FormsModule } from '@angular/forms';
-import { appstraxAuth } from '@appstrax/services/auth';
 import { Component, Input, OnInit, computed, signal } from '@angular/core';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Store } from '@state';
-import { TimeSheetEntry } from '@models';
+import { TimeSheetEntry, User } from '@models';
+import { UsersService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
 
 @Component({
@@ -22,20 +22,19 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   @Input() onApprove?: () => Promise<void>;
 
   public projects = computed(() => this.store.projects.projects());
-  public readonly currentUserId = signal('');
   public readonly isApproving = signal(false);
+  public readonly user = signal<User | undefined>(undefined);
 
   constructor(
     public activeModal: NgbActiveModal,
     private store: Store,
+    private usersService: UsersService,
     private displayUtils: TimeSheetDisplayUtil,
   ) {}
 
   async ngOnInit(): Promise<void> {
-    const user = await appstraxAuth.getUser();
-    if (user) {
-      this.currentUserId.set(user.id);
-    }
+    const [user] = await this.usersService.findByUserIds([this.userId]);
+    this.user.set(user);
   }
 
   public getProjectName(projectId: string): string {
@@ -50,10 +49,7 @@ export class UnapprovedEntriesModalComponent implements OnInit {
   }
 
   public getUserName(userId: string): string {
-    if (userId === this.currentUserId()) {
-      return 'You';
-    }
-    return userId.substring(0, 8);
+    return this.displayUtils.getUserName(userId, this.user());
   }
 
   public formatDate(date: Date): string {

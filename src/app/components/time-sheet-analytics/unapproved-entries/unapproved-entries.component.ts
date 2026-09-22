@@ -1,17 +1,16 @@
 import {
   Component,
-  OnInit,
   computed,
+  effect,
   inject,
   input,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { appstraxAuth } from '@appstrax/services/auth';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { TimeSheetEntry } from '@models';
-import { TimeSheetEntryService, ToastService } from '@services';
+import { TimeSheetEntry, User } from '@models';
+import { TimeSheetEntryService, ToastService, UsersService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
 import { UnapprovedEntriesModalComponent } from '../../../modals/unapproved-entries/unapproved-entries.modal';
 
@@ -29,7 +28,7 @@ interface UnapprovedEntryGroup {
   templateUrl: './unapproved-entries.component.html',
   styleUrl: './unapproved-entries.component.scss',
 })
-export class UnapprovedEntriesComponent implements OnInit {
+export class UnapprovedEntriesComponent {
   public readonly timeSheetEntries = input<TimeSheetEntry[]>([]);
   public readonly canApprove = input(false);
   public readonly groupedEntries = computed(() => {
@@ -60,18 +59,33 @@ export class UnapprovedEntriesComponent implements OnInit {
       (a, b) => b.date.getTime() - a.date.getTime(),
     );
   });
-  public readonly currentUserId = signal('');
   public readonly isLoading = signal(false);
+  public readonly usersById = signal<Map<string, User>>(new Map());
 
   private timeSheetEntryService = inject(TimeSheetEntryService);
+  private usersService = inject(UsersService);
   private toastService = inject(ToastService);
   private modalService = inject(NgbModal);
   public displayUtils = inject(TimeSheetDisplayUtil);
 
-  async ngOnInit(): Promise<void> {
-    const user = await appstraxAuth.getUser();
-    if (user) {
-      this.currentUserId.set(user.id);
+  constructor() {
+    effect(() => {
+      const userIds = [...new Set(this.groupedEntries().map((g) => g.userId))];
+      this.loadUsers(userIds);
+    });
+  }
+
+  private async loadUsers(userIds: string[]): Promise<void> {
+    const missingUserIds = userIds.filter((id) => !this.usersById().has(id));
+    if (!missingUserIds.length) return;
+
+    try {
+      const users = await this.usersService.findByUserIds(missingUserIds);
+      const updated = new Map(this.usersById());
+      users.forEach((user) => updated.set(user.id, user));
+      this.usersById.set(updated);
+    } catch (error) {
+      this.toastService.error('Error loading user details');
     }
   }
 
