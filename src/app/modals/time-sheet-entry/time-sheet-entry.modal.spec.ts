@@ -26,11 +26,32 @@ describe('TimeSheetEntryComponent', () => {
     ],
   } as any as Project;
 
-  const projectWithBooleanField = {
+  const projectWithOptionalBoolean = {
+    id: 'project-4',
+    name: 'Delta',
+    fields: [
+      {
+        key: 'urgent',
+        label: 'Urgent',
+        type: 'boolean',
+        required: false,
+        options: [],
+      },
+    ],
+  } as any as Project;
+
+  const projectWithRequiredBoolean = {
     id: 'project-3',
     name: 'Gamma',
     fields: [
-      { key: 'signed-off', label: 'Signed off', type: 'boolean', required: true, options: [] },
+      { key: 'notes', label: 'Notes', type: 'text', required: true, options: [] },
+      {
+        key: 'billable',
+        label: 'Billable',
+        type: 'boolean',
+        required: true,
+        options: [],
+      },
     ],
   } as any as Project;
 
@@ -63,7 +84,8 @@ describe('TimeSheetEntryComponent', () => {
               projects: signal([
                 project,
                 projectWithFields,
-                projectWithBooleanField,
+                projectWithOptionalBoolean,
+                projectWithRequiredBoolean,
               ]),
             },
           },
@@ -168,22 +190,15 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.isFormValid()).toBe(true);
   });
 
-  it('should store an empty value, not the string "null", when a number field is cleared', async () => {
+  it('should store an empty string when a field value is cleared (null or undefined)', async () => {
     await createComponent();
     component.onProjectSelected(projectWithFields);
-    component.setFieldValue('optional-tag', 5);
+    component.setFieldValue('optional-tag', '42');
     component.setFieldValue('optional-tag', null);
-
     expect(component.getFieldValue('optional-tag')).toBe('');
-  });
-
-  it('should not require a boolean field to be actively toggled to satisfy required validation', async () => {
-    await createComponent();
-    component.onProjectSelected(projectWithBooleanField);
-    fillRequiredBaseFields();
-    // 'signed-off' left at its default unchecked/false state.
-
-    expect(component.isFormValid()).toBe(true);
+    component.setFieldValue('optional-tag', 'x');
+    component.setFieldValue('optional-tag', undefined);
+    expect(component.getFieldValue('optional-tag')).toBe('');
   });
 
   it('should preserve a typed field value when switching project and back', async () => {
@@ -197,6 +212,57 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.getFieldValue('notes')).toBe('kept across switches');
   });
 
+  it('should preserve field values for keys that existed when editing a pre-existing entry', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectWithFields.id;
+    component.timeSheetEntry.fieldValues = [
+      { key: 'legacy-client-ref', value: 'ACME-1' },
+      { key: 'notes', value: 'historical note' },
+    ];
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fillRequiredBaseFields();
+
+    component.onSaveTimeSheetEntry();
+
+    const keys = component.timeSheetEntry.fieldValues.map((fv) => fv.key);
+    expect(keys).toContain('legacy-client-ref');
+    expect(
+      component.timeSheetEntry.fieldValues.find(
+        (fv) => fv.key === 'legacy-client-ref',
+      )?.value,
+    ).toBe('ACME-1');
+  });
+
+  it('should drop orphaned field values when a pre-existing entry is moved to another project', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectWithFields.id;
+    component.timeSheetEntry.fieldValues = [
+      { key: 'client-ref', value: 'ACME' },
+      { key: 'notes', value: 'historical note' },
+    ];
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onProjectSelected(project);
+    fillRequiredBaseFields();
+
+    component.onSaveTimeSheetEntry();
+
+    const keys = component.timeSheetEntry.fieldValues.map((fv) => fv.key);
+    expect(keys).not.toContain('client-ref');
+    expect(keys).not.toContain('notes');
+  });
+
   it('should drop values for fields outside the currently selected project on save', async () => {
     await createComponent();
     component.onProjectSelected(projectWithFields);
@@ -208,6 +274,36 @@ describe('TimeSheetEntryComponent', () => {
 
     const keys = component.timeSheetEntry.fieldValues.map((fv) => fv.key);
     expect(keys).toEqual(['notes']);
+  });
+
+  it('should default an untouched optional boolean to "No" for a new entry', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithOptionalBoolean);
+
+    expect(component.getFieldValue('urgent')).toBe('false');
+    expect(component.isFormValid()).toBe(false); // base fields still unfilled
+  });
+
+  it('should block saving a new entry when a required boolean is left untouched', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithRequiredBoolean);
+    fillRequiredBaseFields();
+    component.setFieldValue('notes', 'done');
+
+    expect(component.getFieldValue('billable')).toBe('');
+    expect(component.isFormValid()).toBe(false);
+    expect(component.errorMessage).toContain('Billable is required');
+  });
+
+  it('should allow saving a required boolean once explicitly set to No', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithRequiredBoolean);
+    fillRequiredBaseFields();
+    component.setFieldValue('notes', 'done');
+    component.setFieldBoolean('billable', false);
+
+    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.isFormValid()).toBe(true);
   });
 
   it('should skip required-configured-field validation for a pre-existing entry (capture-forward)', async () => {

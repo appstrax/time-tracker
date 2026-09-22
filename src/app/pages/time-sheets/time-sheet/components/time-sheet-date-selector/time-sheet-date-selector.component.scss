@@ -1,28 +1,94 @@
+$control-height: var(--page-header-control-height, 2.25rem);
+
+:host {
+  display: block;
+  min-height: $control-height;
+}
+
 .week-selector {
-  width: 350px;
-  padding: 1rem;
-  background-color: var(--color-surface);
-  border-radius: 8px;
+  width: auto;
+  max-width: min(24rem, 58vw);
+  padding: 0;
+  background: transparent;
+  border-radius: 0;
+
+  > .d-flex {
+    align-items: center;
+    gap: 0.35rem;
+    min-height: $control-height;
+  }
+
+  .btn {
+    min-height: $control-height;
+    height: $control-height;
+    max-height: $control-height;
+    padding: 0 0.65rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    line-height: 1;
+    box-sizing: border-box;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
 }
 
 .week-display {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
-  gap: 0.25rem;
+  justify-content: center;
+  gap: 0.35rem;
   cursor: pointer;
   position: relative;
-  padding: 0.5rem;
-  border-radius: 10px;
-  transition: background-color 0.2s;
+  min-height: $control-height;
+  height: $control-height;
+  max-height: $control-height;
+  padding: 0 0.75rem;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
+  font-size: 0.875rem;
+  line-height: 1;
+  white-space: nowrap;
+  box-sizing: border-box;
+  transition:
+    border-color 0.2s,
+    box-shadow 0.2s;
 
   &:hover {
-    background-color: rgba(0, 0, 0, 0.05);
+    border-color: color-mix(
+      in srgb,
+      var(--primary-color) 45%,
+      var(--color-border)
+    );
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
   }
 
   &:active {
-    background-color: rgba(0, 0, 0, 0.1);
+    border-color: color-mix(
+      in srgb,
+      var(--primary-color) 45%,
+      var(--color-border)
+    );
   }
+}
+
+.week-range-label {
+  color: var(--text-muted);
+  font-weight: 600;
+
+  &::after {
+    content: '·';
+    margin-left: 0.35rem;
+    color: var(--text-muted);
+    font-weight: 400;
+  }
+}
+
+.week-range {
+  color: var(--text-primary);
+  font-weight: 500;
 }
 
 .date-picker-input {

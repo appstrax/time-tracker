@@ -42,6 +42,10 @@ export class TimeSheetEntryModal implements OnInit {
 
   wasExistingEntryOnOpen: boolean = false;
 
+  /** Keys present when the modal opened — kept on save only if the project is unchanged. */
+  private fieldValueKeysAtOpen = new Set<string>();
+  private projectIdAtOpen = '';
+
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
 
   get hours(): number {
@@ -56,6 +60,9 @@ export class TimeSheetEntryModal implements OnInit {
 
   async ngOnInit(): Promise<void> {
     this.wasExistingEntryOnOpen = !!this.timeSheetEntry.id;
+    this.fieldValueKeysAtOpen = new Set(
+      this.timeSheetEntry.fieldValues.map((fv) => fv.key),
+    );
 
     const projectId =
       this.timeSheetEntry.projectId || getStoredTimeSheetProjectId();
@@ -73,6 +80,9 @@ export class TimeSheetEntryModal implements OnInit {
     const user = await appstraxAuth.getUser();
     this.timeSheetEntry.userId = user.id;
     this.timeSheetEntry.date = this.date;
+
+    this.projectIdAtOpen = this.timeSheetEntry.projectId;
+    this.initializeBooleanFieldDefaults();
   }
 
   formatHours(hours: number): string {
@@ -82,6 +92,7 @@ export class TimeSheetEntryModal implements OnInit {
   onProjectSelected(project: Project | null): void {
     this.project = project || undefined;
     this.timeSheetEntry.projectId = project ? project.id : '';
+    this.initializeBooleanFieldDefaults();
   }
 
   get projectFields(): ProjectField[] {
@@ -94,17 +105,20 @@ export class TimeSheetEntryModal implements OnInit {
     );
   }
 
-  setFieldValue(key: string, value: string | number | null): void {
-    const normalizedValue = value == null ? '' : String(value);
+  setFieldValue(
+    key: string,
+    value: string | number | null | undefined,
+  ): void {
+    const normalized = value == null ? '' : String(value);
     const existing = this.timeSheetEntry.fieldValues.find(
       (fv) => fv.key === key,
     );
     if (existing) {
-      existing.value = normalizedValue;
+      existing.value = normalized;
     } else {
       this.timeSheetEntry.fieldValues = [
         ...this.timeSheetEntry.fieldValues,
-        { key, value: normalizedValue },
+        { key, value: normalized },
       ];
     }
   }
@@ -192,10 +206,7 @@ export class TimeSheetEntryModal implements OnInit {
     const missingFields = this.wasExistingEntryOnOpen
       ? []
       : this.projectFields.filter(
-          (field) =>
-            field.required &&
-            field.type !== 'boolean' &&
-            !this.getFieldValue(field.key).trim(),
+          (field) => field.required && this.isConfiguredFieldMissing(field),
         );
 
     let isValid =
@@ -222,10 +233,34 @@ export class TimeSheetEntryModal implements OnInit {
     return false;
   }
 
+  private isConfiguredFieldMissing(field: ProjectField): boolean {
+    const value = this.getFieldValue(field.key);
+    if (field.type === 'boolean') {
+      return value !== 'true' && value !== 'false';
+    }
+    return !value.trim();
+  }
+
+  private initializeBooleanFieldDefaults(): void {
+    if (this.wasExistingEntryOnOpen) return;
+
+    for (const field of this.projectFields) {
+      if (field.type !== 'boolean' || field.required) continue;
+      const value = this.getFieldValue(field.key);
+      if (value !== 'true' && value !== 'false') {
+        this.setFieldValue(field.key, 'false');
+      }
+    }
+  }
+
   private pruneStaleFieldValues(): void {
     const currentKeys = new Set(this.projectFields.map((field) => field.key));
+    const preserveOrphanedKeys =
+      this.timeSheetEntry.projectId === this.projectIdAtOpen;
     this.timeSheetEntry.fieldValues = this.timeSheetEntry.fieldValues.filter(
-      (fv) => currentKeys.has(fv.key),
+      (fv) =>
+        currentKeys.has(fv.key) ||
+        (preserveOrphanedKeys && this.fieldValueKeysAtOpen.has(fv.key)),
     );
   }
 

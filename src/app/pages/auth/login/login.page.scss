@@ -130,8 +130,46 @@
   background-color: var(--primary-color);
   border-color: var(--primary-color);
   font-weight: 500;
-  margin-bottom: 2rem;
+  margin-bottom: 0;
   width: 100%;
+}
+
+.google-btn {
+  height: 52px;
+  width: 100%;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.sso-divider {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  margin: 1.5rem 0;
+  color: var(--text-muted);
+  font-size: 0.9rem;
+  text-transform: lowercase;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: color-mix(in srgb, var(--color-border) 88%, transparent);
+  }
+}
+
+.link-account-panel {
+  display: flex;
+  flex-direction: column;
+}
+
+.link-account-copy {
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+  line-height: 1.6;
 }
 
 .signup-link {
