@@ -61,6 +61,7 @@
               <th>Hours</th>
               <th>Category</th>
               <th>Description</th>
+              <th>Details</th>
               <th>Status</th>
             </tr>
           </thead>
@@ -80,6 +81,19 @@
                   <span class="description" [title]="entry.description">
                     {{ entry.description }}
                   </span>
+                </td>
+                <td>
+                  @if (entry.fieldValues.length) {
+                    <div class="field-value-pills">
+                      @for (fieldValue of entry.fieldValues; track fieldValue.key) {
+                        @if (fieldValue.value) {
+                          <span class="field-value-pill">{{ getFieldLabel(entry, fieldValue.key) }}: {{ fieldValue.value }}</span>
+                        }
+                      }
+                    </div>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
                 </td>
                 <td>
                   <span class="status-pill" [class.pending]="!entry.approved">

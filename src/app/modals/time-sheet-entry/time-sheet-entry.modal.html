@@ -93,6 +93,81 @@
       </div>
     </div>
 
+    @if (projectFields.length) {
+      <div class="custom-fields-section">
+        @for (field of projectFields; track field.key) {
+          <div class="form-group">
+            <label [for]="'field-' + field.key">
+              {{ field.required ? '* ' : '' }}{{ field.label || field.key }}
+            </label>
+
+            @switch (field.type) {
+              @case ('text') {
+                <input
+                  type="text"
+                  class="form-control"
+                  [id]="'field-' + field.key"
+                  [ngModel]="getFieldValue(field.key)"
+                  (ngModelChange)="setFieldValue(field.key, $event)"
+                  [disabled]="timeSheetEntry.approved"
+                  [required]="field.required"
+                />
+              }
+              @case ('number') {
+                <input
+                  type="number"
+                  class="form-control"
+                  [id]="'field-' + field.key"
+                  [ngModel]="getFieldValue(field.key)"
+                  (ngModelChange)="setFieldValue(field.key, $event)"
+                  [disabled]="timeSheetEntry.approved"
+                  [required]="field.required"
+                />
+              }
+              @case ('date') {
+                <input
+                  type="date"
+                  class="form-control"
+                  [id]="'field-' + field.key"
+                  [ngModel]="getFieldValue(field.key)"
+                  (ngModelChange)="setFieldValue(field.key, $event)"
+                  [disabled]="timeSheetEntry.approved"
+                  [required]="field.required"
+                />
+              }
+              @case ('select') {
+                <select
+                  class="form-select"
+                  [id]="'field-' + field.key"
+                  [ngModel]="getFieldValue(field.key)"
+                  (ngModelChange)="setFieldValue(field.key, $event)"
+                  [disabled]="timeSheetEntry.approved"
+                  [required]="field.required"
+                >
+                  <option value="">Select...</option>
+                  @for (option of field.options; track option) {
+                    <option [value]="option">{{ option }}</option>
+                  }
+                </select>
+              }
+              @case ('boolean') {
+                <div class="form-check">
+                  <input
+                    type="checkbox"
+                    class="form-check-input"
+                    [id]="'field-' + field.key"
+                    [ngModel]="isFieldBoolean(field)"
+                    (ngModelChange)="setFieldBoolean(field.key, $event)"
+                    [disabled]="timeSheetEntry.approved"
+                  />
+                </div>
+              }
+            }
+          </div>
+        }
+      </div>
+    }
+
     @if (errorMessage) {
       <div class="alert alert-danger mb-3">
         {{ errorMessage }}

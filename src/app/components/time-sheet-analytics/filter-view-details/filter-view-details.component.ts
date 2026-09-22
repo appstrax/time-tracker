@@ -37,4 +37,10 @@ export class FilterViewDetailsComponent {
       }))
       .sort((a, b) => b.date.getTime() - a.date.getTime());
   });
+
+  public getFieldLabel(entry: TimeSheetEntry, fieldKey: string): string {
+    const project = this.projects().find((p) => p.id === entry.projectId);
+    const field = project?.fields?.find((f) => f.key === fieldKey);
+    return field?.label || fieldKey;
+  }
 }
