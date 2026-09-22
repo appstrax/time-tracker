@@ -27,7 +27,7 @@ import {
   Status,
   DateRange,
 } from '@models';
-import { TimeSheetFilterUtil, getUserDisplayName } from '@utils';
+import { TimeSheetFilterUtil, getUserDisplayName, TimeSheetExportUtil } from '@utils';
 import { TimeSheetEntryService, ToastService } from '@services';
 
 export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
@@ -53,6 +53,7 @@ export class FilterViewContainerComponent
   private toast: ToastService = inject(ToastService);
   private filterUtils: TimeSheetFilterUtil = inject(TimeSheetFilterUtil);
   private entryService: TimeSheetEntryService = inject(TimeSheetEntryService);
+  private readonly exportUtil = inject(TimeSheetExportUtil);
   public readonly projects = input<Project[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
   public readonly users = input<User[]>([]);
@@ -234,6 +235,22 @@ export class FilterViewContainerComponent
     const month = String(date.getMonth() + 1).padStart(2, '0');
     const day = String(date.getDate()).padStart(2, '0');
     return `${year}-${month}-${day}`;
+  }
+
+  public exportAllProjects(): void {
+    const entries = this.filteredEntries();
+    if (!entries.length) {
+      this.toast.info('No entries to export for the current filters.');
+      return;
+    }
+
+    this.exportUtil.exportFilteredEntries(
+      entries,
+      this.projects(),
+      this.users(),
+      this.filter(),
+      this.formatDate.bind(this),
+    );
   }
 
   public async onApproveAll(): Promise<void> {
