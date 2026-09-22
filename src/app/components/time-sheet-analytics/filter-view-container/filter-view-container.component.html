@@ -15,18 +15,6 @@
           {{ filteredEntries().length }} {{ filteredEntries().length === 1 ? 'entry' : 'entries' }}
         </span>
 
-        @if (showExport()) {
-          <button
-            type="button"
-            class="collapse-button text-nowrap"
-            (click)="onExport()"
-            aria-label="Export filtered entries as CSV"
-          >
-            <span>Export</span>
-            <i class="bi bi-download" aria-hidden="true"></i>
-          </button>
-        }
-
         <button
           type="button"
           class="collapse-button text-nowrap"
