@@ -14,7 +14,16 @@
         <span class="metric-pill">
           {{ filteredEntries().length }} {{ filteredEntries().length === 1 ? 'entry' : 'entries' }}
         </span>
-
+        @if (showExport()) {
+          <button
+            type="button"
+            class="export-all-button"
+            (click)="exportAllProjects()"
+          >
+            <i class="bi bi-download" aria-hidden="true"></i>
+            Export all projects
+          </button>
+        }
       </div>
     </div>
 
