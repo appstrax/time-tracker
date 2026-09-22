@@ -74,6 +74,34 @@
   white-space: nowrap;
 }
 
+.export-all-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.9rem;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--primary-color-dark);
+  font-size: 0.88rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--color-surface));
+    border-color: color-mix(in srgb, var(--primary-color) 25%, var(--color-border));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+}
+
 .panel-content {
   display: flex;
   flex-direction: column;
