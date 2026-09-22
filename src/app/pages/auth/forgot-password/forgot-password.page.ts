@@ -4,7 +4,11 @@ import { CommonModule } from '@angular/common';
 import { Router, RouterModule } from '@angular/router';
 import { appstraxAuth } from '@appstrax/services/auth';
 
-import { AuthErrorUtil } from '@utils';
+import {
+  AuthErrorUtil,
+  isPasswordValid,
+  PASSWORD_REQUIREMENTS,
+} from '@utils';
 
 @Component({
   selector: 'app-forgot-password',
@@ -60,6 +64,13 @@ export class ForgotPasswordPage {
       return;
     }
 
+    if (!isPasswordValid(this.password())) {
+      this.error.set(
+        `Password does not meet requirements: ${PASSWORD_REQUIREMENTS}`,
+      );
+      return;
+    }
+
     this.loading.set(true);
     this.error.set('');
 
@@ -80,6 +91,11 @@ export class ForgotPasswordPage {
   }
 
   public isResetPasswordFormValid() {
-    return !!(this.email() && this.code() && this.password());
+    return !!(
+      this.email() &&
+      this.code() &&
+      this.password() &&
+      isPasswordValid(this.password())
+    );
   }
 }

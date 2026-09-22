@@ -132,7 +132,11 @@ export class ProfilePage {
   }
 
   openChangePasswordModal(): void {
-    const modal = this.modalService.open(ChangePasswordModal, { centered: true });
+    const modal = this.modalService.open(ChangePasswordModal, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
     modal.result.then(
       () => this.toast.success('Password updated successfully', 'Success'),
       () => {},

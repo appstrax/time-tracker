@@ -7,3 +7,4 @@ export * from './time-sheet-filter.util';
 export * from './time-sheet-display.util';
 export * from './time-sheet-project.util';
 export * from './user-display.util';
+export * from './password.util';
