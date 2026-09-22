@@ -15,29 +15,10 @@
           {{ filteredEntries().length }} {{ filteredEntries().length === 1 ? 'entry' : 'entries' }}
         </span>
 
-        <button
-          type="button"
-          class="collapse-button text-nowrap"
-          (click)="toggleViewCollapsed()"
-          [attr.aria-expanded]="!isViewCollapsed()"
-          aria-controls="viewSelectionCollapse"
-        >
-          <span>{{ isViewCollapsed() ? 'Show controls' : 'Hide controls' }}</span>
-          <i
-            [class]="
-              'bi ' + (isViewCollapsed() ? 'bi-chevron-down' : 'bi-chevron-up')
-            "
-          ></i>
-        </button>
       </div>
     </div>
 
-    <div
-      id="viewSelectionCollapse"
-      [class.collapse]="true"
-      [class.show]="!isViewCollapsed()"
-      class="panel-content"
-    >
+    <div class="panel-content">
       <div class="panel-section">
         <div class="section-heading">
           <div>
@@ -217,6 +198,8 @@
       <app-filter-view-summary
         [entries]="filteredEntries()"
         [projects]="projects()"
+        [users]="users()"
+        [showExport]="showExport()"
       ></app-filter-view-summary>
     } @else if (activeView() === "details") {
       <app-filter-view-details

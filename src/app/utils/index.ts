@@ -5,6 +5,7 @@ export * from './auth.guard';
 export * from './admin.guard';
 export * from './time-sheet-filter.util';
 export * from './time-sheet-display.util';
+export * from './time-sheet-export.util';
 export * from './time-sheet-project.util';
 export * from './user-display.util';
 export * from './password.util';

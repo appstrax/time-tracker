@@ -53,7 +53,6 @@ export class FilterViewContainerComponent
   private toast: ToastService = inject(ToastService);
   private filterUtils: TimeSheetFilterUtil = inject(TimeSheetFilterUtil);
   private entryService: TimeSheetEntryService = inject(TimeSheetEntryService);
-
   public readonly projects = input<Project[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
   public readonly users = input<User[]>([]);
@@ -64,6 +63,7 @@ export class FilterViewContainerComponent
     'unapproved',
   ]);
   public readonly showUserFilter = input(true);
+  public readonly showExport = input(false);
 
   public readonly entryUpdated = output<TimeSheetEntry>();
 
@@ -74,7 +74,6 @@ export class FilterViewContainerComponent
 
   public readonly filteredEntries = signal<TimeSheetEntry[]>([]);
   public readonly view = signal<FilterView>('summary');
-  public readonly isViewCollapsed = signal(false);
   public readonly categories = signal<string[]>([]);
 
   private subscription: Subscription | undefined;
@@ -178,10 +177,6 @@ export class FilterViewContainerComponent
 
   public onViewTypeChange(view: FilterView): void {
     this.view.set(view);
-  }
-
-  public toggleViewCollapsed(): void {
-    this.isViewCollapsed.update((collapsed) => !collapsed);
   }
 
   public onProjectChange(projectId: string): void {
