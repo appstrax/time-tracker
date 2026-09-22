@@ -1,19 +1,22 @@
-<div class="time-sheet-day-section">
-  <div class="d-flex align-items-center">
-    <div class="time-sheet-day-date">
-      <div class="time-sheet-day-title">{{ date() | date: "EEEE" }}</div>
-      <div class="day-date">{{ date() | date: "d MMM yyyy" }}</div>
-    </div>
+<div class="col-day">
+  <div class="day-name">{{ date() | date: "EEE, MMM d" }}</div>
+</div>
 
-    <div class="w-100">
-      <app-time-sheet-number-line
-        [colorIndex]="date().getDay()"
-        (onEntryClick)="openTimeSheetEntryModal($event)"
-        (onCreateEntry)="openTimeSheetEntryModal($event)"
-        [projects]="projects()"
-        [entries]="sortedEntries()"
-        [disabled]="approved()"
-      />
-    </div>
-  </div>
+<div class="col-logged">
+  @if (loggedHours()) {
+    <span class="logged-value">{{ formatLoggedTotal() }}</span>
+  } @else {
+    <span class="logged-empty">—</span>
+  }
+</div>
+
+<div class="col-ruler">
+  <app-time-sheet-number-line
+    [colorIndex]="date().getDay()"
+    (onEntryClick)="openTimeSheetEntryModal($event)"
+    (onCreateEntry)="openTimeSheetEntryModal($event)"
+    [projects]="projects()"
+    [entries]="sortedEntries()"
+    [disabled]="approved()"
+  />
 </div>

@@ -1,8 +1,13 @@
 import { Component, computed, inject, input } from '@angular/core';
+import { Router } from '@angular/router';
 
 import { TimeSheetEntry, Project, User } from '@models';
 import { ToastService } from '@services';
-import { TimeSheetDisplayUtil, TimeSheetExportUtil } from '@utils';
+import {
+  TimeSheetDisplayUtil,
+  TimeSheetExportUtil,
+  storeTimeSheetProjectId,
+} from '@utils';
 
 @Component({
   selector: 'app-filter-view-summary',
@@ -16,10 +21,12 @@ export class FilterViewSummaryComponent {
   public readonly projects = input<Project[]>([]);
   public readonly users = input<User[]>([]);
   public readonly showExport = input(false);
+  public readonly linkProjectsToTimeSheet = input(false);
 
   public displayUtils = inject(TimeSheetDisplayUtil);
   private readonly exportUtil = inject(TimeSheetExportUtil);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   public readonly entriesByProject = computed<
     {
@@ -71,6 +78,11 @@ export class FilterViewSummaryComponent {
       .map(([projectId, data]) => ({ projectId, ...data }))
       .sort((a, b) => b.hours - a.hours);
   });
+
+  public openTimeSheetForProject(projectId: string): void {
+    storeTimeSheetProjectId(projectId);
+    void this.router.navigate(['/time-sheet']);
+  }
 
   public exportProject(projectId: string, projectName: string): void {
     const projectEntries = this.entries().filter(

@@ -1,41 +1,81 @@
-<div class="week-selector">
-  <div class="d-flex align-items-center justify-content-between">
+@if (layout() === 'pill') {
+  <div class="week-pill">
     <button
-      class="btn btn-outline-secondary btn-primary"
+      type="button"
+      class="week-pill-nav"
+      aria-label="Previous week"
       (click)="previousWeek()"
     >
-      <i class="bi bi-chevron-left"></i>
+      <i class="bi bi-chevron-left" aria-hidden="true"></i>
     </button>
 
-    <div class="week-display" (click)="openDatePicker()">
-      <input
-        #datePicker
-        type="date"
-        class="date-picker-input"
-        [value]="datePickerValue()"
-        (change)="onDateSelected($event)"
-      />
-      <span class="week-range-label">{{ selectedYear() }}</span>
-      <span class="week-range">
-        {{ selectedWeekStart() | date: "MMM dd" }} -
-        {{ selectedWeekEnd() | date: "MMM dd" }}
-      </span>
-    </div>
+    <button
+      type="button"
+      class="week-pill-label"
+      aria-label="Choose week"
+      (click)="openDatePicker()"
+    >
+      {{ selectedWeekStart() | date: "MMM d" }} –
+      {{ selectedWeekEnd() | date: "MMM d, y" }}
+    </button>
 
-    <div class="d-flex align-items-center gap-2">
+    <button
+      type="button"
+      class="week-pill-nav"
+      aria-label="Next week"
+      (click)="nextWeek()"
+    >
+      <i class="bi bi-chevron-right" aria-hidden="true"></i>
+    </button>
+
+    <input
+      #datePicker
+      type="date"
+      class="date-picker-input"
+      [value]="datePickerValue()"
+      (change)="onDateSelected($event)"
+    />
+  </div>
+} @else {
+  <div class="week-selector">
+    <div class="d-flex align-items-center justify-content-between">
       <button
         class="btn btn-outline-secondary btn-primary"
-        (click)="nextWeek()"
+        (click)="previousWeek()"
       >
-        <i class="bi bi-chevron-right"></i>
+        <i class="bi bi-chevron-left"></i>
       </button>
-      <button
-        [disabled]="isCurrentWeek()"
-        class="btn btn-outline-secondary btn-primary"
-        (click)="initializeCurrentWeek()"
-      >
-        <span>Today</span>
-      </button>
+
+      <div class="week-display" (click)="openDatePicker()">
+        <input
+          #datePicker
+          type="date"
+          class="date-picker-input"
+          [value]="datePickerValue()"
+          (change)="onDateSelected($event)"
+        />
+        <span class="week-range-label">{{ selectedYear() }}</span>
+        <span class="week-range">
+          {{ selectedWeekStart() | date: "MMM dd" }} -
+          {{ selectedWeekEnd() | date: "MMM dd" }}
+        </span>
+      </div>
+
+      <div class="d-flex align-items-center gap-2">
+        <button
+          class="btn btn-outline-secondary btn-primary"
+          (click)="nextWeek()"
+        >
+          <i class="bi bi-chevron-right"></i>
+        </button>
+        <button
+          [disabled]="isCurrentWeek()"
+          class="btn btn-outline-secondary btn-primary"
+          (click)="initializeCurrentWeek()"
+        >
+          <span>Today</span>
+        </button>
+      </div>
     </div>
   </div>
-</div>
+}

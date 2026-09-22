@@ -1,21 +1,49 @@
-.time-sheet-day-section {
+:host {
+  display: contents;
+}
+
+.col-day,
+.col-logged,
+.col-ruler {
+  display: flex;
+  align-items: flex-end;
+  align-self: stretch;
+  padding: 0.85rem 1rem;
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+}
+
+.col-day {
+  min-width: 9rem;
+}
+
+.day-name {
+  font-weight: 700;
+  font-size: 0.92rem;
+  color: var(--text-primary);
+}
+
+.col-logged {
+  text-align: left;
+  white-space: nowrap;
+  min-width: 4.5rem;
+}
+
+.logged-value {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.logged-empty {
+  color: var(--text-muted);
+}
+
+.col-ruler {
+  min-width: 0;
   width: 100%;
-  background-color: var(--color-surface);
 }
 
-.time-sheet-day-title {
-  color: var(--primary-color-dark);
-  font-size: 1.5rem;
-  font-weight: 600;
-}
-
-.time-sheet-day-date {
-  width: 170px;
-}
-
-@media (max-width: 1200px) {
-  .time-sheet-day-section > .d-flex {
-    flex-flow: row wrap;
-    padding: 0px 0px;
-  }
+.col-ruler app-time-sheet-number-line {
+  width: 100%;
 }

@@ -26,7 +26,20 @@
           @for (project of entriesByProject(); track project.projectId) {
             <tr>
               <td>
-                <span class="project-pill">{{ project.projectName }}</span>
+                @if (linkProjectsToTimeSheet()) {
+                  <button
+                    type="button"
+                    class="project-pill project-pill-link"
+                    (click)="openTimeSheetForProject(project.projectId)"
+                    [attr.aria-label]="
+                      'Open timesheet for ' + project.projectName
+                    "
+                  >
+                    {{ project.projectName }}
+                  </button>
+                } @else {
+                  <span class="project-pill">{{ project.projectName }}</span>
+                }
               </td>
               <td class="text-end value-primary">
                 {{ displayUtils.formatHours(project.hours) }}

@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import {
   Component,
   ElementRef,
+  input,
   OnInit,
   ViewChild,
   computed,
@@ -17,6 +18,7 @@ import {
   imports: [DatePipe],
 })
 export class TimeSheetDateSelectorComponent implements OnInit {
+  public readonly layout = input<'default' | 'pill'>('default');
   public readonly weekChange = output<{ start: Date; end: Date }>();
 
   @ViewChild('datePicker')

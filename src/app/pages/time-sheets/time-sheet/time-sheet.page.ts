@@ -1,12 +1,12 @@
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
 
 import { ProjectDropdownComponent } from '@components';
 import { Project, TimeSheetEntry } from '@models';
 import { ToastService, TimeSheetEntryService } from '@services';
 import { Store } from '@state';
+import { TimeSheetDisplayUtil } from '@utils';
 import {
   ColorList,
-  clearStoredTimeSheetProjectId,
   getStoredTimeSheetProjectId,
   storeTimeSheetProjectId,
 } from '@utils';
@@ -25,6 +25,8 @@ import { TimeSheetDateSelectorComponent } from './components';
   ],
 })
 export class TimeSheetPage {
+  private readonly displayUtil = inject(TimeSheetDisplayUtil);
+
   private readonly weekStart = signal(new Date());
   private readonly weekEnd = signal(new Date());
   private readonly workingOnProjectId = signal<string | null>(
@@ -56,7 +58,7 @@ export class TimeSheetPage {
   private readonly filteredEntries = computed(() => {
     const projectId = this.workingOnProjectId();
     const entries = this.entries();
-    if (!projectId) return entries;
+    if (!projectId) return [];
     return entries.filter((entry) => entry.projectId === projectId);
   });
   public readonly categories = computed(() => [
@@ -83,6 +85,14 @@ export class TimeSheetPage {
     return entriesByDate;
   });
 
+  public readonly weeklyTotalHours = computed(() =>
+    this.filteredEntries().reduce((sum, entry) => sum + entry.hours, 0),
+  );
+
+  public readonly weeklyTotalLabel = computed(() =>
+    this.displayUtil.formatQuarterHourDuration(this.weeklyTotalHours()),
+  );
+
   constructor(
     private store: Store,
     private toastService: ToastService,
@@ -103,25 +113,25 @@ export class TimeSheetPage {
   }
 
   public onWorkingOnProjectSelected(project: Project | null): void {
-    if (!project) {
-      this.workingOnProjectId.set(null);
-      clearStoredTimeSheetProjectId();
-      return;
-    }
+    if (!project) return;
     this.workingOnProjectId.set(project.id);
     storeTimeSheetProjectId(project.id);
   }
 
   private syncWorkingOnProject(): void {
-    const projectId = getStoredTimeSheetProjectId();
-    this.workingOnProjectId.set(projectId);
-    if (!projectId) return;
-
-    const project = this.projects().find((item) => item.id === projectId);
-    if (!project) {
+    const projects = this.projects();
+    if (!projects.length) {
       this.workingOnProjectId.set(null);
-      clearStoredTimeSheetProjectId();
+      return;
     }
+
+    const storedId = getStoredTimeSheetProjectId();
+    const storedProject = storedId
+      ? projects.find((item) => item.id === storedId)
+      : undefined;
+    const project = storedProject ?? projects[0];
+    this.workingOnProjectId.set(project.id);
+    storeTimeSheetProjectId(project.id);
   }
 
   private async fetchTimeSheetEntries(): Promise<void> {

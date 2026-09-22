@@ -64,6 +64,7 @@ export class FilterViewContainerComponent
   ]);
   public readonly showUserFilter = input(true);
   public readonly showExport = input(false);
+  public readonly linkProjectsToTimeSheet = input(false);
 
   public readonly entryUpdated = output<TimeSheetEntry>();
 

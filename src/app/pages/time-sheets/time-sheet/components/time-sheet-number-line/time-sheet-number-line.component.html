@@ -1,35 +1,57 @@
-<div class="time-sheet">
-  <div class="time-sheet-card" [class.time-sheet-card-disabled]="disabled()">
-    <div class="time-sheet-card-header">
-      <div class="time-sheet-card-total">{{ totalLoggedLabel() }}</div>
-    </div>
+<div class="timeline" [class.timeline-disabled]="disabled()" [style.--scale-hours]="scaleHours()">
+  <div class="timeline-ruler-header" aria-hidden="true">
+    @for (hour of hourMarkers(); track hour) {
+      <span class="ruler-hour" [style.--hour]="hour">{{ hour }}h</span>
+    }
+  </div>
 
-    <div class="number-line" (mouseleave)="onNumberLineLeave()">
-      @for (i of numberLineArray(); track i) {
-        <div
-          class="number-line-item"
-          [class.d-none]="i == 0"
-          [class.number-line-item-disabled]="disabled()"
-          [class.number-line-item-logged]="isTickLogged(i)"
-          [class.number-line-item-hovered]="isTickHovered(i)"
-          [style.background-color]="getColor(i)"
-          [attr.tabindex]="isTickInteractive(i) ? 0 : -1"
-          (mouseenter)="onNumberLineHover(i, $event)"
-          (focus)="onNumberLineHover(i, $event)"
-          (click)="onNumberLineClick(i)"
-        >
-          @if (getNumberLineValue(i)) {
-            <span class="tick-label">{{ getNumberLineValue(i) }}</span>
-          }
-          <span
-            class="tick-mark"
-            [ngStyle]="{
-              height: getNumberLineHeight(i),
-            }"
-          >
-          </span>
-        </div>
-      }
-    </div>
+  <div
+    #track
+    class="timeline-track"
+    (mousemove)="onTrackMouseMove($event)"
+    (mouseleave)="onTrackLeave()"
+    (click)="onTrackClick($event)"
+  >
+    <div
+      class="timeline-quarter-grid"
+      aria-hidden="true"
+      [style.--quarter-count]="quarterSlotCount()"
+    ></div>
+
+    @for (segment of segments(); track segment.entry.id) {
+      <button
+        type="button"
+        class="timeline-block"
+        [class.timeline-block-compact]="!segment.showInlineDetail"
+        [style.width.%]="segment.widthPercent"
+        [style.background-color]="segment.backgroundColor"
+        [disabled]="disabled()"
+        [ngbTooltip]="segment.tooltipText"
+        [disableTooltip]="disabled()"
+        container="body"
+        triggers="hover focus"
+        (click)="onBlockClick(segment.entry, $event)"
+      >
+        @if (segment.showInlineDetail) {
+          <span class="timeline-block-name">{{ segment.descriptionLabel }}</span>
+        }
+        <span class="timeline-block-hours">{{ segment.durationLabel }}</span>
+      </button>
+    }
+
+    @if (previewWidthPercent()) {
+      <div
+        class="timeline-preview timeline-block"
+        [class.timeline-preview-from-start]="!loggedHours()"
+        [class.timeline-preview-after-logged]="loggedHours() > 0"
+        [style.left.%]="previewLeftPercent()"
+        [style.width.%]="previewWidthPercent()"
+        [style.background-color]="previewBackgroundColor()"
+        aria-hidden="true"
+      >
+        <span class="timeline-block-hours">{{ previewDurationLabel() }}</span>
+      </div>
+    }
+
   </div>
 </div>

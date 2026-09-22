@@ -1,10 +1,11 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Project, TimeSheetEntry } from '@models';
 import { TimeSheetEntryModal } from '@modals';
 import { TimeSheetEntryService, ToastService } from '@services';
+import { TimeSheetDisplayUtil } from '@utils';
 
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
 
@@ -16,6 +17,8 @@ import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-she
   imports: [TimeSheetNumberLineComponent, DatePipe],
 })
 export class TimeSheetDayComponent {
+  private readonly displayUtil = inject(TimeSheetDisplayUtil);
+
   public readonly date = input(new Date());
   public readonly projects = input<Project[]>([]);
   public readonly categories = input<string[]>([]);
@@ -26,8 +29,18 @@ export class TimeSheetDayComponent {
     this.entries().some((entry) => entry.approved),
   );
   public readonly sortedEntries = computed(() =>
-    this.entries().sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
+    [...this.entries()].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    ),
   );
+
+  public readonly loggedHours = computed(() =>
+    this.sortedEntries().reduce((sum, entry) => sum + entry.hours, 0),
+  );
+
+  public formatLoggedTotal(): string {
+    return this.displayUtil.formatQuarterHourDuration(this.loggedHours());
+  }
 
   constructor(
     private modalService: NgbModal,

@@ -1,20 +1,27 @@
-import { NgStyle } from '@angular/common';
 import {
   Component,
   computed,
+  ElementRef,
+  inject,
   input,
-  OnDestroy,
   output,
   signal,
+  viewChild,
 } from '@angular/core';
-import { Tooltip } from 'bootstrap';
 
-import { TimeSheetEntry, Project } from '@models';
-import { ColorList } from '@utils';
+import { Project, TimeSheetEntry } from '@models';
+import { TimeSheetDisplayUtil } from '@utils';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
-interface EntryAtIndex {
+interface TimelineSegment {
   entry: TimeSheetEntry;
-  index: number;
+  widthPercent: number;
+  color: string;
+  backgroundColor: string;
+  descriptionLabel: string;
+  durationLabel: string;
+  showInlineDetail: boolean;
+  tooltipText: string;
 }
 
 @Component({
@@ -22,9 +29,11 @@ interface EntryAtIndex {
   standalone: true,
   templateUrl: './time-sheet-number-line.component.html',
   styleUrl: './time-sheet-number-line.component.scss',
-  imports: [NgStyle],
+  imports: [NgbTooltipModule],
 })
-export class TimeSheetNumberLineComponent implements OnDestroy {
+export class TimeSheetNumberLineComponent {
+  private readonly displayUtil = inject(TimeSheetDisplayUtil);
+
   public readonly colorIndex = input(0);
   public readonly projects = input<Project[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
@@ -33,118 +42,153 @@ export class TimeSheetNumberLineComponent implements OnDestroy {
   public readonly onEntryClick = output<TimeSheetEntry>();
   public readonly onCreateEntry = output<number>();
 
-  public readonly hoveredQuarterHours = signal<number | null>(null);
-  public readonly loggedQuarterHours = computed(() =>
-    this.entries().reduce(
-      (sum, entry) => sum + this.convertHoursToQuarterHours(entry.hours),
-      0,
-    ),
-  );
-  public readonly totalWorkQuarterHours = computed(() =>
-    Math.max(12 * 4, this.loggedQuarterHours()),
-  );
+  private readonly trackRef = viewChild<ElementRef<HTMLElement>>('track');
 
-  public readonly numberLineArray = computed(() =>
-    Array.from(
-      { length: this.totalWorkQuarterHours() + 1 },
-      (_, index) => index,
+  public readonly hoverTotalHours = signal<number | null>(null);
+
+  private readonly sortedEntries = computed(() =>
+    [...this.entries()].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
     ),
   );
 
-  public readonly totalLoggedLabel = computed(
-    () => `${this.formatHours(this.loggedQuarterHours() / 4)} logged`,
+  public readonly loggedHours = computed(() =>
+    this.sortedEntries().reduce((sum, entry) => sum + entry.hours, 0),
   );
 
-  private tooltip: Tooltip | undefined = undefined;
+  public readonly scaleHours = computed(() =>
+    Math.max(12, this.loggedHours()),
+  );
 
-  constructor() {}
+  public readonly hourMarkers = computed(() =>
+    Array.from({ length: 12 }, (_, index) => index + 1),
+  );
 
-  ngOnDestroy(): void {
-    this.hideTooltip();
-  }
+  public readonly quarterSlotCount = computed(() => this.scaleHours() * 4);
 
-  public getColor(i: number): string {
-    const entry = this.getEntryAtIndex(i);
-    if (!entry) return '';
+  public readonly segments = computed((): TimelineSegment[] => {
+    const scale = this.scaleHours();
+    if (!scale) return [];
 
-    return ColorList.colors[
-      (this.colorIndex() * 4 + entry.index) % ColorList.colors.length
-    ];
-  }
+    return this.sortedEntries().map((entry, index) => ({
+      entry,
+      widthPercent: (entry.hours / scale) * 100,
+      color: this.getEntryColor(entry, index),
+      descriptionLabel: this.getEntryDescription(entry),
+      durationLabel: this.formatBlockHours(entry.hours),
+      backgroundColor: this.getBlockBackground(this.getEntryColor(entry, index)),
+      showInlineDetail: entry.hours > 1,
+      tooltipText: this.getBlockTooltipText(entry),
+    }));
+  });
 
-  public getEntryAtIndex(index: number): EntryAtIndex | undefined {
-    if (!this.isTickLogged(index)) return undefined;
+  public readonly previewLeftPercent = computed(() => {
+    const scale = this.scaleHours();
+    if (!scale) return 0;
+    return (this.loggedHours() / scale) * 100;
+  });
 
-    const time = index / 4;
-    let cumulativeHours = 0;
-    const entries = this.entries();
-    for (let i = 0; i < entries.length; i++) {
-      const entry = entries[i];
-      if (cumulativeHours + entry.hours >= time) {
-        return { entry, index: i };
-      }
-      cumulativeHours += entry.hours;
+  public readonly previewWidthPercent = computed(() => {
+    const hoverTotal = this.hoverTotalHours();
+    const logged = this.loggedHours();
+    const scale = this.scaleHours();
+    if (hoverTotal === null || hoverTotal <= logged || !scale) return 0;
+    return ((hoverTotal - logged) / scale) * 100;
+  });
+
+  public readonly previewDurationLabel = computed(() => {
+    const hoverTotal = this.hoverTotalHours();
+    const logged = this.loggedHours();
+    if (hoverTotal === null || hoverTotal <= logged) return '';
+    return this.formatBlockHours(hoverTotal - logged);
+  });
+
+  public readonly previewBackgroundColor = computed(() =>
+    this.getPreviewBackground('var(--color-primary)'),
+  );
+
+  public onTrackMouseMove(event: MouseEvent): void {
+    if (this.disabled()) return;
+    const total = this.hoursAtPointer(event);
+    if (total === null) return;
+    if (total <= this.loggedHours()) {
+      this.hoverTotalHours.set(null);
+      return;
     }
-
-    return undefined;
+    this.hoverTotalHours.set(total);
   }
 
-  public getNumberLineValue(i: number): string {
-    if (!(i % 4)) return `${i / 4.0}`;
-    return '';
+  public onTrackLeave(): void {
+    this.hoverTotalHours.set(null);
   }
 
-  public getNumberLineHeight(i: number): string {
-    if (!(i % 4)) return '20px';
-    if (!(i % 2)) return '14px';
-    return '8px';
+  public onTrackClick(event: MouseEvent): void {
+    if (this.disabled()) return;
+    const target = event.target as HTMLElement;
+    if (target.closest('.timeline-block')) return;
+
+    const total = this.hoursAtPointer(event);
+    if (total === null) return;
+
+    if (total <= this.loggedHours()) return;
+    this.onCreateEntry.emit(total);
+    this.hoverTotalHours.set(null);
   }
 
-  public isTickInteractive(i: number): boolean {
-    return !this.disabled() && i > this.loggedQuarterHours();
+  public onBlockClick(entry: TimeSheetEntry, event: MouseEvent): void {
+    event.stopPropagation();
+    if (this.disabled()) return;
+    this.onEntryClick.emit(entry);
   }
 
-  public isTickLogged(i: number): boolean {
-    return i > 0 && i <= this.loggedQuarterHours();
-  }
+  private hoursAtPointer(event: MouseEvent): number | null {
+    const track = this.trackRef()?.nativeElement;
+    if (!track) return null;
 
-  public isTickHovered(i: number): boolean {
-    const hoveredQuarterHours = this.hoveredQuarterHours();
-    const loggedQuarterHours = this.loggedQuarterHours();
-    return (
-      !!hoveredQuarterHours &&
-      hoveredQuarterHours > loggedQuarterHours &&
-      i > loggedQuarterHours &&
-      i <= hoveredQuarterHours
+    const rect = track.getBoundingClientRect();
+    if (!rect.width) return null;
+
+    const ratio = Math.min(
+      1,
+      Math.max(0, (event.clientX - rect.left) / rect.width),
     );
+    const rawHours = ratio * this.scaleHours();
+    return Math.round(rawHours * 4) / 4;
   }
 
-  public onNumberLineHover(i: number, event: MouseEvent | FocusEvent): void {
-    const entry = this.getEntryAtIndex(i);
-    if (entry) {
-      this.showTooltip(entry, event.target! as HTMLElement);
-    } else {
-      this.hideTooltip();
-      this.hoveredQuarterHours.set(i);
-    }
+  private getEntryDescription(entry: TimeSheetEntry): string {
+    const description = entry.description?.trim();
+    return description || 'No description';
   }
 
-  private showTooltip(entry: EntryAtIndex, element: HTMLElement): void {
-    this.hideTooltip();
-
-    this.tooltip = new Tooltip(element, {
-      html: true,
-      trigger: 'manual',
-      title: this.getTooltipContent(entry.entry, this.getProject(entry.entry)),
-    });
-    this.tooltip.show();
+  private getBlockTooltipText(entry: TimeSheetEntry): string {
+    const project = this.projects().find((item) => item.id === entry.projectId);
+    const lines = [
+      project?.name ? `Project: ${project.name}` : '',
+      `Duration: ${this.formatBlockHours(entry.hours)}`,
+      `Description: ${this.getEntryDescription(entry)}`,
+    ].filter((line) => line.length > 0);
+    return lines.join('\n');
   }
 
-  private getProject(entry: TimeSheetEntry): Project | undefined {
-    return this.projects().find((project) => project.id === entry.projectId);
+  private getEntryColor(_entry: TimeSheetEntry, _index: number): string {
+    return 'var(--color-primary)';
   }
 
-  private escapeHtml(value: unknown): string {
+  private getBlockBackground(color: string): string {
+    return `color-mix(in srgb, ${color} 60%, transparent)`;
+  }
+
+  private getPreviewBackground(color: string): string {
+    return `color-mix(in srgb, ${color} 30%, transparent)`;
+  }
+
+  private formatBlockHours(hours: number): string {
+    return this.displayUtil.formatQuarterHourDuration(hours);
+  }
+
+  /** @internal Used by unit tests for HTML escaping coverage. */
+  public escapeHtml(value: unknown): string {
     return String(value ?? '')
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -153,7 +197,8 @@ export class TimeSheetNumberLineComponent implements OnDestroy {
       .replace(/'/g, '&#39;');
   }
 
-  private getTooltipContent(entry: TimeSheetEntry, project?: Project): string {
+  /** @internal Used by unit tests for HTML escaping coverage. */
+  public getTooltipContent(entry: TimeSheetEntry, project?: Project): string {
     const hours = Math.floor(entry.hours);
     const minutes = (entry.hours - hours) * 60;
     return `
@@ -178,37 +223,5 @@ export class TimeSheetNumberLineComponent implements OnDestroy {
       .filter((row) => row.length > 0);
 
     return rows.join('');
-  }
-
-  public onNumberLineLeave(): void {
-    this.hoveredQuarterHours.set(null);
-    this.hideTooltip();
-  }
-
-  private hideTooltip(): void {
-    if (this.tooltip) {
-      this.tooltip.dispose();
-      this.tooltip = undefined;
-    }
-  }
-
-  public onNumberLineClick(i: number): void {
-    const entry = this.getEntryAtIndex(i);
-    if (entry) {
-      this.onEntryClick.emit(entry.entry);
-    } else {
-      this.onCreateEntry.emit(i / 4);
-    }
-    this.hideTooltip();
-    this.hoveredQuarterHours.set(null);
-  }
-
-  private convertHoursToQuarterHours(hours: number): number {
-    return Math.round(hours * 4);
-  }
-
-  private formatHours(hours: number): string {
-    const formattedHours = hours.toFixed(2);
-    return `${parseFloat(formattedHours)}h`;
   }
 }
