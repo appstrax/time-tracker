@@ -10,15 +10,16 @@
   min-width: 0;
 }
 
-.timeline-ruler-header {
+.timeline-ruler-footer {
   position: relative;
   height: 1.05rem;
+  margin-top: 0.2rem;
 }
 
 .ruler-hour {
   position: absolute;
   top: 0;
-  left: calc((var(--hour) / var(--scale-hours, 11)) * 100%);
+  left: calc((var(--hour) / var(--scale-hours, 12)) * 100%);
   transform: translateX(-50%);
   font-size: 0.68rem;
   font-weight: 500;
@@ -68,10 +69,10 @@
   top: 5px;
   bottom: 5px;
   z-index: 1;
-  display: inline-flex;
+  display: flex;
   align-items: center;
-  justify-content: center;
-  gap: 0.35rem;
+  justify-content: space-between;
+  gap: 0.4rem;
   min-width: 0;
   padding: 0.35rem 0.55rem;
   border: none;
@@ -109,24 +110,25 @@
 }
 
 .timeline-block-compact {
-  justify-content: center;
-
-  .timeline-block-hours {
-    margin-left: 0;
-  }
+  justify-content: flex-end;
 }
 
 .timeline-block-name {
+  flex: 1 1 auto;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   min-width: 0;
+  text-align: left;
 }
 
 .timeline-block-hours {
-  flex-shrink: 0;
+  flex: 0 0 auto;
+  margin-left: auto;
   font-size: 0.62rem;
-  font-weight: 400;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
 }
 
 .timeline-preview {
@@ -168,5 +170,6 @@
 
   .timeline-block-hours {
     font-size: 0.58rem;
+    margin-left: 0;
   }
 }

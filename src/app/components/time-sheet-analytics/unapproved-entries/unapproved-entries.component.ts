@@ -3,6 +3,7 @@ import {
   computed,
   inject,
   input,
+  output,
   signal,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -32,6 +33,7 @@ export class UnapprovedEntriesComponent {
   public readonly compact = input(false);
   public readonly users = input<User[]>([]);
   public readonly canApprove = input(false);
+  public readonly entryUpdated = output<TimeSheetEntry>();
   public readonly groupedEntries = computed(() => {
     const groupsMap = new Map<string, UnapprovedEntryGroup>();
 
@@ -98,8 +100,6 @@ export class UnapprovedEntriesComponent {
           group.date,
         );
 
-      const unapprovedEntries = allEntries.filter((entry) => !entry.approved);
-
       const modalRef = this.modalService.open(UnapprovedEntriesModalComponent, {
         centered: true,
         backdrop: 'static',
@@ -108,33 +108,37 @@ export class UnapprovedEntriesComponent {
       });
       Object.assign(modalRef.componentInstance, {
         entries: allEntries,
-        unapprovedEntries: unapprovedEntries,
         date: group.date,
         userId: group.userId,
-        preloadedUser: this.usersById().get(group.userId),
-        onApprove: async () => {
-          await this.approveEntries(unapprovedEntries);
-        },
+        users: this.users(),
+        canManageStatus: this.canApprove(),
+        onEntryStatusChange: this.canApprove()
+          ? (entry: TimeSheetEntry, approved: boolean) =>
+              this.updateEntryStatus(entry, approved)
+          : undefined,
       });
 
       modalRef.result.then(() => {}, () => {});
-    } catch (error) {
+    } catch {
       this.toastService.error('Error loading time entries');
     }
   }
 
-  private async approveEntries(entries: TimeSheetEntry[]): Promise<void> {
+  private async updateEntryStatus(
+    entry: TimeSheetEntry,
+    approved: boolean,
+  ): Promise<TimeSheetEntry> {
     try {
-      this.isLoading.set(true);
-      for (const entry of entries) {
-        entry.approved = true;
-        await this.timeSheetEntryService.save(entry);
-      }
-      this.toastService.success(`Approved ${entries.length} time entries`);
-    } catch (error) {
-      this.toastService.error('Error approving time entries');
-    } finally {
-      this.isLoading.set(false);
+      entry.approved = approved;
+      const savedEntry = await this.timeSheetEntryService.save(entry);
+      this.entryUpdated.emit(savedEntry);
+      this.toastService.success(
+        approved ? 'Time entry approved' : 'Time entry marked pending',
+      );
+      return savedEntry;
+    } catch {
+      this.toastService.error('Error updating time entry status');
+      throw new Error('status update failed');
     }
   }
 }

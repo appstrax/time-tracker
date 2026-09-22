@@ -48,18 +48,24 @@
               [disabled]="approved()"
               (click)="openTimeSheetEntryModal(entry)"
             >
-              <span
-                class="entry-project-dot"
-                [style.background-color]="projectColor(entry)"
-                aria-hidden="true"
-              ></span>
-              <span class="entry-project">{{ projectName(entry) }}</span>
-              <span class="entry-meta">
-                {{ formatEntryHours(entry.hours) }}
-                @if (entry.description.trim()) {
-                  · {{ entry.description.trim() }}
-                }
+              <span class="entry-leading">
+                <span
+                  class="entry-project-dot"
+                  [style.background-color]="projectColor(entry)"
+                  aria-hidden="true"
+                ></span>
+                <span class="entry-text">
+                  <span class="entry-project">{{ projectName(entry) }}</span>
+                  @if (entry.description.trim()) {
+                    <span class="entry-description">{{
+                      entry.description.trim()
+                    }}</span>
+                  }
+                </span>
               </span>
+              <span class="entry-duration">{{
+                formatEntryHours(entry.hours)
+              }}</span>
             </button>
           </li>
         }

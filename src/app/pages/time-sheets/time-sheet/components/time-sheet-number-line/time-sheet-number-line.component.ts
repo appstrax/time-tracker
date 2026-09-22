@@ -20,6 +20,7 @@ interface TimelineSegment {
   color: string;
   backgroundColor: string;
   label: string;
+  durationLabel: string;
   showInlineDetail: boolean;
   tooltipText: string;
 }
@@ -57,7 +58,7 @@ export class TimeSheetNumberLineComponent {
   );
 
   public readonly scaleHours = computed(() =>
-    Math.max(11, Math.ceil(this.loggedHours())),
+    Math.max(12, Math.ceil(this.loggedHours())),
   );
 
   public readonly hourMarkers = computed(() =>
@@ -85,6 +86,7 @@ export class TimeSheetNumberLineComponent {
         widthPercent,
         color,
         label: this.getProjectName(entry),
+        durationLabel: this.formatBlockHours(entry.hours),
         backgroundColor: color,
         showInlineDetail: entry.hours >= 0.75,
         tooltipText: this.getBlockTooltipText(entry),

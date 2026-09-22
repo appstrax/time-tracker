@@ -4,7 +4,9 @@
       <div class="ws-tab-head">
         <div>
           <h2 class="ws-tab-title">Daily totals</h2>
-          <p class="ws-tab-sub">Approved vs pending hours per day.</p>
+          <p class="ws-tab-sub">
+            Select a day to review entries and update approval status.
+          </p>
         </div>
         @if (timelineData().length) {
           <span class="ws-tab-badge">
@@ -22,7 +24,11 @@
       } @else {
         <div class="ws-timeline-list">
           @for (day of timelineData(); track day.date.toISOString()) {
-            <article class="ws-timeline-row">
+            <button
+              type="button"
+              class="ws-timeline-row ws-timeline-row--selectable"
+              (click)="openDayReview(day)"
+            >
               <div class="ws-timeline-top">
                 <span>{{ day.date | date : 'EEE, MMM d' }}</span>
                 <span class="ws-hours">
@@ -48,8 +54,12 @@
                   Pending
                   {{ displayUtils.formatHours(day.pendingHours) }}
                 </span>
+                <span class="ws-timeline-action">
+                  View entries
+                  <i class="bi bi-chevron-right" aria-hidden="true"></i>
+                </span>
               </div>
-            </article>
+            </button>
           }
         </div>
       }
@@ -60,17 +70,24 @@
         <div>
           <p class="eyebrow">Timeline</p>
           <h2>Daily activity</h2>
-          <p>See how approved and pending time is distributed across each day.</p>
+          <p>
+            Select a day to open all matching records and change approval
+            status.
+          </p>
         </div>
       </div>
 
       <div class="timeline-container">
         @for (day of timelineData(); track day.date.toISOString()) {
-          <section class="timeline-day">
+          <button
+            type="button"
+            class="timeline-day timeline-day--selectable"
+            (click)="openDayReview(day)"
+          >
             <div class="timeline-header">
               <div>
                 <h3>{{ day.date | date : 'MMM d, yyyy' }}</h3>
-                <p>Daily total across all matching entries.</p>
+                <p>Tap to review all entries for this day.</p>
               </div>
               <span class="metric-pill">
                 {{ displayUtils.formatHours(day.hours) }}
@@ -107,8 +124,12 @@
                   Pending: {{ displayUtils.formatHours(day.pendingHours) }}
                 </span>
               </span>
+              <span class="legend-item timeline-open-hint">
+                View entries
+                <i class="bi bi-arrow-right" aria-hidden="true"></i>
+              </span>
             </div>
-          </section>
+          </button>
         }
 
         @if (!timelineData().length) {

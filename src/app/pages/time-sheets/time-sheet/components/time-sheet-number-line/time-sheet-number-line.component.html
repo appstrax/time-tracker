@@ -1,10 +1,4 @@
 <div class="timeline" [class.timeline-disabled]="disabled()" [style.--scale-hours]="scaleHours()">
-  <div class="timeline-ruler-header" aria-hidden="true">
-    @for (hour of hourMarkers(); track hour) {
-      <span class="ruler-hour" [style.--hour]="hour">{{ hour }}</span>
-    }
-  </div>
-
   <div
     #track
     class="timeline-track"
@@ -36,6 +30,7 @@
         @if (segment.showInlineDetail) {
           <span class="timeline-block-name">{{ segment.label }}</span>
         }
+        <span class="timeline-block-hours">{{ segment.durationLabel }}</span>
       </button>
     }
 
@@ -52,6 +47,11 @@
         <span class="timeline-block-hours">{{ previewDurationLabel() }}</span>
       </div>
     }
+  </div>
 
+  <div class="timeline-ruler-footer" aria-hidden="true">
+    @for (hour of hourMarkers(); track hour) {
+      <span class="ruler-hour" [style.--hour]="hour">{{ hour }}</span>
+    }
   </div>
 </div>

@@ -73,36 +73,53 @@
 
 .entry-list {
   list-style: none;
-  margin: 0.55rem 0 0;
+  margin: 0.5rem 0 0;
   padding: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 0.35rem;
+  border-top: 1px solid var(--color-border);
+}
+
+.entry-list li {
+  border-bottom: 1px solid var(--color-border);
+
+  &:last-child {
+    border-bottom: none;
+  }
 }
 
 .entry-row {
   display: flex;
   align-items: center;
-  gap: 0.55rem;
+  justify-content: space-between;
+  gap: 1rem;
   width: 100%;
-  padding: 0.45rem 0.55rem;
-  border: 1px solid color-mix(in srgb, var(--color-border) 85%, transparent);
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--color-bg) 55%, var(--color-surface));
+  padding: 0.65rem 0;
+  border: none;
+  border-radius: 0;
+  background: transparent;
   color: var(--text-primary);
   font: inherit;
-  font-size: 0.82rem;
+  font-size: 0.84rem;
   text-align: left;
   cursor: pointer;
+  overflow: hidden;
 
   &:hover:not(:disabled) {
-    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+    background: color-mix(in srgb, var(--color-border) 18%, transparent);
   }
 
   &:disabled {
     cursor: default;
     opacity: 0.85;
   }
+}
+
+.entry-leading {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
 }
 
 .entry-project-dot {
@@ -112,31 +129,43 @@
   flex-shrink: 0;
 }
 
-.entry-project {
-  font-weight: 700;
-  flex-shrink: 0;
+.entry-text {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  min-width: 0;
+  flex: 1 1 auto;
+  overflow: hidden;
+  white-space: nowrap;
 }
 
-.entry-meta {
+.entry-project {
+  flex: 0 1 auto;
+  max-width: 55%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: 700;
+}
+
+.entry-description {
+  flex: 1 1 auto;
   min-width: 0;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  font-weight: 400;
   color: var(--text-muted);
+}
+
+.entry-duration {
+  flex: 0 0 auto;
+  font-weight: 700;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  text-align: right;
 }
 
 @media (max-width: 640px) {
   .day-card {
     padding: 1rem;
-  }
-
-  .entry-row {
-    flex-wrap: wrap;
-  }
-
-  .entry-meta {
-    width: 100%;
-    padding-left: 1.1rem;
-    white-space: normal;
   }
 }

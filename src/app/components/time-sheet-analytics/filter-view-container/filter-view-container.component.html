@@ -281,13 +281,18 @@
     <app-filter-view-timeline
       [entries]="filteredEntries()"
       [projects]="projects()"
+      [users]="users()"
       [compact]="compact()"
+      [canManageStatus]="true"
+      (entryUpdated)="onSingleEntryApproved($event)"
     ></app-filter-view-timeline>
   } @else if (activeView() === "unapproved") {
     <app-unapproved-entries
       [timeSheetEntries]="filteredEntries()"
       [users]="users()"
       [compact]="compact()"
+      [canApprove]="true"
+      (entryUpdated)="onSingleEntryApproved($event)"
     />
   }
 </ng-template>

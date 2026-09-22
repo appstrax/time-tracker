@@ -258,6 +258,10 @@ export class FilterViewContainerComponent
     );
   }
 
+  public onSingleEntryApproved(entry: TimeSheetEntry): void {
+    this.entryUpdated.emit(entry);
+  }
+
   public async onApproveAll(): Promise<void> {
     const pendingEntries = this.filteredEntries().filter(
       (entry) => !entry.approved,
