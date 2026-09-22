@@ -39,7 +39,7 @@ export class SettingsPage {
     muted: '#666666',
   };
 
-  custom = { ...SettingsPage.DEFAULT_CUSTOM };
+  custom: typeof SettingsPage.DEFAULT_CUSTOM;
 
   applyCustom() {
     this.theme.setTheme('custom', this.buildCustomVars());
