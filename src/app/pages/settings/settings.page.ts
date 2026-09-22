@@ -12,7 +12,9 @@ import { SettingsService, ThemeService } from '@services';
   styleUrls: ['./settings.page.scss'],
 })
 export class SettingsPage {
-  constructor(public settings: SettingsService, public theme: ThemeService) {}
+  constructor(public settings: SettingsService, public theme: ThemeService) {
+    this.custom = this.loadCustomFromStorage();
+  }
 
   toggleAutoCollapse(event: Event) {
     const target = event.target as HTMLInputElement;
@@ -27,7 +29,7 @@ export class SettingsPage {
     }
   }
 
-  custom = {
+  private static readonly DEFAULT_CUSTOM = {
     primary: '#8a00b4',
     primaryContrast: '#ffffff',
     bg: '#f8f9fa',
@@ -37,22 +39,29 @@ export class SettingsPage {
     muted: '#666666',
   };
 
+  custom = { ...SettingsPage.DEFAULT_CUSTOM };
+
   applyCustom() {
     this.theme.setTheme('custom', this.buildCustomVars());
   }
 
   resetCustom() {
-    this.custom = {
-      primary: '#8a00b4',
-      primaryContrast: '#ffffff',
-      bg: '#f8f9fa',
-      surface: '#ffffff',
-      border: '#e6e6e6',
-      text: '#1a1a1a',
-      muted: '#666666',
-    };
+    this.custom = { ...SettingsPage.DEFAULT_CUSTOM };
     this.theme.clearCustomVars();
     this.theme.setTheme('light');
+  }
+
+  private loadCustomFromStorage(): typeof SettingsPage.DEFAULT_CUSTOM {
+    const stored = this.theme.getStoredCustomVars();
+    return {
+      primary: stored['--color-primary'] ?? SettingsPage.DEFAULT_CUSTOM.primary,
+      primaryContrast: stored['--color-primary-contrast'] ?? SettingsPage.DEFAULT_CUSTOM.primaryContrast,
+      bg: stored['--color-bg'] ?? SettingsPage.DEFAULT_CUSTOM.bg,
+      surface: stored['--color-surface'] ?? SettingsPage.DEFAULT_CUSTOM.surface,
+      border: stored['--color-border'] ?? SettingsPage.DEFAULT_CUSTOM.border,
+      text: stored['--text-primary'] ?? SettingsPage.DEFAULT_CUSTOM.text,
+      muted: stored['--text-muted'] ?? SettingsPage.DEFAULT_CUSTOM.muted,
+    };
   }
 
   private buildCustomVars(): Record<string, string> {
