@@ -232,15 +232,21 @@ export class TimeSheetExportUtil {
   }
 
   private escapeCsvField(value: string): string {
+    // Neutralize spreadsheet formula injection: a cell opened in Excel/Sheets
+    // that starts with =, +, -, or @ is evaluated as a formula, not literal text.
+    const needsFormulaGuard = /^[=+\-@\t\r]/.test(value);
+    const safeValue = needsFormulaGuard ? `'${value}` : value;
+
     const needsQuotes =
-      value.includes(',') ||
-      value.includes('"') ||
-      value.includes('\n') ||
-      value.includes('\r');
+      needsFormulaGuard ||
+      safeValue.includes(',') ||
+      safeValue.includes('"') ||
+      safeValue.includes('\n') ||
+      safeValue.includes('\r');
     if (!needsQuotes) {
-      return value;
+      return safeValue;
     }
-    return `"${value.replace(/"/g, '""')}"`;
+    return `"${safeValue.replace(/"/g, '""')}"`;
   }
 
   private buildFilename(
