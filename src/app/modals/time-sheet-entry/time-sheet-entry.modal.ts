@@ -94,16 +94,20 @@ export class TimeSheetEntryModal implements OnInit {
     );
   }
 
-  setFieldValue(key: string, value: string): void {
+  setFieldValue(
+    key: string,
+    value: string | number | null | undefined,
+  ): void {
+    const normalized = value == null ? '' : String(value);
     const existing = this.timeSheetEntry.fieldValues.find(
       (fv) => fv.key === key,
     );
     if (existing) {
-      existing.value = value;
+      existing.value = normalized;
     } else {
       this.timeSheetEntry.fieldValues = [
         ...this.timeSheetEntry.fieldValues,
-        { key, value },
+        { key, value: normalized },
       ];
     }
   }

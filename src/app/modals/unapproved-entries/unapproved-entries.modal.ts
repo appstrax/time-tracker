@@ -43,6 +43,12 @@ export class UnapprovedEntriesModalComponent implements OnInit {
     return project?.name || 'Unknown Project';
   }
 
+  public getFieldLabel(entry: TimeSheetEntry, fieldKey: string): string {
+    const project = this.projects().find((p) => p.id === entry.projectId);
+    const field = project?.fields?.find((f) => f.key === fieldKey);
+    return field?.label || fieldKey;
+  }
+
   public getUserName(userId: string): string {
     if (userId === this.currentUserId()) {
       return 'You';

@@ -119,7 +119,7 @@
                   class="form-control"
                   [id]="'field-' + field.key"
                   [ngModel]="getFieldValue(field.key)"
-                  (ngModelChange)="setFieldValue(field.key, $event + '')"
+                  (ngModelChange)="setFieldValue(field.key, $event)"
                   [disabled]="timeSheetEntry.approved"
                   [required]="field.required"
                 />

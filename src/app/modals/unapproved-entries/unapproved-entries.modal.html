@@ -87,7 +87,7 @@
                     <div class="field-value-pills">
                       @for (fieldValue of entry.fieldValues; track fieldValue.key) {
                         @if (fieldValue.value) {
-                          <span class="field-value-pill">{{ fieldValue.key }}: {{ fieldValue.value }}</span>
+                          <span class="field-value-pill">{{ getFieldLabel(entry, fieldValue.key) }}: {{ fieldValue.value }}</span>
                         }
                       }
                     </div>

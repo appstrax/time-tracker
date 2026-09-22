@@ -156,6 +156,17 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.isFormValid()).toBe(true);
   });
 
+  it('should store an empty string when a field value is cleared (null or undefined)', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithFields);
+    component.setFieldValue('optional-tag', '42');
+    component.setFieldValue('optional-tag', null);
+    expect(component.getFieldValue('optional-tag')).toBe('');
+    component.setFieldValue('optional-tag', 'x');
+    component.setFieldValue('optional-tag', undefined);
+    expect(component.getFieldValue('optional-tag')).toBe('');
+  });
+
   it('should preserve a typed field value when switching project and back', async () => {
     await createComponent();
     component.onProjectSelected(projectWithFields);
