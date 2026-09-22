@@ -6,6 +6,98 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+
+  &.compact {
+    gap: 1rem;
+
+    .filter-panel {
+      border-radius: 1rem;
+      box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+    }
+
+    .panel-section {
+      padding: 0.85rem 1rem;
+    }
+
+    .panel-section--views {
+      padding-bottom: 0.65rem;
+    }
+
+    .panel-section--filters {
+      padding-top: 0.65rem;
+    }
+
+    .filters-grid {
+      gap: 0.65rem;
+      grid-template-columns: repeat(auto-fit, minmax(9.5rem, 1fr));
+    }
+
+    .custom-date-range {
+      margin-top: 0.65rem;
+    }
+  }
+}
+
+.compact-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+  flex-wrap: wrap;
+}
+
+.view-type-segmented {
+  display: inline-flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  padding: 0.2rem;
+  border-radius: 0.65rem;
+  background: color-mix(in srgb, var(--color-bg) 55%, var(--color-surface));
+  border: 1px solid var(--color-border);
+}
+
+.view-segment {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.4rem 0.7rem;
+  border: none;
+  border-radius: 0.5rem;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background 0.15s ease,
+    color 0.15s ease,
+    box-shadow 0.15s ease;
+
+  i {
+    font-size: 0.95rem;
+  }
+
+  &:hover {
+    color: var(--text-primary);
+    background: color-mix(in srgb, var(--primary-color) 6%, var(--color-surface));
+  }
+
+  &.active {
+    color: var(--primary-color-dark);
+    background: var(--color-surface);
+    box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 1px;
+  }
+}
+
+.metric-pill--compact {
+  padding: 0.3rem 0.65rem;
+  font-size: 0.8rem;
 }
 
 .filter-panel {

@@ -66,6 +66,8 @@ export class FilterViewContainerComponent
   public readonly showUserFilter = input(true);
   public readonly showExport = input(false);
   public readonly linkProjectsToTimeSheet = input(false);
+  /** Tighter layout with less marketing copy — used on /home. */
+  public readonly compact = input(false);
 
   public readonly entryUpdated = output<TimeSheetEntry>();
 

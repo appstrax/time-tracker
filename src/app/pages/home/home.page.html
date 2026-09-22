@@ -1,18 +1,25 @@
-<section class="home-hours-page container py-4">
+<section class="home-hours-page container">
   <header class="page-header">
-    <div>
-      <p class="eyebrow">Home</p>
-      <h1>My time</h1>
-      <p class="subtitle">
-        Review your captured hours. Switch views and filter by project,
-        category, or date range.
-      </p>
-    </div>
+    <h1>My time</h1>
+    @if (isLoading() && !hasLoaded()) {
+      <span class="header-status" aria-live="polite">
+        <span
+          class="spinner-border spinner-border-sm"
+          role="status"
+          aria-hidden="true"
+        ></span>
+        Loading…
+      </span>
+    } @else if (hasLoaded() && hasProjects()) {
+      <span class="header-status">
+        {{ entries().length }}
+        {{ entries().length === 1 ? 'entry' : 'entries' }} captured
+      </span>
+    }
   </header>
 
   @if (isLoading() && !hasLoaded()) {
-    <section class="state-card">
-      <h2>Loading your time entries</h2>
+    <section class="state-card state-card--loading" aria-busy="true">
       <p>Pulling your captured hours.</p>
     </section>
   } @else if (!hasProjects()) {
@@ -28,6 +35,7 @@
       [showUserFilter]="false"
       [linkProjectsToTimeSheet]="true"
       [availableViews]="homeAvailableViews"
+      [compact]="true"
     />
   }
 </section>
