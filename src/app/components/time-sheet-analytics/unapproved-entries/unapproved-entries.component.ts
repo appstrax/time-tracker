@@ -129,8 +129,9 @@ export class UnapprovedEntriesComponent {
     approved: boolean,
   ): Promise<TimeSheetEntry> {
     try {
-      entry.approved = approved;
-      const savedEntry = await this.timeSheetEntryService.save(entry);
+      const toSave = entry.clone();
+      toSave.approved = approved;
+      const savedEntry = await this.timeSheetEntryService.save(toSave);
       this.entryUpdated.emit(savedEntry);
       this.toastService.success(
         approved ? 'Time entry approved' : 'Time entry marked pending',

@@ -277,8 +277,9 @@ export class FilterViewContainerComponent
 
     try {
       for (const entry of pendingEntries) {
-        entry.approved = true;
-        const savedEntry = await this.entryService.save(entry);
+        const toSave = entry.clone();
+        toSave.approved = true;
+        const savedEntry = await this.entryService.save(toSave);
         this.entryUpdated.emit(savedEntry);
       }
 

@@ -92,16 +92,16 @@
       <label for="description" class="form-label">* Description</label>
       <div class="input-with-icon">
         <i class="bi bi-file-earmark-text"></i>
-        <input
-          type="text"
+        <textarea
           class="form-control"
           id="description"
           name="description"
           [(ngModel)]="timeSheetEntry.description"
           placeholder="Description"
+          rows="5"
           required
           [disabled]="timeSheetEntry.approved"
-        />
+        ></textarea>
       </div>
     </div>
 

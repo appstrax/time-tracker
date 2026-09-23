@@ -133,12 +133,10 @@ export class UnapprovedEntriesModalComponent {
 
     try {
       const saved = await this.onEntryStatusChange(entry, approved);
-      const updated = saved ?? entry;
-      updated.approved = approved;
 
       this.dayEntries.update((entries) =>
         entries.map((item) =>
-          item.id === updated.id ? updated.clone() : item,
+          item.id === saved.id ? saved.clone() : item,
         ),
       );
     } catch (error) {
