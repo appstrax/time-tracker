@@ -34,6 +34,23 @@
   .project-dropdown-selection {
     gap: 0.4rem !important;
   }
+
+  .dropdown-menu {
+    --project-dropdown-menu-width: min(26rem, calc(100vw - 1.25rem));
+    min-width: var(--project-dropdown-menu-width);
+    width: max(100%, var(--project-dropdown-menu-width));
+    max-width: calc(100vw - 1.25rem);
+    overflow-x: hidden;
+    right: 0;
+    left: auto;
+  }
+
+  @media (max-width: 900px) {
+    .dropdown-menu {
+      left: 0;
+      right: auto;
+    }
+  }
 }
 
 .project-dropdown-selection {
@@ -101,6 +118,34 @@
   max-height: 300px;
   overflow-y: auto;
   box-shadow: 0 16px 35px rgba(15, 23, 42, 0.12);
+  padding-top: 0;
+}
+
+.project-dropdown-search-item {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.5rem 0.5rem 0.35rem;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  list-style: none;
+}
+
+.project-dropdown-search {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
+  font-size: 0.875rem;
+  padding: 0.4rem 0.65rem;
+
+  &:focus {
+    border-color: color-mix(
+      in srgb,
+      var(--primary-color) 45%,
+      var(--color-border)
+    );
+    box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
+  }
 }
 
 .proj-thumb {
@@ -135,6 +180,15 @@
 .project-dropdown .dropdown-item {
   color: var(--text-primary);
   padding: 0.375rem 0.75rem;
+  min-width: 0;
+
+  > span:last-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
 }
 
 .project-dropdown .dropdown-item:hover,

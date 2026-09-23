@@ -19,6 +19,52 @@
   text-transform: uppercase;
 }
 
+.header-project-dropdown {
+  min-width: 11rem;
+  max-width: min(22rem, 48vw);
+  height: var(--page-header-control-height);
+
+  ::ng-deep .project-dropdown--compact {
+    height: var(--page-header-control-height);
+  }
+
+  ::ng-deep .form-group {
+    margin-bottom: 0;
+  }
+
+  ::ng-deep .project-dropdown--compact .dropdown-toggle {
+    min-height: var(--page-header-control-height, 2.35rem);
+    height: var(--page-header-control-height, 2.35rem);
+    max-height: var(--page-header-control-height, 2.35rem);
+    padding: 0 0.85rem;
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    background: var(--color-surface);
+    color: var(--text-primary);
+    font-size: 0.86rem;
+    font-weight: 600;
+    box-shadow: none;
+  }
+
+  ::ng-deep .project-dropdown--compact .dropdown-toggle:hover,
+  ::ng-deep .project-dropdown--compact .dropdown-toggle:focus,
+  ::ng-deep .project-dropdown--compact .dropdown-toggle:active {
+    border-color: color-mix(
+      in srgb,
+      var(--color-primary) 45%,
+      var(--color-border)
+    );
+    background: var(--color-surface);
+    box-shadow: 0 0 0 0.2rem
+      color-mix(in srgb, var(--color-primary) 14%, transparent);
+  }
+
+  ::ng-deep .project-dropdown-chevron {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+}
+
 .page-header h1 {
   margin: 0.25rem 0 0.5rem;
   font-size: clamp(2rem, 4vw, 2.75rem);
