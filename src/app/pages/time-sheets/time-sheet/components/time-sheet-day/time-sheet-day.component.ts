@@ -5,7 +5,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { Project, TimeSheetEntry } from '@models';
 import { TimeSheetEntryModal } from '@modals';
 import { TimeSheetEntryService, ToastService } from '@services';
-import { TimeSheetDisplayUtil, getProjectColor } from '@utils';
+import {
+  TimeSheetDisplayUtil,
+  getProjectColor,
+  FUTURE_TIMESHEET_ENTRY_TOAST,
+  isFutureUtcCalendarDay,
+} from '@utils';
 
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
 
@@ -30,6 +35,10 @@ export class TimeSheetDayComponent {
 
   public readonly approved = computed(() =>
     this.entries().some((entry) => entry.approved),
+  );
+
+  public readonly isFutureDay = computed(() =>
+    isFutureUtcCalendarDay(this.date()),
   );
   public readonly sortedEntries = computed(() =>
     [...this.entries()].sort(
@@ -64,6 +73,15 @@ export class TimeSheetDayComponent {
     return this.displayUtil.getProjectName(entry.projectId, this.projects());
   }
 
+  public entryCategory(entry: TimeSheetEntry): string {
+    return entry.category?.trim() || 'No category';
+  }
+
+  public entryDescription(entry: TimeSheetEntry): string {
+    const description = entry.description?.trim();
+    return description || 'No description';
+  }
+
   public projectColor(entry: TimeSheetEntry): string {
     const fromMap = this.projectColorById().get(entry.projectId);
     if (fromMap) return fromMap;
@@ -84,8 +102,10 @@ export class TimeSheetDayComponent {
     try {
       entry = await this.entryService.save(entry);
       this.save.emit(entry);
-    } catch {
-      this.toastService.error('Error saving time sheet entry');
+    } catch (error) {
+      const message =
+        error instanceof Error ? error.message : 'Error saving time sheet entry';
+      this.toastService.error(message);
     }
   }
 
@@ -99,6 +119,16 @@ export class TimeSheetDayComponent {
   }
 
   public openTimeSheetEntryModal(entryOrHours?: TimeSheetEntry | number): void {
+    const isNewEntry =
+      typeof entryOrHours === 'number' ||
+      !entryOrHours ||
+      !entryOrHours.id;
+
+    if (isNewEntry && this.isFutureDay()) {
+      this.toastService.error(FUTURE_TIMESHEET_ENTRY_TOAST);
+      return;
+    }
+
     const timeSheetEntry =
       typeof entryOrHours === 'number'
         ? this.createSeededTimeSheetEntry(entryOrHours)

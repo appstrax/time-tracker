@@ -14,9 +14,10 @@
       routerLink="/home"
       routerLinkActive="active"
       class="nav-item"
-      data-bs-toggle="tooltip"
-      data-bs-title="Home"
-      data-bs-placement="right"
+      ngbTooltip="Home"
+      placement="end"
+      container="body"
+      triggers="hover"
     >
       <div class="icon-box">
         <i class="bi bi-house-door-fill"></i>
@@ -26,9 +27,10 @@
       routerLink="/time-sheet"
       routerLinkActive="active"
       class="nav-item"
-      data-bs-toggle="tooltip"
-      data-bs-title="Time Sheets"
-      data-bs-placement="right"
+      ngbTooltip="Time Sheets"
+      placement="end"
+      container="body"
+      triggers="hover"
     >
       <div class="icon-box">
         <i class="bi bi-stopwatch-fill"></i>
@@ -39,9 +41,10 @@
         routerLink="/analytics"
         routerLinkActive="active"
         class="nav-item"
-        data-bs-toggle="tooltip"
-        data-bs-title="Analytics"
-        data-bs-placement="right"
+        ngbTooltip="Analytics"
+        placement="end"
+        container="body"
+        triggers="hover"
       >
         <div class="icon-box">
           <i class="bi bi-bar-chart-fill"></i>
@@ -52,9 +55,10 @@
         routerLink="/projects"
         routerLinkActive="active"
         class="nav-item"
-        data-bs-toggle="tooltip"
-        data-bs-title="Projects"
-        data-bs-placement="right"
+        ngbTooltip="Projects"
+        placement="end"
+        container="body"
+        triggers="hover"
       >
         <div class="icon-box">
           <i class="bi bi-folder-fill"></i>
@@ -64,50 +68,6 @@
   </div>
 
   <div class="profile-section">
-    <a
-      routerLink="/settings"
-      routerLinkActive="active"
-      class="nav-item"
-      data-bs-toggle="tooltip"
-      data-bs-title="Settings"
-      data-bs-placement="right"
-    >
-      <div class="icon-box">
-        <i class="bi bi-gear-fill"></i>
-      </div>
-    </a>
-    <a
-      routerLink="/profile"
-      routerLinkActive="active"
-      class="nav-item"
-      data-bs-toggle="tooltip"
-      [attr.data-bs-title]="profileAriaLabel()"
-      [attr.aria-label]="profileAriaLabel()"
-      data-bs-placement="right"
-    >
-      <div class="icon-box avatar-box">
-        <app-user-avatar [user]="user()" [sizePx]="35" [fontSizePx]="13" />
-      </div>
-    </a>
-    <div
-      class="nav-item"
-      data-bs-toggle="tooltip"
-      data-bs-title="Logout"
-      data-bs-placement="right"
-      (click)="logout.emit()"
-    >
-      <div class="icon-box">
-        <i class="bi bi-power"></i>
-      </div>
-    </div>
+    <app-side-nav-profile-card [compact]="true" (logout)="logout.emit()" />
   </div>
-
-  <button
-    class="toggle-btn"
-    type="button"
-    (click)="toggle.emit()"
-    aria-label="Expand side navigation"
-  >
-    <i class="bi bi-chevron-double-right"></i>
-  </button>
 </div>

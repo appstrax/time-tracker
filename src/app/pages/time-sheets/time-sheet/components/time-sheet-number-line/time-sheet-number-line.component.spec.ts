@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { Project, TimeSheetEntry } from '@models';
+import { TimeSheetEntry } from '@models';
 
 import { TimeSheetNumberLineComponent } from './time-sheet-number-line.component';
 
@@ -29,43 +29,17 @@ describe('TimeSheetNumberLineComponent', () => {
     return entry;
   }
 
-  it('escapes HTML in the description when building tooltip content', () => {
+  it('builds tooltip context with category, description, and duration', () => {
     const entry = makeEntry({
-      description: '<img src=x onerror=alert(1)>',
+      category: 'Development',
+      description: 'API work',
+      hours: 1.5,
     });
 
-    const html = (component as any).getTooltipContent(entry, undefined);
-
-    expect(html).not.toContain('<img src=x onerror=alert(1)>');
-    expect(html).toContain('&lt;img src=x onerror=alert(1)&gt;');
-  });
-
-  it('escapes HTML in a configured field value', () => {
-    const project = new Project();
-    project.id = 'project-1';
-    project.fields = [
-      { key: 'notes', label: 'Notes', type: 'text', required: false, options: [] },
-    ];
-    const entry = makeEntry({
-      fieldValues: [{ key: 'notes', value: '<b>bold</b>' }],
+    expect(component.getEntryTooltipContext(entry)).toEqual({
+      category: 'Development',
+      description: 'API work',
+      duration: '1h 30m',
     });
-
-    const html = (component as any).getTooltipContent(entry, project);
-
-    expect(html).toContain('&lt;b&gt;bold&lt;/b&gt;');
-    expect(html).toContain('Notes');
-  });
-
-  it('omits the configured-fields block entirely when the entry has no field values', () => {
-    const project = new Project();
-    project.id = 'project-1';
-    project.fields = [
-      { key: 'notes', label: 'Notes', type: 'text', required: false, options: [] },
-    ];
-    const entry = makeEntry();
-
-    const html = (component as any).getTooltipContent(entry, project);
-
-    expect(html).not.toContain('Notes');
   });
 });

@@ -4,6 +4,7 @@ export * from './color-list';
 export * from './auth.guard';
 export * from './admin.guard';
 export * from './time-sheet-filter.util';
+export * from './time-sheet-date.util';
 export * from './time-sheet-display.util';
 export * from './time-sheet-export.util';
 export * from './time-sheet-project.util';

@@ -3,7 +3,6 @@ import { RouterModule, Router, NavigationStart } from '@angular/router';
 import { HostListener, AfterViewInit } from '@angular/core';
 
 import { appstraxAuth } from '@appstrax/services/auth';
-import { SideNavCollapsedComponent } from './collapsed/side-nav-collapsed.component';
 import { SideNavExpandedComponent } from './expanded/side-nav-expanded.component';
 import { SettingsService } from '@services';
 import { Store } from '@state';
@@ -20,7 +19,7 @@ interface NavItem {
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   standalone: true,
-  imports: [RouterModule, SideNavCollapsedComponent, SideNavExpandedComponent],
+  imports: [RouterModule, SideNavExpandedComponent],
 })
 export class SideNavComponent implements AfterViewInit {
   isVisible = true;
@@ -29,7 +28,7 @@ export class SideNavComponent implements AfterViewInit {
   private readonly THRESHOLD = 50;
   private readonly BUFFER_ZONE = 100;
 
-  @ViewChild(SideNavCollapsedComponent) collapsedNav?: SideNavCollapsedComponent;
+  @ViewChild(SideNavExpandedComponent) navPanel?: SideNavExpandedComponent;
 
   constructor(
     private router: Router,
@@ -83,7 +82,7 @@ export class SideNavComponent implements AfterViewInit {
   }
 
   private hideAllTooltips() {
-    this.collapsedNav?.hideAllTooltips();
+    this.navPanel?.hideAllTooltips();
   }
 
   @HostListener('document:click')

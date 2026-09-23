@@ -13,11 +13,14 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 import { Store } from '@state';
 import { Project, TimeSheetEntry, ProjectField } from '@models';
 import { ProjectDropdownComponent } from '@components';
+import { ToastService } from '@services';
 import {
   clearStoredTimeSheetProjectId,
+  FUTURE_TIMESHEET_ENTRY_TOAST,
   getStoredTimeSheetProjectId,
   storeTimeSheetProjectId,
   TimeSheetDisplayUtil,
+  isFutureUtcCalendarDay,
 } from '@utils';
 
 @Component({
@@ -56,6 +59,7 @@ export class TimeSheetEntryModal implements OnInit {
     public activeModal: NgbActiveModal,
     private store: Store,
     private displayUtils: TimeSheetDisplayUtil,
+    private toastService: ToastService,
   ) {}
 
   async ngOnInit(): Promise<void> {
@@ -203,6 +207,12 @@ export class TimeSheetEntryModal implements OnInit {
   }
 
   isFormValid(): boolean {
+    if (!this.wasExistingEntryOnOpen && isFutureUtcCalendarDay(this.date)) {
+      this.errorMessage = FUTURE_TIMESHEET_ENTRY_TOAST;
+      this.toastService.error(FUTURE_TIMESHEET_ENTRY_TOAST);
+      return false;
+    }
+
     const missingFields = this.wasExistingEntryOnOpen
       ? []
       : this.projectFields.filter(

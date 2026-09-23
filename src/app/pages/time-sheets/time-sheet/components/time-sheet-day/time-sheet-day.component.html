@@ -16,6 +16,7 @@
     [projects]="projects()"
     [entries]="sortedEntries()"
     [disabled]="approved()"
+    [allowCreate]="!isFutureDay()"
   />
 
   @if (sortedEntries().length) {
@@ -56,11 +57,13 @@
                 ></span>
                 <span class="entry-text">
                   <span class="entry-project">{{ projectName(entry) }}</span>
-                  @if (entry.description.trim()) {
+                  <span class="entry-details">
+                    <span class="entry-category">{{ entryCategory(entry) }}</span>
+                    <span class="entry-separator" aria-hidden="true">|</span>
                     <span class="entry-description">{{
-                      entry.description.trim()
+                      entryDescription(entry)
                     }}</span>
-                  }
+                  </span>
                 </span>
               </span>
               <span class="entry-duration">{{

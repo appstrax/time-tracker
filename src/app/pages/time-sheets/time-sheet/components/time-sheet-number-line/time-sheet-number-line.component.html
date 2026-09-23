@@ -1,4 +1,9 @@
-<div class="timeline" [class.timeline-disabled]="disabled()" [style.--scale-hours]="scaleHours()">
+<div
+  class="timeline"
+  [class.timeline-disabled]="disabled()"
+  [class.timeline-create-disabled]="!allowCreate() && !disabled()"
+  [style.--scale-hours]="scaleHours()"
+>
   <div
     #track
     class="timeline-track"
@@ -12,16 +17,32 @@
       [style.--quarter-count]="quarterSlotCount()"
     ></div>
 
+    <ng-template
+      #entryTooltip
+      let-category="category"
+      let-description="description"
+      let-duration="duration"
+    >
+      <div class="timeline-entry-tooltip-content">
+        <strong>{{ category }}</strong>
+        <span>{{ description }}</span>
+        <span>{{ duration }}</span>
+      </div>
+    </ng-template>
+
     @for (segment of segments(); track segment.entry.id) {
       <button
         type="button"
         class="timeline-block"
         [class.timeline-block-compact]="!segment.showInlineDetail"
+        [class.timeline-block-quarter]="segment.isQuarterHourBlock"
         [style.left.%]="segment.leftPercent"
         [style.width.%]="segment.widthPercent"
         [style.background-color]="segment.backgroundColor"
         [disabled]="disabled()"
-        [ngbTooltip]="segment.tooltipText"
+        [ngbTooltip]="entryTooltip"
+        [tooltipContext]="segment.tooltipContext"
+        tooltipClass="timeline-entry-tooltip"
         [disableTooltip]="disabled()"
         container="body"
         triggers="hover focus"
