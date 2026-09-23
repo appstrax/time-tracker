@@ -18,8 +18,8 @@
           </span>
         } @else if (hasLoaded() && hasProjects()) {
           <span class="insights-chip insights-chip--accent">
-            {{ entries().length }}
-            {{ entries().length === 1 ? 'entry' : 'entries' }}
+            {{ filteredEntryCount() }}
+            {{ filteredEntryCount() === 1 ? 'entry' : 'entries' }}
           </span>
         }
       </div>
@@ -44,6 +44,7 @@
         [availableViews]="homeAvailableViews"
         [compact]="true"
         (entryUpdated)="onEntryUpdated($event)"
+        (filteredEntryCountChange)="onFilteredEntryCountChange($event)"
       />
     }
   </div>

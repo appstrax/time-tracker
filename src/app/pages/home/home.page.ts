@@ -1,9 +1,12 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, OnDestroy, OnInit, computed, effect, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
+import { Subscription } from 'rxjs';
 
 import { FilterView, FilterViewContainerComponent } from '@components';
 import { TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
+import { TimeSheetFilterUtil } from '@utils';
 
 @Component({
   templateUrl: './home.page.html',
@@ -11,14 +14,17 @@ import { Store } from '@state';
   standalone: true,
   imports: [FilterViewContainerComponent],
 })
-export class HomePage {
+export class HomePage implements OnInit, OnDestroy {
   private readonly store = inject(Store);
   private readonly timeSheetEntryService = inject(TimeSheetEntryService);
   private readonly toast = inject(ToastService);
+  private readonly route = inject(ActivatedRoute);
+  private readonly filterUtils = inject(TimeSheetFilterUtil);
 
   public readonly isLoading = signal(true);
   public readonly hasLoaded = signal(false);
   public readonly entries = signal<TimeSheetEntry[]>([]);
+  public readonly filteredEntryCount = signal(0);
   public readonly projects = computed(() => this.store.projects.projects());
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
@@ -30,6 +36,8 @@ export class HomePage {
   ];
 
   private latestLoadId = 0;
+  private queryParamsSub?: Subscription;
+  private lastLoadedUserId: string | null = null;
 
   constructor() {
     effect(() => {
@@ -47,19 +55,53 @@ export class HomePage {
         this.isLoading.set(false);
         this.hasLoaded.set(true);
         this.entries.set([]);
+        this.filteredEntryCount.set(0);
+        this.lastLoadedUserId = null;
         return;
       }
 
-      void this.loadEntries(user.id);
+      if (this.lastLoadedUserId !== user.id) {
+        this.lastLoadedUserId = user.id;
+        void this.loadEntriesForActiveFilter(user.id);
+      }
     });
   }
 
-  private async loadEntries(userId: string): Promise<void> {
+  ngOnInit(): void {
+    this.queryParamsSub = this.route.queryParams.subscribe(() => {
+      const userId = this.store.user.user()?.id;
+      if (!userId) return;
+      void this.loadEntriesForActiveFilter(userId);
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.queryParamsSub?.unsubscribe();
+  }
+
+  private resolveFetchBounds(): { start: Date; end: Date } {
+    const filter = this.filterUtils.parseFilters(this.route.snapshot.queryParams);
+    if (filter.start && filter.end) {
+      return { start: filter.start, end: filter.end };
+    }
+    return this.filterUtils.calculateDateRangeBounds(
+      filter.dateRange ?? 'month',
+      filter.start,
+      filter.end,
+    );
+  }
+
+  private async loadEntriesForActiveFilter(userId: string): Promise<void> {
     const loadId = ++this.latestLoadId;
+    const { start, end } = this.resolveFetchBounds();
     this.isLoading.set(true);
 
     try {
-      const entries = await this.timeSheetEntryService.findByUserId(userId);
+      const entries = await this.timeSheetEntryService.findByUserAndDateRange(
+        userId,
+        start,
+        end,
+      );
       if (loadId !== this.latestLoadId) return;
       this.entries.set(entries);
     } catch {
@@ -71,6 +113,10 @@ export class HomePage {
       this.isLoading.set(false);
       this.hasLoaded.set(true);
     }
+  }
+
+  public onFilteredEntryCountChange(count: number): void {
+    this.filteredEntryCount.set(count);
   }
 
   public onEntryUpdated(entry: TimeSheetEntry): void {
