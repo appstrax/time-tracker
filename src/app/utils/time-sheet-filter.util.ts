@@ -74,6 +74,27 @@ export class TimeSheetFilterUtil {
     return queryParams;
   }
 
+  /**
+   * Parses raw query params into a filter with `start`/`end` always resolved,
+   * falling back to `calculateDateRangeBounds` when either is missing.
+   */
+  public resolveFilter(params: Params): AnalyticsFilter & {
+    start: Date;
+    end: Date;
+  } {
+    const filter = this.parseFilters(params);
+    if (!filter.start || !filter.end) {
+      const bounds = this.calculateDateRangeBounds(
+        filter.dateRange ?? 'month',
+        filter.start,
+        filter.end,
+      );
+      filter.start = bounds.start;
+      filter.end = bounds.end;
+    }
+    return filter as AnalyticsFilter & { start: Date; end: Date };
+  }
+
   public calculateDateRangeBounds(
     dateRange: DateRange,
     start?: Date,

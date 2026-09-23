@@ -75,18 +75,8 @@ export class HomePage {
   }
 
   private resolveFilterBounds(params: Params): { start: Date; end: Date } {
-    const filter = this.filterUtils.parseFilters(params);
-    if (!filter.start || !filter.end) {
-      const bounds = this.filterUtils.calculateDateRangeBounds(
-        filter.dateRange ?? 'month',
-        filter.start,
-        filter.end,
-      );
-      filter.start = bounds.start;
-      filter.end = bounds.end;
-    }
-
-    return { start: filter.start!, end: filter.end! };
+    const { start, end } = this.filterUtils.resolveFilter(params);
+    return { start, end };
   }
 
   private async loadEntriesForRange(

@@ -134,17 +134,7 @@ export class FilterViewContainerComponent
 
   ngOnInit(): void {
     this.subscription = this.route.queryParams.subscribe((params) => {
-      const filter = this.filterUtils.parseFilters(params);
-      if (!filter.start || !filter.end) {
-        const bounds = this.filterUtils.calculateDateRangeBounds(
-          filter.dateRange ?? 'month',
-          filter.start,
-          filter.end,
-        );
-        filter.start = bounds.start;
-        filter.end = bounds.end;
-      }
-      this.filter.set(filter);
+      this.filter.set(this.filterUtils.resolveFilter(params));
       this.filterEntries();
     });
   }
