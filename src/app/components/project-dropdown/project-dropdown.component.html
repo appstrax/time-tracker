@@ -7,9 +7,9 @@
       type="button"
       class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between"
       [class.form-select]="!compact"
-      (click)="toggleProjectDropdown()"
+      (click)="toggleProjectDropdown($event)"
       [disabled]="disabled"
-      aria-expanded="isProjectMenuOpen"
+      [attr.aria-expanded]="isProjectDropdownOpen"
     >
       <span class="project-dropdown-selection d-flex align-items-center gap-2">
         @if (selectedProject) { @if (selectedProject.logoUrl) {
@@ -37,11 +37,25 @@
       ></i>
     </button>
     <ul
-      class="dropdown-menu dropdown-menu-end w-100"
+      class="dropdown-menu w-100"
+      [class.dropdown-menu-end]="!compact"
       [class.show]="isProjectDropdownOpen && !disabled"
       [attr.data-bs-popper]="isProjectDropdownOpen && !disabled ? 'static' : null"
+      (click)="$event.stopPropagation()"
     >
-      @if (allowNull) {
+      <li class="project-dropdown-search-item">
+        <input
+          #searchInput
+          type="search"
+          class="form-control project-dropdown-search"
+          placeholder="Search projects…"
+          autocomplete="off"
+          [ngModel]="projectSearchTerm()"
+          (ngModelChange)="projectSearchTerm.set($event)"
+          (keydown.escape)="onSearchEscape($event)"
+        />
+      </li>
+      @if (shouldShowNullOption()) {
       <li>
         <button
           class="dropdown-item d-flex align-items-center gap-2"
@@ -55,7 +69,14 @@
         </button>
       </li>
       }
-      @for (project of projects(); track project.id) {
+      @if (showEmptyListState()) {
+      <li>
+        <span class="dropdown-item-text text-muted px-3 py-2 d-block">
+          {{ emptyListMessage() }}
+        </span>
+      </li>
+      }
+      @for (project of filteredProjects(); track project.id) {
       <li>
         <button
           class="dropdown-item d-flex align-items-center gap-2"
@@ -74,7 +95,7 @@
           } @else {
           <i class="bi bi-image proj-thumb-fallback"></i>
           }
-          <span>{{ project.name }}</span>
+          <span [attr.title]="project.name">{{ project.name }}</span>
         </button>
       </li>
       }
