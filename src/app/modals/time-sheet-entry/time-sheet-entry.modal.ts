@@ -255,7 +255,7 @@ export class TimeSheetEntryModal implements OnInit {
     if (this.wasExistingEntryOnOpen) return;
 
     for (const field of this.projectFields) {
-      if (field.type !== 'boolean' || field.required) continue;
+      if (field.type !== 'boolean') continue;
       const value = this.getFieldValue(field.key);
       if (value !== 'true' && value !== 'false') {
         this.setFieldValue(field.key, 'false');
