@@ -2,9 +2,13 @@ import { CommonModule } from '@angular/common';
 import {
   Component,
   computed,
+  ElementRef,
   EventEmitter,
+  HostListener,
   Input,
   Output,
+  signal,
+  ViewChild,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
@@ -26,20 +30,73 @@ export class ProjectDropdownComponent {
 
   @Output() projectSelected = new EventEmitter<Project | null>();
 
+  @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
+
   projects = computed(() => this.store.projects.projects());
+  projectSearchTerm = signal('');
+  filteredProjects = computed(() => {
+    const term = this.projectSearchTerm().trim().toLowerCase();
+    const all = this.projects();
+    if (!term) {
+      return all;
+    }
+    return all.filter((project) =>
+      project.name.toLowerCase().includes(term),
+    );
+  });
+
   isProjectDropdownOpen: boolean = false;
 
-  constructor(private store: Store) {}
+  constructor(
+    private store: Store,
+    private elementRef: ElementRef<HTMLElement>,
+  ) {}
+
+  shouldShowNullOption(): boolean {
+    if (!this.allowNull) {
+      return false;
+    }
+    const term = this.projectSearchTerm().trim().toLowerCase();
+    if (!term) {
+      return true;
+    }
+    return this.nullOptionLabel.toLowerCase().includes(term);
+  }
 
   onProjectSelected(project: Project | null): void {
     this.selectedProject = project;
     this.projectSelected.emit(project);
-    this.isProjectDropdownOpen = false;
+    this.closeDropdown();
   }
 
-  toggleProjectDropdown(): void {
-    if (!this.disabled) {
-      this.isProjectDropdownOpen = !this.isProjectDropdownOpen;
+  toggleProjectDropdown(event: Event): void {
+    event.stopPropagation();
+    if (this.disabled) {
+      return;
     }
+    if (this.isProjectDropdownOpen) {
+      this.closeDropdown();
+      return;
+    }
+    this.isProjectDropdownOpen = true;
+    this.projectSearchTerm.set('');
+    queueMicrotask(() => this.searchInput?.nativeElement.focus());
+  }
+
+  closeDropdown(): void {
+    this.isProjectDropdownOpen = false;
+    this.projectSearchTerm.set('');
+  }
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (!this.isProjectDropdownOpen) {
+      return;
+    }
+    const target = event.target;
+    if (target instanceof Node && this.elementRef.nativeElement.contains(target)) {
+      return;
+    }
+    this.closeDropdown();
   }
 }
