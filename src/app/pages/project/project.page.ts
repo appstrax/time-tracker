@@ -20,7 +20,9 @@ export class ProjectPage implements OnInit {
 
   readonly error = signal('');
   readonly saving = signal(false);
+  readonly savingFields = signal(false);
   readonly editing = signal(false);
+  readonly fieldsError = signal('');
 
   readonly logoFile = signal<File | null>(null);
   readonly logoPreviewUrl = signal<string | null>(null);
@@ -35,6 +37,7 @@ export class ProjectPage implements OnInit {
   ];
 
   private fieldOptionsDrafts: Record<number, string> = {};
+  private savedFieldsSnapshot = '[]';
 
   constructor(
     private store: Store,
@@ -53,12 +56,16 @@ export class ProjectPage implements OnInit {
       // Check if the project exists in the store, and set this.project if found.
       const projects = this.store.projects.projects();
       const project = projects.find((p: Project) => p.id === projectId);
-      if (project) this.project.set(project);
+      if (project) {
+        this.project.set(project);
+        this.syncFieldsSnapshot();
+      }
 
       try {
         const project = await this.projectService.findById(projectId);
         this.project.set(project);
         this.logoPreviewUrl.set(project.logoUrl || null);
+        this.syncFieldsSnapshot();
       } catch (e) {
         this.toast.error('Failed to load project for editing', 'Error');
       }
@@ -70,7 +77,7 @@ export class ProjectPage implements OnInit {
     this.error.set('');
 
     try {
-      if (!this.isFormValid()) {
+      if (!this.isCoreFormValid()) {
         return;
       }
 
@@ -81,6 +88,7 @@ export class ProjectPage implements OnInit {
 
       const project = await this.projectService.save(this.project());
       this.project.set(project);
+      this.syncFieldsSnapshot();
 
       if (!this.editing()) {
         const user = this.store.user.user()!;
@@ -127,34 +135,85 @@ export class ProjectPage implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  public isFormValid(): boolean {
+  public isCoreFormValid(): boolean {
     const project = this.project();
     if (project.name == '' || project.description == '') {
       this.error.set('Project name and description are required');
       return false;
     }
 
+    return true;
+  }
+
+  public areFieldsDirty(): boolean {
+    return (
+      JSON.stringify(this.project().fields) !== this.savedFieldsSnapshot
+    );
+  }
+
+  public canSaveFields(): boolean {
+    if (!this.editing() || !this.project().id) {
+      return false;
+    }
+
+    return this.areFieldsDirty();
+  }
+
+  async saveFields(): Promise<void> {
+    this.fieldsError.set('');
+
+    if (!this.editing() || !this.project().id) {
+      this.fieldsError.set(
+        'Create the project first, then save custom fields here.',
+      );
+      return;
+    }
+
+    const validationError = this.validateFields();
+    if (validationError) {
+      this.fieldsError.set(validationError);
+      return;
+    }
+
+    this.savingFields.set(true);
+
+    try {
+      const project = await this.projectService.save(this.project());
+      this.project.set(project);
+      this.syncFieldsSnapshot();
+      await this.refreshProjectsStore();
+      this.toast.success('Custom fields saved', 'Success');
+    } catch (error: any) {
+      this.fieldsError.set(error.message || 'Failed to save custom fields');
+      this.toast.error(error.message || 'Failed to save custom fields', 'Error');
+    } finally {
+      this.savingFields.set(false);
+    }
+  }
+
+  private validateFields(): string | null {
+    const project = this.project();
     const seenKeys = new Set<string>();
+
     for (const field of project.fields) {
       if (!field.key.trim()) {
-        this.error.set('Every custom field needs a key');
-        return false;
+        return 'Every custom field needs a key';
       }
       if (seenKeys.has(field.key)) {
-        this.error.set(`Duplicate field key: "${field.key}"`);
-        return false;
+        return `Duplicate field key: "${field.key}"`;
       }
       seenKeys.add(field.key);
 
       if (field.type === 'select' && field.options.length === 0) {
-        this.error.set(
-          `Field "${field.key}" is a select field but has no options`,
-        );
-        return false;
+        return `Field "${field.key}" is a select field but has no options`;
       }
     }
 
-    return true;
+    return null;
+  }
+
+  private syncFieldsSnapshot(): void {
+    this.savedFieldsSnapshot = JSON.stringify(this.project().fields);
   }
 
   public updateProjectName(name: string): void {
@@ -180,6 +239,7 @@ export class ProjectPage implements OnInit {
 
   public removeField(index: number): void {
     this.fieldOptionsDrafts = {};
+    this.fieldsError.set('');
     this.updateProject((project) => {
       project.fields = project.fields.filter((_, i) => i !== index);
     });
@@ -240,6 +300,7 @@ export class ProjectPage implements OnInit {
   }
 
   private updateFieldAt(index: number, updateFn: (field: ProjectField) => void): void {
+    this.fieldsError.set('');
     this.updateProject((project) => {
       const fields = project.fields.map((field, i) =>
         i === index ? { ...field } : field,

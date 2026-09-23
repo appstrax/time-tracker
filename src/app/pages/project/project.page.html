@@ -35,9 +35,27 @@
             <h2>Core information</h2>
             <p>Update the project profile, description, and brand surface.</p>
           </div>
+          <button
+            type="submit"
+            form="core-project-form"
+            class="btn btn-primary submit-button card-header-action"
+            [disabled]="saving()"
+          >
+            @if (saving()) {
+            <span
+              class="spinner-border spinner-border-sm me-2"
+              aria-hidden="true"
+            ></span>
+            } {{ editing() ? 'Update Project' : 'Create Project' }}
+          </button>
         </div>
 
-        <form (ngSubmit)="saveProject()" #form="ngForm" autocomplete="off">
+        <form
+          id="core-project-form"
+          (ngSubmit)="saveProject()"
+          #form="ngForm"
+          autocomplete="off"
+        >
           <div class="form-group">
             <label for="name">Project name</label>
             <div class="input-with-icon">
@@ -104,21 +122,8 @@
           </div>
 
           @if (error()) {
-          <div class="alert alert-danger mb-3">{{ error() }}</div>
+          <div class="alert alert-danger mb-0">{{ error() }}</div>
           }
-
-          <button
-            type="submit"
-            class="btn btn-primary submit-button mt-2"
-            [disabled]="saving()"
-          >
-            @if (saving()) {
-            <span
-              class="spinner-border spinner-border-sm me-2"
-              aria-hidden="true"
-            ></span>
-            } {{ editing() ? 'Update Project' : 'Create Project' }}
-          </button>
         </form>
       </section>
 
@@ -194,108 +199,143 @@
             form. Leave empty for the standard four-field form.
           </p>
         </div>
-        <button type="button" class="btn btn-outline-secondary" (click)="addField()">
-          <i class="bi bi-plus-lg me-2"></i>
-          Add field
-        </button>
+        <div class="fields-header-actions">
+          @if (areFieldsDirty()) {
+            <span class="field-unsaved-pill">Unsaved changes</span>
+          }
+          <button type="button" class="btn btn-outline-secondary" (click)="addField()">
+            <i class="bi bi-plus-lg me-2"></i>
+            Add field
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary fields-save-button"
+            [disabled]="!canSaveFields() || savingFields()"
+            (click)="saveFields()"
+          >
+            @if (savingFields()) {
+              <span
+                class="spinner-border spinner-border-sm me-2"
+                aria-hidden="true"
+              ></span>
+            }
+            Save fields
+          </button>
+        </div>
       </div>
+
+      @if (fieldsError()) {
+        <div class="alert alert-danger fields-error mb-3">{{ fieldsError() }}</div>
+      }
 
       @if (!project().fields.length) {
         <p class="text-muted mb-0">No custom fields configured.</p>
       } @else {
         <div class="field-rows">
           @for (field of project().fields; track $index) {
-            <div class="field-row">
-              <div class="field-row-inputs">
-                <div class="form-group">
-                  <label>Key</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [ngModel]="field.key"
-                    (ngModelChange)="updateFieldKey($index, $event)"
-                    name="fieldKey{{ $index }}"
-                    placeholder="e.g. client-ref"
-                  />
+            <article class="field-card">
+              <div class="field-card-header">
+                <div>
+                  <p class="field-card-eyebrow">Field {{ $index + 1 }}</p>
+                  <h3 class="field-card-title">
+                    {{ field.label.trim() || field.key.trim() || 'New custom field' }}
+                  </h3>
                 </div>
-                <div class="form-group">
-                  <label>Label</label>
-                  <input
-                    type="text"
-                    class="form-control"
-                    [ngModel]="field.label"
-                    (ngModelChange)="updateFieldLabel($index, $event)"
-                    name="fieldLabel{{ $index }}"
-                    placeholder="Shown to the user"
-                  />
-                </div>
-                <div class="form-group">
-                  <label>Type</label>
-                  <select
-                    class="form-select"
-                    [ngModel]="field.type"
-                    (ngModelChange)="updateFieldType($index, $event)"
-                    name="fieldType{{ $index }}"
+                <div class="field-row-actions">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    [disabled]="$index === 0"
+                    (click)="moveFieldUp($index)"
+                    aria-label="Move field up"
                   >
-                    @for (option of fieldTypeOptions; track option.value) {
-                      <option [value]="option.value">{{ option.label }}</option>
-                    }
-                  </select>
+                    <i class="bi bi-arrow-up"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    [disabled]="$index === project().fields.length - 1"
+                    (click)="moveFieldDown($index)"
+                    aria-label="Move field down"
+                  >
+                    <i class="bi bi-arrow-down"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="removeField($index)"
+                    aria-label="Remove field"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
                 </div>
-                @if (field.type === 'select') {
+              </div>
+
+              <div class="field-card-body">
+                <div class="field-row-inputs">
                   <div class="form-group">
-                    <label>Options (comma-separated)</label>
+                    <label>Key</label>
                     <input
                       type="text"
                       class="form-control"
-                      [ngModel]="fieldOptionsText($index, field)"
-                      (ngModelChange)="updateFieldOptionsText($index, $event)"
-                      name="fieldOptions{{ $index }}"
-                      placeholder="e.g. Draft, Final"
+                      [ngModel]="field.key"
+                      (ngModelChange)="updateFieldKey($index, $event)"
+                      name="fieldKey{{ $index }}"
+                      placeholder="e.g. client-ref"
                     />
                   </div>
-                }
-                <div class="form-check field-required-check">
-                  <input
-                    type="checkbox"
-                    class="form-check-input"
-                    id="fieldRequired{{ $index }}"
-                    [ngModel]="field.required"
-                    (ngModelChange)="updateFieldRequired($index, $event)"
-                    name="fieldRequired{{ $index }}"
-                  />
-                  <label class="form-check-label" for="fieldRequired{{ $index }}">Required</label>
+                  <div class="form-group">
+                    <label>Label</label>
+                    <input
+                      type="text"
+                      class="form-control"
+                      [ngModel]="field.label"
+                      (ngModelChange)="updateFieldLabel($index, $event)"
+                      name="fieldLabel{{ $index }}"
+                      placeholder="Shown to the user"
+                    />
+                  </div>
+                  <div class="form-group">
+                    <label>Type</label>
+                    <select
+                      class="form-select"
+                      [ngModel]="field.type"
+                      (ngModelChange)="updateFieldType($index, $event)"
+                      name="fieldType{{ $index }}"
+                    >
+                      @for (option of fieldTypeOptions; track option.value) {
+                        <option [value]="option.value">{{ option.label }}</option>
+                      }
+                    </select>
+                  </div>
+                  @if (field.type === 'select') {
+                    <div class="form-group">
+                      <label>Options (comma-separated)</label>
+                      <input
+                        type="text"
+                        class="form-control"
+                        [ngModel]="fieldOptionsText($index, field)"
+                        (ngModelChange)="updateFieldOptionsText($index, $event)"
+                        name="fieldOptions{{ $index }}"
+                        placeholder="e.g. Draft, Final"
+                      />
+                    </div>
+                  }
+                  <div class="form-check field-required-check">
+                    <input
+                      type="checkbox"
+                      class="form-check-input"
+                      id="fieldRequired{{ $index }}"
+                      [ngModel]="field.required"
+                      (ngModelChange)="updateFieldRequired($index, $event)"
+                      name="fieldRequired{{ $index }}"
+                    />
+                    <label class="form-check-label" for="fieldRequired{{ $index }}">Required</label>
+                  </div>
                 </div>
+
               </div>
-              <div class="field-row-actions">
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-secondary"
-                  [disabled]="$index === 0"
-                  (click)="moveFieldUp($index)"
-                  aria-label="Move field up"
-                >
-                  <i class="bi bi-arrow-up"></i>
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-secondary"
-                  [disabled]="$index === project().fields.length - 1"
-                  (click)="moveFieldDown($index)"
-                  aria-label="Move field down"
-                >
-                  <i class="bi bi-arrow-down"></i>
-                </button>
-                <button
-                  type="button"
-                  class="btn btn-sm btn-outline-danger"
-                  (click)="removeField($index)"
-                  aria-label="Remove field"
-                >
-                  <i class="bi bi-trash"></i>
-                </button>
-              </div>
-            </div>
+            </article>
           }
         </div>
       }
