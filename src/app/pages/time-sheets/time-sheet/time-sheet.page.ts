@@ -1,4 +1,4 @@
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, computed, signal } from '@angular/core';
 
 import { ProjectDropdownComponent } from '@components';
 import { Project, TimeSheetEntry } from '@models';
@@ -7,6 +7,7 @@ import { Store } from '@state';
 import {
   buildProjectColorMap,
   clearStoredTimeSheetProjectId,
+  getStoredTimeSheetProjectId,
   storeTimeSheetProjectId,
 } from '@utils';
 
@@ -26,7 +27,9 @@ import { TimeSheetDateSelectorComponent } from './components';
 export class TimeSheetPage {
   private readonly weekStart = signal(new Date());
   private readonly weekEnd = signal(new Date());
-  private readonly filterProjectId = signal<string | null>(null);
+  private readonly filterProjectId = signal<string | null>(
+    getStoredTimeSheetProjectId(),
+  );
 
   public readonly projects = computed(() => this.store.projects.projects());
   public readonly filterProject = computed(() => {
@@ -91,6 +94,7 @@ export class TimeSheetPage {
   }
 
   public onTimeSheetEntrySaved() {
+    this.syncFilterProject();
     this.fetchTimeSheetEntries();
   }
 
@@ -103,10 +107,23 @@ export class TimeSheetPage {
     }
   }
 
+  private syncFilterProject(): void {
+    const projectId = getStoredTimeSheetProjectId();
+    this.filterProjectId.set(projectId);
+    if (!projectId) return;
+
+    const project = this.projects().find((item) => item.id === projectId);
+    if (!project) {
+      this.filterProjectId.set(null);
+      clearStoredTimeSheetProjectId();
+    }
+  }
+
   private async fetchTimeSheetEntries(): Promise<void> {
     this.fetching.set(true);
 
     await this.waitForProjects();
+    this.syncFilterProject();
 
     const user = this.store.user.user();
     if (!user) {

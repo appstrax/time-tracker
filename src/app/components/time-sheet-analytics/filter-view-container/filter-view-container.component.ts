@@ -70,6 +70,10 @@ export class FilterViewContainerComponent
   public readonly linkProjectsToTimeSheet = input(false);
   /** Tighter layout with less marketing copy — used on /home. */
   public readonly compact = input(false);
+  /** Timeline day review: allow approve/unapprove (requires parent `entryUpdated`). */
+  public readonly canManageStatus = input(false);
+  /** Unapproved view: allow per-entry approval (requires parent `entryUpdated`). */
+  public readonly canApprove = input(false);
 
   public readonly entryUpdated = output<TimeSheetEntry>();
 

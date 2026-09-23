@@ -72,4 +72,10 @@ export class HomePage {
       this.hasLoaded.set(true);
     }
   }
+
+  public onEntryUpdated(entry: TimeSheetEntry): void {
+    this.entries.update((entries) =>
+      entries.map((e) => (e.id === entry.id ? entry : e)),
+    );
+  }
 }

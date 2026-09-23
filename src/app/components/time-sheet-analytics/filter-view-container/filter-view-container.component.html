@@ -283,7 +283,7 @@
       [projects]="projects()"
       [users]="users()"
       [compact]="compact()"
-      [canManageStatus]="true"
+      [canManageStatus]="canManageStatus()"
       (entryUpdated)="onSingleEntryApproved($event)"
     ></app-filter-view-timeline>
   } @else if (activeView() === "unapproved") {
@@ -291,7 +291,7 @@
       [timeSheetEntries]="filteredEntries()"
       [users]="users()"
       [compact]="compact()"
-      [canApprove]="true"
+      [canApprove]="canApprove()"
       (entryUpdated)="onSingleEntryApproved($event)"
     />
   }

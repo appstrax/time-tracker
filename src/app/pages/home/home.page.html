@@ -43,6 +43,7 @@
         [linkProjectsToTimeSheet]="true"
         [availableViews]="homeAvailableViews"
         [compact]="true"
+        (entryUpdated)="onEntryUpdated($event)"
       />
     }
   </div>
