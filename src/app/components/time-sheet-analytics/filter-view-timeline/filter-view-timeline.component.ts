@@ -4,7 +4,11 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { TimeSheetEntry, Project, User } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
-import { TimeSheetDisplayUtil } from '@utils';
+import {
+  TimeSheetDisplayUtil,
+  dateFromLocalCalendarDayKey,
+  localCalendarDayKey,
+} from '@utils';
 import { UnapprovedEntriesModalComponent } from '@modals';
 
 export interface TimelineDaySummary {
@@ -42,7 +46,7 @@ export class FilterViewTimelineComponent {
     >();
 
     this.entries().forEach((entry) => {
-      const dateKey = this.toDateKey(entry.date);
+      const dateKey = localCalendarDayKey(entry.date);
       if (!dateMap.has(dateKey)) {
         dateMap.set(dateKey, { hours: 0, approvedHours: 0, pendingHours: 0 });
       }
@@ -57,7 +61,7 @@ export class FilterViewTimelineComponent {
 
     return Array.from(dateMap.entries())
       .map(([dateKey, data]) => ({
-        date: new Date(`${dateKey}T00:00:00.000Z`),
+        date: dateFromLocalCalendarDayKey(dateKey),
         ...data,
       }))
       .sort((a, b) => b.date.getTime() - a.date.getTime());
@@ -70,9 +74,9 @@ export class FilterViewTimelineComponent {
   });
 
   public openDayReview(day: TimelineDaySummary): void {
-    const dateKey = this.toDateKey(day.date);
+    const dateKey = localCalendarDayKey(day.date);
     const dayEntries = this.entries().filter(
-      (entry) => this.toDateKey(entry.date) === dateKey,
+      (entry) => localCalendarDayKey(entry.date) === dateKey,
     );
 
     const modalRef = this.modalService.open(UnapprovedEntriesModalComponent, {
@@ -117,7 +121,4 @@ export class FilterViewTimelineComponent {
     }
   }
 
-  private toDateKey(date: Date | string): string {
-    return new Date(date).toISOString().split('T')[0];
-  }
 }

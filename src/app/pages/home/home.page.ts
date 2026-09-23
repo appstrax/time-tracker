@@ -90,8 +90,14 @@ export class HomePage {
   }
 
   private resolveFilterBounds(params: Params): { start: Date; end: Date } {
-    const { start, end } = this.filterUtils.resolveFilter(params);
-    return { start, end };
+    const filter = this.filterUtils.resolveFilter(params);
+    if (filter.dateRange === 'all') {
+      return {
+        start: this.filterUtils.allPresetFetchStart(filter.end),
+        end: filter.end,
+      };
+    }
+    return { start: filter.start, end: filter.end };
   }
 
   private async loadEntriesForRange(

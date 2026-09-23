@@ -7,6 +7,9 @@ import {
   Status,
 } from '../models/analytics-filter.model';
 
+/** Max history loaded for the `all` date preset (server fetch / home). */
+export const ALL_DATE_RANGE_MAX_YEARS = 3;
+
 @Injectable({ providedIn: 'root' })
 export class TimeSheetFilterUtil {
   private readonly allowedStatuses: Status[] = ['all', 'approved', 'pending'];
@@ -93,6 +96,20 @@ export class TimeSheetFilterUtil {
       filter.end = bounds.end;
     }
     return filter as AnalyticsFilter & { start: Date; end: Date };
+  }
+
+  /**
+   * Earliest `start` when resolving the `all` preset for API loads. UI still
+   * labels the range "All"; this avoids unbounded `findAllPages` history pulls.
+   */
+  public allPresetFetchStart(
+    end: Date = new Date(),
+    maxYears: number = ALL_DATE_RANGE_MAX_YEARS,
+  ): Date {
+    const start = new Date(end);
+    start.setFullYear(start.getFullYear() - maxYears);
+    start.setHours(0, 0, 0, 0);
+    return start;
   }
 
   public calculateDateRangeBounds(

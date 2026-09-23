@@ -2,7 +2,11 @@ import { Component, computed, inject, input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
 import { TimeSheetEntry, Project } from '@models';
-import { TimeSheetDisplayUtil } from '@utils';
+import {
+  TimeSheetDisplayUtil,
+  dateFromLocalCalendarDayKey,
+  localCalendarDayKey,
+} from '@utils';
 
 @Component({
   selector: 'app-filter-view-details',
@@ -22,7 +26,7 @@ export class FilterViewDetailsComponent {
     const dateMap = new Map<string, TimeSheetEntry[]>();
 
     this.entries().forEach((entry) => {
-      const dateKey = new Date(entry.date).toISOString().split('T')[0];
+      const dateKey = localCalendarDayKey(entry.date);
       if (!dateMap.has(dateKey)) {
         dateMap.set(dateKey, []);
       }
@@ -31,7 +35,7 @@ export class FilterViewDetailsComponent {
 
     return Array.from(dateMap.entries())
       .map(([dateKey, entries]) => ({
-        date: new Date(dateKey),
+        date: dateFromLocalCalendarDayKey(dateKey),
         entries: entries.sort(
           (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
         ),

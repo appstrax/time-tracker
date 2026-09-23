@@ -1,6 +1,8 @@
 import {
+  dateFromLocalCalendarDayKey,
   isFutureLocalCalendarDay,
   isFutureUtcCalendarDay,
+  localCalendarDayKey,
   startOfLocalCalendarDay,
   startOfUtcCalendarDay,
 } from './time-sheet-date.util';
@@ -57,6 +59,13 @@ describe('time-sheet-date.util', () => {
       expect(
         isFutureLocalCalendarDay(new Date(2026, 4, 1, 0, 0, 0, 0), localReference),
       ).toBe(true);
+    });
+
+    it('localCalendarDayKey and dateFromLocalCalendarDayKey round-trip local days', () => {
+      const key = localCalendarDayKey(localReference);
+      expect(key).toBe('2026-04-08');
+      const day = dateFromLocalCalendarDayKey(key);
+      expect(day.getTime()).toBe(startOfLocalCalendarDay(localReference).getTime());
     });
   });
 });
