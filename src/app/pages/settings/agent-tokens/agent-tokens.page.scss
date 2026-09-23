@@ -22,23 +22,6 @@
   }
 }
 
-.page-header {
-  margin-bottom: 1.5rem;
-
-  h1 {
-    font-size: 1.75rem;
-    font-weight: 600;
-    color: var(--primary-color-dark);
-    margin-bottom: 0.5rem;
-  }
-
-  .lead {
-    max-width: 52rem;
-    color: var(--text-muted);
-    margin: 0;
-  }
-}
-
 .layout-grid {
   display: grid;
   grid-template-columns: minmax(280px, 380px) 1fr;
