@@ -200,7 +200,7 @@
           </p>
         </div>
         <div class="fields-header-actions">
-          @if (areFieldsDirty()) {
+          @if (editing() && project().id && areFieldsDirty()) {
             <span class="field-unsaved-pill">Unsaved changes</span>
           }
           <button type="button" class="btn btn-outline-secondary" (click)="addField()">

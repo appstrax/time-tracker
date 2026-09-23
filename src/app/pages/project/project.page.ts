@@ -169,6 +169,14 @@ export class ProjectPage implements OnInit {
       return;
     }
 
+    const project = this.project();
+    if (project.name == '' || project.description == '') {
+      this.fieldsError.set(
+        'Project name and description are required before saving fields',
+      );
+      return;
+    }
+
     const validationError = this.validateFields();
     if (validationError) {
       this.fieldsError.set(validationError);
