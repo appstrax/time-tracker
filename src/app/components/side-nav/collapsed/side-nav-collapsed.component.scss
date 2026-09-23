@@ -96,7 +96,7 @@
     }
 
     i {
-      color: var(--text-primary);
+      color: currentColor;
       font-size: 18px;
       width: 15px;
       height: 15px;
@@ -140,7 +140,7 @@
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   cursor: pointer;
-  color: var(--text-primary);
+  color: var(--side-nav-text);
 
   &:hover {
     background: color-mix(
