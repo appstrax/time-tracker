@@ -19,8 +19,9 @@ export class ProjectPage implements OnInit {
   readonly project = signal(new Project());
 
   readonly error = signal('');
-  readonly saving = signal(false);
+  private readonly persistMode = signal<'core' | 'fields' | null>(null);
   readonly editing = signal(false);
+  readonly fieldsError = signal('');
 
   readonly logoFile = signal<File | null>(null);
   readonly logoPreviewUrl = signal<string | null>(null);
@@ -35,6 +36,12 @@ export class ProjectPage implements OnInit {
   ];
 
   private fieldOptionsDrafts: Record<number, string> = {};
+  private savedFieldsSnapshot = '[]';
+  private savedCoreSnapshot = {
+    name: '',
+    description: '',
+    logoUrl: '',
+  };
 
   constructor(
     private store: Store,
@@ -53,25 +60,54 @@ export class ProjectPage implements OnInit {
       // Check if the project exists in the store, and set this.project if found.
       const projects = this.store.projects.projects();
       const project = projects.find((p: Project) => p.id === projectId);
-      if (project) this.project.set(project);
+      if (project) {
+        this.project.set(project);
+        this.syncPersistedSnapshots(project);
+      }
 
       try {
         const project = await this.projectService.findById(projectId);
         this.project.set(project);
         this.logoPreviewUrl.set(project.logoUrl || null);
+        this.syncPersistedSnapshots(project);
       } catch (e) {
         this.toast.error('Failed to load project for editing', 'Error');
       }
     }
   }
 
+  public isPersisting(): boolean {
+    return this.persistMode() !== null;
+  }
+
+  public isSavingCore(): boolean {
+    return this.persistMode() === 'core';
+  }
+
+  public isSavingFields(): boolean {
+    return this.persistMode() === 'fields';
+  }
+
   async saveProject(): Promise<void> {
-    this.saving.set(true);
+    if (!this.beginPersist('core')) {
+      return;
+    }
+
     this.error.set('');
 
     try {
-      if (!this.isFormValid()) {
+      if (!this.isCoreFormValid()) {
         return;
+      }
+
+      const hadUnsavedFieldEdits = this.editing() && this.areFieldsDirty();
+
+      if (!this.editing()) {
+        const fieldsValidationError = this.validateFields();
+        if (fieldsValidationError) {
+          this.error.set(fieldsValidationError);
+          return;
+        }
       }
 
       const logoFile = this.logoFile();
@@ -79,8 +115,20 @@ export class ProjectPage implements OnInit {
         await this.uploadProjectLogo(logoFile);
       }
 
-      const project = await this.projectService.save(this.project());
-      this.project.set(project);
+      const draftFieldEdits = this.project().fields;
+      const projectToSave = this.buildProjectForCoreSave();
+      const project = await this.projectService.save(projectToSave);
+
+      if (this.editing()) {
+        this.project.set(
+          this.mergeProjectAfterSave(project, { fields: draftFieldEdits }),
+        );
+      } else {
+        this.project.set(project);
+      }
+
+      this.logoFile.set(null);
+      this.syncPersistedSnapshots(project);
 
       if (!this.editing()) {
         const user = this.store.user.user()!;
@@ -93,12 +141,21 @@ export class ProjectPage implements OnInit {
 
       await this.refreshProjectsStore();
       this.toast.success('Project saved successfully', 'Success');
-      this.router.navigate(['/projects']);
+      if (hadUnsavedFieldEdits) {
+        this.toast.info(
+          'Custom field changes were not saved. Use Save fields when you are ready.',
+          'Reminder',
+        );
+      }
+
+      if (!this.editing() || !this.areFieldsDirty()) {
+        this.router.navigate(['/projects']);
+      }
     } catch (error: any) {
       this.error.set(error.message);
       this.toast.error(error.message || 'Failed to save project', 'Error');
     } finally {
-      this.saving.set(false);
+      this.endPersist();
     }
   }
 
@@ -118,6 +175,7 @@ export class ProjectPage implements OnInit {
     }
 
     const file = input.files[0];
+    this.error.set('');
     this.logoFile.set(file);
 
     const reader = new FileReader();
@@ -127,43 +185,208 @@ export class ProjectPage implements OnInit {
     reader.readAsDataURL(file);
   }
 
-  public isFormValid(): boolean {
+  public isCoreFormValid(): boolean {
     const project = this.project();
     if (project.name == '' || project.description == '') {
       this.error.set('Project name and description are required');
       return false;
     }
 
+    return true;
+  }
+
+  public areFieldsDirty(): boolean {
+    return (
+      JSON.stringify(this.project().fields) !== this.savedFieldsSnapshot
+    );
+  }
+
+  public areCoreDirty(): boolean {
+    if (this.logoFile()) {
+      return true;
+    }
+
+    const project = this.project();
+    return (
+      project.name !== this.savedCoreSnapshot.name ||
+      project.description !== this.savedCoreSnapshot.description ||
+      project.logoUrl !== this.savedCoreSnapshot.logoUrl
+    );
+  }
+
+  public hasUnsavedEdits(): boolean {
+    return this.areCoreDirty() || this.areFieldsDirty();
+  }
+
+  public canLeaveProjectPage(): boolean {
+    if (this.isPersisting()) {
+      return false;
+    }
+
+    if (!this.editing() || !this.project().id || !this.hasUnsavedEdits()) {
+      return true;
+    }
+
+    return confirm(
+      'You have unsaved project or custom field changes. Leave without saving?',
+    );
+  }
+
+  public canSaveFields(): boolean {
+    if (!this.editing() || !this.project().id) {
+      return false;
+    }
+
+    return this.areFieldsDirty();
+  }
+
+  async saveFields(): Promise<void> {
+    this.fieldsError.set('');
+
+    if (!this.editing() || !this.project().id) {
+      this.fieldsError.set(
+        'Create the project first, then save custom fields here.',
+      );
+      return;
+    }
+
+    if (!this.beginPersist('fields')) {
+      return;
+    }
+
+    try {
+      const hadUnsavedCoreEdits = this.areCoreDirty();
+
+      const validationError = this.validateFields();
+      if (validationError) {
+        this.fieldsError.set(validationError);
+        return;
+      }
+      const draftCoreEdits = {
+        name: this.project().name,
+        description: this.project().description,
+        logoUrl: this.project().logoUrl,
+      };
+      const projectToSave = this.buildProjectForFieldsSave();
+      const project = await this.projectService.save(projectToSave);
+
+      this.project.set(
+        this.mergeProjectAfterSave(project, {
+          name: draftCoreEdits.name,
+          description: draftCoreEdits.description,
+          logoUrl: draftCoreEdits.logoUrl,
+        }),
+      );
+
+      this.syncPersistedSnapshots(project);
+      await this.refreshProjectsStore();
+      this.toast.success('Custom fields saved', 'Success');
+      if (hadUnsavedCoreEdits) {
+        this.toast.info(
+          'Project detail changes were not saved. Use Update Project when you are ready.',
+          'Reminder',
+        );
+      }
+    } catch (error: any) {
+      this.fieldsError.set(error.message || 'Failed to save custom fields');
+      this.toast.error(error.message || 'Failed to save custom fields', 'Error');
+    } finally {
+      this.endPersist();
+    }
+  }
+
+  private beginPersist(mode: 'core' | 'fields'): boolean {
+    if (this.persistMode() !== null) {
+      return false;
+    }
+
+    this.persistMode.set(mode);
+    return true;
+  }
+
+  private endPersist(): void {
+    this.persistMode.set(null);
+  }
+
+  private validateFields(): string | null {
+    const project = this.project();
     const seenKeys = new Set<string>();
+
     for (const field of project.fields) {
       if (!field.key.trim()) {
-        this.error.set('Every custom field needs a key');
-        return false;
+        return 'Every custom field needs a key';
       }
       if (seenKeys.has(field.key)) {
-        this.error.set(`Duplicate field key: "${field.key}"`);
-        return false;
+        return `Duplicate field key: "${field.key}"`;
       }
       seenKeys.add(field.key);
 
       if (field.type === 'select' && field.options.length === 0) {
-        this.error.set(
-          `Field "${field.key}" is a select field but has no options`,
-        );
-        return false;
+        return `Field "${field.key}" is a select field but has no options`;
       }
     }
 
-    return true;
+    return null;
+  }
+
+  private syncPersistedSnapshots(project: Project): void {
+    this.savedFieldsSnapshot = JSON.stringify(project.fields);
+    this.savedCoreSnapshot = {
+      name: project.name,
+      description: project.description,
+      logoUrl: project.logoUrl,
+    };
+  }
+
+  private parseSavedFields(): ProjectField[] {
+    try {
+      return JSON.parse(this.savedFieldsSnapshot) as ProjectField[];
+    } catch {
+      return [];
+    }
+  }
+
+  private buildProjectForCoreSave(): Project {
+    const current = this.project();
+    const payload = Object.assign(new Project(), current);
+
+    if (this.editing()) {
+      payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
+    }
+
+    return payload;
+  }
+
+  private buildProjectForFieldsSave(): Project {
+    const current = this.project();
+    const payload = Object.assign(new Project(), current);
+
+    payload.name = this.savedCoreSnapshot.name;
+    payload.description = this.savedCoreSnapshot.description;
+    payload.logoUrl = this.savedCoreSnapshot.logoUrl;
+
+    return payload;
+  }
+
+  private mergeProjectAfterSave(
+    saved: Project,
+    overrides: Partial<Project> = {},
+  ): Project {
+    const current = this.project();
+    const merged = Object.assign(new Project(), current, saved, overrides);
+    merged.users = current.users;
+    return merged;
   }
 
   public updateProjectName(name: string): void {
+    this.error.set('');
     this.updateProject((project) => {
       project.name = name;
     });
   }
 
   public updateProjectDescription(description: string): void {
+    this.error.set('');
     this.updateProject((project) => {
       project.description = description;
     });
@@ -180,6 +403,7 @@ export class ProjectPage implements OnInit {
 
   public removeField(index: number): void {
     this.fieldOptionsDrafts = {};
+    this.fieldsError.set('');
     this.updateProject((project) => {
       project.fields = project.fields.filter((_, i) => i !== index);
     });
@@ -240,6 +464,7 @@ export class ProjectPage implements OnInit {
   }
 
   private updateFieldAt(index: number, updateFn: (field: ProjectField) => void): void {
+    this.fieldsError.set('');
     this.updateProject((project) => {
       const fields = project.fields.map((field, i) =>
         i === index ? { ...field } : field,
@@ -250,7 +475,9 @@ export class ProjectPage implements OnInit {
   }
 
   public onProjectUsersChange(project: Project): void {
-    this.project.set(project);
+    this.updateProject((current) => {
+      current.users = project.users;
+    });
   }
 
   private async refreshProjectsStore(): Promise<void> {
