@@ -16,6 +16,7 @@
     [projects]="projects()"
     [entries]="sortedEntries()"
     [disabled]="approved()"
+    [allowCreate]="!isFutureDay()"
   />
 
   @if (sortedEntries().length) {

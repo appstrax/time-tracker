@@ -5,6 +5,7 @@ import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Project } from '@models';
 import { Store } from '@state';
+import { ToastService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
 
 import { TimeSheetEntryModal } from './time-sheet-entry.modal';
@@ -93,6 +94,16 @@ describe('TimeSheetEntryComponent', () => {
         {
           provide: TimeSheetDisplayUtil,
           useValue: displayUtil,
+        },
+        {
+          provide: ToastService,
+          useValue: jasmine.createSpyObj<ToastService>('ToastService', [
+            'error',
+            'success',
+            'info',
+            'warning',
+            'show',
+          ]),
         },
       ],
     }).compileComponents();

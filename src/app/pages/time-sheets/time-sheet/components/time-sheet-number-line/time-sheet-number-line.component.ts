@@ -40,6 +40,7 @@ export class TimeSheetNumberLineComponent {
   public readonly projectColorById = input<Map<string, string>>(new Map());
   public readonly entries = input<TimeSheetEntry[]>([]);
   public readonly disabled = input(false);
+  public readonly allowCreate = input(true);
 
   public readonly onEntryClick = output<TimeSheetEntry>();
   public readonly onCreateEntry = output<number>();
@@ -122,7 +123,7 @@ export class TimeSheetNumberLineComponent {
   );
 
   public onTrackMouseMove(event: MouseEvent): void {
-    if (this.disabled()) return;
+    if (this.disabled() || !this.allowCreate()) return;
     const total = this.hoursAtPointer(event);
     if (total === null) return;
     if (total <= this.loggedHours()) {

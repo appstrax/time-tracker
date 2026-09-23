@@ -7,6 +7,10 @@ import {
 } from '@appstrax/services/database';
 
 import { TimeSheetEntry } from '../models/time-sheet-entry.model';
+import {
+  FUTURE_TIMESHEET_ENTRY_TOAST,
+  isFutureUtcCalendarDay,
+} from '../utils/time-sheet-date.util';
 
 /** API default/max page size when `limit` is omitted (see DatabaseService). */
 const ENTRY_FETCH_PAGE_SIZE = 1000;
@@ -15,6 +19,13 @@ const ENTRY_FETCH_PAGE_SIZE = 1000;
 export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
   constructor() {
     super('time-sheet-entries', TimeSheetEntry);
+  }
+
+  public override async save(object: TimeSheetEntry): Promise<TimeSheetEntry> {
+    if (!object.id && isFutureUtcCalendarDay(object.date)) {
+      throw new Error(FUTURE_TIMESHEET_ENTRY_TOAST);
+    }
+    return super.save(object);
   }
 
   public async findByUserId(userId: string): Promise<TimeSheetEntry[]> {

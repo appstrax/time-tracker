@@ -169,6 +169,10 @@
   opacity: 0.78;
 }
 
+.timeline-create-disabled .timeline-track {
+  cursor: default;
+}
+
 @media (max-width: 900px) {
   .timeline-block {
     font-size: 0.72rem;

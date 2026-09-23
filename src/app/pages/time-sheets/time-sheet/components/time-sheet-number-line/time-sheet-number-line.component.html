@@ -1,4 +1,9 @@
-<div class="timeline" [class.timeline-disabled]="disabled()" [style.--scale-hours]="scaleHours()">
+<div
+  class="timeline"
+  [class.timeline-disabled]="disabled()"
+  [class.timeline-create-disabled]="!allowCreate() && !disabled()"
+  [style.--scale-hours]="scaleHours()"
+>
   <div
     #track
     class="timeline-track"
