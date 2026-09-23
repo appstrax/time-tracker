@@ -20,7 +20,7 @@ import {
   getStoredTimeSheetProjectId,
   storeTimeSheetProjectId,
   TimeSheetDisplayUtil,
-  isFutureUtcCalendarDay,
+  isFutureLocalCalendarDay,
 } from '@utils';
 
 @Component({
@@ -207,7 +207,7 @@ export class TimeSheetEntryModal implements OnInit {
   }
 
   isFormValid(): boolean {
-    if (!this.wasExistingEntryOnOpen && isFutureUtcCalendarDay(this.date)) {
+    if (!this.wasExistingEntryOnOpen && isFutureLocalCalendarDay(this.date)) {
       this.errorMessage = FUTURE_TIMESHEET_ENTRY_TOAST;
       this.toastService.error(FUTURE_TIMESHEET_ENTRY_TOAST);
       return false;

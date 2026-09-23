@@ -9,7 +9,7 @@ import {
 import { TimeSheetEntry } from '../models/time-sheet-entry.model';
 import {
   FUTURE_TIMESHEET_ENTRY_TOAST,
-  isFutureUtcCalendarDay,
+  isFutureLocalCalendarDay,
 } from '../utils/time-sheet-date.util';
 
 /** API default/max page size when `limit` is omitted (see DatabaseService). */
@@ -22,7 +22,7 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
   }
 
   public override async save(object: TimeSheetEntry): Promise<TimeSheetEntry> {
-    if (!object.id && isFutureUtcCalendarDay(object.date)) {
+    if (!object.id && isFutureLocalCalendarDay(object.date)) {
       throw new Error(FUTURE_TIMESHEET_ENTRY_TOAST);
     }
     return super.save(object);
@@ -78,7 +78,7 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     start: Date,
     end: Date,
   ): Promise<TimeSheetEntry[]> {
-    const res = await this.find({
+    return this.findAllPages({
       where: {
         [Operator.AND]: [
           { userId: userId },
@@ -86,8 +86,8 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
           { date: { [Operator.LTE]: end } },
         ],
       },
+      order: { createdAt: OrderDirection.ASC },
     });
-    return res.data;
   }
 
   public async findByUserAndDate(
