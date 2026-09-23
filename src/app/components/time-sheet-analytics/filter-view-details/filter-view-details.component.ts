@@ -14,6 +14,7 @@ import { TimeSheetDisplayUtil } from '@utils';
 export class FilterViewDetailsComponent {
   public readonly entries = input<TimeSheetEntry[]>([]);
   public readonly projects = input<Project[]>([]);
+  public readonly compact = input(false);
 
   public displayUtils = inject(TimeSheetDisplayUtil);
 

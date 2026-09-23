@@ -5,7 +5,7 @@ import { Project, TimeSheetEntry } from '@models';
 import { ToastService, TimeSheetEntryService } from '@services';
 import { Store } from '@state';
 import {
-  ColorList,
+  buildProjectColorMap,
   clearStoredTimeSheetProjectId,
   getStoredTimeSheetProjectId,
   storeTimeSheetProjectId,
@@ -27,16 +27,20 @@ import { TimeSheetDateSelectorComponent } from './components';
 export class TimeSheetPage {
   private readonly weekStart = signal(new Date());
   private readonly weekEnd = signal(new Date());
-  private readonly workingOnProjectId = signal<string | null>(
+  private readonly filterProjectId = signal<string | null>(
     getStoredTimeSheetProjectId(),
   );
 
   public readonly projects = computed(() => this.store.projects.projects());
-  public readonly workingOnProject = computed(() => {
-    const projectId = this.workingOnProjectId();
-    if (!projectId) return undefined;
-    return this.projects().find((project) => project.id === projectId);
+  public readonly filterProject = computed(() => {
+    const projectId = this.filterProjectId();
+    if (!projectId) return null;
+    return this.projects().find((project) => project.id === projectId) ?? null;
   });
+
+  public readonly projectColorById = computed(() =>
+    buildProjectColorMap(this.projects()),
+  );
 
   public readonly weekDays = computed(() => {
     const weekStart = this.weekStart();
@@ -54,31 +58,23 @@ export class TimeSheetPage {
 
   private readonly entries = signal<TimeSheetEntry[]>([]);
   private readonly filteredEntries = computed(() => {
-    const projectId = this.workingOnProjectId();
+    const projectId = this.filterProjectId();
     const entries = this.entries();
     if (!projectId) return entries;
     return entries.filter((entry) => entry.projectId === projectId);
   });
+
   public readonly categories = computed(() => [
     ...new Set(this.filteredEntries().map((entry) => entry.category)),
   ]);
-  public readonly colors = computed(() => {
-    const colors = new Map<string, string>();
-    this.categories().forEach((category, index) => {
-      colors.set(
-        category,
-        ColorList.colors[index % ColorList.colors.length] ?? '#6B7280',
-      );
-    });
-    return colors;
-  });
+
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
     for (const entry of this.filteredEntries()) {
       const dateKey = entry.date.toDateString();
-      const entries = entriesByDate.get(dateKey) ?? [];
-      entries.push(entry);
-      entriesByDate.set(dateKey, entries);
+      const dayEntries = entriesByDate.get(dateKey) ?? [];
+      dayEntries.push(entry);
+      entriesByDate.set(dateKey, dayEntries);
     }
     return entriesByDate;
   });
@@ -98,28 +94,27 @@ export class TimeSheetPage {
   }
 
   public onTimeSheetEntrySaved() {
-    this.syncWorkingOnProject();
+    this.syncFilterProject();
     this.fetchTimeSheetEntries();
   }
 
-  public onWorkingOnProjectSelected(project: Project | null): void {
-    if (!project) {
-      this.workingOnProjectId.set(null);
+  public onFilterProjectSelected(project: Project | null): void {
+    this.filterProjectId.set(project?.id ?? null);
+    if (project?.id) {
+      storeTimeSheetProjectId(project.id);
+    } else {
       clearStoredTimeSheetProjectId();
-      return;
     }
-    this.workingOnProjectId.set(project.id);
-    storeTimeSheetProjectId(project.id);
   }
 
-  private syncWorkingOnProject(): void {
+  private syncFilterProject(): void {
     const projectId = getStoredTimeSheetProjectId();
-    this.workingOnProjectId.set(projectId);
+    this.filterProjectId.set(projectId);
     if (!projectId) return;
 
     const project = this.projects().find((item) => item.id === projectId);
     if (!project) {
-      this.workingOnProjectId.set(null);
+      this.filterProjectId.set(null);
       clearStoredTimeSheetProjectId();
     }
   }
@@ -128,14 +123,13 @@ export class TimeSheetPage {
     this.fetching.set(true);
 
     await this.waitForProjects();
-    this.syncWorkingOnProject();
-    if (!this.projects().length) {
+    this.syncFilterProject();
+
+    const user = this.store.user.user();
+    if (!user) {
       this.fetching.set(false);
       return;
     }
-
-    const user = this.store.user.user();
-    if (!user) return;
 
     try {
       const start = this.weekStart();
@@ -148,7 +142,7 @@ export class TimeSheetPage {
       );
 
       this.entries.set(entries);
-    } catch (error) {
+    } catch {
       this.toastService.error('Error initializing time sheet entries');
     } finally {
       this.fetching.set(false);

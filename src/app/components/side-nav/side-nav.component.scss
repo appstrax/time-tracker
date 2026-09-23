@@ -67,16 +67,38 @@
     justify-content: center;
     text-decoration: none;
     color: inherit;
+    font-weight: 400;
 
-    &.active,
-    &:active,
-    &:focus-visible {
+    &.active {
+      font-weight: 400;
+      color: var(--primary-color);
+
       .icon-box {
-        background-color: var(--primary-color);
+        background-color: color-mix(
+          in srgb,
+          var(--primary-color) 15%,
+          transparent
+        );
         box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
         i {
-          color: #ffffff;
+          color: var(--primary-color);
+        }
+      }
+    }
+
+    &:active,
+    &:focus-visible {
+      .icon-box {
+        background-color: color-mix(
+          in srgb,
+          var(--primary-color) 15%,
+          transparent
+        );
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+        i {
+          color: var(--primary-color);
         }
       }
     }

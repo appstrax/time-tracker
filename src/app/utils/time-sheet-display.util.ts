@@ -16,6 +16,23 @@ export class TimeSheetDisplayUtil {
     return `${formattedHours} ${formattedMinutes}`;
   }
 
+  /** Quarter-hour durations for timesheet ruler (e.g. 8h 45m, 15m, 2h). */
+  public formatQuarterHourDuration(hours: number): string {
+    const normalized = Math.round(hours * 4) / 4;
+    const wholeHours = Math.floor(normalized);
+    const minutes = Math.round((normalized - wholeHours) * 60);
+
+    const parts: string[] = [];
+    if (wholeHours > 0) {
+      parts.push(`${wholeHours}h`);
+    }
+    if (minutes > 0) {
+      parts.push(minutes < 10 ? `0${minutes}m` : `${minutes}m`);
+    }
+
+    return parts.join(' ');
+  }
+
   public getProjectName(projectId: string, projects?: Project[]): string {
     if (!projectId) {
       return this.defaultUnknownProject;

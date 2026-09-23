@@ -42,19 +42,29 @@
   justify-content: center;
   text-decoration: none;
   color: inherit;
+  font-weight: 400;
 
   &.active {
+    font-weight: 400;
+    color: var(--primary-color);
+
     .icon-box {
-      background-color: var(--primary-color);
+      background-color: color-mix(
+        in srgb,
+        var(--primary-color) 15%,
+        transparent
+      );
       box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 
       i {
-        color: #ffffff;
+        color: var(--primary-color);
       }
     }
 
     .icon-box.avatar-box {
-      box-shadow: 0 0 0 2px var(--primary-color), 0 4px 8px rgba(0, 0, 0, 0.1);
+      box-shadow:
+        0 0 0 2px color-mix(in srgb, var(--primary-color) 15%, transparent),
+        0 4px 8px rgba(0, 0, 0, 0.1);
     }
   }
 

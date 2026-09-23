@@ -1,32 +1,50 @@
-<section class="home-hours-page container py-4">
-  <header class="page-header">
-    <div>
-      <p class="eyebrow">Home</p>
-      <h1>My time</h1>
-      <p class="subtitle">
-        Review your captured hours. Switch views and filter by project,
-        category, or date range.
-      </p>
-    </div>
-  </header>
+<section class="home-hours-page insights-page">
+  <div class="insights-shell">
+    <header class="insights-hero">
+      <div class="insights-hero-copy">
+        <h1>My time</h1>
+        <p class="insights-lead">Your captured hours, filtered by project and period.</p>
+      </div>
 
-  @if (isLoading() && !hasLoaded()) {
-    <section class="state-card">
-      <h2>Loading your time entries</h2>
-      <p>Pulling your captured hours.</p>
-    </section>
-  } @else if (!hasProjects()) {
-    <section class="state-card">
-      <h2>No accessible projects</h2>
-      <p>There are no projects available for this account yet.</p>
-    </section>
-  } @else {
-    <app-filter-view-container
-      [projects]="projects()"
-      [entries]="entries()"
-      [users]="noUsers"
-      [showUserFilter]="false"
-      [availableViews]="homeAvailableViews"
-    />
-  }
+      <div class="insights-chips" aria-live="polite">
+        @if (isLoading() && !hasLoaded()) {
+          <span class="insights-chip insights-chip--accent">
+            <span
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Loading…
+          </span>
+        } @else if (hasLoaded() && hasProjects()) {
+          <span class="insights-chip insights-chip--accent">
+            {{ entries().length }}
+            {{ entries().length === 1 ? 'entry' : 'entries' }}
+          </span>
+        }
+      </div>
+    </header>
+
+    @if (isLoading() && !hasLoaded()) {
+      <section class="insights-state" aria-busy="true">
+        <p>Pulling your captured hours…</p>
+      </section>
+    } @else if (!hasProjects()) {
+      <section class="insights-state">
+        <h2>No accessible projects</h2>
+        <p>There are no projects available for this account yet.</p>
+      </section>
+    } @else {
+      <app-filter-view-container
+        [projects]="projects()"
+        [entries]="entries()"
+        [users]="noUsers"
+        [showUserFilter]="false"
+        [linkProjectsToTimeSheet]="true"
+        [availableViews]="homeAvailableViews"
+        [compact]="true"
+        (entryUpdated)="onEntryUpdated($event)"
+      />
+    }
+  </div>
 </section>

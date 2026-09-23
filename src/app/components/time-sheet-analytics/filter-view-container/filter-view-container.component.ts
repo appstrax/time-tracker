@@ -10,6 +10,7 @@ import {
   output,
   signal,
 } from '@angular/core';
+import { NgTemplateOutlet } from '@angular/common';
 import { Subscription } from 'rxjs';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
@@ -36,6 +37,7 @@ export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
   selector: 'app-filter-view-container',
   standalone: true,
   imports: [
+    NgTemplateOutlet,
     FormsModule,
     FilterBlockComponent,
     FilterViewSummaryComponent,
@@ -65,6 +67,13 @@ export class FilterViewContainerComponent
   ]);
   public readonly showUserFilter = input(true);
   public readonly showExport = input(false);
+  public readonly linkProjectsToTimeSheet = input(false);
+  /** Tighter layout with less marketing copy — used on /home. */
+  public readonly compact = input(false);
+  /** Timeline day review: allow approve/unapprove (requires parent `entryUpdated`). */
+  public readonly canManageStatus = input(false);
+  /** Unapproved view: allow per-entry approval (requires parent `entryUpdated`). */
+  public readonly canApprove = input(false);
 
   public readonly entryUpdated = output<TimeSheetEntry>();
 
@@ -253,6 +262,10 @@ export class FilterViewContainerComponent
     );
   }
 
+  public onSingleEntryApproved(entry: TimeSheetEntry): void {
+    this.entryUpdated.emit(entry);
+  }
+
   public async onApproveAll(): Promise<void> {
     const pendingEntries = this.filteredEntries().filter(
       (entry) => !entry.approved,
@@ -264,8 +277,9 @@ export class FilterViewContainerComponent
 
     try {
       for (const entry of pendingEntries) {
-        entry.approved = true;
-        const savedEntry = await this.entryService.save(entry);
+        const toSave = entry.clone();
+        toSave.approved = true;
+        const savedEntry = await this.entryService.save(toSave);
         this.entryUpdated.emit(savedEntry);
       }
 
