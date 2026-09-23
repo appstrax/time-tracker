@@ -78,7 +78,7 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     start: Date,
     end: Date,
   ): Promise<TimeSheetEntry[]> {
-    const res = await this.find({
+    return this.findAllPages({
       where: {
         [Operator.AND]: [
           { userId: userId },
@@ -87,7 +87,6 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
         ],
       },
     });
-    return res.data;
   }
 
   public async findByUserAndDate(
