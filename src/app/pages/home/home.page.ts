@@ -70,6 +70,9 @@ export class HomePage {
         return;
       }
 
+      this.isLoading.set(true);
+      this.entries.set([]);
+      this.filteredEntryCount.set(0);
       void this.loadEntriesForRange(user.id, start, end, boundsKey);
     });
   }
@@ -86,7 +89,6 @@ export class HomePage {
     boundsKey: string,
   ): Promise<void> {
     const loadId = ++this.latestLoadId;
-    this.isLoading.set(true);
 
     try {
       const entries = await this.timeSheetEntryService.findByUserAndDateRange(
