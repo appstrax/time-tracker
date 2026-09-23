@@ -86,12 +86,7 @@ export class ProjectPage implements OnInit {
         return;
       }
 
-      if (this.editing() && this.areFieldsDirty()) {
-        this.error.set(
-          'You have unsaved custom field changes. Use Save fields before updating project details.',
-        );
-        return;
-      }
+      const hadUnsavedFieldEdits = this.editing() && this.areFieldsDirty();
 
       if (!this.editing()) {
         const fieldsValidationError = this.validateFields();
@@ -132,7 +127,16 @@ export class ProjectPage implements OnInit {
 
       await this.refreshProjectsStore();
       this.toast.success('Project saved successfully', 'Success');
-      this.router.navigate(['/projects']);
+      if (hadUnsavedFieldEdits) {
+        this.toast.info(
+          'Custom field changes were not saved. Use Save fields when you are ready.',
+          'Reminder',
+        );
+      }
+
+      if (!this.editing() || !this.areFieldsDirty()) {
+        this.router.navigate(['/projects']);
+      }
     } catch (error: any) {
       this.error.set(error.message);
       this.toast.error(error.message || 'Failed to save project', 'Error');
@@ -228,12 +232,7 @@ export class ProjectPage implements OnInit {
       return;
     }
 
-    if (this.areCoreDirty()) {
-      this.fieldsError.set(
-        'You have unsaved project detail changes. Use Update Project before saving custom fields.',
-      );
-      return;
-    }
+    const hadUnsavedCoreEdits = this.areCoreDirty();
 
     const validationError = this.validateFields();
     if (validationError) {
@@ -261,6 +260,12 @@ export class ProjectPage implements OnInit {
       this.syncPersistedSnapshots(project);
       await this.refreshProjectsStore();
       this.toast.success('Custom fields saved', 'Success');
+      if (hadUnsavedCoreEdits) {
+        this.toast.info(
+          'Project detail changes were not saved. Use Update Project when you are ready.',
+          'Reminder',
+        );
+      }
     } catch (error: any) {
       this.fieldsError.set(error.message || 'Failed to save custom fields');
       this.toast.error(error.message || 'Failed to save custom fields', 'Error');
@@ -426,7 +431,9 @@ export class ProjectPage implements OnInit {
   }
 
   public onProjectUsersChange(project: Project): void {
-    this.project.set(project);
+    this.updateProject((current) => {
+      current.users = project.users;
+    });
   }
 
   private async refreshProjectsStore(): Promise<void> {
