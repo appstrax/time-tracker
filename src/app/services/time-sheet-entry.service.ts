@@ -78,30 +78,7 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     start: Date,
     end: Date,
   ): Promise<TimeSheetEntry[]> {
-    const res = await this.find({
-      where: {
-        [Operator.AND]: [
-          { userId: userId },
-          { date: { [Operator.GTE]: start } },
-          { date: { [Operator.LTE]: end } },
-        ],
-      },
-    });
-    return res.data;
-  }
-
-  public async findByUserAndDate(
-    userId: string,
-    date: Date,
-  ): Promise<TimeSheetEntry[]> {
-    // Get start and end of the day
-    const start = new Date(date);
-    start.setHours(0, 0, 0, 0);
-
-    const end = new Date(date);
-    end.setHours(23, 59, 59, 999);
-
-    const timeSheetEntries = await this.find({
+    return this.findAllPages({
       where: {
         [Operator.AND]: [
           { userId: userId },
@@ -111,6 +88,27 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
       },
       order: { createdAt: OrderDirection.ASC },
     });
-    return timeSheetEntries.data;
+  }
+
+  public async findByUserAndDate(
+    userId: string,
+    date: Date,
+  ): Promise<TimeSheetEntry[]> {
+    const start = new Date(date);
+    start.setHours(0, 0, 0, 0);
+
+    const end = new Date(date);
+    end.setHours(23, 59, 59, 999);
+
+    return this.findAllPages({
+      where: {
+        [Operator.AND]: [
+          { userId: userId },
+          { date: { [Operator.GTE]: start } },
+          { date: { [Operator.LTE]: end } },
+        ],
+      },
+      order: { createdAt: OrderDirection.ASC },
+    });
   }
 }
