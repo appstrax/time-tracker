@@ -16,8 +16,8 @@
         aria-label="Choose week"
         (click)="openDatePicker()"
       >
-        {{ selectedWeekStart() | date: "MMM d" }} –
-        {{ selectedWeekEnd() | date: "MMM d, y" }}
+        {{ selectedWeekStart() | date: "MMM d" : calendarTimezone }} –
+        {{ selectedWeekEnd() | date: "MMM d, y" : calendarTimezone }}
       </button>
 
       <button
@@ -67,8 +67,8 @@
         />
         <span class="week-range-label">{{ selectedYear() }}</span>
         <span class="week-range">
-          {{ selectedWeekStart() | date: "MMM dd" }} -
-          {{ selectedWeekEnd() | date: "MMM dd" }}
+          {{ selectedWeekStart() | date: "MMM dd" : calendarTimezone }} -
+          {{ selectedWeekEnd() | date: "MMM dd" : calendarTimezone }}
         </span>
       </div>
 

@@ -1,90 +1,88 @@
 .time-sheet-page {
-  width: 100%;
-  max-width: none;
-  margin: 0;
   color: var(--text-primary);
 }
 
-.page-header-actions {
-  --page-header-control-height: 2.35rem;
+.page-header {
   display: flex;
   align-items: center;
-  flex-wrap: wrap;
-  justify-content: flex-end;
-  gap: 0.65rem 0.75rem;
-  flex-shrink: 0;
-
-  app-time-sheet-date-selector,
-  .header-project-dropdown {
-    display: flex;
-    align-items: center;
-    min-height: var(--page-header-control-height);
-  }
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
 }
 
-.header-project-dropdown {
-  min-width: 11rem;
-  max-width: min(20rem, 42vw);
-  height: var(--page-header-control-height);
-
-  ::ng-deep .project-dropdown--compact {
-    height: var(--page-header-control-height);
-  }
-
-  ::ng-deep .form-group {
-    margin-bottom: 0;
-  }
-
-  ::ng-deep .project-dropdown--compact .dropdown-toggle {
-    min-height: var(--page-header-control-height, 2.35rem);
-    height: var(--page-header-control-height, 2.35rem);
-    max-height: var(--page-header-control-height, 2.35rem);
-    padding: 0 0.85rem;
-    border: 1px solid var(--color-border);
-    border-radius: 999px;
-    background: var(--color-surface);
-    color: var(--text-primary);
-    font-size: 0.86rem;
-    font-weight: 600;
-    box-shadow: none;
-  }
-
-  ::ng-deep .project-dropdown--compact .dropdown-toggle:hover,
-  ::ng-deep .project-dropdown--compact .dropdown-toggle:focus,
-  ::ng-deep .project-dropdown--compact .dropdown-toggle:active {
-    border-color: color-mix(
-      in srgb,
-      var(--color-primary) 45%,
-      var(--color-border)
-    );
-    background: var(--color-surface);
-    box-shadow: 0 0 0 0.2rem
-      color-mix(in srgb, var(--color-primary) 14%, transparent);
-  }
-
-  ::ng-deep .project-dropdown-chevron {
-    font-size: 0.75rem;
-    color: var(--text-muted);
-  }
+.eyebrow {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
 }
 
-.week-days {
-  display: flex;
-  flex-direction: column;
-  gap: 0.85rem;
+.page-header h1 {
+  margin: 0.25rem 0 0.5rem;
+  font-size: clamp(2rem, 4vw, 2.75rem);
+}
+
+.subtitle {
+  max-width: 42rem;
+  margin: 0;
+  color: var(--text-muted);
+}
+
+.time-sheet-section {
+  border-radius: 20px;
+  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+  min-width: 380px;
+  padding: 2rem 3rem;
+  margin-bottom: 2rem;
+  background-color: var(--color-surface);
 }
 
 .time-sheet-spinner {
-  min-height: 14rem;
-  border-radius: var(--radius-card, 12px);
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  min-height: 12rem;
 }
 
-@media (max-width: 900px) {
-  .page-header-actions {
-    flex-wrap: wrap;
-    justify-content: flex-start;
+.time-sheet-card .time-sheet-title {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.time-sheet-card .time-sheet-desc {
+  font-size: 0.9rem;
+  color: var(--text-muted);
+}
+
+.day-label {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.time-sheet-day-border {
+  padding-bottom: 1rem;
+  padding-top: 1rem;
+  border-bottom: 1px solid var(--color-border);
+
+  &:first-child {
+    border-top: 1px solid var(--color-border);
   }
 }
 
+@media (max-width: 1200px) {
+  .time-sheet-section {
+    padding: 1rem;
+  }
+}
+
+@media (max-width: 767px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .time-sheet-section {
+    min-width: 0;
+  }
+}

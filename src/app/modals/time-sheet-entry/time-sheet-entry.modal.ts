@@ -11,17 +11,9 @@ import {
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Store } from '@state';
-import { Project, TimeSheetEntry, ProjectField } from '@models';
+import { Project, TimeSheetEntry } from '@models';
 import { ProjectDropdownComponent } from '@components';
-import { ToastService } from '@services';
-import {
-  clearStoredTimeSheetProjectId,
-  FUTURE_TIMESHEET_ENTRY_TOAST,
-  getStoredTimeSheetProjectId,
-  storeTimeSheetProjectId,
-  TimeSheetDisplayUtil,
-  isFutureUtcCalendarDay,
-} from '@utils';
+import { TimeSheetDisplayUtil } from '@utils';
 
 @Component({
   standalone: true,
@@ -30,6 +22,8 @@ import {
   imports: [FormsModule, ProjectDropdownComponent],
 })
 export class TimeSheetEntryModal implements OnInit {
+  private static readonly LAST_SELECTED_PROJECT_KEY = 'timeSheet.lastProjectId';
+
   @Input() timeSheetEntry = new TimeSheetEntry();
   @Input() categories!: string[];
   @Input() date!: Date;
@@ -43,12 +37,6 @@ export class TimeSheetEntryModal implements OnInit {
 
   errorMessage: string = '';
 
-  wasExistingEntryOnOpen: boolean = false;
-
-  /** Keys present when the modal opened — kept on save only if the project is unchanged. */
-  private fieldValueKeysAtOpen = new Set<string>();
-  private projectIdAtOpen = '';
-
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
 
   get hours(): number {
@@ -59,23 +47,17 @@ export class TimeSheetEntryModal implements OnInit {
     public activeModal: NgbActiveModal,
     private store: Store,
     private displayUtils: TimeSheetDisplayUtil,
-    private toastService: ToastService,
   ) {}
 
   async ngOnInit(): Promise<void> {
-    this.wasExistingEntryOnOpen = !!this.timeSheetEntry.id;
-    this.fieldValueKeysAtOpen = new Set(
-      this.timeSheetEntry.fieldValues.map((fv) => fv.key),
-    );
-
     const projectId =
-      this.timeSheetEntry.projectId || getStoredTimeSheetProjectId();
+      this.timeSheetEntry.projectId || this.getStoredProjectId();
     if (projectId) {
       this.project = this.projects().find((x) => x.id === projectId);
       if (this.project) {
         this.timeSheetEntry.projectId = this.project.id;
       } else if (!this.timeSheetEntry.projectId) {
-        clearStoredTimeSheetProjectId();
+        this.clearStoredProjectId();
       }
     }
 
@@ -84,9 +66,6 @@ export class TimeSheetEntryModal implements OnInit {
     const user = await appstraxAuth.getUser();
     this.timeSheetEntry.userId = user.id;
     this.timeSheetEntry.date = this.date;
-
-    this.projectIdAtOpen = this.timeSheetEntry.projectId;
-    this.initializeBooleanFieldDefaults();
   }
 
   formatHours(hours: number): string {
@@ -95,44 +74,13 @@ export class TimeSheetEntryModal implements OnInit {
 
   onProjectSelected(project: Project | null): void {
     this.project = project || undefined;
-    this.timeSheetEntry.projectId = project ? project.id : '';
-    this.initializeBooleanFieldDefaults();
-  }
-
-  get projectFields(): ProjectField[] {
-    return this.project?.fields ?? [];
-  }
-
-  getFieldValue(key: string): string {
-    return (
-      this.timeSheetEntry.fieldValues.find((fv) => fv.key === key)?.value ?? ''
-    );
-  }
-
-  setFieldValue(
-    key: string,
-    value: string | number | null | undefined,
-  ): void {
-    const normalized = value == null ? '' : String(value);
-    const existing = this.timeSheetEntry.fieldValues.find(
-      (fv) => fv.key === key,
-    );
-    if (existing) {
-      existing.value = normalized;
-    } else {
-      this.timeSheetEntry.fieldValues = [
-        ...this.timeSheetEntry.fieldValues,
-        { key, value: normalized },
-      ];
+    if (!project) {
+      this.timeSheetEntry.projectId = '';
+      this.clearStoredProjectId();
+      return;
     }
-  }
-
-  isFieldBoolean(field: ProjectField): boolean {
-    return this.getFieldValue(field.key) === 'true';
-  }
-
-  setFieldBoolean(key: string, checked: boolean): void {
-    this.setFieldValue(key, checked ? 'true' : 'false');
+    this.timeSheetEntry.projectId = project.id;
+    this.storeProjectId(project.id);
   }
 
   onCategoryInput(event: Event): void {
@@ -184,8 +132,7 @@ export class TimeSheetEntryModal implements OnInit {
         return;
       }
 
-      this.pruneStaleFieldValues();
-      storeTimeSheetProjectId(this.timeSheetEntry.projectId);
+      this.storeProjectId(this.timeSheetEntry.projectId);
       this.activeModal.close({
         action: 'save',
         timeSheetEntry: this.timeSheetEntry,
@@ -207,24 +154,11 @@ export class TimeSheetEntryModal implements OnInit {
   }
 
   isFormValid(): boolean {
-    if (!this.wasExistingEntryOnOpen && isFutureUtcCalendarDay(this.date)) {
-      this.errorMessage = FUTURE_TIMESHEET_ENTRY_TOAST;
-      this.toastService.error(FUTURE_TIMESHEET_ENTRY_TOAST);
-      return false;
-    }
-
-    const missingFields = this.wasExistingEntryOnOpen
-      ? []
-      : this.projectFields.filter(
-          (field) => field.required && this.isConfiguredFieldMissing(field),
-        );
-
     let isValid =
       this.timeSheetEntry.projectId &&
       this.timeSheetEntry.hours &&
       this.timeSheetEntry.description &&
-      this.timeSheetEntry.category &&
-      missingFields.length === 0;
+      this.timeSheetEntry.category;
 
     if (isValid) return true;
     let errorMessage = 'Please fill in all required fields';
@@ -236,44 +170,35 @@ export class TimeSheetEntryModal implements OnInit {
       errorMessage += '\n\t• Hours must be greater than 0';
     if (!this.timeSheetEntry.description)
       errorMessage += '\n\t• Description is required';
-    for (const field of missingFields) {
-      errorMessage += `\n\t• ${field.label || field.key} is required`;
-    }
     this.errorMessage = errorMessage;
     return false;
   }
 
-  private isConfiguredFieldMissing(field: ProjectField): boolean {
-    const value = this.getFieldValue(field.key);
-    if (field.type === 'boolean') {
-      return value !== 'true' && value !== 'false';
-    }
-    return !value.trim();
-  }
-
-  private initializeBooleanFieldDefaults(): void {
-    if (this.wasExistingEntryOnOpen) return;
-
-    for (const field of this.projectFields) {
-      if (field.type !== 'boolean' || field.required) continue;
-      const value = this.getFieldValue(field.key);
-      if (value !== 'true' && value !== 'false') {
-        this.setFieldValue(field.key, 'false');
-      }
+  private getStoredProjectId(): string | null {
+    try {
+      return localStorage.getItem(
+        TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY,
+      );
+    } catch {
+      return null;
     }
   }
 
-  private pruneStaleFieldValues(): void {
-    const currentKeys = new Set(this.projectFields.map((field) => field.key));
-    const preserveOrphanedKeys =
-      this.timeSheetEntry.projectId === this.projectIdAtOpen;
-    this.timeSheetEntry.fieldValues = this.timeSheetEntry.fieldValues.filter(
-      (fv) =>
-        currentKeys.has(fv.key) ||
-        (preserveOrphanedKeys && this.fieldValueKeysAtOpen.has(fv.key)),
-    );
+  private storeProjectId(projectId: string): void {
+    if (!projectId) return;
+    try {
+      localStorage.setItem(
+        TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY,
+        projectId,
+      );
+    } catch {}
   }
 
+  private clearStoredProjectId(): void {
+    try {
+      localStorage.removeItem(TimeSheetEntryModal.LAST_SELECTED_PROJECT_KEY);
+    } catch {}
+  }
 }
 
 export interface TimeSheetEntryModalOptions {

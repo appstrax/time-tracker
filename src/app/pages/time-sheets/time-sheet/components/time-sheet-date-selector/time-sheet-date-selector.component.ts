@@ -10,6 +10,8 @@ import {
   signal,
 } from '@angular/core';
 
+import { TIMESHEET_CALENDAR_TIMEZONE } from '@utils';
+
 @Component({
   selector: 'app-time-sheet-date-selector',
   standalone: true,
@@ -18,6 +20,8 @@ import {
   imports: [DatePipe],
 })
 export class TimeSheetDateSelectorComponent implements OnInit {
+  public readonly calendarTimezone = TIMESHEET_CALENDAR_TIMEZONE;
+
   public readonly layout = input<'default' | 'pill'>('default');
   public readonly weekChange = output<{ start: Date; end: Date }>();
 
@@ -42,7 +46,7 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     return `${year}-${month}-${day}`;
   });
   public readonly selectedYear = computed(() =>
-    this.selectedWeekStart().getFullYear(),
+    this.selectedWeekStart().getUTCFullYear(),
   );
 
   public ngOnInit(): void {

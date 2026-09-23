@@ -1,8 +1,8 @@
 <article class="day-card">
   <header class="day-card-header">
     <div class="day-heading">
-      <span class="day-name">{{ date() | date: "EEEE" }}</span>
-      <span class="day-date">{{ date() | date: "d MMM y" }}</span>
+      <span class="day-name">{{ date() | date: "EEEE" : calendarTimezone }}</span>
+      <span class="day-date">{{ date() | date: "d MMM y" : calendarTimezone }}</span>
     </div>
     @if (loggedHours()) {
       <span class="day-total-badge">{{ formatLoggedBadge() }}</span>

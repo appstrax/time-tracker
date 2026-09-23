@@ -10,6 +10,7 @@ import {
   getProjectColor,
   FUTURE_TIMESHEET_ENTRY_TOAST,
   isFutureUtcCalendarDay,
+  TIMESHEET_CALENDAR_TIMEZONE,
 } from '@utils';
 
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
@@ -23,6 +24,9 @@ import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-she
 })
 export class TimeSheetDayComponent {
   private readonly displayUtil = inject(TimeSheetDisplayUtil);
+
+  /** Matches weekly navigator UTC calendar days (see DatePipe in template). */
+  public readonly calendarTimezone = TIMESHEET_CALENDAR_TIMEZONE;
 
   public readonly date = input(new Date());
   public readonly projects = input<Project[]>([]);

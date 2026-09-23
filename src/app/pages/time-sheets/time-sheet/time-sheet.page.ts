@@ -9,6 +9,7 @@ import {
   clearStoredTimeSheetProjectId,
   getStoredTimeSheetProjectId,
   storeTimeSheetProjectId,
+  toUtcCalendarDateKey,
 } from '@utils';
 
 import { TimeSheetDayComponent } from './components';
@@ -71,7 +72,7 @@ export class TimeSheetPage {
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
     for (const entry of this.filteredEntries()) {
-      const dateKey = entry.date.toDateString();
+      const dateKey = toUtcCalendarDateKey(entry.date);
       const dayEntries = entriesByDate.get(dateKey) ?? [];
       dayEntries.push(entry);
       entriesByDate.set(dateKey, dayEntries);
@@ -147,6 +148,10 @@ export class TimeSheetPage {
     } finally {
       this.fetching.set(false);
     }
+  }
+
+  public utcDateKey(date: Date): string {
+    return toUtcCalendarDateKey(date);
   }
 
   public onWeekChange(range: { start: Date; end: Date }) {

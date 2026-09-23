@@ -1,13 +1,6 @@
-<div class="insights-page">
+<div class="container">
   @if (user()) {
-  <div class="insights-shell w-100">
-    <header class="insights-hero">
-      <div class="insights-hero-copy">
-        <h1>Profile</h1>
-        <p class="insights-lead">Your account details and personal information.</p>
-      </div>
-    </header>
-
+  <div class="w-100">
     <section class="profile-section">
       <div class="d-flex align-items-center justify-content-between">
         <div class="d-flex align-items-center gap-4">
@@ -20,7 +13,7 @@
             />
             } @else {
             <span class="member-avatar rounded-circle" aria-hidden="true">
-              <span>{{ userInitials() }}</span>
+              <span>{{ getUserInitials() }}</span>
             </span>
             }
             <input
@@ -51,24 +44,13 @@
       <div class="d-flex align-items-center justify-content-between">
         <h2 class="section-title">Personal Information</h2>
         @if (!editing()) {
-        <div class="d-flex align-items-center gap-2">
-          <button
-            type="button"
-            class="btn btn-primary d-flex align-items-center gap-2"
-            (click)="openChangePasswordModal()"
-          >
-            Change password
-            <i class="bi bi-shield-lock"></i>
-          </button>
-          <button
-            type="button"
-            class="btn btn-primary d-flex align-items-center gap-2"
-            (click)="toggleEditing()"
-          >
-            Edit
-            <i class="bi bi-pencil"></i>
-          </button>
-        </div>
+        <button
+          class="btn btn-primary d-flex align-items-center gap-3"
+          (click)="toggleEditing()"
+        >
+          Edit
+          <i class="bi bi-pencil"></i>
+        </button>
         } @else {
         <div class="d-flex gap-2">
           <button class="btn btn-light" type="button" (click)="toggleEditing()">
@@ -126,6 +108,10 @@
           <div class="col-md-4">
             <div class="text-muted fw-light">Email</div>
             <div class="fw-500">{{ user().email }}</div>
+          </div>
+          <div class="col-md-4">
+            <div class="text-muted fw-light">Password</div>
+            <div class="fw-500">********</div>
           </div>
         </div>
       </div>

@@ -2,6 +2,34 @@
   color: var(--text-primary);
 }
 
+.page-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1.5rem;
+
+  h1 {
+    margin: 0.25rem 0 0.5rem;
+    font-size: clamp(2rem, 4vw, 2.75rem);
+  }
+}
+
+.eyebrow {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.subtitle {
+  max-width: 42rem;
+  margin: 0;
+  color: var(--text-muted);
+}
+
 .loading-card,
 .state-card,
 .table-shell {
@@ -127,6 +155,11 @@
 }
 
 @media (max-width: 767px) {
+  .page-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
   .table-toolbar,
   .table-responsive {
     padding-left: 1rem;
