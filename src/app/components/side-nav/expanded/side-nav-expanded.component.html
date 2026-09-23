@@ -1,4 +1,4 @@
-<div class="expanded-nav">
+<div class="nav-panel" [class.nav-panel--compact]="compact">
   <div class="logo-row">
     <a routerLink="/home" class="brand">
       <img
@@ -6,58 +6,77 @@
         alt="Time Tracker Logo"
         class="site-logo"
       />
-      <span class="brand-name">Time Tracker</span>
+      <span class="brand-name nav-expandable-text">Time Tracker</span>
     </a>
-    <button
-      class="toggle-btn"
-      type="button"
-      (click)="toggle.emit()"
-      aria-label="Collapse side navigation"
-    >
-      <i class="bi bi-chevron-double-left"></i>
-    </button>
   </div>
 
   <div class="menu">
-    <a routerLink="/home" routerLinkActive="active" class="menu-item">
-      <i class="bi bi-house-door-fill"></i>
-      <span class="label">Home</span>
+    <a
+      routerLink="/home"
+      routerLinkActive="active"
+      class="menu-item"
+      ngbTooltip="Home"
+      [disableTooltip]="!compact"
+      placement="end"
+      container="body"
+      triggers="hover"
+    >
+      <span class="menu-item-icon" aria-hidden="true">
+        <i class="bi bi-house-door-fill"></i>
+      </span>
+      <span class="label nav-expandable-text">Home</span>
     </a>
-    <a routerLink="/time-sheet" routerLinkActive="active" class="menu-item">
-      <i class="bi bi-stopwatch-fill"></i>
-      <span class="label">Time Sheets</span>
+    <a
+      routerLink="/time-sheet"
+      routerLinkActive="active"
+      class="menu-item"
+      ngbTooltip="Time Sheets"
+      [disableTooltip]="!compact"
+      placement="end"
+      container="body"
+      triggers="hover"
+    >
+      <span class="menu-item-icon" aria-hidden="true">
+        <i class="bi bi-stopwatch-fill"></i>
+      </span>
+      <span class="label nav-expandable-text">Time Sheets</span>
     </a>
     @if (admin()) {
-      <a routerLink="/analytics" routerLinkActive="active" class="menu-item">
-        <i class="bi bi-bar-chart-fill"></i>
-        <span class="label">Analytics</span>
+      <a
+        routerLink="/analytics"
+        routerLinkActive="active"
+        class="menu-item"
+        ngbTooltip="Analytics"
+        [disableTooltip]="!compact"
+        placement="end"
+        container="body"
+        triggers="hover"
+      >
+        <span class="menu-item-icon" aria-hidden="true">
+          <i class="bi bi-bar-chart-fill"></i>
+        </span>
+        <span class="label nav-expandable-text">Analytics</span>
       </a>
 
-      <a routerLink="/projects" routerLinkActive="active" class="menu-item">
-        <i class="bi bi-folder-fill"></i>
-        <span class="label">Projects</span>
+      <a
+        routerLink="/projects"
+        routerLinkActive="active"
+        class="menu-item"
+        ngbTooltip="Projects"
+        [disableTooltip]="!compact"
+        placement="end"
+        container="body"
+        triggers="hover"
+      >
+        <span class="menu-item-icon" aria-hidden="true">
+          <i class="bi bi-folder-fill"></i>
+        </span>
+        <span class="label nav-expandable-text">Projects</span>
       </a>
     }
   </div>
 
   <div class="footer">
-    <a routerLink="/settings" routerLinkActive="active" class="menu-item">
-      <i class="bi bi-gear-fill"></i>
-      <span class="label">Settings</span>
-    </a>
-    <a
-      routerLink="/profile"
-      routerLinkActive="active"
-      class="menu-item"
-      [title]="userDisplayName()"
-      [attr.aria-label]="profileAriaLabel()"
-    >
-      <app-user-avatar [user]="user()" [sizePx]="18" [fontSizePx]="9" />
-      <span class="label">{{ userDisplayName() }}</span>
-    </a>
-    <button class="menu-item" type="button" (click)="logout.emit()">
-      <i class="bi bi-power"></i>
-      <span class="label">Logout</span>
-    </button>
+    <app-side-nav-profile-card [compact]="compact" (logout)="logout.emit()" />
   </div>
 </div>

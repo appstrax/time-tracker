@@ -1,0 +1,59 @@
+<div class="profile-card" [class.profile-card--compact]="compact">
+  <a
+    routerLink="/profile"
+    routerLinkActive="profile-identity-active"
+    class="profile-identity"
+    [attr.aria-label]="profileAriaLabel()"
+    [ngbTooltip]="userDisplayName()"
+    [disableTooltip]="!compact"
+    placement="end"
+    container="body"
+    triggers="hover"
+  >
+    <app-user-avatar
+      class="profile-avatar"
+      [user]="user()"
+      [sizePx]="compact ? 36 : 40"
+      [fontSizePx]="compact ? 12 : 14"
+    />
+    <div class="profile-text">
+      <span class="profile-name">{{ userDisplayName() }}</span>
+      @if (userSubtitle()) {
+        <span class="profile-subtitle">{{ userSubtitle() }}</span>
+      }
+    </div>
+  </a>
+
+  <div class="profile-menu" ngbDropdown placement="top-end" container="body">
+    <button
+      type="button"
+      class="profile-settings-btn"
+      ngbDropdownToggle
+      aria-label="Account menu"
+      ngbTooltip="Settings"
+      [disableTooltip]="!compact"
+      placement="end"
+      container="body"
+      triggers="hover"
+    >
+      <span class="icon-box">
+        <i class="bi bi-gear-fill" aria-hidden="true"></i>
+      </span>
+    </button>
+    <div ngbDropdownMenu class="profile-dropdown-menu">
+      <a routerLink="/settings" ngbDropdownItem class="profile-dropdown-item">
+        <i class="bi bi-gear-fill" aria-hidden="true"></i>
+        Settings
+      </a>
+      <button
+        type="button"
+        ngbDropdownItem
+        class="profile-dropdown-item profile-dropdown-item--danger"
+        (click)="onLogout()"
+      >
+        <i class="bi bi-box-arrow-right" aria-hidden="true"></i>
+        Log out
+      </button>
+    </div>
+  </div>
+</div>

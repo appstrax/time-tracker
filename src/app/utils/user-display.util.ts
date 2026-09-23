@@ -1,4 +1,4 @@
-import { User } from '@models';
+import { User, UserRole } from '@models';
 
 export function getUserDisplayName(
   user: User | null,
@@ -15,6 +15,16 @@ export function getUserDisplayName(
 export function getProfileLinkLabel(user: User | null): string {
   const name = getUserDisplayName(user, '');
   return name ? `Profile, ${name}` : 'Profile';
+}
+
+export function getUserSubtitle(user: User | null): string {
+  if (!user) {
+    return '';
+  }
+  if (user.role === UserRole.ADMIN) {
+    return 'Administrator';
+  }
+  return user.email;
 }
 
 export function getUserInitials(user: User | null): string {

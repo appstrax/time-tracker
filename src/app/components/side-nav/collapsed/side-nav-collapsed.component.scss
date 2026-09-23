@@ -80,19 +80,19 @@
     align-items: center;
     justify-content: center;
     border-radius: 8px;
-    background-color: var(--color-border);
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
-    transition: all 0.2s ease;
+    background-color: transparent;
+    box-shadow: none;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
     cursor: pointer;
 
-    /* Hover state only when not active */
-    .nav-item:not(.active) & :hover {
+    .nav-item:not(.active) &:hover {
       background-color: color-mix(
         in srgb,
-        var(--color-border) 70%,
+        var(--color-border) 55%,
         transparent
       );
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     }
 
     i {
@@ -119,34 +119,9 @@
 }
 
 .profile-section {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 15px;
-  margin-top: 50px;
-  padding: 0 10px;
+  margin-top: auto;
+  padding: 0 6px 8px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.toggle-btn {
-  margin-top: 10px;
-  margin-left: auto;
-  margin-right: auto;
-  width: 30px;
-  height: 30px;
-  border-radius: 18px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
-  cursor: pointer;
-  color: var(--side-nav-text);
-
-  &:hover {
-    background: color-mix(
-      in srgb,
-      var(--color-surface) 70%,
-      var(--color-border)
-    );
-  }
-}
