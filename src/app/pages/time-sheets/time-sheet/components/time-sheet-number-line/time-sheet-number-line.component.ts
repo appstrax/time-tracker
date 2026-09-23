@@ -144,7 +144,7 @@ export class TimeSheetNumberLineComponent {
   }
 
   public onTrackClick(event: MouseEvent): void {
-    if (this.disabled()) return;
+    if (this.disabled() || !this.allowCreate()) return;
     const target = event.target as HTMLElement;
     if (target.closest('.timeline-block')) return;
 
