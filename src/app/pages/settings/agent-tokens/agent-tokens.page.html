@@ -1,17 +1,20 @@
-<div class="container agent-tokens-page">
+<div class="agent-tokens-page insights-page">
+  <div class="insights-shell container">
   <nav class="breadcrumb-nav" aria-label="Breadcrumb">
     <a routerLink="/settings">Settings</a>
     <span class="sep">/</span>
     <span class="current">Agent tokens</span>
   </nav>
 
-  <header class="page-header">
-    <h1>Agent tokens</h1>
-    <p class="lead">
-      Create tokens so an AI agent (for example in Cursor) can track time and read project
-      details on your behalf. Actions are recorded under your account within the limits you set
-      here.
-    </p>
+  <header class="insights-hero page-header">
+    <div class="insights-hero-copy">
+      <h1>Agent tokens</h1>
+      <p class="insights-lead">
+        Create tokens so an AI agent (for example in Cursor) can track time and read project
+        details on your behalf. Actions are recorded under your account within the limits you set
+        here.
+      </p>
+    </div>
   </header>
 
   @if (loading()) {
@@ -151,4 +154,5 @@
       </section>
     </div>
   }
+  </div>
 </div>

@@ -2,29 +2,7 @@
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0.25rem 0 2rem;
   color: var(--text-primary);
-}
-
-.page-header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 1.25rem;
-  margin-bottom: 1.5rem;
-}
-
-.page-header-copy h1 {
-  margin: 0 0 0.35rem;
-  font-size: clamp(1.65rem, 3vw, 2rem);
-  font-weight: 700;
-}
-
-.subtitle {
-  margin: 0;
-  max-width: 36rem;
-  color: var(--text-muted);
-  font-size: 0.88rem;
 }
 
 .page-header-actions {
@@ -104,19 +82,9 @@
 }
 
 @media (max-width: 900px) {
-  .page-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
   .page-header-actions {
     flex-wrap: wrap;
     justify-content: flex-start;
   }
 }
 
-@media (max-width: 767px) {
-  .time-sheet-page {
-    padding-bottom: 1rem;
-  }
-}

@@ -15,7 +15,8 @@
   padding: 0.75rem 1.25rem 1.5rem;
 }
 
-.insights-hero {
+.insights-hero,
+.page-header {
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -24,18 +25,33 @@
   padding: 0.25rem 0 0.5rem;
 }
 
-.insights-hero-copy h1 {
+.insights-hero-copy h1,
+.page-header-copy h1,
+.page-header > h1,
+.page-header > div > h1 {
   margin: 0;
   font-size: clamp(1.5rem, 2.8vw, 1.875rem);
   font-weight: 700;
   letter-spacing: -0.02em;
+  color: var(--text-primary);
 }
 
-.insights-lead {
+.insights-lead,
+.page-header .lead,
+.page-header .subtitle,
+.project-page .page-header .subtitle {
   margin: 0.25rem 0 0;
   color: var(--text-muted);
   font-size: 0.9rem;
   max-width: 36rem;
+}
+
+@media (max-width: 900px) {
+  .insights-hero,
+  .page-header {
+    align-items: stretch;
+    flex-direction: column;
+  }
 }
 
 .insights-chips {
