@@ -118,6 +118,7 @@ export class ProjectPage implements OnInit {
         this.project.set(project);
       }
 
+      this.logoFile.set(null);
       this.syncPersistedSnapshots(project);
 
       if (!this.editing()) {
@@ -156,6 +157,7 @@ export class ProjectPage implements OnInit {
     }
 
     const file = input.files[0];
+    this.error.set('');
     this.logoFile.set(file);
 
     const reader = new FileReader();
@@ -181,6 +183,33 @@ export class ProjectPage implements OnInit {
     );
   }
 
+  public areCoreDirty(): boolean {
+    if (this.logoFile()) {
+      return true;
+    }
+
+    const project = this.project();
+    return (
+      project.name !== this.savedCoreSnapshot.name ||
+      project.description !== this.savedCoreSnapshot.description ||
+      project.logoUrl !== this.savedCoreSnapshot.logoUrl
+    );
+  }
+
+  public hasUnsavedEdits(): boolean {
+    return this.areCoreDirty() || this.areFieldsDirty();
+  }
+
+  public canLeaveProjectPage(): boolean {
+    if (!this.editing() || !this.project().id || !this.hasUnsavedEdits()) {
+      return true;
+    }
+
+    return confirm(
+      'You have unsaved project or custom field changes. Leave without saving?',
+    );
+  }
+
   public canSaveFields(): boolean {
     if (!this.editing() || !this.project().id) {
       return false;
@@ -195,6 +224,13 @@ export class ProjectPage implements OnInit {
     if (!this.editing() || !this.project().id) {
       this.fieldsError.set(
         'Create the project first, then save custom fields here.',
+      );
+      return;
+    }
+
+    if (this.areCoreDirty()) {
+      this.fieldsError.set(
+        'You have unsaved project detail changes. Use Update Project before saving custom fields.',
       );
       return;
     }
@@ -294,12 +330,14 @@ export class ProjectPage implements OnInit {
   }
 
   public updateProjectName(name: string): void {
+    this.error.set('');
     this.updateProject((project) => {
       project.name = name;
     });
   }
 
   public updateProjectDescription(description: string): void {
+    this.error.set('');
     this.updateProject((project) => {
       project.description = description;
     });
