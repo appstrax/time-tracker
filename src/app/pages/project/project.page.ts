@@ -115,17 +115,12 @@ export class ProjectPage implements OnInit {
         await this.uploadProjectLogo(logoFile);
       }
 
-      const draftFieldEdits = this.project().fields;
-      const projectToSave = this.buildProjectForCoreSave();
-      const project = await this.projectService.save(projectToSave);
+      const submitted = this.buildProjectForCoreSave();
+      const project = await this.projectService.save(submitted);
 
-      if (this.editing()) {
-        this.project.set(
-          this.mergeProjectAfterSave(project, { fields: draftFieldEdits }),
-        );
-      } else {
-        this.project.set(project);
-      }
+      this.project.set(
+        this.mergeProjectAfterSave(project, this.liveEditOverrides(submitted)),
+      );
 
       this.logoFile.set(null);
       this.syncPersistedSnapshots(project);
@@ -262,20 +257,11 @@ export class ProjectPage implements OnInit {
         this.fieldsError.set(validationError);
         return;
       }
-      const draftCoreEdits = {
-        name: this.project().name,
-        description: this.project().description,
-        logoUrl: this.project().logoUrl,
-      };
-      const projectToSave = this.buildProjectForFieldsSave();
-      const project = await this.projectService.save(projectToSave);
+      const submitted = this.buildProjectForFieldsSave();
+      const project = await this.projectService.save(submitted);
 
       this.project.set(
-        this.mergeProjectAfterSave(project, {
-          name: draftCoreEdits.name,
-          description: draftCoreEdits.description,
-          logoUrl: draftCoreEdits.logoUrl,
-        }),
+        this.mergeProjectAfterSave(project, this.liveEditOverrides(submitted)),
       );
 
       this.syncPersistedSnapshots(project);
@@ -378,6 +364,28 @@ export class ProjectPage implements OnInit {
     return merged;
   }
 
+  /**
+   * Preserves any edits made to the live form while a save request was in
+   * flight. Compares the current (post-await) form state against what was
+   * actually submitted; anything that changed since submission wins over
+   * the (now stale) server response.
+   */
+  private liveEditOverrides(submitted: Project): Partial<Project> {
+    const live = this.project();
+    const overrides: Partial<Project> = {};
+
+    if (live.name !== submitted.name) overrides.name = live.name;
+    if (live.description !== submitted.description) {
+      overrides.description = live.description;
+    }
+    if (live.logoUrl !== submitted.logoUrl) overrides.logoUrl = live.logoUrl;
+    if (JSON.stringify(live.fields) !== JSON.stringify(submitted.fields)) {
+      overrides.fields = live.fields;
+    }
+
+    return overrides;
+  }
+
   public updateProjectName(name: string): void {
     this.error.set('');
     this.updateProject((project) => {
@@ -393,6 +401,7 @@ export class ProjectPage implements OnInit {
   }
 
   public addField(): void {
+    this.fieldsError.set('');
     this.updateProject((project) => {
       project.fields = [
         ...project.fields,
@@ -412,6 +421,7 @@ export class ProjectPage implements OnInit {
   public moveFieldUp(index: number): void {
     if (index <= 0) return;
     this.fieldOptionsDrafts = {};
+    this.fieldsError.set('');
     this.updateProject((project) => {
       const fields = [...project.fields];
       [fields[index - 1], fields[index]] = [fields[index], fields[index - 1]];
@@ -423,6 +433,7 @@ export class ProjectPage implements OnInit {
     this.updateProject((project) => {
       if (index >= project.fields.length - 1) return;
       this.fieldOptionsDrafts = {};
+      this.fieldsError.set('');
       const fields = [...project.fields];
       [fields[index], fields[index + 1]] = [fields[index + 1], fields[index]];
       project.fields = fields;
