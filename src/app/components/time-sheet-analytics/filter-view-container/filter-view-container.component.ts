@@ -75,6 +75,7 @@ export class FilterViewContainerComponent
   public readonly canApprove = input(false);
 
   public readonly entryUpdated = output<TimeSheetEntry>();
+  public readonly filteredEntryCountChange = output<number>();
 
   public readonly filter = signal<AnalyticsFilter>({
     status: 'all',
@@ -175,6 +176,7 @@ export class FilterViewContainerComponent
     });
 
     this.filteredEntries.set(filteredEntries);
+    this.filteredEntryCountChange.emit(filteredEntries.length);
   }
 
   private populateCategories(): void {
