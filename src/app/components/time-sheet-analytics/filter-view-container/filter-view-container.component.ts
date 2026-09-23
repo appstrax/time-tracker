@@ -29,7 +29,7 @@ import {
   DateRange,
 } from '@models';
 import { TimeSheetFilterUtil, getUserDisplayName, TimeSheetExportUtil } from '@utils';
-import { TimeSheetEntryService, ToastService } from '@services';
+import { ToastService } from '@services';
 
 export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
 
@@ -54,7 +54,6 @@ export class FilterViewContainerComponent
   private route: ActivatedRoute = inject(ActivatedRoute);
   private toast: ToastService = inject(ToastService);
   private filterUtils: TimeSheetFilterUtil = inject(TimeSheetFilterUtil);
-  private entryService: TimeSheetEntryService = inject(TimeSheetEntryService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
   public readonly projects = input<Project[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
@@ -264,28 +263,5 @@ export class FilterViewContainerComponent
 
   public onSingleEntryApproved(entry: TimeSheetEntry): void {
     this.entryUpdated.emit(entry);
-  }
-
-  public async onApproveAll(): Promise<void> {
-    const pendingEntries = this.filteredEntries().filter(
-      (entry) => !entry.approved,
-    );
-    if (!pendingEntries.length) {
-      this.toast.info('No pending entries to approve');
-      return;
-    }
-
-    try {
-      for (const entry of pendingEntries) {
-        const toSave = entry.clone();
-        toSave.approved = true;
-        const savedEntry = await this.entryService.save(toSave);
-        this.entryUpdated.emit(savedEntry);
-      }
-
-      this.toast.success(`Approved ${pendingEntries.length} time entries`);
-    } catch (error) {
-      this.toast.error('Error approving time entries');
-    }
   }
 }
