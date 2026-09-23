@@ -17,6 +17,7 @@
         type="button"
         class="timeline-block"
         [class.timeline-block-compact]="!segment.showInlineDetail"
+        [class.timeline-block-quarter]="segment.isQuarterHourBlock"
         [style.left.%]="segment.leftPercent"
         [style.width.%]="segment.widthPercent"
         [style.background-color]="segment.backgroundColor"

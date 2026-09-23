@@ -113,6 +113,17 @@
   justify-content: flex-end;
 }
 
+.timeline-block-quarter {
+  padding-inline: 0;
+  justify-content: center;
+
+  .timeline-block-hours {
+    margin-left: 0;
+    flex: 1 1 auto;
+    text-align: center;
+  }
+}
+
 .timeline-block-name {
   flex: 1 1 auto;
   overflow: hidden;
@@ -162,6 +173,10 @@
   .timeline-block {
     font-size: 0.72rem;
     padding: 0.35rem 0.4rem;
+  }
+
+  .timeline-block-quarter {
+    padding-inline: 0;
   }
 
   .timeline-block-name {

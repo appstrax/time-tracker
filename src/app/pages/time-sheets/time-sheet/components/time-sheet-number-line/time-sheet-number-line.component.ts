@@ -22,6 +22,7 @@ interface TimelineSegment {
   label: string;
   durationLabel: string;
   showInlineDetail: boolean;
+  isQuarterHourBlock: boolean;
   tooltipText: string;
 }
 
@@ -89,6 +90,7 @@ export class TimeSheetNumberLineComponent {
         durationLabel: this.formatBlockHours(entry.hours),
         backgroundColor: color,
         showInlineDetail: entry.hours >= 0.75,
+        isQuarterHourBlock: entry.hours === 0.25,
         tooltipText: this.getBlockTooltipText(entry),
       };
     });
