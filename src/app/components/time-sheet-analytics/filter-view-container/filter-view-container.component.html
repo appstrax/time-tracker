@@ -1,68 +1,114 @@
-<div class="filter-view-container">
-  <section class="filter-panel">
-    <div class="panel-header">
-      <div>
-        <p class="eyebrow">Explore data</p>
-        <h2>Filters and views</h2>
-        <p>
-          Switch between summary, detail, timeline, and approval-focused views,
-          then narrow the results by status, teammate, category, and date range.
-        </p>
-      </div>
-
-      <div class="panel-actions">
-        <span class="metric-pill">
-          {{ filteredEntries().length }} {{ filteredEntries().length === 1 ? 'entry' : 'entries' }}
-        </span>
-        @if (showExport()) {
-          <button
-            type="button"
-            class="export-all-button"
-            (click)="exportAllProjects()"
-          >
-            <i class="bi bi-download" aria-hidden="true"></i>
-            Export all projects
-          </button>
-        }
-      </div>
-    </div>
-
-    <div class="panel-content">
-      <div class="panel-section">
-        <div class="section-heading">
-          <div>
-            <h3>Choose a view</h3>
-            <p>Pick the perspective that best fits the question you are answering.</p>
-          </div>
+<div class="filter-view-container" [class.compact]="compact()">
+  <section class="filter-panel" [class.workspace-panel]="compact()">
+    @if (!compact()) {
+      <div class="panel-header">
+        <div>
+          <p class="eyebrow">Explore data</p>
+          <h2>Filters and views</h2>
+          <p>
+            Switch between summary, detail, timeline, and approval-focused views,
+            then narrow the results by status, teammate, category, and date range.
+          </p>
         </div>
 
-        <div class="view-type-grid">
-          @for (viewType of visibleViewTypes(); track viewType.value) {
+        <div class="panel-actions">
+          <span class="metric-pill">
+            {{ filteredEntries().length }} {{ filteredEntries().length === 1 ? 'entry' : 'entries' }}
+          </span>
+          @if (showExport()) {
             <button
               type="button"
-              class="view-type-option"
-              [class.active]="activeView() === viewType.value"
-              (click)="onViewTypeChange(viewType.value)"
+              class="export-all-button"
+              (click)="exportAllProjects()"
             >
-              <div class="icon-wrapper">
-                <i [class]="'bi ' + viewType.icon"></i>
-              </div>
-              <div class="text-start">
-                <div class="view-label">{{ viewType.label }}</div>
-                <div class="view-description">{{ viewType.description }}</div>
-              </div>
+              <i class="bi bi-download" aria-hidden="true"></i>
+              Export all projects
             </button>
           }
         </div>
       </div>
+    }
 
-      <div class="panel-section">
-        <div class="section-heading">
-          <div>
-            <h3>Refine results</h3>
-            <p>Adjust the filters to focus the analytics output.</p>
+    <div class="panel-content">
+      <div class="panel-section panel-section--views">
+        @if (!compact()) {
+          <div class="section-heading">
+            <div>
+              <h3>Choose a view</h3>
+              <p>Pick the perspective that best fits the question you are answering.</p>
+            </div>
           </div>
-        </div>
+        } @else {
+          <div class="compact-toolbar">
+            <div
+              class="view-type-segmented"
+              role="tablist"
+              aria-label="Time entry view"
+            >
+              @for (viewType of visibleViewTypes(); track viewType.value) {
+                <button
+                  type="button"
+                  role="tab"
+                  class="view-segment"
+                  [class.active]="activeView() === viewType.value"
+                  [attr.aria-selected]="activeView() === viewType.value"
+                  (click)="onViewTypeChange(viewType.value)"
+                >
+                  <i [class]="'bi ' + viewType.icon" aria-hidden="true"></i>
+                  {{ viewType.label }}
+                </button>
+              }
+            </div>
+            <div class="compact-toolbar-actions">
+              <span class="metric-pill metric-pill--compact">
+                {{ filteredEntries().length }}
+                {{ filteredEntries().length === 1 ? 'match' : 'matches' }}
+              </span>
+              @if (showExport()) {
+                <button
+                  type="button"
+                  class="export-all-button export-all-button--compact"
+                  (click)="exportAllProjects()"
+                >
+                  <i class="bi bi-download" aria-hidden="true"></i>
+                  Export
+                </button>
+              }
+            </div>
+          </div>
+        }
+
+        @if (!compact()) {
+          <div class="view-type-grid">
+            @for (viewType of visibleViewTypes(); track viewType.value) {
+              <button
+                type="button"
+                class="view-type-option"
+                [class.active]="activeView() === viewType.value"
+                (click)="onViewTypeChange(viewType.value)"
+              >
+                <div class="icon-wrapper">
+                  <i [class]="'bi ' + viewType.icon"></i>
+                </div>
+                <div class="text-start">
+                  <div class="view-label">{{ viewType.label }}</div>
+                  <div class="view-description">{{ viewType.description }}</div>
+                </div>
+              </button>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="panel-section panel-section--filters">
+        @if (!compact()) {
+          <div class="section-heading">
+            <div>
+              <h3>Refine results</h3>
+              <p>Adjust the filters to focus the analytics output.</p>
+            </div>
+          </div>
+        }
 
         <div class="filters-grid">
           <app-filter-block label="Status">
@@ -200,31 +246,53 @@
         </div>
       </div>
     </div>
+
+    @if (compact()) {
+      <div class="workspace-results">
+        <ng-container *ngTemplateOutlet="viewResults" />
+      </div>
+    }
   </section>
 
-  <div class="view-content">
-    @if (activeView() === "summary") {
-      <app-filter-view-summary
-        [entries]="filteredEntries()"
-        [projects]="projects()"
-        [users]="users()"
-        [showExport]="showExport()"
-      ></app-filter-view-summary>
-    } @else if (activeView() === "details") {
-      <app-filter-view-details
-        [entries]="filteredEntries()"
-        [projects]="projects()"
-      ></app-filter-view-details>
-    } @else if (activeView() === "timeline") {
-      <app-filter-view-timeline
-        [entries]="filteredEntries()"
-        [projects]="projects()"
-      ></app-filter-view-timeline>
-    } @else if (activeView() === "unapproved") {
-      <app-unapproved-entries
-        [timeSheetEntries]="filteredEntries()"
-        [users]="users()"
-      />
-    }
-  </div>
+  @if (!compact()) {
+    <div class="view-content">
+      <ng-container *ngTemplateOutlet="viewResults" />
+    </div>
+  }
 </div>
+
+<ng-template #viewResults>
+  @if (activeView() === "summary") {
+    <app-filter-view-summary
+      [entries]="filteredEntries()"
+      [projects]="projects()"
+      [users]="users()"
+      [showExport]="showExport()"
+      [linkProjectsToTimeSheet]="linkProjectsToTimeSheet()"
+      [compact]="compact()"
+    ></app-filter-view-summary>
+  } @else if (activeView() === "details") {
+    <app-filter-view-details
+      [entries]="filteredEntries()"
+      [projects]="projects()"
+      [compact]="compact()"
+    ></app-filter-view-details>
+  } @else if (activeView() === "timeline") {
+    <app-filter-view-timeline
+      [entries]="filteredEntries()"
+      [projects]="projects()"
+      [users]="users()"
+      [compact]="compact()"
+      [canManageStatus]="canManageStatus()"
+      (entryUpdated)="onSingleEntryApproved($event)"
+    ></app-filter-view-timeline>
+  } @else if (activeView() === "unapproved") {
+    <app-unapproved-entries
+      [timeSheetEntries]="filteredEntries()"
+      [users]="users()"
+      [compact]="compact()"
+      [canApprove]="canApprove()"
+      (entryUpdated)="onSingleEntryApproved($event)"
+    />
+  }
+</ng-template>

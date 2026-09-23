@@ -13,5 +13,6 @@ export class MetricCardComponent {
   public readonly value = input<string | number>('');
   public readonly valueSuffix = input('');
   public readonly iconClass = input('bi bi-circle');
+  public readonly compact = input(false);
 }
 

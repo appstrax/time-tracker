@@ -1,10 +1,11 @@
 import { DatePipe } from '@angular/common';
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { Project, TimeSheetEntry } from '@models';
 import { TimeSheetEntryModal } from '@modals';
 import { TimeSheetEntryService, ToastService } from '@services';
+import { TimeSheetDisplayUtil, getProjectColor } from '@utils';
 
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
 
@@ -16,18 +17,62 @@ import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-she
   imports: [TimeSheetNumberLineComponent, DatePipe],
 })
 export class TimeSheetDayComponent {
+  private readonly displayUtil = inject(TimeSheetDisplayUtil);
+
   public readonly date = input(new Date());
   public readonly projects = input<Project[]>([]);
+  public readonly projectColorById = input<Map<string, string>>(new Map());
   public readonly categories = input<string[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
 
   public readonly save = output<TimeSheetEntry | undefined>();
+  public readonly entriesExpanded = signal(false);
+
   public readonly approved = computed(() =>
     this.entries().some((entry) => entry.approved),
   );
   public readonly sortedEntries = computed(() =>
-    this.entries().sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
+    [...this.entries()].sort(
+      (a, b) => a.createdAt.getTime() - b.createdAt.getTime(),
+    ),
   );
+
+  public readonly loggedHours = computed(() =>
+    this.sortedEntries().reduce((sum, entry) => sum + entry.hours, 0),
+  );
+
+  public readonly entryCountLabel = computed(() => {
+    const count = this.sortedEntries().length;
+    return count === 1 ? '1 entry' : `${count} entries`;
+  });
+
+  public formatLoggedBadge(): string {
+    const hours = this.loggedHours();
+    if (!hours) return '';
+    const normalized = Math.round(hours * 4) / 4;
+    const label = Number.isInteger(normalized)
+      ? `${normalized}h`
+      : `${parseFloat(normalized.toFixed(2))}h`;
+    return `${label} logged`;
+  }
+
+  public formatEntryHours(hours: number): string {
+    return this.displayUtil.formatQuarterHourDuration(hours);
+  }
+
+  public projectName(entry: TimeSheetEntry): string {
+    return this.displayUtil.getProjectName(entry.projectId, this.projects());
+  }
+
+  public projectColor(entry: TimeSheetEntry): string {
+    const fromMap = this.projectColorById().get(entry.projectId);
+    if (fromMap) return fromMap;
+    return getProjectColor(entry.projectId, this.projects());
+  }
+
+  public toggleEntriesExpanded(): void {
+    this.entriesExpanded.update((expanded) => !expanded);
+  }
 
   constructor(
     private modalService: NgbModal,
@@ -39,7 +84,7 @@ export class TimeSheetDayComponent {
     try {
       entry = await this.entryService.save(entry);
       this.save.emit(entry);
-    } catch (error) {
+    } catch {
       this.toastService.error('Error saving time sheet entry');
     }
   }
@@ -48,7 +93,7 @@ export class TimeSheetDayComponent {
     try {
       await this.entryService.delete(entry.id);
       this.save.emit(undefined);
-    } catch (error) {
+    } catch {
       this.toastService.error('Error deleting time sheet entry');
     }
   }
@@ -69,17 +114,19 @@ export class TimeSheetDayComponent {
       centered: true,
       backdrop: 'static',
       keyboard: true,
+      size: 'lg',
+      backdropClass: 'time-sheet-entry-backdrop',
     });
     Object.assign(modalRef.componentInstance, options);
     modalRef.result.then(
-      (result: any) => {
+      (result: { action: string; timeSheetEntry: TimeSheetEntry }) => {
         if (result.action === 'save') {
           this.saveTimeSheetEntry(result.timeSheetEntry);
         } else if (result.action === 'delete') {
           this.deleteTimeSheetEntry(result.timeSheetEntry);
         }
       },
-      (reason: any) => {},
+      () => {},
     );
   }
 

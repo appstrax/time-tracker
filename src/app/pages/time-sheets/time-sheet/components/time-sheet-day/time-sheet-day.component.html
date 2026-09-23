@@ -1,19 +1,75 @@
-<div class="time-sheet-day-section">
-  <div class="d-flex align-items-center">
-    <div class="time-sheet-day-date">
-      <div class="time-sheet-day-title">{{ date() | date: "EEEE" }}</div>
-      <div class="day-date">{{ date() | date: "d MMM yyyy" }}</div>
+<article class="day-card">
+  <header class="day-card-header">
+    <div class="day-heading">
+      <span class="day-name">{{ date() | date: "EEEE" }}</span>
+      <span class="day-date">{{ date() | date: "d MMM y" }}</span>
     </div>
+    @if (loggedHours()) {
+      <span class="day-total-badge">{{ formatLoggedBadge() }}</span>
+    }
+  </header>
 
-    <div class="w-100">
-      <app-time-sheet-number-line
-        [colorIndex]="date().getDay()"
-        (onEntryClick)="openTimeSheetEntryModal($event)"
-        (onCreateEntry)="openTimeSheetEntryModal($event)"
-        [projects]="projects()"
-        [entries]="sortedEntries()"
-        [disabled]="approved()"
-      />
-    </div>
-  </div>
-</div>
+  <app-time-sheet-number-line
+    [projectColorById]="projectColorById()"
+    (onEntryClick)="openTimeSheetEntryModal($event)"
+    (onCreateEntry)="openTimeSheetEntryModal($event)"
+    [projects]="projects()"
+    [entries]="sortedEntries()"
+    [disabled]="approved()"
+  />
+
+  @if (sortedEntries().length) {
+    <button
+      type="button"
+      class="entries-toggle"
+      [attr.aria-expanded]="entriesExpanded()"
+      (click)="toggleEntriesExpanded()"
+    >
+      <i
+        class="bi entries-toggle-icon"
+        [class.bi-chevron-right]="!entriesExpanded()"
+        [class.bi-chevron-down]="entriesExpanded()"
+        aria-hidden="true"
+      ></i>
+      @if (entriesExpanded()) {
+        Hide {{ entryCountLabel() }}
+      } @else {
+        Show {{ entryCountLabel() }}
+      }
+    </button>
+
+    @if (entriesExpanded()) {
+      <ul class="entry-list">
+        @for (entry of sortedEntries(); track entry.id) {
+          <li>
+            <button
+              type="button"
+              class="entry-row"
+              [disabled]="approved()"
+              (click)="openTimeSheetEntryModal(entry)"
+            >
+              <span class="entry-leading">
+                <span
+                  class="entry-project-dot"
+                  [style.background-color]="projectColor(entry)"
+                  aria-hidden="true"
+                ></span>
+                <span class="entry-text">
+                  <span class="entry-project">{{ projectName(entry) }}</span>
+                  @if (entry.description.trim()) {
+                    <span class="entry-description">{{
+                      entry.description.trim()
+                    }}</span>
+                  }
+                </span>
+              </span>
+              <span class="entry-duration">{{
+                formatEntryHours(entry.hours)
+              }}</span>
+            </button>
+          </li>
+        }
+      </ul>
+    }
+  }
+</article>

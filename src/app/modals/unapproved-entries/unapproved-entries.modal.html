@@ -1,144 +1,161 @@
-<div class="unapproved-modal">
-  <div class="modal-header">
-    <div>
-      <p class="eyebrow">Approval review</p>
-      <h4 class="modal-title mb-0">Unapproved time entries</h4>
-      <p class="modal-subtitle">
-        Review the selected day, confirm the details, and approve all pending
-        time in one action.
+<div class="pending-modal">
+  <header class="pending-modal__header">
+    <div class="pending-modal__heading">
+      <p class="pending-modal__eyebrow">{{ headerEyebrow }}</p>
+      <h2 class="pending-modal__title">{{ formatDate(date) }}</h2>
+      <p class="pending-modal__subtitle">
+        {{ headerSubtitle() }}
       </p>
     </div>
     <button
       type="button"
-      class="btn-close"
+      class="btn-close pending-modal__close"
       aria-label="Close"
       (click)="close()"
     ></button>
-  </div>
+  </header>
 
-  <div class="modal-body">
-    <div class="overview-card mb-4">
-      <div class="overview-item">
-        <span class="label">Date</span>
-        <span class="value text-color">{{ formatDate(date) }}</span>
-      </div>
-      <div class="overview-item">
-        <span class="label">User</span>
-        <span class="value text-color">{{ getUserName(userId) }}</span>
-      </div>
-      <div class="overview-item">
-        <span class="label">Total Hours</span>
-        <span class="value text-color">{{ getTotalHours() }}</span>
-      </div>
-      @if (getUniqueCategories().length) {
-        <div class="overview-item categories">
-          <span class="label">Categories</span>
-          <div class="categories-list">
-            @for (category of getUniqueCategories(); track category) {
-              <span class="category-pill">
-                {{ category }}
-              </span>
-            }
-          </div>
-        </div>
-      }
+  <div class="pending-modal__stats" aria-label="Day summary">
+    <div class="stat-chip">
+      <span class="stat-chip__label">Total logged</span>
+      <span class="stat-chip__value">{{ getTotalHours() }}</span>
     </div>
-
-    <div class="entries-shell">
-      <div class="entries-toolbar">
-        <div>
-          <h5>Entries</h5>
-          <p>{{ entries.length }} record{{ entries.length === 1 ? '' : 's' }} for this day</p>
-        </div>
-        <span class="metric-pill">{{ getUnapprovedCount() }} pending</span>
-      </div>
-
-      <div class="table-responsive entries-table">
-        <table class="table align-middle mb-0">
-          <thead>
-            <tr>
-              <th>Project</th>
-              <th>Hours</th>
-              <th>Category</th>
-              <th>Description</th>
-              <th>Details</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            @for (entry of entries; track entry) {
-              <tr class="entry-row" [class.pending]="!entry.approved" [class.approved]="entry.approved">
-                <td>
-                  <span class="project-pill">{{ getProjectName(entry.projectId) }}</span>
-                </td>
-                <td class="text-color">
-                  {{ formatHours(entry.hours) }}
-                </td>
-                <td>
-                  <span class="category-pill">{{ entry.category }}</span>
-                </td>
-                <td>
-                  <span class="description" [title]="entry.description">
-                    {{ entry.description }}
-                  </span>
-                </td>
-                <td>
-                  @if (entry.fieldValues.length) {
-                    <div class="field-value-pills">
-                      @for (fieldValue of entry.fieldValues; track fieldValue.key) {
-                        @if (fieldValue.value) {
-                          <span class="field-value-pill">{{ getFieldLabel(entry, fieldValue.key) }}: {{ fieldValue.value }}</span>
-                        }
-                      }
-                    </div>
-                  } @else {
-                    <span class="text-muted">—</span>
-                  }
-                </td>
-                <td>
-                  <span class="status-pill" [class.pending]="!entry.approved">
-                    {{ entry.approved ? 'Approved' : 'Pending' }}
-                  </span>
-                </td>
-              </tr>
-            }
-          </tbody>
-        </table>
-      </div>
+    <div class="stat-chip stat-chip--warn">
+      <span class="stat-chip__label">Pending</span>
+      <span class="stat-chip__value">{{ pendingCount() }}</span>
+    </div>
+    <div class="stat-chip stat-chip--ok">
+      <span class="stat-chip__label">Approved</span>
+      <span class="stat-chip__value">{{ approvedCount() }}</span>
+    </div>
+    <div class="stat-chip">
+      <span class="stat-chip__label">Records</span>
+      <span class="stat-chip__value">{{ dayEntries().length }}</span>
     </div>
   </div>
 
-  <div class="modal-footer">
-    <div class="footer-actions">
-      <button
-        type="button"
-        class="btn btn-outline-secondary"
-        (click)="close()"
-        [disabled]="isApproving()"
-      >
-        Close
-      </button>
-      @if (getUnapprovedCount()) {
-        <button
-          type="button"
-          class="btn btn-success ms-3"
-          (click)="approveAll()"
-          [disabled]="isApproving()"
+  <div class="pending-modal__body">
+    @if (canManageStatus) {
+      <p class="pending-modal__hint">
+        Review each record and update its approval status individually.
+      </p>
+    } @else {
+      <p class="pending-modal__hint">
+        All matching records for this day are listed below.
+      </p>
+    }
+
+    <ul class="entry-list">
+      @for (entry of dayEntries(); track entry.id) {
+        <li
+          class="entry-card"
+          [class.entry-card--pending]="!entry.approved"
+          [class.entry-card--approved]="entry.approved"
         >
-          @if (isApproving()) {
+          <div class="entry-card__layout">
             <span
-              class="spinner-border spinner-border-sm me-2"
-              role="status"
-            >
-              <span class="visually-hidden">Loading...</span>
-            </span>
-          }
-          @if (!isApproving()) {
-            <i class="bi bi-check-circle me-1"></i>
-          }
-          Approve All ({{ getUnapprovedCount() }})
-        </button>
+              class="entry-card__dot"
+              [style.background-color]="projectColor(entry)"
+              aria-hidden="true"
+            ></span>
+
+            <div class="entry-card__content">
+              <div class="entry-card__row">
+                <span class="entry-card__project">{{
+                  getProjectName(entry.projectId)
+                }}</span>
+                <span class="entry-card__hours">{{
+                  formatHours(entry.hours)
+                }}</span>
+              </div>
+
+              @if (showEntryUsers) {
+                <p class="entry-card__user">{{ getEntryUserName(entry) }}</p>
+              }
+
+              <div class="entry-card__meta">
+                @if (entry.category.trim()) {
+                  <span class="entry-card__category">{{ entry.category }}</span>
+                }
+                @if (entry.description.trim()) {
+                  <p class="entry-card__description">
+                    {{ entry.description.trim() }}
+                  </p>
+                }
+              </div>
+
+              @if (entry.fieldValues.length) {
+                <dl class="entry-card__fields">
+                  @for (fieldValue of entry.fieldValues; track fieldValue.key) {
+                    @if (fieldValue.value) {
+                      <div class="entry-card__field">
+                        <dt>{{ getFieldLabel(entry, fieldValue.key) }}</dt>
+                        <dd>{{ fieldValue.value }}</dd>
+                      </div>
+                    }
+                  }
+                </dl>
+              }
+            </div>
+
+            <div class="entry-card__aside">
+              <span
+                class="entry-card__status"
+                [class.entry-card__status--pending]="!entry.approved"
+              >
+                {{ entry.approved ? 'Approved' : 'Pending' }}
+              </span>
+
+              @if (canManageStatus && onEntryStatusChange) {
+                @if (!entry.approved) {
+                  <button
+                    type="button"
+                    class="btn btn-success entry-card__approve"
+                    (click)="setEntryStatus(entry, true)"
+                    [disabled]="isProcessingEntry(entry.id)"
+                  >
+                    @if (isProcessingEntry(entry.id)) {
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span class="visually-hidden">Updating…</span>
+                      </span>
+                    } @else {
+                      <i class="bi bi-check-lg" aria-hidden="true"></i>
+                      Approve
+                    }
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="btn btn-outline-secondary entry-card__approve"
+                    (click)="setEntryStatus(entry, false)"
+                    [disabled]="isProcessingEntry(entry.id)"
+                  >
+                    @if (isProcessingEntry(entry.id)) {
+                      <span
+                        class="spinner-border spinner-border-sm"
+                        role="status"
+                      >
+                        <span class="visually-hidden">Updating…</span>
+                      </span>
+                    } @else {
+                      Mark pending
+                    }
+                  </button>
+                }
+              }
+            </div>
+          </div>
+        </li>
       }
-    </div>
+    </ul>
   </div>
+
+  <footer class="pending-modal__footer">
+    <button type="button" class="btn btn-primary" (click)="close()">
+      Done
+    </button>
+  </footer>
 </div>

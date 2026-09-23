@@ -63,6 +63,26 @@
   font-weight: 600;
 }
 
+.project-pill-link {
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary-color) 14%, var(--color-surface));
+    box-shadow: 0 0 0 1px
+      color-mix(in srgb, var(--primary-color) 22%, var(--color-border));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+}
+
 .value-primary {
   color: var(--primary-color);
   font-weight: 600;

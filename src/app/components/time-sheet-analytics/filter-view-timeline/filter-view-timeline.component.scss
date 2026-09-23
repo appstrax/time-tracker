@@ -34,14 +34,44 @@
 }
 
 .timeline-day {
+  display: block;
+  width: 100%;
   padding: 1.25rem;
   border: 1px solid var(--color-border);
   border-radius: 20px;
   background: color-mix(in srgb, var(--color-surface) 96%, var(--color-bg));
+  text-align: left;
+  color: inherit;
+  font: inherit;
 
   & + .timeline-day {
     margin-top: 1rem;
   }
+}
+
+.timeline-day--selectable {
+  cursor: pointer;
+  transition:
+    border-color 0.16s ease,
+    box-shadow 0.16s ease,
+    transform 0.16s ease;
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
+    box-shadow: 0 8px 24px color-mix(in srgb, var(--text-primary) 8%, transparent);
+    transform: translateY(-1px);
+  }
+
+  &:focus-visible {
+    outline: 2px solid color-mix(in srgb, var(--color-primary) 45%, transparent);
+    outline-offset: 2px;
+  }
+}
+
+.timeline-open-hint {
+  margin-left: auto;
+  font-weight: 600;
+  color: var(--color-primary);
 }
 
 .timeline-header {

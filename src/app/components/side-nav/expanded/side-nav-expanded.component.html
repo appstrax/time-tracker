@@ -20,21 +20,21 @@
 
   <div class="menu">
     <a routerLink="/home" routerLinkActive="active" class="menu-item">
-      <i class="bi bi-house-door"></i>
+      <i class="bi bi-house-door-fill"></i>
       <span class="label">Home</span>
     </a>
     <a routerLink="/time-sheet" routerLinkActive="active" class="menu-item">
-      <i class="bi bi-stopwatch"></i>
+      <i class="bi bi-stopwatch-fill"></i>
       <span class="label">Time Sheets</span>
     </a>
     @if (admin()) {
       <a routerLink="/analytics" routerLinkActive="active" class="menu-item">
-        <i class="bi bi-graph-up"></i>
+        <i class="bi bi-bar-chart-fill"></i>
         <span class="label">Analytics</span>
       </a>
 
       <a routerLink="/projects" routerLinkActive="active" class="menu-item">
-        <i class="bi bi-folder2-open"></i>
+        <i class="bi bi-folder-fill"></i>
         <span class="label">Projects</span>
       </a>
     }
@@ -42,7 +42,7 @@
 
   <div class="footer">
     <a routerLink="/settings" routerLinkActive="active" class="menu-item">
-      <i class="bi bi-gear"></i>
+      <i class="bi bi-gear-fill"></i>
       <span class="label">Settings</span>
     </a>
     <a
@@ -56,7 +56,7 @@
       <span class="label">{{ userDisplayName() }}</span>
     </a>
     <button class="menu-item" type="button" (click)="logout.emit()">
-      <i class="bi bi-box-arrow-right"></i>
+      <i class="bi bi-power"></i>
       <span class="label">Logout</span>
     </button>
   </div>
