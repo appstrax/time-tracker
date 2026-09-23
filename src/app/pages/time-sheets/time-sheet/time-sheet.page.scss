@@ -1,8 +1,9 @@
+@use '../../../styles/insights-workspace';
+
 .time-sheet-page {
   width: 100%;
   max-width: none;
   margin: 0;
-  padding: 0.25rem 0 2rem;
   color: var(--text-primary);
 }
 
@@ -115,8 +116,3 @@
   }
 }
 
-@media (max-width: 767px) {
-  .time-sheet-page {
-    padding-bottom: 1rem;
-  }
-}
