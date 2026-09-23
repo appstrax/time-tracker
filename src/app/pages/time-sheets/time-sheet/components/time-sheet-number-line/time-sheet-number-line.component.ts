@@ -13,6 +13,12 @@ import { Project, TimeSheetEntry } from '@models';
 import { TimeSheetDisplayUtil, getProjectColor } from '@utils';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
+export interface TimelineEntryTooltipContext {
+  category: string;
+  description: string;
+  duration: string;
+}
+
 interface TimelineSegment {
   entry: TimeSheetEntry;
   leftPercent: number;
@@ -23,7 +29,7 @@ interface TimelineSegment {
   durationLabel: string;
   showInlineDetail: boolean;
   isQuarterHourBlock: boolean;
-  tooltipText: string;
+  tooltipContext: TimelineEntryTooltipContext;
 }
 
 @Component({
@@ -92,7 +98,7 @@ export class TimeSheetNumberLineComponent {
         backgroundColor: color,
         showInlineDetail: entry.hours >= 0.75,
         isQuarterHourBlock: entry.hours === 0.25,
-        tooltipText: this.getBlockTooltipText(entry),
+        tooltipContext: this.getEntryTooltipContext(entry),
       };
     });
   });
@@ -180,14 +186,14 @@ export class TimeSheetNumberLineComponent {
     return description || 'No description';
   }
 
-  private getBlockTooltipText(entry: TimeSheetEntry): string {
-    const project = this.projects().find((item) => item.id === entry.projectId);
-    const lines = [
-      project?.name ? `Project: ${project.name}` : '',
-      `Duration: ${this.formatBlockHours(entry.hours)}`,
-      `Description: ${this.getEntryDescription(entry)}`,
-    ].filter((line) => line.length > 0);
-    return lines.join('\n');
+  public getEntryTooltipContext(
+    entry: TimeSheetEntry,
+  ): TimelineEntryTooltipContext {
+    return {
+      category: entry.category?.trim() || 'No category',
+      description: this.getEntryDescription(entry),
+      duration: this.formatBlockHours(entry.hours),
+    };
   }
 
   private getEntryColor(entry: TimeSheetEntry): string {
@@ -208,41 +214,4 @@ export class TimeSheetNumberLineComponent {
     return this.displayUtil.formatQuarterHourDuration(hours);
   }
 
-  /** @internal Used by unit tests for HTML escaping coverage. */
-  public escapeHtml(value: unknown): string {
-    return String(value ?? '')
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  /** @internal Used by unit tests for HTML escaping coverage. */
-  public getTooltipContent(entry: TimeSheetEntry, project?: Project): string {
-    const hours = Math.floor(entry.hours);
-    const minutes = (entry.hours - hours) * 60;
-    return `
-      <div class="p-2">
-        <div class="mb-2"><strong>Project:</strong><br> ${this.escapeHtml(project?.name || 'N/A')}</div>
-        <div class="mb-2"><strong>Category:</strong><br> ${this.escapeHtml(entry.category || 'N/A')}</div>
-        <div class="mb-2"><strong>Hours:</strong><br> ${hours}h ${minutes}m</div>
-        <div><strong>Description:</strong><br> ${this.escapeHtml(entry.description || 'N/A')}</div>
-        ${this.getFieldValuesHtml(entry, project)}
-      </div>
-    `;
-  }
-
-  private getFieldValuesHtml(entry: TimeSheetEntry, project?: Project): string {
-    const fields = project?.fields ?? [];
-    const rows = fields
-      .map((field) => {
-        const value = entry.fieldValues.find((fv) => fv.key === field.key)?.value;
-        if (!value) return '';
-        return `<div class="mb-2"><strong>${this.escapeHtml(field.label || field.key)}:</strong><br> ${this.escapeHtml(value)}</div>`;
-      })
-      .filter((row) => row.length > 0);
-
-    return rows.join('');
-  }
 }

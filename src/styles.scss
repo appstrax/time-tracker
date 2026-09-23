@@ -424,6 +424,22 @@ select:-webkit-autofill {
   box-shadow: var(--tooltip-shadow);
 }
 
+.tooltip.timeline-entry-tooltip .tooltip-inner {
+  text-align: left;
+  max-width: min(20rem, 90vw);
+}
+
+.timeline-entry-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  line-height: 1.35;
+}
+
+.timeline-entry-tooltip-content strong {
+  font-weight: 700;
+}
+
 /* Themed global scrollbar */
 html {
   scrollbar-width: thin;
