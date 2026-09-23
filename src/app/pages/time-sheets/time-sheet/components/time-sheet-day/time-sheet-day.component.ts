@@ -73,6 +73,15 @@ export class TimeSheetDayComponent {
     return this.displayUtil.getProjectName(entry.projectId, this.projects());
   }
 
+  public entryCategory(entry: TimeSheetEntry): string {
+    return entry.category?.trim() || 'No category';
+  }
+
+  public entryDescription(entry: TimeSheetEntry): string {
+    const description = entry.description?.trim();
+    return description || 'No description';
+  }
+
   public projectColor(entry: TimeSheetEntry): string {
     const fromMap = this.projectColorById().get(entry.projectId);
     if (fromMap) return fromMap;
