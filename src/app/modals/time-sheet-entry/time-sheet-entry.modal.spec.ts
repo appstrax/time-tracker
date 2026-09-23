@@ -295,23 +295,22 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.isFormValid()).toBe(false); // base fields still unfilled
   });
 
-  it('should block saving a new entry when a required boolean is left untouched', async () => {
+  it('should default an untouched required boolean to No for a new entry', async () => {
     await createComponent();
     component.onProjectSelected(projectWithRequiredBoolean);
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 
-    expect(component.getFieldValue('billable')).toBe('');
-    expect(component.isFormValid()).toBe(false);
-    expect(component.errorMessage).toContain('Billable is required');
+    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.isFormValid()).toBe(true);
   });
 
-  it('should allow saving a required boolean once explicitly set to No', async () => {
+  it('should default a required boolean when the project is pre-selected on open', async () => {
+    localStorage.setItem(storageKey, projectWithRequiredBoolean.id);
+
     await createComponent();
-    component.onProjectSelected(projectWithRequiredBoolean);
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
-    component.setFieldBoolean('billable', false);
 
     expect(component.getFieldValue('billable')).toBe('false');
     expect(component.isFormValid()).toBe(true);
