@@ -114,6 +114,8 @@ export class TimeSheetDayComponent {
       centered: true,
       backdrop: 'static',
       keyboard: true,
+      size: 'lg',
+      backdropClass: 'time-sheet-entry-backdrop',
     });
     Object.assign(modalRef.componentInstance, options);
     modalRef.result.then(

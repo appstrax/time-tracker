@@ -593,3 +593,14 @@ textarea.form-control[disabled] {
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.1);
 }
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .modal-backdrop.time-sheet-entry-backdrop.show {
+    /* Bootstrap dims via opacity on an opaque bg, which paints over (and hides)
+       the blurred layer. Use a translucent bg instead so the blur shows through. */
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
+}
