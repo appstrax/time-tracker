@@ -38,6 +38,11 @@ export class ProjectPage implements OnInit {
 
   private fieldOptionsDrafts: Record<number, string> = {};
   private savedFieldsSnapshot = '[]';
+  private savedCoreSnapshot = {
+    name: '',
+    description: '',
+    logoUrl: '',
+  };
 
   constructor(
     private store: Store,
@@ -58,14 +63,14 @@ export class ProjectPage implements OnInit {
       const project = projects.find((p: Project) => p.id === projectId);
       if (project) {
         this.project.set(project);
-        this.syncFieldsSnapshot();
+        this.syncPersistedSnapshots(project);
       }
 
       try {
         const project = await this.projectService.findById(projectId);
         this.project.set(project);
         this.logoPreviewUrl.set(project.logoUrl || null);
-        this.syncFieldsSnapshot();
+        this.syncPersistedSnapshots(project);
       } catch (e) {
         this.toast.error('Failed to load project for editing', 'Error');
       }
@@ -81,14 +86,39 @@ export class ProjectPage implements OnInit {
         return;
       }
 
+      if (this.editing() && this.areFieldsDirty()) {
+        this.error.set(
+          'You have unsaved custom field changes. Use Save fields before updating project details.',
+        );
+        return;
+      }
+
+      if (!this.editing()) {
+        const fieldsValidationError = this.validateFields();
+        if (fieldsValidationError) {
+          this.error.set(fieldsValidationError);
+          return;
+        }
+      }
+
       const logoFile = this.logoFile();
       if (logoFile) {
         await this.uploadProjectLogo(logoFile);
       }
 
-      const project = await this.projectService.save(this.project());
-      this.project.set(project);
-      this.syncFieldsSnapshot();
+      const draftFieldEdits = this.project().fields;
+      const projectToSave = this.buildProjectForCoreSave();
+      const project = await this.projectService.save(projectToSave);
+
+      if (this.editing()) {
+        const merged = Object.assign(new Project(), project);
+        merged.fields = draftFieldEdits;
+        this.project.set(merged);
+      } else {
+        this.project.set(project);
+      }
+
+      this.syncPersistedSnapshots(project);
 
       if (!this.editing()) {
         const user = this.store.user.user()!;
@@ -169,14 +199,6 @@ export class ProjectPage implements OnInit {
       return;
     }
 
-    const project = this.project();
-    if (project.name == '' || project.description == '') {
-      this.fieldsError.set(
-        'Project name and description are required before saving fields',
-      );
-      return;
-    }
-
     const validationError = this.validateFields();
     if (validationError) {
       this.fieldsError.set(validationError);
@@ -186,9 +208,21 @@ export class ProjectPage implements OnInit {
     this.savingFields.set(true);
 
     try {
-      const project = await this.projectService.save(this.project());
-      this.project.set(project);
-      this.syncFieldsSnapshot();
+      const draftCoreEdits = {
+        name: this.project().name,
+        description: this.project().description,
+        logoUrl: this.project().logoUrl,
+      };
+      const projectToSave = this.buildProjectForFieldsSave();
+      const project = await this.projectService.save(projectToSave);
+
+      const merged = Object.assign(new Project(), project);
+      merged.name = draftCoreEdits.name;
+      merged.description = draftCoreEdits.description;
+      merged.logoUrl = draftCoreEdits.logoUrl;
+      this.project.set(merged);
+
+      this.syncPersistedSnapshots(project);
       await this.refreshProjectsStore();
       this.toast.success('Custom fields saved', 'Success');
     } catch (error: any) {
@@ -220,8 +254,43 @@ export class ProjectPage implements OnInit {
     return null;
   }
 
-  private syncFieldsSnapshot(): void {
-    this.savedFieldsSnapshot = JSON.stringify(this.project().fields);
+  private syncPersistedSnapshots(project: Project): void {
+    this.savedFieldsSnapshot = JSON.stringify(project.fields);
+    this.savedCoreSnapshot = {
+      name: project.name,
+      description: project.description,
+      logoUrl: project.logoUrl,
+    };
+  }
+
+  private parseSavedFields(): ProjectField[] {
+    try {
+      return JSON.parse(this.savedFieldsSnapshot) as ProjectField[];
+    } catch {
+      return [];
+    }
+  }
+
+  private buildProjectForCoreSave(): Project {
+    const current = this.project();
+    const payload = Object.assign(new Project(), current);
+
+    if (this.editing()) {
+      payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
+    }
+
+    return payload;
+  }
+
+  private buildProjectForFieldsSave(): Project {
+    const current = this.project();
+    const payload = Object.assign(new Project(), current);
+
+    payload.name = this.savedCoreSnapshot.name;
+    payload.description = this.savedCoreSnapshot.description;
+    payload.logoUrl = this.savedCoreSnapshot.logoUrl;
+
+    return payload;
   }
 
   public updateProjectName(name: string): void {
