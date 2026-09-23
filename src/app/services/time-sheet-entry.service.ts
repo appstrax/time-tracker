@@ -86,6 +86,7 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
           { date: { [Operator.LTE]: end } },
         ],
       },
+      order: { createdAt: OrderDirection.ASC },
     });
   }
 
