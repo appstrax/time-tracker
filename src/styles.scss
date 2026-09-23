@@ -1,6 +1,9 @@
 /* You can add global styles to this file, and also import other style files */
+@use "app/styles/analytics-view-workspace";
+@use "app/styles/insights-workspace";
 @import "bootstrap/dist/css/bootstrap.min.css";
 @import "bootstrap-icons/font/bootstrap-icons.css";
+@import "@ng-select/ng-select/themes/default.theme.css";
 
 :root {
   --primary-color: #560078;
@@ -14,15 +17,7 @@ body {
   height: 100%;
   margin: 0;
   padding: 0;
-  font-family:
-    Consolas,
-    -apple-system,
-    BlinkMacSystemFont,
-    "Segoe UI",
-    Roboto,
-    "Helvetica Neue",
-    Arial,
-    sans-serif;
+  font-family: "Segoe UI", Arial, Helvetica, sans-serif;
 }
 
 body {
@@ -120,6 +115,20 @@ select:-webkit-autofill {
   --color-primary-contrast: #ffffff;
   --text-primary: #1a1a1a;
   --text-muted: #666666;
+  --side-nav-text: #5c5c5c;
+
+  --tooltip-bg: color-mix(in srgb, var(--text-primary) 88%, #000);
+  --tooltip-color: #f5f5f5;
+  --tooltip-border: color-mix(in srgb, var(--text-primary) 55%, transparent);
+  --tooltip-shadow:
+    0 4px 16px color-mix(in srgb, #000 22%, transparent),
+    0 1px 3px color-mix(in srgb, #000 12%, transparent);
+
+  --tag-teal: #0d9488;
+  --tag-blue: #2563eb;
+  --tag-purple: #7c3aed;
+  --tag-amber: #d97706;
+  --tag-rose: #e11d48;
 
   /* Map legacy vars to tokens for compatibility */
   --primary-color: var(--color-primary);
@@ -145,6 +154,20 @@ select:-webkit-autofill {
   --color-primary-contrast: #0f0f10;
   --text-primary: #f2f2f3;
   --text-muted: #9e9e9e;
+  --side-nav-text: #c4c4c8;
+
+  --tooltip-bg: color-mix(in srgb, #fff 86%, var(--color-surface));
+  --tooltip-color: #141418;
+  --tooltip-border: color-mix(in srgb, #fff 38%, var(--color-border));
+  --tooltip-shadow:
+    0 4px 18px color-mix(in srgb, #000 45%, transparent),
+    0 0 0 1px color-mix(in srgb, #fff 8%, transparent);
+
+  --tag-teal: #2dd4bf;
+  --tag-blue: #60a5fa;
+  --tag-purple: #a78bfa;
+  --tag-amber: #fbbf24;
+  --tag-rose: #fb7185;
 
   --primary-color: var(--color-primary);
   --primary-color-light: color-mix(
@@ -158,6 +181,175 @@ select:-webkit-autofill {
   --bs-body-color: var(--text-primary);
   --bs-primary: var(--color-primary);
   --bs-border-color: var(--color-border);
+}
+
+/* ng-select — align with app tokens in dark mode (dropdown may render on body) */
+:root[data-theme="dark"] {
+  .ng-select .ng-select-container {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--color-surface) 94%,
+      var(--color-bg)
+    );
+    border-color: var(--color-border);
+  }
+
+  .ng-select.ng-select-opened > .ng-select-container {
+    background: var(--color-surface);
+    border-color: var(--color-border);
+  }
+
+  .ng-select.ng-select-opened > .ng-select-container .ng-arrow {
+    border-color: transparent transparent var(--text-muted);
+  }
+
+  .ng-select.ng-select-focused:not(.ng-select-opened) > .ng-select-container {
+    border-color: color-mix(
+      in srgb,
+      var(--primary-color) 45%,
+      var(--color-border)
+    );
+    box-shadow: 0 0 0 0.2rem
+      color-mix(in srgb, var(--primary-color) 22%, transparent);
+  }
+
+  .ng-select.ng-select-disabled > .ng-select-container {
+    background-color: var(--color-bg);
+    opacity: 0.65;
+  }
+
+  .ng-select .ng-select-container .ng-value-container .ng-placeholder {
+    color: var(--text-muted);
+  }
+
+  .ng-select .ng-clear-wrapper {
+    color: var(--text-muted);
+  }
+
+  .ng-select .ng-arrow-wrapper .ng-arrow {
+    border-top-color: var(--text-muted);
+  }
+
+  .ng-select .ng-arrow-wrapper:hover .ng-arrow {
+    border-top-color: var(--text-primary);
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 18%,
+      var(--color-surface)
+    );
+    border: 1px solid
+      color-mix(in srgb, var(--primary-color) 32%, var(--color-border));
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value
+    .ng-value-icon:hover {
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 28%,
+      var(--color-surface)
+    );
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value
+    .ng-value-icon.left {
+    border-right-color: color-mix(
+      in srgb,
+      var(--primary-color) 32%,
+      var(--color-border)
+    );
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-value
+    .ng-value-icon.right {
+    border-left-color: color-mix(
+      in srgb,
+      var(--primary-color) 32%,
+      var(--color-border)
+    );
+  }
+
+  .ng-select.ng-select-multiple
+    .ng-select-container
+    .ng-value-container
+    .ng-input
+    > input {
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel {
+    background-color: var(--color-surface);
+    border-color: var(--color-border);
+    box-shadow: 0 10px 28px rgba(0, 0, 0, 0.45);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-header,
+  .ng-dropdown-panel .ng-dropdown-footer {
+    border-color: var(--color-border);
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option {
+    background-color: var(--color-surface);
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-marked {
+    background-color: color-mix(in srgb, var(--color-border) 55%, transparent);
+    color: var(--text-primary);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-selected,
+  .ng-dropdown-panel
+    .ng-dropdown-panel-items
+    .ng-option.ng-option-selected.ng-option-marked {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 22%,
+      var(--color-surface)
+    );
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-option.ng-option-disabled {
+    color: var(--text-muted);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-optgroup {
+    color: var(--text-muted);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-optgroup.ng-option-marked {
+    background-color: color-mix(in srgb, var(--color-border) 55%, transparent);
+  }
+
+  .ng-dropdown-panel .ng-dropdown-panel-items .ng-optgroup.ng-option-selected,
+  .ng-dropdown-panel
+    .ng-dropdown-panel-items
+    .ng-optgroup.ng-option-selected.ng-option-marked {
+    color: var(--text-primary);
+    background-color: color-mix(
+      in srgb,
+      var(--primary-color) 22%,
+      var(--color-surface)
+    );
+  }
 }
 
 /* Global button color overrides to unify primary buttons */
@@ -213,8 +405,32 @@ select:-webkit-autofill {
 }
 
 .tooltip {
-  --bs-tooltip-bg: var(--color-bg);
-  --bs-tooltip-color: var(--text-primary);
+  --bs-tooltip-bg: var(--tooltip-bg);
+  --bs-tooltip-color: var(--tooltip-color);
+  --bs-tooltip-opacity: 1;
+}
+
+.tooltip-inner {
+  background-color: var(--tooltip-bg);
+  color: var(--tooltip-color);
+  border: 1px solid var(--tooltip-border);
+  box-shadow: var(--tooltip-shadow);
+}
+
+.tooltip.timeline-entry-tooltip .tooltip-inner {
+  text-align: left;
+  max-width: min(20rem, 90vw);
+}
+
+.timeline-entry-tooltip-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  line-height: 1.35;
+}
+
+.timeline-entry-tooltip-content strong {
+  font-weight: 700;
 }
 
 /* Themed global scrollbar */
@@ -387,4 +603,15 @@ textarea.form-control[disabled] {
 .modal-header .btn-close:hover {
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .modal-backdrop.time-sheet-entry-backdrop.show {
+    /* Bootstrap dims via opacity on an opaque bg, which paints over (and hides)
+       the blurred layer. Use a translucent bg instead so the blur shows through. */
+    opacity: 1;
+    background-color: rgba(0, 0, 0, 0.45);
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+  }
 }

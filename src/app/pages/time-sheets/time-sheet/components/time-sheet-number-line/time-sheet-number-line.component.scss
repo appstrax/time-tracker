@@ -1,135 +1,194 @@
-.time-sheet {
-  overflow-x: auto;
-  overflow-y: hidden;
-  padding: 6px 0;
+:host {
+  display: block;
+  min-width: 0;
 }
 
-.time-sheet-card-disabled {
-  opacity: 0.72;
-}
-
-.time-sheet-card-header {
-  display: flex;
-  justify-content: flex-end;
-  margin-bottom: 0.3rem;
-}
-
-.time-sheet-card-title {
-  font-size: 0.82rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: color-mix(in srgb, var(--primary-color) 72%, #475569);
-}
-
-.time-sheet-card-total {
-  padding: 0.35rem 0.7rem;
-  border-radius: 999px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: color-mix(in srgb, var(--primary-color) 82%, #1e293b);
-  background: color-mix(
-    in srgb,
-    var(--primary-color) 10%,
-    var(--color-surface)
-  );
-}
-
-.number-line {
-  display: grid;
-  grid-template-columns: repeat(48, 1fr);
-}
-
-::ng-deep .tooltip-inner {
-  min-width: 250px;
-  max-width: 250px;
-}
-
-.number-line-item {
+.timeline {
   display: flex;
   flex-direction: column;
-  align-items: center;
-  justify-content: flex-end;
-  padding: 0.45rem 0.15rem 0.5rem;
-  border: none;
-  background: color-mix(in srgb, var(--primary-color) 4%, var(--color-surface));
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.timeline-ruler-footer {
+  position: relative;
+  height: 1.05rem;
+  margin-top: 0.2rem;
+}
+
+.ruler-hour {
+  position: absolute;
+  top: 0;
+  left: calc((var(--hour) / var(--scale-hours, 12)) * 100%);
+  transform: translateX(-50%);
+  font-size: 0.68rem;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--text-muted) 85%, transparent);
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.timeline-track {
+  position: relative;
+  min-height: 2.65rem;
+  padding-block: 5px;
+  border-radius: var(--track-radius, 8px);
+  background: color-mix(in srgb, var(--color-border) 28%, var(--color-surface));
+  overflow: visible;
   cursor: pointer;
-
-  transition:
-    background-color 0.18s ease,
-    box-shadow 0.18s ease,
-    transform 0.18s ease;
-
-  &:nth-child(2) {
-    border-top-left-radius: 16px;
-    border-bottom-left-radius: 16px;
-  }
-  &:last-child {
-    border-top-right-radius: 16px;
-    border-bottom-right-radius: 16px;
-  }
+  isolation: isolate;
 }
 
-.tick-mark {
-  display: block;
-  width: 2px;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--primary-color) 34%, #64748b);
-  transition:
-    background-color 0.18s ease,
-    height 0.18s ease;
+.timeline-quarter-grid {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: inherit;
+  overflow: hidden;
+  --grid-line: color-mix(in srgb, var(--color-border) 62%, transparent);
+  background-image:
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc((100% / var(--quarter-count, 48)) - 1px),
+      var(--grid-line) calc((100% / var(--quarter-count, 48)) - 1px),
+      var(--grid-line) calc(100% / var(--quarter-count, 48))
+    ),
+    repeating-linear-gradient(
+      to right,
+      transparent 0,
+      transparent calc((100% / var(--quarter-count, 48)) * 4 - 2px),
+      var(--grid-line) calc((100% / var(--quarter-count, 48)) * 4 - 2px),
+      var(--grid-line) calc((100% / var(--quarter-count, 48)) * 4)
+    );
 }
 
-.tick-label {
-  margin-bottom: 0.45rem;
-  font-size: 0.72rem;
+.timeline-block {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.4rem;
+  min-width: 0;
+  padding: 0.35rem 0.55rem;
+  border: none;
+  color: #fff;
+  font: inherit;
+  font-size: 0.78rem;
   font-weight: 600;
-  line-height: 1;
-  color: #64748b;
+  line-height: 1.2;
+  cursor: pointer;
+  text-align: left;
+  box-sizing: border-box;
+  min-height: 2rem;
+  overflow: hidden;
+  border-radius: var(--segment-radius, 7px);
+  box-shadow: 0 1px 2px color-mix(in srgb, var(--text-primary) 12%, transparent);
+  transition:
+    transform 0.16s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
+
+  &:not(:disabled):hover,
+  &:not(:disabled):focus-visible {
+    transform: translateY(-1px);
+    z-index: 4;
+    filter: brightness(1.05);
+    box-shadow:
+      0 3px 12px color-mix(in srgb, var(--text-primary) 18%, transparent),
+      0 0 0 1px color-mix(in srgb, var(--color-surface) 70%, var(--color-border));
+  }
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.85;
+  }
 }
 
-.number-line-item-logged {
-  background: color-mix(
-    in srgb,
-    var(--primary-color) 14%,
-    var(--color-surface)
-  );
+.timeline-block-compact {
+  justify-content: flex-end;
 }
 
-.number-line-item-logged .tick-mark {
-  background: color-mix(in srgb, var(--primary-color) 72%, #334155);
+.timeline-block-quarter {
+  padding-inline: 0;
+  justify-content: center;
+
+  .timeline-block-hours {
+    margin-left: 0;
+    flex: 1 1 auto;
+    text-align: center;
+  }
 }
 
-.number-line-item-logged .tick-label {
-  color: color-mix(in srgb, var(--primary-color) 70%, #334155);
+.timeline-block-name {
+  flex: 1 1 auto;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  min-width: 0;
+  text-align: left;
 }
 
-.number-line-item-hovered {
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--primary-color) 16%, var(--color-surface)),
-    color-mix(in srgb, var(--primary-color) 28%, var(--color-surface))
-  );
+.timeline-block-hours {
+  flex: 0 0 auto;
+  margin-left: auto;
+  font-size: 0.62rem;
+  font-weight: 500;
+  text-align: right;
+  white-space: nowrap;
 }
 
-.number-line-item-hovered .tick-mark {
-  background: color-mix(in srgb, var(--primary-color) 88%, #1d4ed8);
+.timeline-preview {
+  position: absolute;
+  top: 5px;
+  bottom: 5px;
+  z-index: 2;
+  min-width: 0;
+  overflow: hidden;
+  border-radius: var(--segment-radius, 7px);
+  pointer-events: none;
+  box-sizing: border-box;
 }
 
-.number-line-item-hovered .tick-label {
-  color: color-mix(in srgb, var(--primary-color) 88%, #1d4ed8);
+.timeline-preview-from-start,
+.timeline-preview-after-logged {
+  border-left: none;
 }
 
-.number-line-item:not(.number-line-item-disabled):hover,
-.number-line-item:not(.number-line-item-disabled):focus-visible {
-  transform: translateY(-1px);
-  outline: none;
+.timeline-preview.timeline-block {
+  justify-content: flex-end;
+  color: var(--primary-color-dark, #0f766e);
 }
 
-.number-line-item-disabled {
+.timeline-disabled .timeline-track {
+  cursor: default;
+  opacity: 0.78;
+}
+
+.timeline-create-disabled .timeline-track {
   cursor: default;
 }
 
-::ng-deep .tooltip-inner {
-  text-align: left !important;
+@media (max-width: 900px) {
+  .timeline-block {
+    font-size: 0.72rem;
+    padding: 0.35rem 0.4rem;
+  }
+
+  .timeline-block-quarter {
+    padding-inline: 0;
+  }
+
+  .timeline-block-name {
+    display: none;
+  }
+
+  .timeline-block-hours {
+    font-size: 0.58rem;
+    margin-left: 0;
+  }
 }

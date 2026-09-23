@@ -1,40 +1,63 @@
-<section class="analytics-page">
-  <div class="analytics-shell">
-    <header class="page-header">
-      <div>
-        <p class="eyebrow">Workspace insights</p>
-        <h1 class="main-title">Analytics</h1>
-        <p class="subtitle">
-          Review hours, approvals, and project activity in one place with
-          flexible views for summaries, timelines, and pending work.
+<section class="analytics-page insights-page">
+  <div class="insights-shell">
+    <header class="insights-hero">
+      <div class="insights-hero-copy">
+        <h1>Analytics</h1>
+        <p class="insights-lead">
+          Hours, approvals, and activity across your workspace.
         </p>
       </div>
 
-      @if (!loading()) {
-        <span class="metric-pill">
-          {{ projects().length }} {{ projects().length === 1 ? 'project' : 'projects' }}
-        </span>
-      }
+      <div class="insights-chips" aria-live="polite">
+        @if (loading()) {
+          <span class="insights-chip insights-chip--accent">
+            <span
+              class="spinner-border spinner-border-sm"
+              role="status"
+              aria-hidden="true"
+            ></span>
+            Loading…
+          </span>
+        } @else {
+          <span class="insights-chip">
+            {{ projects().length }}
+            {{ projects().length === 1 ? 'project' : 'projects' }}
+          </span>
+          <span class="insights-chip insights-chip--accent">
+            {{ entries().length }}
+            {{ entries().length === 1 ? 'entry' : 'entries' }}
+          </span>
+        }
+      </div>
     </header>
 
-    @if (!loading()) {
-      <app-summary-metrics [entries]="entries()" [projects]="projects()" />
+    @if (loading()) {
+      <section class="insights-state" aria-busy="true">
+        <p>Loading analytics data…</p>
+      </section>
+    } @else {
+      <section class="insights-kpis" aria-label="All-time totals">
+        <div class="kpi-header">
+          <span class="kpi-badge">All-time snapshot</span>
+          <span class="kpi-hint">Not affected by filters below</span>
+        </div>
+        <app-summary-metrics
+          [entries]="entries()"
+          [projects]="projects()"
+          [compact]="true"
+        />
+      </section>
 
       <app-filter-view-container
         [projects]="projects()"
         [entries]="entries()"
         [users]="users()"
+        [showExport]="true"
+        [compact]="true"
+        [canManageStatus]="true"
+        [canApprove]="true"
         (entryUpdated)="onEntryUpdated($event)"
       />
-    } @else {
-      <section class="loading-card">
-        <div class="text-center py-4">
-          <div class="spinner-border spinner-border-lg" role="status">
-            <span class="visually-hidden">Loading...</span>
-          </div>
-        </div>
-        <p class="loading-copy">Loading analytics data...</p>
-      </section>
     }
   </div>
 </section>

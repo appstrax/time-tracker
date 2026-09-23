@@ -1,10 +1,11 @@
-<section class="metrics-grid">
+<section class="metrics-grid" [class.compact]="compact()">
   @for (card of cards(); track card.label) {
     <app-metric-card
       [label]="card.label"
       [value]="card.value"
       [valueSuffix]="card.valueSuffix || ''"
       [iconClass]="card.iconClass"
+      [compact]="compact()"
     ></app-metric-card>
   }
 </section>

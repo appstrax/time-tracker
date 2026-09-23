@@ -1,12 +1,15 @@
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
-import { Component, computed, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { appstraxStorage } from '@appstrax/services/storage';
 
 import { User } from '@models';
+import { ChangePasswordModal } from '@modals';
 import { ToastService } from '@services';
 import { Store } from '@state';
+import { getUserInitials } from '@utils';
 
 @Component({
   selector: 'app-profile',
@@ -24,6 +27,9 @@ export class ProfilePage {
   public editing = signal(false);
 
   projects = computed(() => this.store.projects.projects());
+  userInitials = computed(() => getUserInitials(this.user()));
+
+  private readonly modalService = inject(NgbModal);
 
   constructor(
     private store: Store,
@@ -125,14 +131,15 @@ export class ProfilePage {
     this.editing.set(true);
   }
 
-  getUserInitials(): string {
-    const user = this.user();
-    const initials = [user.name, user.surname]
-      .map((value) => value?.trim())
-      .filter((value): value is string => Boolean(value))
-      .map((value) => value.charAt(0).toUpperCase())
-      .join('');
-
-    return initials || user.email.charAt(0).toUpperCase() || 'U';
+  openChangePasswordModal(): void {
+    const modal = this.modalService.open(ChangePasswordModal, {
+      centered: true,
+      backdrop: 'static',
+      keyboard: false,
+    });
+    modal.result.then(
+      () => this.toast.success('Password updated successfully', 'Success'),
+      () => {},
+    );
   }
 }

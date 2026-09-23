@@ -1,0 +1,177 @@
+.agent-tokens-page {
+  padding-bottom: 3rem;
+}
+
+.breadcrumb-nav {
+  font-size: 0.85rem;
+  color: var(--text-muted);
+  margin-top: 1rem;
+  margin-bottom: 0.5rem;
+
+  a {
+    color: var(--text-muted);
+    text-decoration: none;
+  }
+
+  .sep {
+    margin: 0 0.35rem;
+  }
+
+  .current {
+    color: var(--text-primary);
+  }
+}
+
+.layout-grid {
+  display: grid;
+  grid-template-columns: minmax(280px, 380px) 1fr;
+  gap: 1.5rem;
+  align-items: start;
+}
+
+@media (max-width: 992px) {
+  .layout-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+.panel {
+  background: var(--color-surface);
+  border-radius: 16px;
+  box-shadow: 0 0 3px rgba(0, 0, 0, 0.08);
+  padding: 1.5rem 1.75rem;
+}
+
+.panel-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin-bottom: 1.25rem;
+}
+
+.subsection-title {
+  font-size: 0.95rem;
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.75rem;
+}
+
+.scope-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.project-ng-select {
+  ::ng-deep .ng-select-container {
+    min-height: 2.75rem;
+    border-radius: 8px;
+    color: var(--text-primary);
+    border-color: var(--color-border);
+    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
+  }
+
+  ::ng-deep .ng-value-container {
+    padding-top: 0.35rem;
+    padding-bottom: 0.35rem;
+  }
+
+  ::ng-deep .ng-placeholder {
+    color: var(--text-muted);
+  }
+
+  ::ng-deep .ng-input > input {
+    color: var(--text-primary);
+  }
+}
+
+.scope-row,
+.radio-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  cursor: pointer;
+}
+
+.scope-chip {
+  font-family: ui-monospace, monospace;
+  font-size: 0.8rem;
+  background: color-mix(in srgb, var(--color-border) 60%, transparent);
+  padding: 0.1rem 0.4rem;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.scope-desc {
+  color: var(--text-muted);
+  line-height: 1.35;
+}
+
+.project-scope-options {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.field-hint {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 0.35rem;
+}
+
+.create-btn {
+  margin-top: 1.25rem;
+  width: 100%;
+}
+
+.tokens-table {
+  width: 100%;
+  font-size: 0.875rem;
+  border-collapse: collapse;
+
+  th {
+    text-align: left;
+    font-weight: 600;
+    color: var(--text-muted);
+    padding: 0.5rem 0.75rem 0.5rem 0;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  td {
+    padding: 0.75rem 0.75rem 0.75rem 0;
+    border-bottom: 1px solid var(--color-border);
+    vertical-align: top;
+  }
+}
+
+.scope-badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.scope-badge {
+  font-family: ui-monospace, monospace;
+  font-size: 0.7rem;
+  padding: 0.15rem 0.4rem;
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--color-border) 70%, transparent);
+}
+
+.revoke-btn {
+  color: #c2410c;
+  padding: 0;
+  font-size: 0.875rem;
+  text-decoration: none;
+
+  &:hover {
+    text-decoration: underline;
+  }
+}
+
+.empty-state {
+  margin: 0;
+}

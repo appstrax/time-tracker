@@ -1,0 +1,164 @@
+<section class="filter-view-summary" [class.workspace-view]="compact()">
+  @if (compact()) {
+    <div class="ws-tab">
+      <div class="ws-tab-head">
+        <div>
+          <h2 class="ws-tab-title">Hours by project</h2>
+          <p class="ws-tab-sub">Totals for the filtered date range.</p>
+        </div>
+        @if (entriesByProject().length) {
+          <span class="ws-tab-badge ws-tab-badge--ok">
+            {{ entriesByProject().length }}
+            {{ entriesByProject().length === 1 ? 'project' : 'projects' }}
+          </span>
+        }
+      </div>
+
+      @if (!entriesByProject().length) {
+        <div class="ws-empty">
+          <i class="bi bi-bar-chart" aria-hidden="true"></i>
+          <p>No entries match the current filters.</p>
+        </div>
+      } @else {
+        <div
+          class="ws-data-grid ws-data-grid--summary"
+          [class.has-export]="showExport()"
+        >
+          <div class="ws-data-head">
+            <span class="ws-col-project">Project</span>
+            <span class="ws-num">Total</span>
+            <span class="ws-num">Approved</span>
+            <span class="ws-num">Pending</span>
+            <span class="ws-num">Entries</span>
+            @if (showExport()) {
+              <span class="ws-col-export" aria-hidden="true"></span>
+            }
+          </div>
+          @for (project of entriesByProject(); track project.projectId) {
+            <article class="ws-data-row">
+              @if (linkProjectsToTimeSheet()) {
+                <button
+                  type="button"
+                  class="ws-project-btn ws-summary-project"
+                  (click)="openTimeSheetForProject(project.projectId)"
+                  [attr.aria-label]="
+                    'Open timesheet for ' + project.projectName
+                  "
+                  [title]="project.projectName"
+                >
+                  {{ project.projectName }}
+                </button>
+              } @else {
+                <span class="ws-project-label ws-summary-project" [title]="project.projectName">
+                  {{ project.projectName }}
+                </span>
+              }
+              <span class="ws-num ws-num--total">
+                {{ displayUtils.formatHours(project.hours) }}
+              </span>
+              <span class="ws-num ws-num--ok">
+                {{ displayUtils.formatHours(project.approvedHours) }}
+              </span>
+              <span class="ws-num ws-num--warn">
+                {{ displayUtils.formatHours(project.pendingHours) }}
+              </span>
+              <span class="ws-num">{{ project.count }}</span>
+              @if (showExport()) {
+                <button
+                  type="button"
+                  class="ws-icon-btn"
+                  (click)="exportProject(project.projectId, project.projectName)"
+                  [attr.aria-label]="
+                    'Export entries for ' + project.projectName
+                  "
+                >
+                  <i class="bi bi-download" aria-hidden="true"></i>
+                </button>
+              }
+            </article>
+          }
+        </div>
+      }
+    </div>
+  } @else {
+    <div class="table-shell">
+      <div class="table-toolbar">
+        <div>
+          <p class="eyebrow">Summary</p>
+          <h2>Hours by project</h2>
+          <p>Compare total, approved, and pending time across every project in scope.</p>
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="table align-middle mb-0">
+          <thead>
+            <tr>
+              <th>Project</th>
+              <th class="text-end">Total Hours</th>
+              <th class="text-end">Approved</th>
+              <th class="text-end">Pending</th>
+              <th class="text-end">Entries</th>
+              @if (showExport()) {
+                <th class="text-end export-column">Export</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (project of entriesByProject(); track project.projectId) {
+              <tr>
+                <td>
+                  @if (linkProjectsToTimeSheet()) {
+                    <button
+                      type="button"
+                      class="project-pill project-pill-link"
+                      (click)="openTimeSheetForProject(project.projectId)"
+                      [attr.aria-label]="
+                        'Open timesheet for ' + project.projectName
+                      "
+                    >
+                      {{ project.projectName }}
+                    </button>
+                  } @else {
+                    <span class="project-pill">{{ project.projectName }}</span>
+                  }
+                </td>
+                <td class="text-end value-primary">
+                  {{ displayUtils.formatHours(project.hours) }}
+                </td>
+                <td class="text-end value-success">
+                  {{ displayUtils.formatHours(project.approvedHours) }}
+                </td>
+                <td class="text-end value-warning">
+                  {{ displayUtils.formatHours(project.pendingHours) }}
+                </td>
+                <td class="text-end value-primary">{{ project.count }}</td>
+                @if (showExport()) {
+                  <td class="text-end export-column">
+                    <button
+                      type="button"
+                      class="export-button"
+                      (click)="exportProject(project.projectId, project.projectName)"
+                      [attr.aria-label]="
+                        'Export entries for ' + project.projectName
+                      "
+                    >
+                      <i class="bi bi-download" aria-hidden="true"></i>
+                    </button>
+                  </td>
+                }
+              </tr>
+            }
+            @if (!entriesByProject().length) {
+              <tr>
+                <td [attr.colspan]="showExport() ? 6 : 5" class="empty-state">
+                  No entries found for the current filters.
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</section>

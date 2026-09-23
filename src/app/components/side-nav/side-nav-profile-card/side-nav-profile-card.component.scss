@@ -1,0 +1,201 @@
+:host {
+  display: block;
+  width: 100%;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--color-border);
+}
+
+$nav-width-transition-duration: 0.3s;
+$nav-width-transition: $nav-width-transition-duration ease-out;
+
+.profile-card {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.25rem 0;
+  transition:
+    flex-direction $nav-width-transition,
+    gap $nav-width-transition,
+    padding $nav-width-transition;
+}
+
+.profile-card--compact {
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.35rem 0 0;
+
+  .profile-identity {
+    flex: none;
+    justify-content: center;
+    gap: 0;
+    transition:
+      gap $nav-width-transition,
+      background-color 0.15s ease,
+      justify-content 0s linear $nav-width-transition-duration;
+  }
+
+  .profile-text {
+    max-width: 0;
+    opacity: 0;
+    margin-inline-start: 0;
+  }
+
+  .profile-menu {
+    display: flex;
+    justify-content: center;
+  }
+}
+
+.profile-identity {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 0.65rem;
+  text-decoration: none;
+  color: inherit;
+  border-radius: 8px;
+  padding: 0.15rem;
+  margin: -0.15rem;
+  transition:
+    gap $nav-width-transition,
+    background-color 0.15s ease,
+    justify-content 0s linear 0s;
+
+  &:hover {
+    background: color-mix(in srgb, var(--color-border) 45%, transparent);
+  }
+
+  &.profile-identity-active {
+    background: color-mix(
+      in srgb,
+      var(--primary-color) 10%,
+      transparent
+    );
+  }
+}
+
+.profile-text {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  max-width: 11rem;
+  opacity: 1;
+  overflow: hidden;
+  transition:
+    max-width $nav-width-transition,
+    opacity 0.22s ease-out,
+    margin-inline-start $nav-width-transition;
+}
+
+.profile-name {
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25;
+  color: color-mix(in srgb, var(--text-primary) 88%, #1e3a5f);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-subtitle {
+  font-size: 0.75rem;
+  font-weight: 400;
+  line-height: 1.3;
+  color: var(--text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.profile-avatar ::ng-deep .user-avatar {
+  background: linear-gradient(135deg, #0d9488 0%, #14b8a6 48%, #2563eb 100%);
+  box-shadow: 0 1px 3px color-mix(in srgb, #0d9488 35%, transparent);
+}
+
+.profile-avatar ::ng-deep .user-avatar-initials {
+  color: #fff;
+  font-weight: 700;
+}
+
+.profile-settings-btn {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  border: none;
+  background: transparent;
+  color: inherit;
+  cursor: pointer;
+
+  &::after {
+    display: none;
+  }
+
+  .icon-box {
+    width: 35px;
+    height: 35px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 8px;
+    background-color: transparent;
+    transition:
+      background-color 0.2s ease,
+      color 0.2s ease;
+
+    i {
+      color: currentColor;
+      font-size: 18px;
+      width: 15px;
+      height: 15px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      line-height: 1;
+    }
+  }
+
+  &:hover .icon-box,
+  &:focus-visible .icon-box {
+    background-color: color-mix(in srgb, var(--color-border) 55%, transparent);
+  }
+}
+
+.profile-dropdown-menu {
+  min-width: 11rem;
+  padding: 0.35rem;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  box-shadow:
+    0 8px 24px color-mix(in srgb, var(--text-primary) 12%, transparent),
+    0 2px 6px color-mix(in srgb, var(--text-primary) 6%, transparent);
+}
+
+.profile-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  border-radius: 6px;
+  font-size: 0.875rem;
+  font-weight: 500;
+
+  i {
+    font-size: 1rem;
+    opacity: 0.85;
+  }
+}
+
+.profile-dropdown-item--danger {
+  color: #dc3545;
+
+  &:hover,
+  &:focus {
+    color: #dc3545;
+    background: color-mix(in srgb, #dc3545 10%, transparent);
+  }
+}

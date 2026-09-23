@@ -1,9 +1,16 @@
 import { Component, computed, signal } from '@angular/core';
 
-import { TimeSheetEntry } from '@models';
+import { ProjectDropdownComponent } from '@components';
+import { Project, TimeSheetEntry } from '@models';
 import { ToastService, TimeSheetEntryService } from '@services';
 import { Store } from '@state';
-import { ColorList } from '@utils';
+import {
+  buildProjectColorMap,
+  clearStoredTimeSheetProjectId,
+  getStoredTimeSheetProjectId,
+  localCalendarDayKey,
+  storeTimeSheetProjectId,
+} from '@utils';
 
 import { TimeSheetDayComponent } from './components';
 import { TimeSheetDateSelectorComponent } from './components';
@@ -12,13 +19,31 @@ import { TimeSheetDateSelectorComponent } from './components';
   standalone: true,
   templateUrl: './time-sheet.page.html',
   styleUrl: './time-sheet.page.scss',
-  imports: [TimeSheetDayComponent, TimeSheetDateSelectorComponent],
+  imports: [
+    TimeSheetDayComponent,
+    TimeSheetDateSelectorComponent,
+    ProjectDropdownComponent,
+  ],
 })
 export class TimeSheetPage {
+  public readonly localCalendarDayKey = localCalendarDayKey;
+
   private readonly weekStart = signal(new Date());
   private readonly weekEnd = signal(new Date());
+  private readonly filterProjectId = signal<string | null>(
+    getStoredTimeSheetProjectId(),
+  );
 
   public readonly projects = computed(() => this.store.projects.projects());
+  public readonly filterProject = computed(() => {
+    const projectId = this.filterProjectId();
+    if (!projectId) return null;
+    return this.projects().find((project) => project.id === projectId) ?? null;
+  });
+
+  public readonly projectColorById = computed(() =>
+    buildProjectColorMap(this.projects()),
+  );
 
   public readonly weekDays = computed(() => {
     const weekStart = this.weekStart();
@@ -35,26 +60,24 @@ export class TimeSheetPage {
   );
 
   private readonly entries = signal<TimeSheetEntry[]>([]);
-  public readonly categories = computed(() => [
-    ...new Set(this.entries().map((entry) => entry.category)),
-  ]);
-  public readonly colors = computed(() => {
-    const colors = new Map<string, string>();
-    this.categories().forEach((category, index) => {
-      colors.set(
-        category,
-        ColorList.colors[index % ColorList.colors.length] ?? '#6B7280',
-      );
-    });
-    return colors;
+  private readonly filteredEntries = computed(() => {
+    const projectId = this.filterProjectId();
+    const entries = this.entries();
+    if (!projectId) return entries;
+    return entries.filter((entry) => entry.projectId === projectId);
   });
+
+  public readonly categories = computed(() => [
+    ...new Set(this.filteredEntries().map((entry) => entry.category)),
+  ]);
+
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
-    for (const entry of this.entries()) {
-      const dateKey = entry.date.toDateString();
-      const entries = entriesByDate.get(dateKey) ?? [];
-      entries.push(entry);
-      entriesByDate.set(dateKey, entries);
+    for (const entry of this.filteredEntries()) {
+      const dateKey = localCalendarDayKey(entry.date);
+      const dayEntries = entriesByDate.get(dateKey) ?? [];
+      dayEntries.push(entry);
+      entriesByDate.set(dateKey, dayEntries);
     }
     return entriesByDate;
   });
@@ -74,20 +97,42 @@ export class TimeSheetPage {
   }
 
   public onTimeSheetEntrySaved() {
+    this.syncFilterProject();
     this.fetchTimeSheetEntries();
+  }
+
+  public onFilterProjectSelected(project: Project | null): void {
+    this.filterProjectId.set(project?.id ?? null);
+    if (project?.id) {
+      storeTimeSheetProjectId(project.id);
+    } else {
+      clearStoredTimeSheetProjectId();
+    }
+  }
+
+  private syncFilterProject(): void {
+    const projectId = getStoredTimeSheetProjectId();
+    this.filterProjectId.set(projectId);
+    if (!projectId) return;
+
+    const project = this.projects().find((item) => item.id === projectId);
+    if (!project) {
+      this.filterProjectId.set(null);
+      clearStoredTimeSheetProjectId();
+    }
   }
 
   private async fetchTimeSheetEntries(): Promise<void> {
     this.fetching.set(true);
 
     await this.waitForProjects();
-    if (!this.projects().length) {
+    this.syncFilterProject();
+
+    const user = this.store.user.user();
+    if (!user) {
       this.fetching.set(false);
       return;
     }
-
-    const user = this.store.user.user();
-    if (!user) return;
 
     try {
       const start = this.weekStart();
@@ -100,7 +145,7 @@ export class TimeSheetPage {
       );
 
       this.entries.set(entries);
-    } catch (error) {
+    } catch {
       this.toastService.error('Error initializing time sheet entries');
     } finally {
       this.fetching.set(false);

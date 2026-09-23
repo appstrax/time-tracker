@@ -1,12 +1,17 @@
-<div class="project-dropdown form-group" [class.show]="isProjectDropdownOpen">
+<div
+  class="project-dropdown form-group"
+  [class.show]="isProjectDropdownOpen"
+  [class.project-dropdown--compact]="compact"
+>
     <button
       type="button"
-      class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between form-select"
-      (click)="toggleProjectDropdown()"
+      class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+      [class.form-select]="!compact"
+      (click)="toggleProjectDropdown($event)"
       [disabled]="disabled"
-      aria-expanded="isProjectMenuOpen"
+      [attr.aria-expanded]="isProjectDropdownOpen"
     >
-      <span class="d-flex align-items-center gap-2">
+      <span class="project-dropdown-selection d-flex align-items-center gap-2">
         @if (selectedProject) { @if (selectedProject.logoUrl) {
         <img
           [src]="selectedProject.logoUrl"
@@ -17,23 +22,40 @@
         } @else {
         <i class="bi bi-image proj-thumb-fallback"></i>
         }
-        <span>{{ selectedProject.name }}</span>
+        <span
+          class="project-dropdown-name"
+          [attr.title]="selectedProject.name"
+          >{{ selectedProject.name }}</span>
         } @else {
         <i class="bi bi-image proj-thumb-fallback"></i>
-        <span>Select a project</span>
+        <span class="project-dropdown-name">{{ nullOptionLabel }}</span>
         }
       </span>
       <i
-        class="bi"
+        class="bi project-dropdown-chevron flex-shrink-0"
         [ngClass]="isProjectDropdownOpen ? 'bi-chevron-up' : 'bi-chevron-down'"
       ></i>
     </button>
     <ul
-      class="dropdown-menu dropdown-menu-end w-100"
+      class="dropdown-menu w-100"
+      [class.dropdown-menu-end]="!compact"
       [class.show]="isProjectDropdownOpen && !disabled"
       [attr.data-bs-popper]="isProjectDropdownOpen && !disabled ? 'static' : null"
+      (click)="$event.stopPropagation()"
     >
-      @if (allowNull) {
+      <li class="project-dropdown-search-item">
+        <input
+          #searchInput
+          type="search"
+          class="form-control project-dropdown-search"
+          placeholder="Search projects…"
+          autocomplete="off"
+          [ngModel]="projectSearchTerm()"
+          (ngModelChange)="projectSearchTerm.set($event)"
+          (keydown.escape)="onSearchEscape($event)"
+        />
+      </li>
+      @if (shouldShowNullOption()) {
       <li>
         <button
           class="dropdown-item d-flex align-items-center gap-2"
@@ -43,11 +65,18 @@
           [disabled]="disabled"
         >
           <i class="bi bi-image proj-thumb-fallback"></i>
-          <span>Select a project</span>
+          <span>{{ nullOptionLabel }}</span>
         </button>
       </li>
       }
-      @for (project of projects(); track project.id) {
+      @if (showEmptyListState()) {
+      <li>
+        <span class="dropdown-item-text text-muted px-3 py-2 d-block">
+          {{ emptyListMessage() }}
+        </span>
+      </li>
+      }
+      @for (project of filteredProjects(); track project.id) {
       <li>
         <button
           class="dropdown-item d-flex align-items-center gap-2"
@@ -66,7 +95,7 @@
           } @else {
           <i class="bi bi-image proj-thumb-fallback"></i>
           }
-          <span>{{ project.name }}</span>
+          <span [attr.title]="project.name">{{ project.name }}</span>
         </button>
       </li>
       }

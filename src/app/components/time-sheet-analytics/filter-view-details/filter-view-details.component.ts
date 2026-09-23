@@ -1,0 +1,51 @@
+import { Component, computed, inject, input } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
+import { TimeSheetEntry, Project } from '@models';
+import {
+  TimeSheetDisplayUtil,
+  dateFromLocalCalendarDayKey,
+  localCalendarDayKey,
+} from '@utils';
+
+@Component({
+  selector: 'app-filter-view-details',
+  standalone: true,
+  imports: [CommonModule],
+  templateUrl: './filter-view-details.component.html',
+  styleUrl: './filter-view-details.component.scss',
+})
+export class FilterViewDetailsComponent {
+  public readonly entries = input<TimeSheetEntry[]>([]);
+  public readonly projects = input<Project[]>([]);
+  public readonly compact = input(false);
+
+  public displayUtils = inject(TimeSheetDisplayUtil);
+
+  public readonly entriesByDate = computed(() => {
+    const dateMap = new Map<string, TimeSheetEntry[]>();
+
+    this.entries().forEach((entry) => {
+      const dateKey = localCalendarDayKey(entry.date);
+      if (!dateMap.has(dateKey)) {
+        dateMap.set(dateKey, []);
+      }
+      dateMap.get(dateKey)!.push(entry);
+    });
+
+    return Array.from(dateMap.entries())
+      .map(([dateKey, entries]) => ({
+        date: dateFromLocalCalendarDayKey(dateKey),
+        entries: entries.sort(
+          (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
+        ),
+      }))
+      .sort((a, b) => b.date.getTime() - a.date.getTime());
+  });
+
+  public getFieldLabel(entry: TimeSheetEntry, fieldKey: string): string {
+    const project = this.projects().find((p) => p.id === entry.projectId);
+    const field = project?.fields?.find((f) => f.key === fieldKey);
+    return field?.label || fieldKey;
+  }
+}

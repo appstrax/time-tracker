@@ -32,6 +32,7 @@ interface MetricCardViewModel extends MetricCardConfig {
 export class SummaryMetricsComponent {
   public readonly entries = input<TimeSheetEntry[]>([]);
   public readonly projects = input<Project[]>([]);
+  public readonly compact = input(false);
 
   public readonly metrics = computed<SummaryMetrics>(() => {
     const entries = this.entries();

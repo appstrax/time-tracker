@@ -1,59 +1,70 @@
-<div class="modal-header align-items-center d-flex justify-content-between">
-  <h4 class="modal-title text-white mb-0">Time Sheet Entry</h4>
-  <button
-    type="button"
-    class="btn-close btn-close-white"
-    aria-label="Close"
-    (click)="close()"
-  ></button>
-</div>
+<div class="time-sheet-entry-modal">
+  <div class="modal-header align-items-center d-flex justify-content-between">
+    <h4 class="modal-title mb-0 d-inline-flex align-items-center gap-2">
+      <i class="bi bi-clock-history"></i>
+      Time Sheet Entry
+    </h4>
+    <button
+      type="button"
+      class="btn-close"
+      aria-label="Close"
+      (click)="close()"
+    ></button>
+  </div>
 
-<div class="modal-body">
-  <ng-container>
-    <app-project-dropdown
-      [selectedProject]="project"
-      (projectSelected)="onProjectSelected($event)"
-      [disabled]="timeSheetEntry.approved"
-    ></app-project-dropdown>
-    <div class="form-group">
-      <label for="category" class="visually-hidden">Category</label>
-      <div class="input-with-icon position-relative">
-        <i class="bi bi-tag"></i>
-        <input
-          type="text"
-          class="form-control"
-          id="category"
-          name="category"
-          [(ngModel)]="timeSheetEntry.category"
-          (input)="onCategoryInput($event)"
-          (focus)="onCategoryFocus()"
-          (blur)="onCategoryBlur()"
-          placeholder="* Category"
-          autocomplete="off"
+  <div class="modal-body">
+    <div class="field-row">
+      <div class="form-group">
+        <label class="form-label">* Project</label>
+        <app-project-dropdown
+          [selectedProject]="project"
+          (projectSelected)="onProjectSelected($event)"
           [disabled]="timeSheetEntry.approved"
-          required
-          />
-        @if (isCategoryDropdownOpen && filteredCategories.length && !timeSheetEntry.approved) {
-          <ul
-            class="dropdown-menu dropdown-menu-end w-100 show category-autocomplete"
-            [attr.data-bs-popper]="'static'"
-            >
-            @for (category of filteredCategories; track category) {
-              <li>
-                <button
-                  class="dropdown-item"
-                  type="button"
-                  (click)="selectCategory(category)"
-                  >
-                  {{ category }}
-                </button>
-              </li>
-            }
-          </ul>
-        }
+        ></app-project-dropdown>
+      </div>
+
+      <div class="form-group">
+        <label for="category" class="form-label">* Category</label>
+        <div class="input-with-icon position-relative">
+          <i class="bi bi-tag"></i>
+          <input
+            type="text"
+            class="form-control"
+            id="category"
+            name="category"
+            [(ngModel)]="timeSheetEntry.category"
+            (input)="onCategoryInput($event)"
+            (focus)="onCategoryFocus()"
+            (blur)="onCategoryBlur()"
+            placeholder="Category"
+            autocomplete="off"
+            [disabled]="timeSheetEntry.approved"
+            required
+            />
+          @if (isCategoryDropdownOpen && filteredCategories.length && !timeSheetEntry.approved) {
+            <ul
+              class="dropdown-menu dropdown-menu-end w-100 show category-autocomplete"
+              [attr.data-bs-popper]="'static'"
+              >
+              @for (category of filteredCategories; track category) {
+                <li>
+                  <button
+                    class="dropdown-item"
+                    type="button"
+                    (click)="selectCategory(category)"
+                    >
+                    {{ category }}
+                  </button>
+                </li>
+              }
+            </ul>
+          }
+        </div>
       </div>
     </div>
+
     <div class="form-group">
+      <label class="form-label">* Hours</label>
       <div class="hours-input-container">
         <div class="hours-range-wrapper">
           <input
@@ -76,8 +87,9 @@
         </div>
       </div>
     </div>
+
     <div class="form-group">
-      <label for="description" class="visually-hidden">Description</label>
+      <label for="description" class="form-label">* Description</label>
       <div class="input-with-icon">
         <i class="bi bi-file-earmark-text"></i>
         <textarea
@@ -85,7 +97,7 @@
           id="description"
           name="description"
           [(ngModel)]="timeSheetEntry.description"
-          placeholder="* Description"
+          placeholder="Description"
           rows="5"
           required
           [disabled]="timeSheetEntry.approved"
@@ -93,42 +105,128 @@
       </div>
     </div>
 
+    @if (projectFields.length) {
+      <div class="custom-fields-section">
+        <span class="custom-fields-section__label">Project Details</span>
+        <div class="custom-fields-grid">
+          @for (field of projectFields; track field.key) {
+            <div class="form-group custom-field" [class.custom-field--boolean]="field.type === 'boolean'">
+              @if (field.type !== 'boolean') {
+                <label class="form-label" [for]="'field-' + field.key">
+                  {{ field.required ? '* ' : '' }}{{ field.label || field.key }}
+                </label>
+              }
+
+              @switch (field.type) {
+                @case ('text') {
+                  <input
+                    type="text"
+                    class="form-control"
+                    [id]="'field-' + field.key"
+                    [ngModel]="getFieldValue(field.key)"
+                    (ngModelChange)="setFieldValue(field.key, $event)"
+                    [disabled]="timeSheetEntry.approved"
+                    [required]="field.required"
+                  />
+                }
+                @case ('number') {
+                  <input
+                    type="number"
+                    class="form-control"
+                    [id]="'field-' + field.key"
+                    [ngModel]="getFieldValue(field.key)"
+                    (ngModelChange)="setFieldValue(field.key, $event)"
+                    [disabled]="timeSheetEntry.approved"
+                    [required]="field.required"
+                  />
+                }
+                @case ('date') {
+                  <input
+                    type="date"
+                    class="form-control"
+                    [id]="'field-' + field.key"
+                    [ngModel]="getFieldValue(field.key)"
+                    (ngModelChange)="setFieldValue(field.key, $event)"
+                    [disabled]="timeSheetEntry.approved"
+                    [required]="field.required"
+                  />
+                }
+                @case ('select') {
+                  <select
+                    class="form-select"
+                    [id]="'field-' + field.key"
+                    [ngModel]="getFieldValue(field.key)"
+                    (ngModelChange)="setFieldValue(field.key, $event)"
+                    [disabled]="timeSheetEntry.approved"
+                    [required]="field.required"
+                  >
+                    <option value="">Select...</option>
+                    @for (option of field.options; track option) {
+                      <option [value]="option">{{ option }}</option>
+                    }
+                  </select>
+                }
+                @case ('boolean') {
+                  <label class="toggle-switch" [for]="'field-' + field.key">
+                    <input
+                      type="checkbox"
+                      class="toggle-switch__input"
+                      [id]="'field-' + field.key"
+                      [ngModel]="isFieldBoolean(field)"
+                      (ngModelChange)="setFieldBoolean(field.key, $event)"
+                      [disabled]="timeSheetEntry.approved"
+                    />
+                    <span class="toggle-switch__track">
+                      <span class="toggle-switch__thumb"></span>
+                    </span>
+                    <span class="toggle-switch__label">
+                      {{ field.required ? '* ' : '' }}{{ field.label || field.key }}
+                    </span>
+                  </label>
+                }
+              }
+            </div>
+          }
+        </div>
+      </div>
+    }
+
     @if (errorMessage) {
       <div class="alert alert-danger mb-3">
         {{ errorMessage }}
       </div>
     }
-  </ng-container>
-</div>
-
-<div class="modal-footer d-flex justify-content-between">
-  <div>
-    @if(timeSheetEntry.id && !timeSheetEntry.approved){
-      <button
-        type="button"
-        class="btn btn-outline-danger"
-        (click)="onDeleteTimeSheetEntry()"
-        >
-        Delete
-      </button>
-    }
   </div>
-  <div>
-    <button
-      type="button"
-      class="btn btn-outline-secondary"
-      (click)="close()"
-      >
-      Close
-    </button>
-    @if(!timeSheetEntry.approved){
+
+  <div class="modal-footer d-flex justify-content-between">
+    <div>
+      @if(timeSheetEntry.id && !timeSheetEntry.approved){
+        <button
+          type="button"
+          class="btn btn-outline-danger"
+          (click)="onDeleteTimeSheetEntry()"
+          >
+          Delete
+        </button>
+      }
+    </div>
+    <div>
       <button
         type="button"
-        class="btn btn-primary ms-3"
-        (click)="onSaveTimeSheetEntry()"
+        class="btn btn-outline-secondary"
+        (click)="close()"
         >
-        Save
+        Close
       </button>
-    }
+      @if(!timeSheetEntry.approved){
+        <button
+          type="button"
+          class="btn btn-primary ms-3"
+          (click)="onSaveTimeSheetEntry()"
+          >
+          Save
+        </button>
+      }
+    </div>
   </div>
 </div>

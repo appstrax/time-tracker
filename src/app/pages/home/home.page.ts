@@ -1,55 +1,57 @@
-import { Component, computed, effect, signal } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { Component, computed, effect, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Params } from '@angular/router';
 
-import { Project } from '@models';
+import { FilterView, FilterViewContainerComponent } from '@components';
+import { TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
-import { TimeSheetDisplayUtil } from '@utils';
-
-interface ProjectHoursBar {
-  projectId: string;
-  projectName: string;
-  hours: number;
-  percent: number;
-}
+import { TimeSheetFilterUtil } from '@utils';
 
 @Component({
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [CommonModule],
+  imports: [FilterViewContainerComponent],
 })
 export class HomePage {
+  private readonly store = inject(Store);
+  private readonly route = inject(ActivatedRoute);
+  private readonly filterUtils = inject(TimeSheetFilterUtil);
+  private readonly timeSheetEntryService = inject(TimeSheetEntryService);
+  private readonly toast = inject(ToastService);
+
+  private readonly queryParams = toSignal(this.route.queryParams, {
+    initialValue: this.route.snapshot.queryParams as Params,
+  });
+
   public readonly isLoading = signal(true);
   public readonly hasLoaded = signal(false);
-  public readonly graphData = signal<ProjectHoursBar[]>([]);
-  public readonly totalHours = computed(() =>
-    this.graphData().reduce((sum, item) => sum + item.hours, 0),
-  );
-  public readonly activeProjects = computed(
-    () => this.graphData().filter((item) => item.hours > 0).length,
-  );
-  public readonly hasProjects = computed(() => this.graphData().length > 0);
-  public readonly hasCapturedHours = computed(() => this.totalHours() > 0);
-  public readonly rangeStart = this.createRangeStart();
-  public readonly rangeEnd = this.createRangeEnd();
-  public readonly rangeLabel = this.formatRangeLabel(
-    this.rangeStart,
-    this.rangeEnd,
-  );
-  private latestLoadId = 0;
+  public readonly entries = signal<TimeSheetEntry[]>([]);
+  public readonly filteredEntryCount = signal(0);
+  public readonly projects = computed(() => this.store.projects.projects());
+  public readonly hasProjects = computed(() => this.projects().length > 0);
 
-  constructor(
-    private store: Store,
-    private timeSheetEntryService: TimeSheetEntryService,
-    private timeSheetDisplayUtil: TimeSheetDisplayUtil,
-    private toast: ToastService,
-  ) {
+  public readonly noUsers: User[] = [];
+  public readonly homeAvailableViews: FilterView[] = [
+    'summary',
+    'details',
+    'timeline',
+  ];
+
+  private latestLoadId = 0;
+  /** Bounds key for which `entries` was last loaded successfully. */
+  private loadedBoundsKey: string | null = null;
+  /** Bounds key currently being fetched, if any. */
+  private pendingBoundsKey: string | null = null;
+
+  constructor() {
     effect(() => {
       const user = this.store.user.user();
       const userLoading = this.store.user.loading();
       const projects = this.store.projects.projects();
       const projectsLoading = this.store.projects.loading();
+      const params = this.queryParams();
 
       if (userLoading || (projectsLoading && user?.id && !projects.length)) {
         this.isLoading.set(true);
@@ -59,98 +61,83 @@ export class HomePage {
       if (!user?.id) {
         this.isLoading.set(false);
         this.hasLoaded.set(true);
-        this.graphData.set([]);
+        this.entries.set([]);
+        this.filteredEntryCount.set(0);
+        this.loadedBoundsKey = null;
+        this.pendingBoundsKey = null;
         return;
       }
 
-      void this.loadGraphData(user.id, projects);
+      const { start, end } = this.resolveFilterBounds(params);
+      const boundsKey = `${user.id}:${start.getTime()}:${end.getTime()}`;
+      if (
+        boundsKey === this.loadedBoundsKey &&
+        this.pendingBoundsKey !== boundsKey
+      ) {
+        return;
+      }
+      if (this.pendingBoundsKey === boundsKey) {
+        return;
+      }
+
+      this.pendingBoundsKey = boundsKey;
+      this.loadedBoundsKey = null;
+      this.isLoading.set(true);
+      this.entries.set([]);
+      this.filteredEntryCount.set(0);
+      void this.loadEntriesForRange(user.id, start, end, boundsKey);
     });
   }
 
-  public formatHours(hours: number): string {
-    return this.timeSheetDisplayUtil.formatHours(hours);
+  private resolveFilterBounds(params: Params): { start: Date; end: Date } {
+    const filter = this.filterUtils.resolveFilter(params);
+    if (filter.dateRange === 'all') {
+      return {
+        start: this.filterUtils.allPresetFetchStart(filter.end),
+        end: filter.end,
+      };
+    }
+    return { start: filter.start, end: filter.end };
   }
 
-  private async loadGraphData(
+  private async loadEntriesForRange(
     userId: string,
-    projects: Project[],
+    start: Date,
+    end: Date,
+    boundsKey: string,
   ): Promise<void> {
     const loadId = ++this.latestLoadId;
-    this.isLoading.set(true);
 
     try {
-      const entries =
-        await this.timeSheetEntryService.findByUserAndDateRange(
-          userId,
-          this.rangeStart,
-          this.rangeEnd,
-        );
-
-      const hoursByProject = new Map<string, number>();
-      for (const entry of entries) {
-        hoursByProject.set(
-          entry.projectId,
-          (hoursByProject.get(entry.projectId) ?? 0) + entry.hours,
-        );
-      }
-
-      const visibleProjects = [...projects].sort((a, b) =>
-        a.name.localeCompare(b.name),
+      const entries = await this.timeSheetEntryService.findByUserAndDateRange(
+        userId,
+        start,
+        end,
       );
-      const maxHours = Math.max(
-        ...visibleProjects.map((project) => hoursByProject.get(project.id) ?? 0),
-        0,
-      );
-
-      const graphData = visibleProjects
-        .map((project) => {
-          const hours = hoursByProject.get(project.id) ?? 0;
-          return {
-            projectId: project.id,
-            projectName: project.name || 'Untitled project',
-            hours,
-            percent: maxHours > 0 ? (hours / maxHours) * 100 : 0,
-          };
-        })
-        .sort(
-          (a, b) => b.hours - a.hours || a.projectName.localeCompare(b.projectName),
-        );
-
       if (loadId !== this.latestLoadId) return;
-
-      this.graphData.set(graphData);
+      this.loadedBoundsKey = boundsKey;
+      this.entries.set(entries);
     } catch {
       if (loadId !== this.latestLoadId) return;
-
-      this.graphData.set([]);
-      this.toast.error('Unable to load last week captured hours.');
+      this.entries.set([]);
+      this.toast.error('Unable to load your time entries.');
     } finally {
       if (loadId !== this.latestLoadId) return;
-
+      if (this.pendingBoundsKey === boundsKey) {
+        this.pendingBoundsKey = null;
+      }
       this.isLoading.set(false);
       this.hasLoaded.set(true);
     }
   }
 
-  private createRangeStart(): Date {
-    const start = new Date();
-    start.setDate(start.getDate() - 6);
-    start.setHours(0, 0, 0, 0);
-    return start;
+  public onFilteredEntryCountChange(count: number): void {
+    this.filteredEntryCount.set(count);
   }
 
-  private createRangeEnd(): Date {
-    const end = new Date();
-    end.setHours(23, 59, 59, 999);
-    return end;
-  }
-
-  private formatRangeLabel(start: Date, end: Date): string {
-    const dateFormatter = new Intl.DateTimeFormat(undefined, {
-      month: 'short',
-      day: 'numeric',
-    });
-
-    return `${dateFormatter.format(start)} to ${dateFormatter.format(end)}`;
+  public onEntryUpdated(entry: TimeSheetEntry): void {
+    this.entries.update((entries) =>
+      entries.map((e) => (e.id === entry.id ? entry : e)),
+    );
   }
 }

@@ -1,26 +1,144 @@
 /* Project dropdown styles */
 .project-dropdown {
-    position: relative;
+  position: relative;
+}
+
+.project-dropdown--compact {
+  margin-bottom: 0;
+  height: 100%;
+  width: 100%;
+  min-width: 0;
+
+  .project-dropdown-selection {
+    flex: 1 1 auto;
+    min-width: 0;
   }
-  
-  .project-dropdown .dropdown-toggle {
-    min-height: 3.25rem;
-    border-radius: 16px;
-    border: 1px solid var(--color-border);
-    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
-    color: var(--text-primary);
-    padding: 0.75rem 1rem;
+
+  .project-dropdown-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  
-  .project-dropdown .dropdown-toggle::after {
-    display: none;
+
+  .proj-thumb,
+  .proj-thumb-fallback {
+    width: 1.25rem;
+    height: 1.25rem;
+    border-radius: 0.35rem;
   }
-  
-  .project-dropdown .dropdown-toggle:hover,
-  .project-dropdown .dropdown-toggle:focus,
-  .project-dropdown .dropdown-toggle:active {
-    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
-    color: var(--text-primary);
+
+  .proj-thumb-fallback {
+    font-size: 0.75rem;
+  }
+
+  .project-dropdown-selection {
+    gap: 0.4rem !important;
+  }
+
+  .dropdown-menu {
+    --project-dropdown-menu-width: min(26rem, calc(100vw - 1.25rem));
+    min-width: var(--project-dropdown-menu-width);
+    width: max(100%, var(--project-dropdown-menu-width));
+    max-width: calc(100vw - 1.25rem);
+    overflow-x: hidden;
+    right: 0;
+    left: auto;
+  }
+
+  @media (max-width: 900px) {
+    .dropdown-menu {
+      left: 0;
+      right: auto;
+    }
+  }
+}
+
+.project-dropdown-selection {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.project-dropdown-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.project-dropdown-chevron {
+  flex-shrink: 0;
+}
+
+.project-dropdown:not(.project-dropdown--compact) .dropdown-toggle {
+  min-height: 3.25rem;
+  border-radius: 16px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
+  color: var(--text-primary);
+  padding: 0.75rem 1rem;
+}
+
+.project-dropdown--compact .dropdown-toggle {
+  min-height: var(--page-header-control-height, 2.25rem);
+  height: var(--page-header-control-height, 2.25rem);
+  max-height: var(--page-header-control-height, 2.25rem);
+  padding: 0 0.65rem;
+  border-radius: 999px;
+  font-size: 0.875rem;
+  line-height: 1;
+  box-sizing: border-box;
+  gap: 0.35rem;
+  min-width: 0;
+}
+
+.project-dropdown .dropdown-toggle::after {
+  display: none;
+}
+
+.project-dropdown:not(.project-dropdown--compact) .dropdown-toggle:hover,
+.project-dropdown:not(.project-dropdown--compact) .dropdown-toggle:focus,
+.project-dropdown:not(.project-dropdown--compact) .dropdown-toggle:active {
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
+  color: var(--text-primary);
+  border-color: color-mix(
+    in srgb,
+    var(--primary-color) 45%,
+    var(--color-border)
+  );
+  box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
+}
+
+.project-dropdown .dropdown-toggle i {
+  color: var(--text-primary);
+}
+
+.project-dropdown .dropdown-menu {
+  border-radius: 20px;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  max-height: 300px;
+  overflow-y: auto;
+  box-shadow: 0 16px 35px rgba(15, 23, 42, 0.12);
+  padding-top: 0;
+}
+
+.project-dropdown-search-item {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  padding: 0.5rem 0.5rem 0.35rem;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid var(--color-border);
+  list-style: none;
+}
+
+.project-dropdown-search {
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
+  font-size: 0.875rem;
+  padding: 0.4rem 0.65rem;
+
+  &:focus {
     border-color: color-mix(
       in srgb,
       var(--primary-color) 45%,
@@ -28,57 +146,55 @@
     );
     box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
   }
-  
-  .project-dropdown .dropdown-toggle i {
-    color: var(--text-primary);
+}
+
+.proj-thumb {
+  width: 24px;
+  height: 24px;
+  object-fit: cover;
+  border-radius: 15px;
+  flex-shrink: 0;
+  transition: transform 0.2s ease;
+}
+
+.proj-thumb:hover {
+  transform: scale(1.05);
+}
+
+.proj-thumb-fallback {
+  font-size: 16px;
+  width: 24px;
+  height: 24px;
+  border-radius: 15px;
+  background-color: var(--color-border);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  color: var(--text-muted);
+  transition:
+    background-color 0.2s ease,
+    transform 0.2s ease;
+}
+
+.project-dropdown .dropdown-item {
+  color: var(--text-primary);
+  padding: 0.375rem 0.75rem;
+  min-width: 0;
+
+  > span:last-child {
+    flex: 1 1 auto;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
-  
-  .project-dropdown .dropdown-menu {
-    border-radius: 20px;
-    background-color: var(--color-surface);
-    border: 1px solid var(--color-border);
-    max-height: 300px;
-    overflow-y: auto;
-    box-shadow: 0 16px 35px rgba(15, 23, 42, 0.12);
-  }
-  
-  /* Project thumbnail styling - matches project-selector */
-  .proj-thumb {
-    width: 24px;
-    height: 24px;
-    object-fit: cover;
-    border-radius: 15px;
-    flex-shrink: 0;
-    transition: transform 0.2s ease;
-  }
-  
-  .proj-thumb:hover {
-    transform: scale(1.05);
-  }
-  
-  .proj-thumb-fallback {
-    font-size: 16px;
-    width: 24px;
-    height: 24px;
-    border-radius: 15px;
-    background-color: var(--color-border);
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    flex-shrink: 0;
-    color: var(--text-muted);
-    transition: background-color 0.2s ease, transform 0.2s ease;
-  }
-  
-  .project-dropdown .dropdown-item {
-    color: var(--text-primary);
-    padding: 0.375rem 0.75rem;
-  }
-  
-  .project-dropdown .dropdown-item:hover,
-  .project-dropdown .dropdown-item:focus,
-  .project-dropdown .dropdown-item:active,
-  .project-dropdown .dropdown-item.active {
-    color: var(--text-primary);
-    background-color: color-mix(in srgb, var(--color-border) 60%, transparent);
-  }
+}
+
+.project-dropdown .dropdown-item:hover,
+.project-dropdown .dropdown-item:focus,
+.project-dropdown .dropdown-item:active,
+.project-dropdown .dropdown-item.active {
+  color: var(--text-primary);
+  background-color: color-mix(in srgb, var(--color-border) 60%, transparent);
+}

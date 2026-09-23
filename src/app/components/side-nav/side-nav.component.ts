@@ -1,10 +1,8 @@
-import { Component, OnDestroy } from '@angular/core';
+import { Component, ViewChild } from '@angular/core';
 import { RouterModule, Router, NavigationStart } from '@angular/router';
 import { HostListener, AfterViewInit } from '@angular/core';
 
-import { Tooltip } from 'bootstrap';
 import { appstraxAuth } from '@appstrax/services/auth';
-import { SideNavCollapsedComponent } from './collapsed/side-nav-collapsed.component';
 import { SideNavExpandedComponent } from './expanded/side-nav-expanded.component';
 import { SettingsService } from '@services';
 import { Store } from '@state';
@@ -21,15 +19,16 @@ interface NavItem {
   templateUrl: './side-nav.component.html',
   styleUrls: ['./side-nav.component.scss'],
   standalone: true,
-  imports: [RouterModule, SideNavCollapsedComponent, SideNavExpandedComponent],
+  imports: [RouterModule, SideNavExpandedComponent],
 })
-export class SideNavComponent implements AfterViewInit, OnDestroy {
+export class SideNavComponent implements AfterViewInit {
   isVisible = true;
   mode: 'collapsed' | 'expanded' = 'collapsed';
   private closeTimeout: any;
   private readonly THRESHOLD = 50;
   private readonly BUFFER_ZONE = 100;
-  private tooltips: Tooltip[] = [];
+
+  @ViewChild(SideNavExpandedComponent) navPanel?: SideNavExpandedComponent;
 
   constructor(
     private router: Router,
@@ -72,21 +71,6 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
   }
 
   ngAfterViewInit() {
-    setTimeout(() => {
-      const tooltipTriggerList = document.querySelectorAll(
-        '[data-bs-toggle="tooltip"]',
-      );
-      this.tooltips = [...tooltipTriggerList].map((tooltipTriggerEl) => {
-        return new Tooltip(tooltipTriggerEl, {
-          placement: 'right',
-          trigger: 'hover',
-          delay: { show: 300, hide: 100 },
-          container: 'body',
-          boundary: document.body as any,
-        });
-      });
-    }, 100);
-
     // Hide tooltips on navigation to avoid lingering tooltips
     this.router.events.subscribe((ev) => {
       if (ev instanceof NavigationStart) {
@@ -97,12 +81,8 @@ export class SideNavComponent implements AfterViewInit, OnDestroy {
     });
   }
 
-  ngOnDestroy() {
-    this.tooltips.forEach((tooltip) => tooltip.dispose());
-  }
-
   private hideAllTooltips() {
-    this.tooltips.forEach((tooltip) => tooltip.hide());
+    this.navPanel?.hideAllTooltips();
   }
 
   @HostListener('document:click')

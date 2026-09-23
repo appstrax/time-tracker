@@ -1,12 +1,33 @@
 <div
-  class="side-nav"
+  class="side-nav-shell"
   [class.visible]="isVisible"
   [class.expanded]="mode === 'expanded'"
   [class.collapsed]="mode === 'collapsed'"
 >
-  @if (mode === "collapsed") {
-    <app-side-nav-collapsed (logout)="logout()" (toggle)="toggleNav()" />
-  } @else {
-    <app-side-nav-expanded (logout)="logout()" (toggle)="toggleNav()" />
+  <div class="side-nav">
+    <app-side-nav-expanded
+      [compact]="mode === 'collapsed'"
+      (logout)="logout()"
+    />
+  </div>
+
+  @if (isVisible) {
+    <button
+      type="button"
+      class="side-nav-toggle-tab"
+      (click)="toggleNav()"
+      [attr.aria-label]="
+        mode === 'expanded'
+          ? 'Collapse side navigation'
+          : 'Expand side navigation'
+      "
+    >
+      <i
+        class="bi"
+        [class.bi-chevron-double-left]="mode === 'expanded'"
+        [class.bi-chevron-double-right]="mode === 'collapsed'"
+        aria-hidden="true"
+      ></i>
+    </button>
   }
 </div>

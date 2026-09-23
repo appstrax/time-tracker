@@ -1,0 +1,145 @@
+.table-shell {
+  border: 1px solid var(--color-border);
+  border-radius: 24px;
+  background: var(--color-surface);
+  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  overflow: hidden;
+}
+
+.table-toolbar {
+  padding: 1.5rem 1.5rem 0;
+
+  h2 {
+    margin: 0;
+    font-size: 1.25rem;
+  }
+
+  p {
+    margin: 0.35rem 0 0;
+    color: var(--text-muted);
+  }
+}
+
+.eyebrow {
+  margin: 0 0 0.45rem;
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.table-responsive {
+  padding: 1rem 1.5rem 1.5rem;
+}
+
+.table {
+  --bs-table-color: var(--text-primary);
+  --bs-table-bg: transparent;
+  --bs-table-border-color: var(--color-border);
+
+  th {
+    color: var(--text-muted);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  td,
+  th {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
+  }
+}
+
+.project-pill {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.35rem 0.75rem;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary-color) 8%, var(--color-surface));
+  color: var(--primary-color-dark);
+  font-weight: 600;
+}
+
+.project-pill-link {
+  border: none;
+  font: inherit;
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    box-shadow 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary-color) 14%, var(--color-surface));
+    box-shadow: 0 0 0 1px
+      color-mix(in srgb, var(--primary-color) 22%, var(--color-border));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+}
+
+.value-primary {
+  color: var(--primary-color);
+  font-weight: 600;
+}
+
+.value-success {
+  color: #198754;
+  font-weight: 600;
+}
+
+.value-warning {
+  color: #b7791f;
+  font-weight: 600;
+}
+
+.empty-state {
+  padding: 2rem 1rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+.export-column {
+  width: 4.5rem;
+}
+
+.export-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.5rem;
+  height: 2.5rem;
+  padding: 0;
+  border: 1px solid var(--color-border);
+  border-radius: 999px;
+  background: var(--color-surface);
+  color: var(--primary-color-dark);
+  cursor: pointer;
+  transition:
+    background 0.15s ease,
+    border-color 0.15s ease;
+
+  &:hover {
+    background: color-mix(in srgb, var(--primary-color) 8%, var(--color-surface));
+    border-color: color-mix(in srgb, var(--primary-color) 25%, var(--color-border));
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--primary-color);
+    outline-offset: 2px;
+  }
+}
+
+@media (max-width: 767px) {
+  .table-toolbar,
+  .table-responsive {
+    padding-left: 1rem;
+    padding-right: 1rem;
+  }
+}
+

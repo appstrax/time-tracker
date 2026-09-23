@@ -1,7 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { ThemeService } from '@services';
 import { RouterOutlet } from '@angular/router';
-import { appstraxAuth } from '@appstrax/services/auth';
+import { isAuthenticatedAfterReady } from '@utils';
 
 import { Store } from '@state';
 
@@ -18,7 +18,7 @@ export class AppComponent implements OnInit {
   constructor(private theme: ThemeService, private store: Store) {}
 
   async ngOnInit(): Promise<void> {
-    const authenticated = await appstraxAuth.isAuthenticated();
+    const authenticated = await isAuthenticatedAfterReady();
     if (authenticated) {
       // TODO: handle catch and show error toast if services are down
       await this.store.init();

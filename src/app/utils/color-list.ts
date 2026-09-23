@@ -1,5 +1,22 @@
 export class ColorList {
+  static readonly tagThemeVars: string[] = [
+    'var(--tag-teal)',
+    'var(--tag-blue)',
+    'var(--tag-purple)',
+    'var(--tag-amber)',
+    'var(--tag-rose)',
+  ];
+
+  static readonly tagColors: string[] = [
+    '#0d9488',
+    '#2563eb',
+    '#7c3aed',
+    '#d97706',
+    '#e11d48',
+  ];
+
   static colors: string[] = [
+    ...ColorList.tagColors,
     '#FF6B6B',
     '#FF8E72',
     '#FFA94D',
