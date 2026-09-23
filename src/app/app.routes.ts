@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 
 import { AuthGuard } from './utils/auth.guard';
 import { AdminGuard } from './utils/admin.guard';
+import { projectPageCanDeactivate } from './utils/project-page.guard';
 
 import { PageLayoutComponent } from '@components';
 
@@ -48,6 +49,7 @@ export const routes: Routes = [
       {
         path: 'projects/project',
         canActivate: [AdminGuard],
+        canDeactivate: [projectPageCanDeactivate],
         component: ProjectPage,
       },
       {

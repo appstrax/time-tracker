@@ -3,8 +3,7 @@
   color: var(--text-primary);
 
   .project-shell {
-    max-width: 1200px;
-    margin: 0 auto;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 1.5rem;
@@ -134,6 +133,11 @@
     min-width: 180px;
   }
 
+  .card-header-action {
+    flex-shrink: 0;
+    align-self: flex-start;
+  }
+
   .project-preview-tile {
     display: flex;
     align-items: flex-start;
@@ -211,27 +215,79 @@
     padding: 1.75rem;
   }
 
+  .fields-header-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 0.65rem;
+    flex-shrink: 0;
+  }
+
+  .fields-save-button {
+    border-radius: 14px;
+    font-weight: 600;
+    min-width: 130px;
+  }
+
+  .fields-error {
+    border-radius: 14px;
+  }
+
   .field-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 1.25rem;
+  }
+
+  .field-card {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem 1.25rem;
+    border: 1px solid var(--color-border);
+    border-radius: 24px;
+    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
+    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+  }
+
+  .field-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 1rem;
+  }
+
+  .field-card-eyebrow {
+    margin: 0 0 0.25rem;
+    color: var(--text-muted);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .field-card-title {
+    margin: 0;
+    font-size: 1.15rem;
+    font-weight: 700;
+  }
+
+  .field-card-body {
     display: flex;
     flex-direction: column;
     gap: 1rem;
   }
 
-  .field-row {
-    display: flex;
-    align-items: flex-end;
+  .field-row-inputs {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
     gap: 1rem;
-    padding: 1rem;
-    border: 1px solid var(--color-border);
-    border-radius: 16px;
+    align-items: end;
   }
 
-  .field-row-inputs {
-    flex: 1;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
-    gap: 0.75rem;
-    align-items: end;
+  .field-row-inputs .form-group {
+    margin-bottom: 0;
   }
 
   .field-required-check {
@@ -245,6 +301,15 @@
     display: flex;
     gap: 0.4rem;
     flex-shrink: 0;
+  }
+
+  .field-unsaved-pill {
+    padding: 0.35rem 0.75rem;
+    border-radius: 999px;
+    background: rgba(245, 158, 11, 0.12);
+    color: #b45309;
+    font-size: 0.82rem;
+    font-weight: 600;
   }
 }
 
