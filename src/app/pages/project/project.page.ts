@@ -120,9 +120,9 @@ export class ProjectPage implements OnInit {
       const project = await this.projectService.save(projectToSave);
 
       if (this.editing()) {
-        const merged = Object.assign(new Project(), project);
-        merged.fields = draftFieldEdits;
-        this.project.set(merged);
+        this.project.set(
+          this.mergeProjectAfterSave(project, { fields: draftFieldEdits }),
+        );
       } else {
         this.project.set(project);
       }
@@ -270,11 +270,13 @@ export class ProjectPage implements OnInit {
       const projectToSave = this.buildProjectForFieldsSave();
       const project = await this.projectService.save(projectToSave);
 
-      const merged = Object.assign(new Project(), project);
-      merged.name = draftCoreEdits.name;
-      merged.description = draftCoreEdits.description;
-      merged.logoUrl = draftCoreEdits.logoUrl;
-      this.project.set(merged);
+      this.project.set(
+        this.mergeProjectAfterSave(project, {
+          name: draftCoreEdits.name,
+          description: draftCoreEdits.description,
+          logoUrl: draftCoreEdits.logoUrl,
+        }),
+      );
 
       this.syncPersistedSnapshots(project);
       await this.refreshProjectsStore();
@@ -364,6 +366,16 @@ export class ProjectPage implements OnInit {
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
 
     return payload;
+  }
+
+  private mergeProjectAfterSave(
+    saved: Project,
+    overrides: Partial<Project> = {},
+  ): Project {
+    const current = this.project();
+    const merged = Object.assign(new Project(), current, saved, overrides);
+    merged.users = current.users;
+    return merged;
   }
 
   public updateProjectName(name: string): void {
