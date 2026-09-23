@@ -14,6 +14,21 @@ export function startOfLocalCalendarDay(date: Date): Date {
   return copy;
 }
 
+/** Sortable `YYYY-MM-DD` key for the entry's local calendar day (timesheet grid / analytics grouping). */
+export function localCalendarDayKey(date: Date | string | number): string {
+  const local = startOfLocalCalendarDay(new Date(date));
+  const year = local.getFullYear();
+  const month = String(local.getMonth() + 1).padStart(2, '0');
+  const day = String(local.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
+}
+
+/** Local midnight for a `localCalendarDayKey` value. */
+export function dateFromLocalCalendarDayKey(key: string): Date {
+  const [year, month, day] = key.split('-').map(Number);
+  return new Date(year, month - 1, day, 0, 0, 0, 0);
+}
+
 /** True when `date` is strictly after `reference`'s UTC calendar day (e.g. tomorrow). */
 export function isFutureUtcCalendarDay(
   date: Date,

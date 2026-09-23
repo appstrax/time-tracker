@@ -11,7 +11,12 @@ import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
 import { TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
-import { getUserDisplayName, TimeSheetDisplayUtil } from '@utils';
+import {
+  dateFromLocalCalendarDayKey,
+  getUserDisplayName,
+  localCalendarDayKey,
+  TimeSheetDisplayUtil,
+} from '@utils';
 import { UnapprovedEntriesModalComponent } from '../../../modals/unapproved-entries/unapproved-entries.modal';
 
 interface UnapprovedEntryGroup {
@@ -40,13 +45,12 @@ export class UnapprovedEntriesComponent {
     this.timeSheetEntries()
       .filter((entry) => !entry.approved)
       .forEach((entry) => {
-        const entryDate = new Date(entry.date);
-        const dateKey = entryDate.toISOString().split('T')[0];
+        const dateKey = localCalendarDayKey(entry.date);
         const groupKey = `${dateKey}_${entry.userId}`;
 
         if (!groupsMap.has(groupKey)) {
           groupsMap.set(groupKey, {
-            date: entryDate,
+            date: dateFromLocalCalendarDayKey(dateKey),
             userId: entry.userId,
             totalHours: 0,
             entries: [],

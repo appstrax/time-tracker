@@ -38,7 +38,7 @@
           [date]="day"
           [projects]="projects()"
           [projectColorById]="projectColorById()"
-          [entries]="entriesByDate().get(day.toDateString()) ?? []"
+          [entries]="entriesByDate().get(localCalendarDayKey(day)) ?? []"
           [categories]="categories()"
           (save)="onTimeSheetEntrySaved()"
         />

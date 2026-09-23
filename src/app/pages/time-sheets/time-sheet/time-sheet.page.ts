@@ -8,6 +8,7 @@ import {
   buildProjectColorMap,
   clearStoredTimeSheetProjectId,
   getStoredTimeSheetProjectId,
+  localCalendarDayKey,
   storeTimeSheetProjectId,
 } from '@utils';
 
@@ -25,6 +26,8 @@ import { TimeSheetDateSelectorComponent } from './components';
   ],
 })
 export class TimeSheetPage {
+  public readonly localCalendarDayKey = localCalendarDayKey;
+
   private readonly weekStart = signal(new Date());
   private readonly weekEnd = signal(new Date());
   private readonly filterProjectId = signal<string | null>(
@@ -71,7 +74,7 @@ export class TimeSheetPage {
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
     for (const entry of this.filteredEntries()) {
-      const dateKey = entry.date.toDateString();
+      const dateKey = localCalendarDayKey(entry.date);
       const dayEntries = entriesByDate.get(dateKey) ?? [];
       dayEntries.push(entry);
       entriesByDate.set(dateKey, dayEntries);

@@ -23,10 +23,7 @@ interface FieldColumn {
  * Remap when that artefact arrives.
  *
  * **Date convention:** Each row uses the local calendar day via the caller's
- * `formatDate` (aligned with filter date inputs on the analytics panel). Summary,
- * Details, and Timeline views group days using UTC in places; an entry near
- * midnight may show a different day in those views than in this export.
- * Reconciling all sites is follow-up work, not handled here.
+ * `formatDate` (aligned with filter bounds and analytics view grouping).
  *
  * **Custom fields:** Per-project exports append columns from that project's
  * `fields` config (in order), plus any `fieldValues` keys on entries not in config.
