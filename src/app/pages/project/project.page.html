@@ -43,9 +43,9 @@
               type="submit"
               form="core-project-form"
               class="btn btn-primary submit-button card-header-action"
-              [disabled]="saving()"
+              [disabled]="isPersisting()"
             >
-              @if (saving()) {
+              @if (isSavingCore()) {
               <span
                 class="spinner-border spinner-border-sm me-2"
                 aria-hidden="true"
@@ -215,10 +215,10 @@
           <button
             type="button"
             class="btn btn-primary fields-save-button"
-            [disabled]="!canSaveFields() || savingFields()"
+            [disabled]="!canSaveFields() || isPersisting()"
             (click)="saveFields()"
           >
-            @if (savingFields()) {
+            @if (isSavingFields()) {
               <span
                 class="spinner-border spinner-border-sm me-2"
                 aria-hidden="true"

@@ -19,8 +19,7 @@ export class ProjectPage implements OnInit {
   readonly project = signal(new Project());
 
   readonly error = signal('');
-  readonly saving = signal(false);
-  readonly savingFields = signal(false);
+  private readonly persistMode = signal<'core' | 'fields' | null>(null);
   readonly editing = signal(false);
   readonly fieldsError = signal('');
 
@@ -77,8 +76,23 @@ export class ProjectPage implements OnInit {
     }
   }
 
+  public isPersisting(): boolean {
+    return this.persistMode() !== null;
+  }
+
+  public isSavingCore(): boolean {
+    return this.persistMode() === 'core';
+  }
+
+  public isSavingFields(): boolean {
+    return this.persistMode() === 'fields';
+  }
+
   async saveProject(): Promise<void> {
-    this.saving.set(true);
+    if (!this.beginPersist('core')) {
+      return;
+    }
+
     this.error.set('');
 
     try {
@@ -141,7 +155,7 @@ export class ProjectPage implements OnInit {
       this.error.set(error.message);
       this.toast.error(error.message || 'Failed to save project', 'Error');
     } finally {
-      this.saving.set(false);
+      this.endPersist();
     }
   }
 
@@ -205,6 +219,10 @@ export class ProjectPage implements OnInit {
   }
 
   public canLeaveProjectPage(): boolean {
+    if (this.isPersisting()) {
+      return false;
+    }
+
     if (!this.editing() || !this.project().id || !this.hasUnsavedEdits()) {
       return true;
     }
@@ -232,17 +250,18 @@ export class ProjectPage implements OnInit {
       return;
     }
 
-    const hadUnsavedCoreEdits = this.areCoreDirty();
-
-    const validationError = this.validateFields();
-    if (validationError) {
-      this.fieldsError.set(validationError);
+    if (!this.beginPersist('fields')) {
       return;
     }
 
-    this.savingFields.set(true);
-
     try {
+      const hadUnsavedCoreEdits = this.areCoreDirty();
+
+      const validationError = this.validateFields();
+      if (validationError) {
+        this.fieldsError.set(validationError);
+        return;
+      }
       const draftCoreEdits = {
         name: this.project().name,
         description: this.project().description,
@@ -270,8 +289,21 @@ export class ProjectPage implements OnInit {
       this.fieldsError.set(error.message || 'Failed to save custom fields');
       this.toast.error(error.message || 'Failed to save custom fields', 'Error');
     } finally {
-      this.savingFields.set(false);
+      this.endPersist();
     }
+  }
+
+  private beginPersist(mode: 'core' | 'fields'): boolean {
+    if (this.persistMode() !== null) {
+      return false;
+    }
+
+    this.persistMode.set(mode);
+    return true;
+  }
+
+  private endPersist(): void {
+    this.persistMode.set(null);
   }
 
   private validateFields(): string | null {
