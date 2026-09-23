@@ -99,6 +99,18 @@
     }
   }
 
+  > i {
+    flex-shrink: 0;
+    font-size: 18px;
+    width: 18px;
+    text-align: center;
+  }
+
+  ::ng-deep .user-avatar {
+    box-sizing: border-box;
+    border: 1px solid currentColor;
+  }
+
   .label {
     overflow: hidden;
     text-overflow: ellipsis;

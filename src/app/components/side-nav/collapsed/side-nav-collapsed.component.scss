@@ -62,9 +62,14 @@
     }
 
     .icon-box.avatar-box {
+      background-color: transparent;
       box-shadow:
-        0 0 0 2px color-mix(in srgb, var(--primary-color) 15%, transparent),
+        0 0 0 2px var(--primary-color),
         0 4px 8px rgba(0, 0, 0, 0.1);
+
+      ::ng-deep .user-avatar {
+        border-color: #ffffff;
+      }
     }
   }
 
@@ -103,7 +108,13 @@
   }
 
   .icon-box.avatar-box {
-    border-radius: 50%;
+    background-color: transparent;
+    box-shadow: none;
+
+    ::ng-deep .user-avatar {
+      box-sizing: border-box;
+      border: 1px solid currentColor;
+    }
   }
 }
 
