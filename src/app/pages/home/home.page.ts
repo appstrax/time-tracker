@@ -40,7 +40,10 @@ export class HomePage {
   ];
 
   private latestLoadId = 0;
-  private lastFetchBoundsKey: string | null = null;
+  /** Bounds key for which `entries` was last loaded successfully. */
+  private loadedBoundsKey: string | null = null;
+  /** Bounds key currently being fetched, if any. */
+  private pendingBoundsKey: string | null = null;
 
   constructor() {
     effect(() => {
@@ -60,16 +63,25 @@ export class HomePage {
         this.hasLoaded.set(true);
         this.entries.set([]);
         this.filteredEntryCount.set(0);
-        this.lastFetchBoundsKey = null;
+        this.loadedBoundsKey = null;
+        this.pendingBoundsKey = null;
         return;
       }
 
       const { start, end } = this.resolveFilterBounds(params);
       const boundsKey = `${user.id}:${start.getTime()}:${end.getTime()}`;
-      if (boundsKey === this.lastFetchBoundsKey) {
+      if (
+        boundsKey === this.loadedBoundsKey &&
+        this.pendingBoundsKey !== boundsKey
+      ) {
+        return;
+      }
+      if (this.pendingBoundsKey === boundsKey) {
         return;
       }
 
+      this.pendingBoundsKey = boundsKey;
+      this.loadedBoundsKey = null;
       this.isLoading.set(true);
       this.entries.set([]);
       this.filteredEntryCount.set(0);
@@ -97,7 +109,7 @@ export class HomePage {
         end,
       );
       if (loadId !== this.latestLoadId) return;
-      this.lastFetchBoundsKey = boundsKey;
+      this.loadedBoundsKey = boundsKey;
       this.entries.set(entries);
     } catch {
       if (loadId !== this.latestLoadId) return;
@@ -105,6 +117,9 @@ export class HomePage {
       this.toast.error('Unable to load your time entries.');
     } finally {
       if (loadId !== this.latestLoadId) return;
+      if (this.pendingBoundsKey === boundsKey) {
+        this.pendingBoundsKey = null;
+      }
       this.isLoading.set(false);
       this.hasLoaded.set(true);
     }
