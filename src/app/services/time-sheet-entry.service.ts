@@ -9,7 +9,7 @@ import {
 import { TimeSheetEntry } from '../models/time-sheet-entry.model';
 import {
   FUTURE_TIMESHEET_ENTRY_TOAST,
-  isFutureUtcCalendarDay,
+  isFutureLocalCalendarDay,
 } from '../utils/time-sheet-date.util';
 
 /** API default/max page size when `limit` is omitted (see DatabaseService). */
@@ -22,7 +22,7 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
   }
 
   public override async save(object: TimeSheetEntry): Promise<TimeSheetEntry> {
-    if (!object.id && isFutureUtcCalendarDay(object.date)) {
+    if (!object.id && isFutureLocalCalendarDay(object.date)) {
       throw new Error(FUTURE_TIMESHEET_ENTRY_TOAST);
     }
     return super.save(object);

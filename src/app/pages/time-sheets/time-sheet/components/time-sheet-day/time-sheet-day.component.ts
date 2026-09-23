@@ -9,7 +9,7 @@ import {
   TimeSheetDisplayUtil,
   getProjectColor,
   FUTURE_TIMESHEET_ENTRY_TOAST,
-  isFutureUtcCalendarDay,
+  isFutureLocalCalendarDay,
 } from '@utils';
 
 import { TimeSheetNumberLineComponent } from '../time-sheet-number-line/time-sheet-number-line.component';
@@ -38,7 +38,7 @@ export class TimeSheetDayComponent {
   );
 
   public readonly isFutureDay = computed(() =>
-    isFutureUtcCalendarDay(this.date()),
+    isFutureLocalCalendarDay(this.date()),
   );
   public readonly sortedEntries = computed(() =>
     [...this.entries()].sort(
