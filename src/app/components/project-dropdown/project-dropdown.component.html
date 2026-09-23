@@ -9,7 +9,7 @@
       [class.form-select]="!compact"
       (click)="toggleProjectDropdown($event)"
       [disabled]="disabled"
-      aria-expanded="isProjectMenuOpen"
+      [attr.aria-expanded]="isProjectDropdownOpen"
     >
       <span class="project-dropdown-selection d-flex align-items-center gap-2">
         @if (selectedProject) { @if (selectedProject.logoUrl) {
@@ -37,7 +37,8 @@
       ></i>
     </button>
     <ul
-      class="dropdown-menu dropdown-menu-end w-100"
+      class="dropdown-menu w-100"
+      [class.dropdown-menu-end]="!compact"
       [class.show]="isProjectDropdownOpen && !disabled"
       [attr.data-bs-popper]="isProjectDropdownOpen && !disabled ? 'static' : null"
       (click)="$event.stopPropagation()"
@@ -51,7 +52,7 @@
           autocomplete="off"
           [ngModel]="projectSearchTerm()"
           (ngModelChange)="projectSearchTerm.set($event)"
-          (keydown.escape)="closeDropdown()"
+          (keydown.escape)="onSearchEscape($event)"
         />
       </li>
       @if (shouldShowNullOption()) {
@@ -68,10 +69,10 @@
         </button>
       </li>
       }
-      @if (filteredProjects().length === 0 && !shouldShowNullOption()) {
+      @if (showEmptyListState()) {
       <li>
         <span class="dropdown-item-text text-muted px-3 py-2 d-block">
-          No projects match your search
+          {{ emptyListMessage() }}
         </span>
       </li>
       }

@@ -60,4 +60,28 @@ describe('ProjectDropdownComponent', () => {
     component.onDocumentClick(new MouseEvent('click'));
     expect(component.isProjectDropdownOpen).toBe(false);
   });
+
+  it('shows a no-results message when search matches nothing', () => {
+    component.projectSearchTerm.set('zzz');
+    expect(component.emptyListMessage()).toBe('No projects match your search');
+  });
+
+  it('shows a no-projects message when the list is empty and search is blank', () => {
+    projectsSignal.set([]);
+    component.projectSearchTerm.set('');
+    expect(component.emptyListMessage()).toBe('No projects available');
+  });
+
+  it('stops escape from bubbling when closing the search field', () => {
+    const event = new KeyboardEvent('keydown', { key: 'Escape' });
+    const stopPropagation = spyOn(event, 'stopPropagation');
+    const preventDefault = spyOn(event, 'preventDefault');
+
+    component.isProjectDropdownOpen = true;
+    component.onSearchEscape(event);
+
+    expect(stopPropagation).toHaveBeenCalled();
+    expect(preventDefault).toHaveBeenCalled();
+    expect(component.isProjectDropdownOpen).toBe(false);
+  });
 });

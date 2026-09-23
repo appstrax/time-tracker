@@ -63,6 +63,26 @@ export class ProjectDropdownComponent {
     return this.nullOptionLabel.toLowerCase().includes(term);
   }
 
+  showEmptyListState(): boolean {
+    return (
+      this.filteredProjects().length === 0 && !this.shouldShowNullOption()
+    );
+  }
+
+  emptyListMessage(): string {
+    const hasSearch = this.projectSearchTerm().trim().length > 0;
+    if (!hasSearch && this.projects().length === 0) {
+      return 'No projects available';
+    }
+    return 'No projects match your search';
+  }
+
+  onSearchEscape(event: Event): void {
+    event.stopPropagation();
+    event.preventDefault();
+    this.closeDropdown();
+  }
+
   onProjectSelected(project: Project | null): void {
     this.selectedProject = project;
     this.projectSelected.emit(project);
