@@ -8,5 +8,6 @@ export * from './time-sheet-date.util';
 export * from './time-sheet-display.util';
 export * from './time-sheet-export.util';
 export * from './time-sheet-project.util';
+export * from './project-category.util';
 export * from './user-display.util';
 export * from './password.util';

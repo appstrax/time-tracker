@@ -56,6 +56,22 @@ describe('TimeSheetEntryComponent', () => {
     ],
   } as any as Project;
 
+  const projectWithCategories = {
+    id: 'project-cat',
+    name: 'Cat Project',
+    fields: [],
+    categories: ['Development', 'Meetings'],
+    allowCustomCategory: true,
+  } as any as Project;
+
+  const projectStrictCategories = {
+    id: 'project-strict',
+    name: 'Strict Project',
+    fields: [],
+    categories: ['Development'],
+    allowCustomCategory: false,
+  } as any as Project;
+
   let component: TimeSheetEntryModal;
   let fixture: ComponentFixture<TimeSheetEntryModal>;
   let activeModal: jasmine.SpyObj<NgbActiveModal>;
@@ -313,6 +329,57 @@ describe('TimeSheetEntryComponent', () => {
     component.setFieldValue('notes', 'done');
 
     expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should use project categories for suggestions instead of week fallback', async () => {
+    await createComponent();
+    component.categories = ['Legacy'];
+    component.onProjectSelected(projectWithCategories);
+
+    expect(component.filteredCategories).toEqual(['Development', 'Meetings']);
+  });
+
+  it('should keep week fallback when project has no category list', async () => {
+    await createComponent();
+    component.categories = ['Legacy'];
+    component.onProjectSelected(project);
+
+    expect(component.filteredCategories).toEqual(['Legacy']);
+  });
+
+  it('should allow custom category text when allowCustomCategory is true', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithCategories);
+    fillRequiredBaseFields();
+    component.timeSheetEntry.category = 'Custom work';
+
+    expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should reject custom category when allowCustomCategory is false', async () => {
+    await createComponent();
+    component.onProjectSelected(projectStrictCategories);
+    fillRequiredBaseFields();
+    component.timeSheetEntry.category = 'Custom work';
+
+    expect(component.isFormValid()).toBe(false);
+    expect(component.errorMessage).toContain("project's categories");
+  });
+
+  it('should grandfather an existing off-list category when custom is disabled', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.category = 'Legacy standup';
+    component.timeSheetEntry.projectId = projectStrictCategories.id;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    fillRequiredBaseFields();
+
     expect(component.isFormValid()).toBe(true);
   });
 

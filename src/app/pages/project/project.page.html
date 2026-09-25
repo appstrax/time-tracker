@@ -198,6 +198,100 @@
       <div class="card-header">
         <div>
           <p class="eyebrow">Capture</p>
+          <h2>Time entry categories</h2>
+          <p>
+            Suggested categories when logging time on this project. Saved with
+            Update Project.
+          </p>
+        </div>
+        <div class="fields-header-actions">
+          <button type="button" class="btn btn-outline-secondary" (click)="addCategory()">
+            <i class="bi bi-plus-lg me-2"></i>
+            Add category
+          </button>
+        </div>
+      </div>
+
+      <div class="form-check mb-3">
+        <input
+          type="checkbox"
+          class="form-check-input"
+          id="allowCustomCategory"
+          [ngModel]="project().allowCustomCategory"
+          (ngModelChange)="updateAllowCustomCategory($event)"
+          name="allowCustomCategory"
+        />
+        <label class="form-check-label" for="allowCustomCategory">
+          Allow users to type their own category
+        </label>
+      </div>
+
+      @if (!project().categories.length) {
+        <p class="text-muted mb-0">
+          No categories configured. Time capture will suggest categories from
+          recent entries on the week view.
+        </p>
+      } @else {
+        <div class="field-rows">
+          @for (category of project().categories; track $index) {
+            <article class="field-card">
+              <div class="field-card-header">
+                <div>
+                  <p class="field-card-eyebrow">Category {{ $index + 1 }}</p>
+                </div>
+                <div class="field-row-actions">
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    [disabled]="$index === 0"
+                    (click)="moveCategoryUp($index)"
+                    aria-label="Move category up"
+                  >
+                    <i class="bi bi-arrow-up"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-secondary"
+                    [disabled]="$index === project().categories.length - 1"
+                    (click)="moveCategoryDown($index)"
+                    aria-label="Move category down"
+                  >
+                    <i class="bi bi-arrow-down"></i>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="removeCategory($index)"
+                    aria-label="Remove category"
+                  >
+                    <i class="bi bi-trash"></i>
+                  </button>
+                </div>
+              </div>
+              <div class="field-card-body">
+                <div class="form-group mb-0">
+                  <label [for]="'categoryName' + $index">Name</label>
+                  <input
+                    type="text"
+                    class="form-control"
+                    [id]="'categoryName' + $index"
+                    [ngModel]="category"
+                    (ngModelChange)="updateCategoryAt($index, $event)"
+                    [name]="'categoryName' + $index"
+                    placeholder="e.g. Development"
+                  />
+                </div>
+              </div>
+            </article>
+          }
+        </div>
+      }
+    </section>
+
+    <section class="editor-card fields-card">
+      <div class="card-header">
+        <div>
+          <p class="eyebrow">Capture</p>
           <h2>Custom fields</h2>
           <p>
             Extra fields that appear on this project's time sheet capture

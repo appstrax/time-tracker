@@ -7,6 +7,11 @@ import { ToastService, ProjectService, ProjectUserService } from '@services';
 import { Project, ProjectField, ProjectFieldType, ProjectUser, ProjectUserRole } from '@models';
 import { Store } from '@state';
 import { ProjectUsersComponent } from '@components';
+import {
+  normalizeProjectCategories,
+  seedNewProjectCategories,
+  validateProjectCategories,
+} from '@utils';
 
 @Component({
   selector: 'app-create-project',
@@ -41,6 +46,8 @@ export class ProjectPage implements OnInit {
     name: '',
     description: '',
     logoUrl: '',
+    categories: [] as string[],
+    allowCustomCategory: true,
   };
 
   constructor(
@@ -73,6 +80,8 @@ export class ProjectPage implements OnInit {
       } catch (e) {
         this.toast.error('Failed to load project for editing', 'Error');
       }
+    } else {
+      this.updateProject((project) => seedNewProjectCategories(project));
     }
   }
 
@@ -187,6 +196,12 @@ export class ProjectPage implements OnInit {
       return false;
     }
 
+    const categoryError = validateProjectCategories(project.categories);
+    if (categoryError) {
+      this.error.set(categoryError);
+      return false;
+    }
+
     return true;
   }
 
@@ -205,7 +220,10 @@ export class ProjectPage implements OnInit {
     return (
       project.name !== this.savedCoreSnapshot.name ||
       project.description !== this.savedCoreSnapshot.description ||
-      project.logoUrl !== this.savedCoreSnapshot.logoUrl
+      project.logoUrl !== this.savedCoreSnapshot.logoUrl ||
+      JSON.stringify(project.categories) !==
+        JSON.stringify(this.savedCoreSnapshot.categories) ||
+      project.allowCustomCategory !== this.savedCoreSnapshot.allowCustomCategory
     );
   }
 
@@ -223,7 +241,7 @@ export class ProjectPage implements OnInit {
     }
 
     return confirm(
-      'You have unsaved project or custom field changes. Leave without saving?',
+      'You have unsaved project, category, or custom field changes. Leave without saving?',
     );
   }
 
@@ -321,6 +339,8 @@ export class ProjectPage implements OnInit {
       name: project.name,
       description: project.description,
       logoUrl: project.logoUrl,
+      categories: [...project.categories],
+      allowCustomCategory: project.allowCustomCategory,
     };
   }
 
@@ -336,6 +356,9 @@ export class ProjectPage implements OnInit {
     const current = this.project();
     const payload = Object.assign(new Project(), current);
 
+    payload.categories = normalizeProjectCategories(current.categories);
+    payload.allowCustomCategory = current.allowCustomCategory;
+
     if (this.editing()) {
       payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
     }
@@ -350,6 +373,8 @@ export class ProjectPage implements OnInit {
     payload.name = this.savedCoreSnapshot.name;
     payload.description = this.savedCoreSnapshot.description;
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
+    payload.categories = [...this.savedCoreSnapshot.categories];
+    payload.allowCustomCategory = this.savedCoreSnapshot.allowCustomCategory;
 
     return payload;
   }
@@ -382,6 +407,12 @@ export class ProjectPage implements OnInit {
     if (JSON.stringify(live.fields) !== JSON.stringify(submitted.fields)) {
       overrides.fields = live.fields;
     }
+    if (JSON.stringify(live.categories) !== JSON.stringify(submitted.categories)) {
+      overrides.categories = live.categories;
+    }
+    if (live.allowCustomCategory !== submitted.allowCustomCategory) {
+      overrides.allowCustomCategory = live.allowCustomCategory;
+    }
 
     return overrides;
   }
@@ -397,6 +428,62 @@ export class ProjectPage implements OnInit {
     this.error.set('');
     this.updateProject((project) => {
       project.description = description;
+    });
+  }
+
+  public addCategory(): void {
+    this.error.set('');
+    this.updateProject((project) => {
+      project.categories = [...project.categories, ''];
+    });
+  }
+
+  public removeCategory(index: number): void {
+    this.error.set('');
+    this.updateProject((project) => {
+      project.categories = project.categories.filter((_, i) => i !== index);
+    });
+  }
+
+  public moveCategoryUp(index: number): void {
+    if (index <= 0) return;
+    this.error.set('');
+    this.updateProject((project) => {
+      const categories = [...project.categories];
+      [categories[index - 1], categories[index]] = [
+        categories[index],
+        categories[index - 1],
+      ];
+      project.categories = categories;
+    });
+  }
+
+  public moveCategoryDown(index: number): void {
+    this.updateProject((project) => {
+      if (index >= project.categories.length - 1) return;
+      this.error.set('');
+      const categories = [...project.categories];
+      [categories[index], categories[index + 1]] = [
+        categories[index + 1],
+        categories[index],
+      ];
+      project.categories = categories;
+    });
+  }
+
+  public updateCategoryAt(index: number, value: string): void {
+    this.error.set('');
+    this.updateProject((project) => {
+      const categories = [...project.categories];
+      categories[index] = value;
+      project.categories = categories;
+    });
+  }
+
+  public updateAllowCustomCategory(allow: boolean): void {
+    this.error.set('');
+    this.updateProject((project) => {
+      project.allowCustomCategory = allow;
     });
   }
 
