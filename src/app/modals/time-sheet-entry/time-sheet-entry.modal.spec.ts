@@ -383,6 +383,24 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.isFormValid()).toBe(true);
   });
 
+  it('should reject an off-list category when an existing entry is moved to a strict project', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.category = 'Legacy standup';
+    component.timeSheetEntry.projectId = project.id;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    component.onProjectSelected(projectStrictCategories);
+    fillRequiredBaseFields();
+
+    expect(component.isFormValid()).toBe(false);
+    expect(component.errorMessage).toContain("project's categories");
+  });
+
   it('should skip required-configured-field validation for a pre-existing entry (capture-forward)', async () => {
     await createComponent();
     component.timeSheetEntry.id = 'existing-entry-id';

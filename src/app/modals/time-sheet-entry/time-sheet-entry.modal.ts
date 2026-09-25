@@ -235,10 +235,15 @@ export class TimeSheetEntryModal implements OnInit {
           (field) => field.required && this.isConfiguredFieldMissing(field),
         );
 
+    const categoryGrandfather =
+      this.timeSheetEntry.projectId === this.projectIdAtOpen
+        ? this.categoryAtOpen
+        : undefined;
+
     const categoryAllowed = isCategoryAllowed(
       this.project,
       this.timeSheetEntry.category,
-      this.categoryAtOpen,
+      categoryGrandfather,
     );
 
     let isValid =
