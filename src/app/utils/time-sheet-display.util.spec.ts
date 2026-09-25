@@ -16,9 +16,13 @@ describe('TimeSheetDisplayUtil', () => {
     });
 
     it('coerces string hour values from range inputs', () => {
-      expect(util.formatQuarterHourDuration('0.25' as unknown as number)).toBe(
-        '15m',
-      );
+      expect(util.formatQuarterHourDuration('0.25')).toBe('15m');
+      expect(util.formatHours('1.25')).toBe('1h 15m');
+    });
+
+    it('returns safe defaults for non-numeric values', () => {
+      expect(util.formatQuarterHourDuration('')).toBe('');
+      expect(util.formatHours('')).toBe('0h 00m');
     });
   });
 
