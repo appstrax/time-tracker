@@ -97,7 +97,7 @@ export class TimeSheetNumberLineComponent {
         durationLabel: this.formatBlockHours(entry.hours),
         backgroundColor: color,
         showInlineDetail: entry.hours >= 0.75,
-        isQuarterHourBlock: entry.hours === 0.25,
+        isQuarterHourBlock: Math.round(Number(entry.hours) * 4) / 4 === 0.25,
         tooltipContext: this.getEntryTooltipContext(entry),
       };
     });

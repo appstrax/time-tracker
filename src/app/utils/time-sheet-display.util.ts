@@ -5,9 +5,13 @@ import { Project } from '@models';
 export class TimeSheetDisplayUtil {
   private readonly defaultUnknownProject = 'Unknown Project';
 
-  public formatHours(hours: number): string {
-    const wholeHours = Math.floor(hours);
-    const minutes = Math.round((hours - wholeHours) * 60);
+  public formatHours(hours: number | string): string {
+    const numericHours = Number(hours);
+    if (!Number.isFinite(numericHours)) {
+      return '0h 00m';
+    }
+    const wholeHours = Math.floor(numericHours);
+    const minutes = Math.round((numericHours - wholeHours) * 60);
 
     let formattedMinutes = `${minutes}m`;
     if (minutes < 10) formattedMinutes = '0' + formattedMinutes;
@@ -17,8 +21,12 @@ export class TimeSheetDisplayUtil {
   }
 
   /** Quarter-hour durations for timesheet ruler (e.g. 8h 45m, 15m, 2h). */
-  public formatQuarterHourDuration(hours: number): string {
-    const normalized = Math.round(hours * 4) / 4;
+  public formatQuarterHourDuration(hours: number | string): string {
+    const numericHours = Number(hours);
+    if (!Number.isFinite(numericHours)) {
+      return '';
+    }
+    const normalized = Math.round(numericHours * 4) / 4;
     const wholeHours = Math.floor(normalized);
     const minutes = Math.round((normalized - wholeHours) * 60);
 
