@@ -295,25 +295,100 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.isFormValid()).toBe(false); // base fields still unfilled
   });
 
-  it('should default an untouched required boolean to No for a new entry', async () => {
+  it('should default an untouched required boolean to Yes for a new entry', async () => {
     await createComponent();
     component.onProjectSelected(projectWithRequiredBoolean);
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 
-    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.getFieldValue('billable')).toBe('true');
     expect(component.isFormValid()).toBe(true);
   });
 
-  it('should default a required boolean when the project is pre-selected on open', async () => {
+  it('should default a required boolean to Yes when the project is pre-selected on open', async () => {
     localStorage.setItem(storageKey, projectWithRequiredBoolean.id);
 
     await createComponent();
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 
+    expect(component.getFieldValue('billable')).toBe('true');
+    expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should keep No when a required boolean is changed to No', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithRequiredBoolean);
+    fillRequiredBaseFields();
+    component.setFieldValue('notes', 'done');
+    component.setFieldValue('billable', 'false');
+
     expect(component.getFieldValue('billable')).toBe('false');
     expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should render a required boolean as a Yes/No select with Yes selected', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithRequiredBoolean);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const control: HTMLElement = fixture.nativeElement.querySelector('#field-billable');
+    expect(control.tagName).toBe('SELECT');
+    const select = control as HTMLSelectElement;
+    expect(select.value).toBe('true');
+    expect(Array.from(select.options).map((o) => o.text.trim())).toEqual([
+      'Yes',
+      'No',
+    ]);
+  });
+
+  it('should show Yes in a required boolean select when the project is pre-selected on open', async () => {
+    localStorage.setItem(storageKey, projectWithRequiredBoolean.id);
+
+    await createComponent();
+
+    const select: HTMLSelectElement = fixture.nativeElement.querySelector('#field-billable');
+    expect(select.value).toBe('true');
+  });
+
+  async function openExistingEntry(billable?: string): Promise<void> {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectWithRequiredBoolean.id;
+    component.timeSheetEntry.fieldValues =
+      billable === undefined ? [] : [{ key: 'billable', value: billable }];
+    fixture.detectChanges();
+    await fixture.whenStable();
+  }
+
+  it('should default a missing required boolean to Yes on a pre-existing entry', async () => {
+    await openExistingEntry();
+
+    expect(component.getFieldValue('billable')).toBe('true');
+    const select: HTMLSelectElement = fixture.nativeElement.querySelector('#field-billable');
+    expect(select.value).toBe('true');
+  });
+
+  it('should keep a saved No on a pre-existing entry\'s required boolean', async () => {
+    await openExistingEntry('false');
+
+    expect(component.getFieldValue('billable')).toBe('false');
+    const select: HTMLSelectElement = fixture.nativeElement.querySelector('#field-billable');
+    expect(select.value).toBe('false');
+  });
+
+  it('should render an optional boolean as a toggle', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithOptionalBoolean);
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    const control: HTMLInputElement = fixture.nativeElement.querySelector('#field-urgent');
+    expect(control.type).toBe('checkbox');
   });
 
   it('should skip required-configured-field validation for a pre-existing entry (capture-forward)', async () => {

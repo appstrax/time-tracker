@@ -81,12 +81,12 @@ export class TimeSheetEntryModal implements OnInit {
 
     this.filteredCategories = [...this.categories];
 
+    this.projectIdAtOpen = this.timeSheetEntry.projectId;
+    this.initializeBooleanFieldDefaults();
+
     const user = await appstraxAuth.getUser();
     this.timeSheetEntry.userId = user.id;
     this.timeSheetEntry.date = this.date;
-
-    this.projectIdAtOpen = this.timeSheetEntry.projectId;
-    this.initializeBooleanFieldDefaults();
   }
 
   formatHours(hours: number): string {
@@ -125,6 +125,11 @@ export class TimeSheetEntryModal implements OnInit {
         { key, value: normalized },
       ];
     }
+  }
+
+  /** Optional booleans render as a toggle; required ones use a Yes/No select. */
+  isToggleField(field: ProjectField): boolean {
+    return field.type === 'boolean' && !field.required;
   }
 
   isFieldBoolean(field: ProjectField): boolean {
@@ -252,13 +257,14 @@ export class TimeSheetEntryModal implements OnInit {
   }
 
   private initializeBooleanFieldDefaults(): void {
-    if (this.wasExistingEntryOnOpen) return;
-
     for (const field of this.projectFields) {
       if (field.type !== 'boolean') continue;
+      // Existing entries keep optional booleans as saved; required ones always need a Yes/No value to show.
+      if (this.wasExistingEntryOnOpen && !field.required) continue;
       const value = this.getFieldValue(field.key);
       if (value !== 'true' && value !== 'false') {
-        this.setFieldValue(field.key, 'false');
+        // Required booleans use a Yes/No select that opens on its first option (Yes).
+        this.setFieldValue(field.key, field.required ? 'true' : 'false');
       }
     }
   }
