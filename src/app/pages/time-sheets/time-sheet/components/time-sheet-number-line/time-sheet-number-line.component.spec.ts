@@ -29,6 +29,14 @@ describe('TimeSheetNumberLineComponent', () => {
     return entry;
   }
 
+  it('labels a quarter-hour entry as 15m', () => {
+    fixture.componentRef.setInput('entries', [makeEntry({ hours: 0.25 })]);
+    fixture.detectChanges();
+
+    expect(component.segments()[0].durationLabel).toBe('15m');
+    expect(component.segments()[0].isQuarterHourBlock).toBe(true);
+  });
+
   it('builds tooltip context with category, description, and duration', () => {
     const entry = makeEntry({
       category: 'Development',

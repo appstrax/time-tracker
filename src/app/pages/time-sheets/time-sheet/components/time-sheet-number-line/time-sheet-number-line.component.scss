@@ -116,11 +116,19 @@
 .timeline-block-quarter {
   padding-inline: 0;
   justify-content: center;
+  overflow: visible;
 
   .timeline-block-hours {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
     margin-left: 0;
-    flex: 1 1 auto;
+    flex: none;
     text-align: center;
+    text-shadow:
+      0 0 4px color-mix(in srgb, var(--color-surface) 90%, transparent),
+      0 1px 2px color-mix(in srgb, var(--text-primary) 35%, transparent);
   }
 }
 
@@ -148,7 +156,7 @@
   bottom: 5px;
   z-index: 2;
   min-width: 0;
-  overflow: hidden;
+  overflow: visible;
   border-radius: var(--segment-radius, 7px);
   pointer-events: none;
   box-sizing: border-box;
@@ -160,8 +168,23 @@
 }
 
 .timeline-preview.timeline-block {
-  justify-content: flex-end;
+  justify-content: center;
+  padding: 0;
+  overflow: visible;
   color: var(--primary-color-dark, #0f766e);
+
+  .timeline-block-hours {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    margin-left: 0;
+    z-index: 3;
+    font-weight: 600;
+    text-shadow:
+      0 0 4px var(--color-surface),
+      0 0 2px var(--color-surface);
+  }
 }
 
 .timeline-disabled .timeline-track {
