@@ -127,6 +127,10 @@ export class TimeSheetEntryModal implements OnInit {
     }
   }
 
+  isToggleField(field: ProjectField): boolean {
+    return field.type === 'boolean' && !field.required;
+  }
+
   isFieldBoolean(field: ProjectField): boolean {
     return this.getFieldValue(field.key) === 'true';
   }
@@ -255,7 +259,7 @@ export class TimeSheetEntryModal implements OnInit {
     if (this.wasExistingEntryOnOpen) return;
 
     for (const field of this.projectFields) {
-      if (field.type !== 'boolean') continue;
+      if (field.type !== 'boolean' || field.required) continue;
       const value = this.getFieldValue(field.key);
       if (value !== 'true' && value !== 'false') {
         this.setFieldValue(field.key, 'false');

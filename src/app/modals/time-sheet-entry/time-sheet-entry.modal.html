@@ -110,8 +110,8 @@
         <span class="custom-fields-section__label">Project Details</span>
         <div class="custom-fields-grid">
           @for (field of projectFields; track field.key) {
-            <div class="form-group custom-field" [class.custom-field--boolean]="field.type === 'boolean'">
-              @if (field.type !== 'boolean') {
+            <div class="form-group custom-field" [class.custom-field--boolean]="isToggleField(field)">
+              @if (!isToggleField(field)) {
                 <label class="form-label" [for]="'field-' + field.key">
                   {{ field.required ? '* ' : '' }}{{ field.label || field.key }}
                 </label>
@@ -167,22 +167,36 @@
                   </select>
                 }
                 @case ('boolean') {
-                  <label class="toggle-switch" [for]="'field-' + field.key">
-                    <input
-                      type="checkbox"
-                      class="toggle-switch__input"
+                  @if (field.required) {
+                    <select
+                      class="form-select"
                       [id]="'field-' + field.key"
-                      [ngModel]="isFieldBoolean(field)"
-                      (ngModelChange)="setFieldBoolean(field.key, $event)"
+                      [ngModel]="getFieldValue(field.key)"
+                      (ngModelChange)="setFieldValue(field.key, $event)"
                       [disabled]="timeSheetEntry.approved"
-                    />
-                    <span class="toggle-switch__track">
-                      <span class="toggle-switch__thumb"></span>
-                    </span>
-                    <span class="toggle-switch__label">
-                      {{ field.required ? '* ' : '' }}{{ field.label || field.key }}
-                    </span>
-                  </label>
+                      required
+                    >
+                      <option value="true">Yes</option>
+                      <option value="false">No</option>
+                    </select>
+                  } @else {
+                    <label class="toggle-switch" [for]="'field-' + field.key">
+                      <input
+                        type="checkbox"
+                        class="toggle-switch__input"
+                        [id]="'field-' + field.key"
+                        [ngModel]="isFieldBoolean(field)"
+                        (ngModelChange)="setFieldBoolean(field.key, $event)"
+                        [disabled]="timeSheetEntry.approved"
+                      />
+                      <span class="toggle-switch__track">
+                        <span class="toggle-switch__thumb"></span>
+                      </span>
+                      <span class="toggle-switch__label">
+                        {{ field.label || field.key }}
+                      </span>
+                    </label>
+                  }
                 }
               }
             </div>
