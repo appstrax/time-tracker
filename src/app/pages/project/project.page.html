@@ -217,7 +217,7 @@
             [disabled]="!canSaveCategories() || isPersisting()"
             (click)="saveCategories()"
           >
-            @if (isSavingCore()) {
+            @if (isSavingCategories()) {
               <span
                 class="spinner-border spinner-border-sm me-2"
                 aria-hidden="true"

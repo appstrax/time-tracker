@@ -8,6 +8,7 @@ import {
   normalizeProjectCategories,
   seedNewProjectCategories,
   validateProjectCategories,
+  validateProjectCategoryPolicy,
 } from './project-category.util';
 
 describe('project-category.util', () => {
@@ -42,13 +43,28 @@ describe('project-category.util', () => {
     ]);
   });
 
-  it('isCategoryAllowed allows any value when list empty or custom allowed', () => {
+  it('isCategoryAllowed allows any value when custom is allowed', () => {
     const project = new Project();
     expect(isCategoryAllowed(project, 'Custom')).toBe(true);
 
     project.categories = ['Development'];
     project.allowCustomCategory = true;
     expect(isCategoryAllowed(project, 'Custom')).toBe(true);
+  });
+
+  it('isCategoryAllowed rejects new categories when custom is off and list is empty', () => {
+    const project = new Project();
+    project.categories = [];
+    project.allowCustomCategory = false;
+    expect(isCategoryAllowed(project, 'Custom')).toBe(false);
+    expect(isCategoryAllowed(project, 'Legacy', 'Legacy')).toBe(true);
+  });
+
+  it('validateProjectCategoryPolicy requires a list when custom entry is disabled', () => {
+    expect(validateProjectCategoryPolicy([], false)).toContain(
+      'at least one category',
+    );
+    expect(validateProjectCategoryPolicy(['Development'], false)).toBeNull();
   });
 
   it('isCategoryAllowed enforces list when custom is off', () => {
