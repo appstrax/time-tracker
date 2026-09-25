@@ -83,9 +83,13 @@ export function categoryFilterOptions(
   projects: Project[],
   projectId?: string,
 ): string[] {
+  const scopedEntries = projectId
+    ? entries.filter((entry) => entry.projectId === projectId)
+    : entries;
+
   const fromEntries = [
     ...new Set(
-      entries
+      scopedEntries
         .map((entry) => entry.category?.trim())
         .filter((category): category is string => !!category),
     ),

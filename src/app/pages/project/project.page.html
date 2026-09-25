@@ -228,6 +228,12 @@
         </div>
       </div>
 
+      @if (categoriesError()) {
+        <div class="alert alert-danger categories-error mb-3">
+          {{ categoriesError() }}
+        </div>
+      }
+
       <div class="form-check mb-3">
         <input
           type="checkbox"

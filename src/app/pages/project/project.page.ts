@@ -27,6 +27,7 @@ export class ProjectPage implements OnInit {
   private readonly persistMode = signal<'core' | 'fields' | null>(null);
   readonly editing = signal(false);
   readonly fieldsError = signal('');
+  readonly categoriesError = signal('');
 
   readonly logoFile = signal<File | null>(null);
   readonly logoPreviewUrl = signal<string | null>(null);
@@ -103,6 +104,7 @@ export class ProjectPage implements OnInit {
     }
 
     this.error.set('');
+    this.categoriesError.set('');
 
     try {
       if (!this.isCoreFormValid()) {
@@ -269,7 +271,21 @@ export class ProjectPage implements OnInit {
   }
 
   async saveCategories(): Promise<void> {
+    this.categoriesError.set('');
+
+    const categoryValidation = validateProjectCategories(
+      this.project().categories,
+    );
+    if (categoryValidation) {
+      this.categoriesError.set(categoryValidation);
+      return;
+    }
+
     await this.saveProject();
+
+    if (this.error()) {
+      this.categoriesError.set(this.error());
+    }
   }
 
   async saveFields(): Promise<void> {
@@ -452,6 +468,7 @@ export class ProjectPage implements OnInit {
 
   public addCategory(): void {
     this.error.set('');
+    this.categoriesError.set('');
     this.updateProject((project) => {
       project.categories = [...project.categories, ''];
     });
@@ -459,6 +476,7 @@ export class ProjectPage implements OnInit {
 
   public removeCategory(index: number): void {
     this.error.set('');
+    this.categoriesError.set('');
     this.updateProject((project) => {
       project.categories = project.categories.filter((_, i) => i !== index);
     });
@@ -467,6 +485,7 @@ export class ProjectPage implements OnInit {
   public moveCategoryUp(index: number): void {
     if (index <= 0) return;
     this.error.set('');
+    this.categoriesError.set('');
     this.updateProject((project) => {
       const categories = [...project.categories];
       [categories[index - 1], categories[index]] = [
@@ -481,6 +500,7 @@ export class ProjectPage implements OnInit {
     this.updateProject((project) => {
       if (index >= project.categories.length - 1) return;
       this.error.set('');
+      this.categoriesError.set('');
       const categories = [...project.categories];
       [categories[index], categories[index + 1]] = [
         categories[index + 1],
@@ -492,6 +512,7 @@ export class ProjectPage implements OnInit {
 
   public updateCategoryAt(index: number, value: string): void {
     this.error.set('');
+    this.categoriesError.set('');
     this.updateProject((project) => {
       const categories = [...project.categories];
       categories[index] = value;
@@ -501,6 +522,7 @@ export class ProjectPage implements OnInit {
 
   public updateAllowCustomCategory(allow: boolean): void {
     this.error.set('');
+    this.categoriesError.set('');
     this.updateProject((project) => {
       project.allowCustomCategory = allow;
     });

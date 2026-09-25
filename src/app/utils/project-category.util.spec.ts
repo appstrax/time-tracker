@@ -74,6 +74,24 @@ describe('project-category.util', () => {
     ).toEqual(['Development', 'Meetings', 'standup']);
   });
 
+  it('categoryFilterOptions ignores other projects when a project is selected', () => {
+    const project = new Project();
+    project.id = 'p1';
+    project.categories = ['Development'];
+
+    const ownEntry = new TimeSheetEntry();
+    ownEntry.projectId = 'p1';
+    ownEntry.category = 'standup';
+
+    const otherEntry = new TimeSheetEntry();
+    otherEntry.projectId = 'p2';
+    otherEntry.category = 'OtherProjectOnly';
+
+    expect(
+      categoryFilterOptions([ownEntry, otherEntry], [project], 'p1'),
+    ).toEqual(['Development', 'standup']);
+  });
+
   it('categoryFilterOptions without project sorts entry categories only', () => {
     const e1 = new TimeSheetEntry();
     e1.category = 'B';

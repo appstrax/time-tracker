@@ -200,6 +200,7 @@ export class TimeSheetEntryModal implements OnInit {
       }
 
       this.pruneStaleFieldValues();
+      this.timeSheetEntry.category = this.timeSheetEntry.category.trim();
       storeTimeSheetProjectId(this.timeSheetEntry.projectId);
       this.activeModal.close({
         action: 'save',
