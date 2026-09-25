@@ -200,14 +200,30 @@
           <p class="eyebrow">Capture</p>
           <h2>Time entry categories</h2>
           <p>
-            Suggested categories when logging time on this project. Saved with
-            Update Project.
+            Suggested categories when logging time on this project.
           </p>
         </div>
         <div class="fields-header-actions">
+          @if (editing() && project().id && areCategoriesDirty()) {
+            <span class="field-unsaved-pill">Unsaved changes</span>
+          }
           <button type="button" class="btn btn-outline-secondary" (click)="addCategory()">
             <i class="bi bi-plus-lg me-2"></i>
             Add category
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary fields-save-button"
+            [disabled]="!canSaveCategories() || isPersisting()"
+            (click)="saveCategories()"
+          >
+            @if (isSavingCore()) {
+              <span
+                class="spinner-border spinner-border-sm me-2"
+                aria-hidden="true"
+              ></span>
+            }
+            Save categories
           </button>
         </div>
       </div>

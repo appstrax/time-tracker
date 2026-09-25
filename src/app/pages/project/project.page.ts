@@ -221,6 +221,13 @@ export class ProjectPage implements OnInit {
       project.name !== this.savedCoreSnapshot.name ||
       project.description !== this.savedCoreSnapshot.description ||
       project.logoUrl !== this.savedCoreSnapshot.logoUrl ||
+      this.areCategoriesDirty()
+    );
+  }
+
+  public areCategoriesDirty(): boolean {
+    const project = this.project();
+    return (
       JSON.stringify(project.categories) !==
         JSON.stringify(this.savedCoreSnapshot.categories) ||
       project.allowCustomCategory !== this.savedCoreSnapshot.allowCustomCategory
@@ -251,6 +258,18 @@ export class ProjectPage implements OnInit {
     }
 
     return this.areFieldsDirty();
+  }
+
+  public canSaveCategories(): boolean {
+    if (!this.editing() || !this.project().id) {
+      return false;
+    }
+
+    return this.areCategoriesDirty();
+  }
+
+  async saveCategories(): Promise<void> {
+    await this.saveProject();
   }
 
   async saveFields(): Promise<void> {
