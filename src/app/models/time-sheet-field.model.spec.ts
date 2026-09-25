@@ -8,6 +8,13 @@ describe('time-sheet-field model shape', () => {
     expect(project.fields.length).toBe(0);
   });
 
+  it('Project.categories defaults to an empty array and allowCustomCategory is true', () => {
+    const project = new Project();
+    expect(Array.isArray(project.categories)).toBe(true);
+    expect(project.categories.length).toBe(0);
+    expect(project.allowCustomCategory).toBe(true);
+  });
+
   it('TimeSheetEntry.fieldValues defaults to an empty array, not an object', () => {
     const entry = new TimeSheetEntry();
     expect(Array.isArray(entry.fieldValues)).toBe(true);

@@ -7,6 +7,11 @@ import { ToastService, ProjectService, ProjectUserService } from '@services';
 import { Project, ProjectField, ProjectFieldType, ProjectUser, ProjectUserRole } from '@models';
 import { Store } from '@state';
 import { ProjectUsersComponent } from '@components';
+import {
+  normalizeProjectCategories,
+  seedNewProjectCategories,
+  validateProjectCategoryPolicy,
+} from '@utils';
 
 @Component({
   selector: 'app-create-project',
@@ -19,9 +24,12 @@ export class ProjectPage implements OnInit {
   readonly project = signal(new Project());
 
   readonly error = signal('');
-  private readonly persistMode = signal<'core' | 'fields' | null>(null);
+  private readonly persistMode = signal<'core' | 'fields' | 'categories' | null>(
+    null,
+  );
   readonly editing = signal(false);
   readonly fieldsError = signal('');
+  readonly categoriesError = signal('');
 
   readonly logoFile = signal<File | null>(null);
   readonly logoPreviewUrl = signal<string | null>(null);
@@ -41,6 +49,8 @@ export class ProjectPage implements OnInit {
     name: '',
     description: '',
     logoUrl: '',
+    categories: [] as string[],
+    allowCustomCategory: true,
   };
 
   constructor(
@@ -73,6 +83,8 @@ export class ProjectPage implements OnInit {
       } catch (e) {
         this.toast.error('Failed to load project for editing', 'Error');
       }
+    } else {
+      this.updateProject((project) => seedNewProjectCategories(project));
     }
   }
 
@@ -88,12 +100,17 @@ export class ProjectPage implements OnInit {
     return this.persistMode() === 'fields';
   }
 
+  public isSavingCategories(): boolean {
+    return this.persistMode() === 'categories';
+  }
+
   async saveProject(): Promise<void> {
     if (!this.beginPersist('core')) {
       return;
     }
 
     this.error.set('');
+    this.categoriesError.set('');
 
     try {
       if (!this.isCoreFormValid()) {
@@ -187,6 +204,15 @@ export class ProjectPage implements OnInit {
       return false;
     }
 
+    const categoryError = validateProjectCategoryPolicy(
+      project.categories,
+      project.allowCustomCategory,
+    );
+    if (categoryError) {
+      this.error.set(categoryError);
+      return false;
+    }
+
     return true;
   }
 
@@ -205,7 +231,17 @@ export class ProjectPage implements OnInit {
     return (
       project.name !== this.savedCoreSnapshot.name ||
       project.description !== this.savedCoreSnapshot.description ||
-      project.logoUrl !== this.savedCoreSnapshot.logoUrl
+      project.logoUrl !== this.savedCoreSnapshot.logoUrl ||
+      this.areCategoriesDirty()
+    );
+  }
+
+  public areCategoriesDirty(): boolean {
+    const project = this.project();
+    return (
+      JSON.stringify(project.categories) !==
+        JSON.stringify(this.savedCoreSnapshot.categories) ||
+      project.allowCustomCategory !== this.savedCoreSnapshot.allowCustomCategory
     );
   }
 
@@ -223,7 +259,7 @@ export class ProjectPage implements OnInit {
     }
 
     return confirm(
-      'You have unsaved project or custom field changes. Leave without saving?',
+      'You have unsaved project, category, or custom field changes. Leave without saving?',
     );
   }
 
@@ -233,6 +269,70 @@ export class ProjectPage implements OnInit {
     }
 
     return this.areFieldsDirty();
+  }
+
+  public canSaveCategories(): boolean {
+    if (!this.editing() || !this.project().id) {
+      return false;
+    }
+
+    return this.areCategoriesDirty();
+  }
+
+  async saveCategories(): Promise<void> {
+    this.categoriesError.set('');
+
+    if (!this.editing() || !this.project().id) {
+      this.categoriesError.set(
+        'Create the project first, then save categories here.',
+      );
+      return;
+    }
+
+    if (!this.beginPersist('categories')) {
+      return;
+    }
+
+    try {
+      const hadUnsavedCoreEdits = this.hasUnsavedCoreDetailsEdits();
+
+      const validationError = validateProjectCategoryPolicy(
+        this.project().categories,
+        this.project().allowCustomCategory,
+      );
+      if (validationError) {
+        this.categoriesError.set(validationError);
+        return;
+      }
+
+      const submitted = this.buildProjectForCategoriesSave();
+      const project = await this.projectService.save(submitted);
+
+      this.project.set(
+        this.mergeProjectAfterSave(project, this.liveEditOverrides(submitted)),
+      );
+
+      this.syncPersistedSnapshots(project);
+      await this.refreshProjectsStore();
+      this.toast.success('Categories saved', 'Success');
+      if (hadUnsavedCoreEdits) {
+        this.toast.info(
+          'Project detail changes were not saved. Use Update Project when you are ready.',
+          'Reminder',
+        );
+      }
+      if (this.areFieldsDirty()) {
+        this.toast.info(
+          'Custom field changes were not saved. Use Save fields when you are ready.',
+          'Reminder',
+        );
+      }
+    } catch (error: any) {
+      this.categoriesError.set(error.message || 'Failed to save categories');
+      this.toast.error(error.message || 'Failed to save categories', 'Error');
+    } finally {
+      this.endPersist();
+    }
   }
 
   async saveFields(): Promise<void> {
@@ -250,7 +350,8 @@ export class ProjectPage implements OnInit {
     }
 
     try {
-      const hadUnsavedCoreEdits = this.areCoreDirty();
+      const hadUnsavedCoreDetailEdits = this.hasUnsavedCoreDetailsEdits();
+      const hadUnsavedCategoryEdits = this.areCategoriesDirty();
 
       const validationError = this.validateFields();
       if (validationError) {
@@ -267,9 +368,15 @@ export class ProjectPage implements OnInit {
       this.syncPersistedSnapshots(project);
       await this.refreshProjectsStore();
       this.toast.success('Custom fields saved', 'Success');
-      if (hadUnsavedCoreEdits) {
+      if (hadUnsavedCoreDetailEdits) {
         this.toast.info(
           'Project detail changes were not saved. Use Update Project when you are ready.',
+          'Reminder',
+        );
+      }
+      if (hadUnsavedCategoryEdits) {
+        this.toast.info(
+          'Category changes were not saved. Use Save categories when you are ready.',
           'Reminder',
         );
       }
@@ -281,7 +388,20 @@ export class ProjectPage implements OnInit {
     }
   }
 
-  private beginPersist(mode: 'core' | 'fields'): boolean {
+  private hasUnsavedCoreDetailsEdits(): boolean {
+    if (this.logoFile()) {
+      return true;
+    }
+
+    const project = this.project();
+    return (
+      project.name !== this.savedCoreSnapshot.name ||
+      project.description !== this.savedCoreSnapshot.description ||
+      project.logoUrl !== this.savedCoreSnapshot.logoUrl
+    );
+  }
+
+  private beginPersist(mode: 'core' | 'fields' | 'categories'): boolean {
     if (this.persistMode() !== null) {
       return false;
     }
@@ -321,6 +441,8 @@ export class ProjectPage implements OnInit {
       name: project.name,
       description: project.description,
       logoUrl: project.logoUrl,
+      categories: [...project.categories],
+      allowCustomCategory: project.allowCustomCategory,
     };
   }
 
@@ -336,6 +458,9 @@ export class ProjectPage implements OnInit {
     const current = this.project();
     const payload = Object.assign(new Project(), current);
 
+    payload.categories = normalizeProjectCategories(current.categories);
+    payload.allowCustomCategory = current.allowCustomCategory;
+
     if (this.editing()) {
       payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
     }
@@ -350,6 +475,22 @@ export class ProjectPage implements OnInit {
     payload.name = this.savedCoreSnapshot.name;
     payload.description = this.savedCoreSnapshot.description;
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
+    payload.categories = [...this.savedCoreSnapshot.categories];
+    payload.allowCustomCategory = this.savedCoreSnapshot.allowCustomCategory;
+
+    return payload;
+  }
+
+  private buildProjectForCategoriesSave(): Project {
+    const current = this.project();
+    const payload = Object.assign(new Project(), current);
+
+    payload.name = this.savedCoreSnapshot.name;
+    payload.description = this.savedCoreSnapshot.description;
+    payload.logoUrl = this.savedCoreSnapshot.logoUrl;
+    payload.categories = normalizeProjectCategories(current.categories);
+    payload.allowCustomCategory = current.allowCustomCategory;
+    payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
 
     return payload;
   }
@@ -382,6 +523,12 @@ export class ProjectPage implements OnInit {
     if (JSON.stringify(live.fields) !== JSON.stringify(submitted.fields)) {
       overrides.fields = live.fields;
     }
+    if (JSON.stringify(live.categories) !== JSON.stringify(submitted.categories)) {
+      overrides.categories = live.categories;
+    }
+    if (live.allowCustomCategory !== submitted.allowCustomCategory) {
+      overrides.allowCustomCategory = live.allowCustomCategory;
+    }
 
     return overrides;
   }
@@ -397,6 +544,68 @@ export class ProjectPage implements OnInit {
     this.error.set('');
     this.updateProject((project) => {
       project.description = description;
+    });
+  }
+
+  public addCategory(): void {
+    this.error.set('');
+    this.categoriesError.set('');
+    this.updateProject((project) => {
+      project.categories = [...project.categories, ''];
+    });
+  }
+
+  public removeCategory(index: number): void {
+    this.error.set('');
+    this.categoriesError.set('');
+    this.updateProject((project) => {
+      project.categories = project.categories.filter((_, i) => i !== index);
+    });
+  }
+
+  public moveCategoryUp(index: number): void {
+    if (index <= 0) return;
+    this.error.set('');
+    this.categoriesError.set('');
+    this.updateProject((project) => {
+      const categories = [...project.categories];
+      [categories[index - 1], categories[index]] = [
+        categories[index],
+        categories[index - 1],
+      ];
+      project.categories = categories;
+    });
+  }
+
+  public moveCategoryDown(index: number): void {
+    this.updateProject((project) => {
+      if (index >= project.categories.length - 1) return;
+      this.error.set('');
+      this.categoriesError.set('');
+      const categories = [...project.categories];
+      [categories[index], categories[index + 1]] = [
+        categories[index + 1],
+        categories[index],
+      ];
+      project.categories = categories;
+    });
+  }
+
+  public updateCategoryAt(index: number, value: string): void {
+    this.error.set('');
+    this.categoriesError.set('');
+    this.updateProject((project) => {
+      const categories = [...project.categories];
+      categories[index] = value;
+      project.categories = categories;
+    });
+  }
+
+  public updateAllowCustomCategory(allow: boolean): void {
+    this.error.set('');
+    this.categoriesError.set('');
+    this.updateProject((project) => {
+      project.allowCustomCategory = allow;
     });
   }
 

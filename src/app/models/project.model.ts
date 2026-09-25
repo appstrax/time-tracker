@@ -10,4 +10,6 @@ export class Project extends Model {
 
   users: User[] = [];
   fields: ProjectField[] = [];
+  categories: string[] = [];
+  allowCustomCategory: boolean = true;
 }

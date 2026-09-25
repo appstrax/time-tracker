@@ -28,7 +28,12 @@ import {
   Status,
   DateRange,
 } from '@models';
-import { TimeSheetFilterUtil, getUserDisplayName, TimeSheetExportUtil } from '@utils';
+import {
+  TimeSheetFilterUtil,
+  categoryFilterOptions,
+  getUserDisplayName,
+  TimeSheetExportUtil,
+} from '@utils';
 import { ToastService } from '@services';
 
 export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
@@ -136,11 +141,12 @@ export class FilterViewContainerComponent
     this.subscription = this.route.queryParams.subscribe((params) => {
       this.filter.set(this.filterUtils.resolveFilter(params));
       this.filterEntries();
+      this.populateCategories();
     });
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if (changes['entries']) {
+    if (changes['entries'] || changes['projects']) {
       this.filterEntries();
       this.populateCategories();
     }
@@ -170,10 +176,13 @@ export class FilterViewContainerComponent
   }
 
   private populateCategories(): void {
-    const categories = this.entries()
-      .map((entry) => entry.category)
-      .filter((category) => category && category.trim() !== '');
-    this.categories.set([...new Set(categories)].sort());
+    this.categories.set(
+      categoryFilterOptions(
+        this.entries(),
+        this.projects(),
+        this.filter().projectId,
+      ),
+    );
   }
 
   public onViewTypeChange(view: FilterView): void {
