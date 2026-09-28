@@ -93,8 +93,8 @@
     box-shadow 0.16s ease,
     filter 0.16s ease;
 
-  &:not(:disabled):hover,
-  &:not(:disabled):focus-visible {
+  &:not(.timeline-block-disabled):hover,
+  &:not(.timeline-block-disabled):focus-visible {
     transform: translateY(-1px);
     z-index: 4;
     filter: brightness(1.05);
@@ -103,7 +103,7 @@
       0 0 0 1px color-mix(in srgb, var(--color-surface) 70%, var(--color-border));
   }
 
-  &:disabled {
+  &.timeline-block-disabled {
     cursor: default;
     opacity: 0.85;
   }

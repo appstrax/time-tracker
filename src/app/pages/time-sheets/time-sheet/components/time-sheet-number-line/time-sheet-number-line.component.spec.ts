@@ -1,7 +1,7 @@
 import { provideZonelessChangeDetection } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
-import { TimeSheetEntry } from '@models';
+import { Project, TimeSheetEntry } from '@models';
 
 import { TimeSheetNumberLineComponent } from './time-sheet-number-line.component';
 
@@ -29,14 +29,20 @@ describe('TimeSheetNumberLineComponent', () => {
     return entry;
   }
 
-  it('builds tooltip context with category, description, and duration', () => {
+  it('builds tooltip context with project, category, description, and duration', () => {
     const entry = makeEntry({
       category: 'Development',
       description: 'API work',
       hours: 1.5,
     });
 
+    const project = new Project();
+    project.id = 'project-1';
+    project.name = 'Time Tracker';
+    fixture.componentRef.setInput('projects', [project]);
+
     expect(component.getEntryTooltipContext(entry)).toEqual({
+      project: 'Time Tracker',
       category: 'Development',
       description: 'API work',
       duration: '1h 30m',
