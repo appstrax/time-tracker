@@ -15,9 +15,11 @@ import { Project, TimeSheetEntry, ProjectField } from '@models';
 import { ProjectDropdownComponent } from '@components';
 import { ToastService } from '@services';
 import {
+  categorySuggestions,
   clearStoredTimeSheetProjectId,
   FUTURE_TIMESHEET_ENTRY_TOAST,
   getStoredTimeSheetProjectId,
+  isCategoryAllowed,
   storeTimeSheetProjectId,
   TimeSheetDisplayUtil,
   isFutureLocalCalendarDay,
@@ -48,6 +50,7 @@ export class TimeSheetEntryModal implements OnInit {
   /** Keys present when the modal opened — kept on save only if the project is unchanged. */
   private fieldValueKeysAtOpen = new Set<string>();
   private projectIdAtOpen = '';
+  private categoryAtOpen = '';
 
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
 
@@ -79,7 +82,8 @@ export class TimeSheetEntryModal implements OnInit {
       }
     }
 
-    this.filteredCategories = [...this.categories];
+    this.categoryAtOpen = this.timeSheetEntry.category ?? '';
+    this.refreshCategorySuggestions();
 
     const user = await appstraxAuth.getUser();
     this.timeSheetEntry.userId = user.id;
@@ -97,6 +101,13 @@ export class TimeSheetEntryModal implements OnInit {
     this.project = project || undefined;
     this.timeSheetEntry.projectId = project ? project.id : '';
     this.initializeBooleanFieldDefaults();
+    this.refreshCategorySuggestions();
+  }
+
+  private refreshCategorySuggestions(): void {
+    this.filteredCategories = [
+      ...categorySuggestions(this.project, this.categories),
+    ];
   }
 
   get projectFields(): ProjectField[] {
@@ -139,11 +150,12 @@ export class TimeSheetEntryModal implements OnInit {
     const input = event.target as HTMLInputElement;
     const value = input.value.toLowerCase().trim();
 
+    const suggestions = categorySuggestions(this.project, this.categories);
     if (value === '') {
-      this.filteredCategories = [...this.categories];
+      this.filteredCategories = [...suggestions];
       this.isCategoryDropdownOpen = false;
     } else {
-      this.filteredCategories = this.categories.filter((category) =>
+      this.filteredCategories = suggestions.filter((category) =>
         category.toLowerCase().includes(value),
       );
       this.isCategoryDropdownOpen = !!this.filteredCategories.length;
@@ -153,17 +165,20 @@ export class TimeSheetEntryModal implements OnInit {
   selectCategory(category: string): void {
     this.timeSheetEntry.category = category;
     this.isCategoryDropdownOpen = false;
-    this.filteredCategories = [...this.categories];
+    this.refreshCategorySuggestions();
   }
 
   onCategoryFocus(): void {
+    const suggestions = categorySuggestions(this.project, this.categories);
     if (this.timeSheetEntry.category) {
       const value = this.timeSheetEntry.category.toLowerCase().trim();
-      this.filteredCategories = this.categories.filter((category) =>
+      this.filteredCategories = suggestions.filter((category) =>
         category.toLowerCase().includes(value),
       );
     } else {
-      this.filteredCategories = [...this.categories];
+      this.filteredCategories = [
+        ...categorySuggestions(this.project, this.categories),
+      ];
     }
     this.isCategoryDropdownOpen = !!this.filteredCategories.length;
   }
@@ -185,6 +200,7 @@ export class TimeSheetEntryModal implements OnInit {
       }
 
       this.pruneStaleFieldValues();
+      this.timeSheetEntry.category = this.timeSheetEntry.category.trim();
       storeTimeSheetProjectId(this.timeSheetEntry.projectId);
       this.activeModal.close({
         action: 'save',
@@ -219,19 +235,33 @@ export class TimeSheetEntryModal implements OnInit {
           (field) => field.required && this.isConfiguredFieldMissing(field),
         );
 
+    const categoryGrandfather =
+      this.timeSheetEntry.projectId === this.projectIdAtOpen
+        ? this.categoryAtOpen
+        : undefined;
+
+    const categoryAllowed = isCategoryAllowed(
+      this.project,
+      this.timeSheetEntry.category,
+      categoryGrandfather,
+    );
+
     let isValid =
       this.timeSheetEntry.projectId &&
       this.timeSheetEntry.hours &&
       this.timeSheetEntry.description &&
-      this.timeSheetEntry.category &&
+      categoryAllowed &&
       missingFields.length === 0;
 
     if (isValid) return true;
     let errorMessage = 'Please fill in all required fields';
     if (!this.timeSheetEntry.projectId)
       errorMessage += '\n\t• Please select a project';
-    if (!this.timeSheetEntry.category)
+    if (!this.timeSheetEntry.category.trim())
       errorMessage += '\n\t• Category is required';
+    else if (!categoryAllowed)
+      errorMessage +=
+        "\n\t• Category must be one of this project's categories";
     if (!this.timeSheetEntry.hours)
       errorMessage += '\n\t• Hours must be greater than 0';
     if (!this.timeSheetEntry.description)
