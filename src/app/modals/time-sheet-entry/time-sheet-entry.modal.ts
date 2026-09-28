@@ -1,6 +1,7 @@
 import { FormsModule } from '@angular/forms';
 import { appstraxAuth } from '@appstrax/services/auth';
 import {
+  AfterViewChecked,
   Component,
   Input,
   OnDestroy,
@@ -32,7 +33,9 @@ import {
   styleUrl: './time-sheet-entry.modal.scss',
   imports: [FormsModule, ProjectDropdownComponent],
 })
-export class TimeSheetEntryModal implements OnInit, OnDestroy {
+export class TimeSheetEntryModal
+  implements OnInit, OnDestroy, AfterViewChecked
+{
   @Input() timeSheetEntry = new TimeSheetEntry();
   @Input() categories!: string[];
   @Input() date!: Date;
@@ -50,6 +53,9 @@ export class TimeSheetEntryModal implements OnInit, OnDestroy {
   private categoryDropdownCloseTimer: ReturnType<typeof setTimeout> | null =
     null;
   private destroyed = false;
+
+  /** Set when the dropdown's `<ul>` isn't rendered yet (e.g. 0 -> N filtered results); applied once it exists. */
+  private pendingDropdownVisible: boolean | null = null;
 
   /** Keys present when the modal opened — kept on save only if the project is unchanged. */
   private fieldValueKeysAtOpen = new Set<string>();
@@ -126,10 +132,25 @@ export class TimeSheetEntryModal implements OnInit, OnDestroy {
 
   /** Toggle visibility via DOM so modal close does not trip dev-mode CD checks. */
   private setCategoryDropdownVisible(visible: boolean): void {
+    this.pendingDropdownVisible = visible;
+    this.applyPendingDropdownVisible();
+  }
+
+  /** Applies a pending visibility change once the `@if`-gated `<ul>` exists in the DOM. */
+  private applyPendingDropdownVisible(): void {
+    if (this.pendingDropdownVisible === null) return;
     const menu = this.categoryDropdownMenu?.nativeElement;
     if (!menu) return;
-    menu.classList.toggle('show', visible);
-    menu.setAttribute('aria-hidden', visible ? 'false' : 'true');
+    menu.classList.toggle('show', this.pendingDropdownVisible);
+    menu.setAttribute(
+      'aria-hidden',
+      this.pendingDropdownVisible ? 'false' : 'true',
+    );
+    this.pendingDropdownVisible = null;
+  }
+
+  ngAfterViewChecked(): void {
+    this.applyPendingDropdownVisible();
   }
 
   private scheduleCategoryDropdownClose(): void {
