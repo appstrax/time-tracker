@@ -173,6 +173,7 @@
 
 /* Category autocomplete dropdown styles */
 .category-autocomplete {
+  display: none;
   position: absolute;
   top: 100%;
   left: 0;
@@ -185,6 +186,10 @@
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.category-autocomplete.show {
+  display: block;
 }
 
 .category-autocomplete .dropdown-item {
