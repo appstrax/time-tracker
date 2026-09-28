@@ -47,6 +47,8 @@ export class TimeSheetEntryModal implements OnInit {
 
   wasExistingEntryOnOpen: boolean = false;
 
+  private modalInputsInitialized = false;
+
   /** Keys present when the modal opened — kept on save only if the project is unchanged. */
   private fieldValueKeysAtOpen = new Set<string>();
   private projectIdAtOpen = '';
@@ -65,7 +67,17 @@ export class TimeSheetEntryModal implements OnInit {
     private toastService: ToastService,
   ) {}
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
+    this.initializeFromOptions();
+  }
+
+  /** Called after NgbModal `Object.assign` so categories/date are available. */
+  initializeFromOptions(): void {
+    if (this.modalInputsInitialized || !this.date || !this.categories) {
+      return;
+    }
+    this.modalInputsInitialized = true;
+
     this.wasExistingEntryOnOpen = !!this.timeSheetEntry.id;
     this.fieldValueKeysAtOpen = new Set(
       this.timeSheetEntry.fieldValues.map((fv) => fv.key),
@@ -84,13 +96,16 @@ export class TimeSheetEntryModal implements OnInit {
 
     this.categoryAtOpen = this.timeSheetEntry.category ?? '';
     this.refreshCategorySuggestions();
+    this.projectIdAtOpen = this.timeSheetEntry.projectId;
+    this.initializeBooleanFieldDefaults();
 
+    void this.assignEntryUser();
+  }
+
+  private async assignEntryUser(): Promise<void> {
     const user = await appstraxAuth.getUser();
     this.timeSheetEntry.userId = user.id;
     this.timeSheetEntry.date = this.date;
-
-    this.projectIdAtOpen = this.timeSheetEntry.projectId;
-    this.initializeBooleanFieldDefaults();
   }
 
   formatHours(hours: number): string {
@@ -153,7 +168,8 @@ export class TimeSheetEntryModal implements OnInit {
     const suggestions = categorySuggestions(this.project, this.categories);
     if (value === '') {
       this.filteredCategories = [...suggestions];
-      this.isCategoryDropdownOpen = false;
+      this.isCategoryDropdownOpen =
+        document.activeElement === input && suggestions.length > 0;
     } else {
       this.filteredCategories = suggestions.filter((category) =>
         category.toLowerCase().includes(value),

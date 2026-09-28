@@ -58,6 +58,7 @@
     @if (previewWidthPercent()) {
       <div
         class="timeline-preview timeline-block"
+        [class.timeline-block-quarter]="previewIsQuarterHourBlock()"
         [class.timeline-preview-from-start]="!loggedHours()"
         [class.timeline-preview-after-logged]="loggedHours() > 0"
         [style.left.%]="previewLeftPercent()"

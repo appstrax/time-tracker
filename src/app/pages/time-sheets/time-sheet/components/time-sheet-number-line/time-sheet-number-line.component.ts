@@ -124,6 +124,13 @@ export class TimeSheetNumberLineComponent {
     return this.formatBlockHours(hoverTotal - logged);
   });
 
+  public readonly previewIsQuarterHourBlock = computed(() => {
+    const hoverTotal = this.hoverTotalHours();
+    const logged = this.loggedHours();
+    if (hoverTotal === null || hoverTotal <= logged) return false;
+    return hoverTotal - logged === 0.25;
+  });
+
   public readonly previewBackgroundColor = computed(() =>
     this.getPreviewBackground('var(--color-primary)'),
   );
