@@ -148,6 +148,7 @@ export class TimeSheetDayComponent {
       backdropClass: 'time-sheet-entry-backdrop',
     });
     Object.assign(modalRef.componentInstance, options);
+    modalRef.componentInstance.initializeFromOptions();
     modalRef.result.then(
       (result: { action: string; timeSheetEntry: TimeSheetEntry }) => {
         if (result.action === 'save') {

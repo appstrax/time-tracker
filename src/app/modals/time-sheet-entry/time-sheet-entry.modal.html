@@ -8,6 +8,7 @@
       type="button"
       class="btn-close"
       aria-label="Close"
+      (mousedown)="$event.preventDefault()"
       (click)="close()"
     ></button>
   </div>
@@ -41,9 +42,11 @@
             [disabled]="timeSheetEntry.approved"
             required
             />
-          @if (isCategoryDropdownOpen && filteredCategories.length && !timeSheetEntry.approved) {
+          @if (filteredCategories.length && !timeSheetEntry.approved) {
             <ul
-              class="dropdown-menu dropdown-menu-end w-100 show category-autocomplete"
+              #categoryDropdownMenu
+              class="dropdown-menu dropdown-menu-end w-100 category-autocomplete"
+              aria-hidden="true"
               [attr.data-bs-popper]="'static'"
               >
               @for (category of filteredCategories; track category) {
@@ -51,6 +54,7 @@
                   <button
                     class="dropdown-item"
                     type="button"
+                    (mousedown)="$event.preventDefault()"
                     (click)="selectCategory(category)"
                     >
                     {{ category }}

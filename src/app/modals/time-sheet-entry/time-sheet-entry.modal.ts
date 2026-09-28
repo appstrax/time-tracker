@@ -1,8 +1,10 @@
 import { FormsModule } from '@angular/forms';
 import { appstraxAuth } from '@appstrax/services/auth';
 import {
+  AfterViewChecked,
   Component,
   Input,
+  OnDestroy,
   OnInit,
   ViewChild,
   ElementRef,
@@ -31,7 +33,9 @@ import {
   styleUrl: './time-sheet-entry.modal.scss',
   imports: [FormsModule, ProjectDropdownComponent],
 })
-export class TimeSheetEntryModal implements OnInit {
+export class TimeSheetEntryModal
+  implements OnInit, OnDestroy, AfterViewChecked
+{
   @Input() timeSheetEntry = new TimeSheetEntry();
   @Input() categories!: string[];
   @Input() date!: Date;
@@ -41,11 +45,17 @@ export class TimeSheetEntryModal implements OnInit {
   project: Project | undefined;
   filteredCategories: string[] = [];
 
-  isCategoryDropdownOpen: boolean = false;
-
   errorMessage: string = '';
 
   wasExistingEntryOnOpen: boolean = false;
+
+  private modalInputsInitialized = false;
+  private categoryDropdownCloseTimer: ReturnType<typeof setTimeout> | null =
+    null;
+  private destroyed = false;
+
+  /** Set when the dropdown's `<ul>` isn't rendered yet (e.g. 0 -> N filtered results); applied once it exists. */
+  private pendingDropdownVisible: boolean | null = null;
 
   /** Keys present when the modal opened — kept on save only if the project is unchanged. */
   private fieldValueKeysAtOpen = new Set<string>();
@@ -53,6 +63,8 @@ export class TimeSheetEntryModal implements OnInit {
   private categoryAtOpen = '';
 
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
+  @ViewChild('categoryDropdownMenu', { static: false })
+  categoryDropdownMenu?: ElementRef<HTMLUListElement>;
 
   get hours(): number {
     return this.timeSheetEntry?.hours || 0;
@@ -65,7 +77,17 @@ export class TimeSheetEntryModal implements OnInit {
     private toastService: ToastService,
   ) {}
 
-  async ngOnInit(): Promise<void> {
+  ngOnInit(): void {
+    this.initializeFromOptions();
+  }
+
+  /** Called after NgbModal `Object.assign` so categories/date are available. */
+  initializeFromOptions(): void {
+    if (this.modalInputsInitialized || !this.date || !this.categories) {
+      return;
+    }
+    this.modalInputsInitialized = true;
+
     this.wasExistingEntryOnOpen = !!this.timeSheetEntry.id;
     this.fieldValueKeysAtOpen = new Set(
       this.timeSheetEntry.fieldValues.map((fv) => fv.key),
@@ -84,13 +106,59 @@ export class TimeSheetEntryModal implements OnInit {
 
     this.categoryAtOpen = this.timeSheetEntry.category ?? '';
     this.refreshCategorySuggestions();
-
-    const user = await appstraxAuth.getUser();
-    this.timeSheetEntry.userId = user.id;
-    this.timeSheetEntry.date = this.date;
-
     this.projectIdAtOpen = this.timeSheetEntry.projectId;
     this.initializeBooleanFieldDefaults();
+
+    void this.assignEntryUser();
+  }
+
+  private async assignEntryUser(): Promise<void> {
+    const user = await appstraxAuth.getUser();
+    if (this.destroyed) return;
+    this.timeSheetEntry.userId = user.id;
+    this.timeSheetEntry.date = this.date;
+  }
+
+  ngOnDestroy(): void {
+    this.destroyed = true;
+    this.clearCategoryDropdownCloseTimer();
+  }
+
+  private clearCategoryDropdownCloseTimer(): void {
+    if (this.categoryDropdownCloseTimer === null) return;
+    clearTimeout(this.categoryDropdownCloseTimer);
+    this.categoryDropdownCloseTimer = null;
+  }
+
+  /** Toggle visibility via DOM so modal close does not trip dev-mode CD checks. */
+  private setCategoryDropdownVisible(visible: boolean): void {
+    this.pendingDropdownVisible = visible;
+    this.applyPendingDropdownVisible();
+  }
+
+  /** Applies a pending visibility change once the `@if`-gated `<ul>` exists in the DOM. */
+  private applyPendingDropdownVisible(): void {
+    if (this.pendingDropdownVisible === null) return;
+    const menu = this.categoryDropdownMenu?.nativeElement;
+    if (!menu) return;
+    menu.classList.toggle('show', this.pendingDropdownVisible);
+    menu.setAttribute(
+      'aria-hidden',
+      this.pendingDropdownVisible ? 'false' : 'true',
+    );
+    this.pendingDropdownVisible = null;
+  }
+
+  ngAfterViewChecked(): void {
+    this.applyPendingDropdownVisible();
+  }
+
+  private scheduleCategoryDropdownClose(): void {
+    this.clearCategoryDropdownCloseTimer();
+    this.categoryDropdownCloseTimer = setTimeout(() => {
+      this.categoryDropdownCloseTimer = null;
+      this.setCategoryDropdownVisible(false);
+    }, 200);
   }
 
   formatHours(hours: number): string {
@@ -153,18 +221,21 @@ export class TimeSheetEntryModal implements OnInit {
     const suggestions = categorySuggestions(this.project, this.categories);
     if (value === '') {
       this.filteredCategories = [...suggestions];
-      this.isCategoryDropdownOpen = false;
+      this.setCategoryDropdownVisible(
+        document.activeElement === input && suggestions.length > 0,
+      );
     } else {
       this.filteredCategories = suggestions.filter((category) =>
         category.toLowerCase().includes(value),
       );
-      this.isCategoryDropdownOpen = !!this.filteredCategories.length;
+      this.setCategoryDropdownVisible(this.filteredCategories.length > 0);
     }
   }
 
   selectCategory(category: string): void {
     this.timeSheetEntry.category = category;
-    this.isCategoryDropdownOpen = false;
+    this.clearCategoryDropdownCloseTimer();
+    this.setCategoryDropdownVisible(false);
     this.refreshCategorySuggestions();
   }
 
@@ -180,13 +251,11 @@ export class TimeSheetEntryModal implements OnInit {
         ...categorySuggestions(this.project, this.categories),
       ];
     }
-    this.isCategoryDropdownOpen = !!this.filteredCategories.length;
+    this.setCategoryDropdownVisible(this.filteredCategories.length > 0);
   }
 
   onCategoryBlur(): void {
-    setTimeout(() => {
-      this.isCategoryDropdownOpen = false;
-    }, 200);
+    this.scheduleCategoryDropdownClose();
   }
 
   onSaveTimeSheetEntry(): void {
@@ -202,6 +271,7 @@ export class TimeSheetEntryModal implements OnInit {
       this.pruneStaleFieldValues();
       this.timeSheetEntry.category = this.timeSheetEntry.category.trim();
       storeTimeSheetProjectId(this.timeSheetEntry.projectId);
+      this.clearCategoryDropdownCloseTimer();
       this.activeModal.close({
         action: 'save',
         timeSheetEntry: this.timeSheetEntry,
@@ -212,6 +282,7 @@ export class TimeSheetEntryModal implements OnInit {
   }
 
   async onDeleteTimeSheetEntry(): Promise<void> {
+    this.clearCategoryDropdownCloseTimer();
     this.activeModal.close({
       action: 'delete',
       timeSheetEntry: this.timeSheetEntry,
@@ -219,6 +290,7 @@ export class TimeSheetEntryModal implements OnInit {
   }
 
   close(): void {
+    this.clearCategoryDropdownCloseTimer();
     this.activeModal.dismiss();
   }
 

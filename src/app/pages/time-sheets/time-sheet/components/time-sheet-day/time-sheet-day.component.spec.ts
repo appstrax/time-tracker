@@ -15,7 +15,9 @@ describe('TimeSheetDayComponent', () => {
   beforeEach(async () => {
     modalService = jasmine.createSpyObj<NgbModal>('NgbModal', ['open']);
     modalService.open.and.returnValue({
-      componentInstance: {},
+      componentInstance: {
+        initializeFromOptions: jasmine.createSpy('initializeFromOptions'),
+      },
       result: Promise.resolve({ action: 'close' }),
     } as any);
 
