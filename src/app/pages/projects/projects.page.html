@@ -68,24 +68,12 @@
               <tr>
                 <td>
                   <div class="project-cell">
-                    @if (project.logoUrl) {
-                      <img
-                        class="project-logo"
-                        [src]="project.logoUrl"
-                        [alt]="project.name + ' logo'"
-                      />
-                    } @else {
-                      <div class="project-logo project-logo-fallback" aria-hidden="true">
-                        <i class="bi bi-kanban"></i>
-                      </div>
-                    }
-
-                    <div>
-                      <div class="project-name">
-                        {{ project.name || 'Untitled project' }}
-                      </div>
-                      <div class="project-id">{{ project.id }}</div>
-                    </div>
+                    <span
+                      class="project-name"
+                      [style.--project-color]="projectColor(project)"
+                    >
+                      {{ project.name || 'Untitled project' }}
+                    </span>
                   </div>
                 </td>
                 <td class="description-cell">

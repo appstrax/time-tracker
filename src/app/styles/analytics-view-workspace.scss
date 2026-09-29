@@ -302,8 +302,8 @@
   border-radius: 0.35rem;
   font-size: 0.8rem;
   font-weight: 600;
-  background: color-mix(in srgb, var(--primary-color) 10%, var(--color-surface));
-  color: var(--primary-color-dark);
+  background: color-mix(in srgb, var(--project-color) 16%, var(--color-surface));
+  color: var(--project-color);
 }
 
 .ws-project-btn {
@@ -312,7 +312,7 @@
   text-align: left;
 
   &:hover {
-    background: color-mix(in srgb, var(--primary-color) 16%, var(--color-surface));
+    background: color-mix(in srgb, var(--project-color) 26%, var(--color-surface));
   }
 
   &:focus-visible {

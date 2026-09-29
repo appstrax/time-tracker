@@ -5,6 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Project } from '@models';
 import { ToastService } from '@services';
 import { Store } from '@state';
+import { getProjectColor } from '@utils';
 
 @Component({
   selector: 'app-projects',
@@ -34,6 +35,10 @@ export class ProjectsPage implements OnInit {
     } catch {
       this.toast.error('Unable to load projects.');
     }
+  }
+
+  public projectColor(project: Project): string {
+    return getProjectColor(project.id, this.projects());
   }
 
   public formatUpdatedAt(project: Project): string {

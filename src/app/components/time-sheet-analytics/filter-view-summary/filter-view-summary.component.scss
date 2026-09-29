@@ -58,8 +58,8 @@
   align-items: center;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--primary-color) 8%, var(--color-surface));
-  color: var(--primary-color-dark);
+  background: color-mix(in srgb, var(--project-color) 16%, var(--color-surface));
+  color: var(--project-color);
   font-weight: 600;
 }
 
@@ -72,9 +72,9 @@
     box-shadow 0.15s ease;
 
   &:hover {
-    background: color-mix(in srgb, var(--primary-color) 14%, var(--color-surface));
+    background: color-mix(in srgb, var(--project-color) 26%, var(--color-surface));
     box-shadow: 0 0 0 1px
-      color-mix(in srgb, var(--primary-color) 22%, var(--color-border));
+      color-mix(in srgb, var(--project-color) 22%, var(--color-border));
   }
 
   &:focus-visible {
