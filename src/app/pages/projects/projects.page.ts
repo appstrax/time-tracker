@@ -1,6 +1,6 @@
 import { CommonModule } from '@angular/common';
 import { Component, computed, inject, OnInit } from '@angular/core';
-import { RouterModule } from '@angular/router';
+import { Router, RouterModule } from '@angular/router';
 
 import { Project } from '@models';
 import { ToastService } from '@services';
@@ -17,6 +17,7 @@ import { buildProjectColorMap, getProjectColor } from '@utils';
 export class ProjectsPage implements OnInit {
   private readonly store = inject(Store);
   private readonly toast = inject(ToastService);
+  private readonly router = inject(Router);
 
   public readonly loading = this.store.projects.loading;
   public readonly loaded = computed(() => !!this.store.projects.fetchedAt());
@@ -45,6 +46,12 @@ export class ProjectsPage implements OnInit {
       this.projectColorById().get(project.id) ??
       getProjectColor(project.id, this.projects())
     );
+  }
+
+  public goToProject(project: Project): void {
+    void this.router.navigate(['/projects/project'], {
+      queryParams: { id: project.id },
+    });
   }
 
   public formatUpdatedAt(project: Project): string {

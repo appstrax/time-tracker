@@ -60,12 +60,19 @@
               <th scope="col">Description</th>
               <th scope="col">Members</th>
               <th scope="col">Updated</th>
-              <th scope="col" class="text-end">Actions</th>
             </tr>
           </thead>
           <tbody>
             @for (project of projects(); track project.id) {
-              <tr>
+              <tr
+                class="project-row"
+                tabindex="0"
+                role="button"
+                [attr.aria-label]="'Open ' + (project.name || 'Untitled project')"
+                (click)="goToProject(project)"
+                (keydown.enter)="goToProject(project)"
+                (keydown.space)="goToProject(project); $event.preventDefault()"
+              >
                 <td>
                   <div class="project-cell">
                     <span
@@ -86,15 +93,6 @@
                   </span>
                 </td>
                 <td>{{ formatUpdatedAt(project) }}</td>
-                <td class="text-end">
-                  <a
-                    class="btn btn-sm btn-outline-primary"
-                    [routerLink]="['/projects/project']"
-                    [queryParams]="{ id: project.id }"
-                  >
-                    Edit
-                  </a>
-                </td>
               </tr>
             }
           </tbody>
