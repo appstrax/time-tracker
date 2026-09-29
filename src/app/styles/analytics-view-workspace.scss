@@ -297,28 +297,38 @@
 .ws-project-btn,
 .ws-project-label {
   display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
   max-width: 100%;
   padding: 0.2rem 0.5rem;
   border-radius: 0.35rem;
   font-size: 0.8rem;
   font-weight: 600;
-  background: color-mix(in srgb, var(--project-color) 16%, var(--color-surface));
-  color: var(--project-color);
+  color: var(--text-primary);
 }
 
 .ws-project-btn {
   border: none;
   cursor: pointer;
+  background: transparent;
   text-align: left;
 
   &:hover {
-    background: color-mix(in srgb, var(--project-color) 26%, var(--color-surface));
+    background: color-mix(in srgb, var(--color-bg) 40%, var(--color-surface));
   }
 
   &:focus-visible {
     outline: 2px solid var(--primary-color);
     outline-offset: 1px;
   }
+}
+
+.ws-project-btn .project-color-dot,
+.ws-project-label .project-color-dot {
+  width: 0.55rem;
+  height: 0.55rem;
+  border-radius: 50%;
+  flex-shrink: 0;
 }
 
 .ws-num {

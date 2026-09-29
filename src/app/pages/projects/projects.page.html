@@ -76,9 +76,11 @@
                 <td>
                   <div class="project-cell">
                     <span
-                      class="project-name"
-                      [style.--project-color]="projectColor(project)"
-                    >
+                      class="project-color-dot"
+                      [style.background-color]="projectColor(project)"
+                      aria-hidden="true"
+                    ></span>
+                    <span class="project-name">
                       {{ project.name || 'Untitled project' }}
                     </span>
                   </div>

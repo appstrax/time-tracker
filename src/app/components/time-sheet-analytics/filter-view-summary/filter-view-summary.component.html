@@ -45,16 +45,24 @@
                     'Open timesheet for ' + project.projectName
                   "
                   [title]="project.projectName"
-                  [style.--project-color]="projectColor(project.projectId)"
                 >
+                  <span
+                    class="project-color-dot"
+                    [style.background-color]="projectColor(project.projectId)"
+                    aria-hidden="true"
+                  ></span>
                   {{ project.projectName }}
                 </button>
               } @else {
                 <span
                   class="ws-project-label ws-summary-project"
                   [title]="project.projectName"
-                  [style.--project-color]="projectColor(project.projectId)"
                 >
+                  <span
+                    class="project-color-dot"
+                    [style.background-color]="projectColor(project.projectId)"
+                    aria-hidden="true"
+                  ></span>
                   {{ project.projectName }}
                 </span>
               }
@@ -120,15 +128,21 @@
                       [attr.aria-label]="
                         'Open timesheet for ' + project.projectName
                       "
-                      [style.--project-color]="projectColor(project.projectId)"
                     >
+                      <span
+                        class="project-color-dot"
+                        [style.background-color]="projectColor(project.projectId)"
+                        aria-hidden="true"
+                      ></span>
                       {{ project.projectName }}
                     </button>
                   } @else {
-                    <span
-                      class="project-pill"
-                      [style.--project-color]="projectColor(project.projectId)"
-                    >
+                    <span class="project-pill">
+                      <span
+                        class="project-color-dot"
+                        [style.background-color]="projectColor(project.projectId)"
+                        aria-hidden="true"
+                      ></span>
                       {{ project.projectName }}
                     </span>
                   }
