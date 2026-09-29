@@ -5,7 +5,7 @@ import { RouterModule } from '@angular/router';
 import { Project } from '@models';
 import { ToastService } from '@services';
 import { Store } from '@state';
-import { getProjectColor } from '@utils';
+import { buildProjectColorMap, getProjectColor } from '@utils';
 
 @Component({
   selector: 'app-projects',
@@ -21,6 +21,9 @@ export class ProjectsPage implements OnInit {
   public readonly loading = this.store.projects.loading;
   public readonly loaded = computed(() => !!this.store.projects.fetchedAt());
   public readonly projects = this.store.projects.projects;
+  public readonly projectColorById = computed(() =>
+    buildProjectColorMap(this.projects()),
+  );
 
   ngOnInit(): void {
     this.fetchProjects();
@@ -38,7 +41,10 @@ export class ProjectsPage implements OnInit {
   }
 
   public projectColor(project: Project): string {
-    return getProjectColor(project.id, this.projects());
+    return (
+      this.projectColorById().get(project.id) ??
+      getProjectColor(project.id, this.projects())
+    );
   }
 
   public formatUpdatedAt(project: Project): string {
