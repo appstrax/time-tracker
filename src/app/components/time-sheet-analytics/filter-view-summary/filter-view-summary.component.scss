@@ -53,13 +53,20 @@
   }
 }
 
+.project-color-dot {
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+
 .project-pill {
   display: inline-flex;
   align-items: center;
+  gap: 0.5rem;
   padding: 0.35rem 0.75rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--primary-color) 8%, var(--color-surface));
-  color: var(--primary-color-dark);
+  color: var(--text-primary);
   font-weight: 600;
 }
 
@@ -67,14 +74,11 @@
   border: none;
   font: inherit;
   cursor: pointer;
-  transition:
-    background 0.15s ease,
-    box-shadow 0.15s ease;
+  background: transparent;
+  transition: background 0.15s ease;
 
   &:hover {
-    background: color-mix(in srgb, var(--primary-color) 14%, var(--color-surface));
-    box-shadow: 0 0 0 1px
-      color-mix(in srgb, var(--primary-color) 22%, var(--color-border));
+    background: color-mix(in srgb, var(--color-bg) 65%, var(--color-surface));
   }
 
   &:focus-visible {

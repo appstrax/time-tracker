@@ -46,10 +46,23 @@
                   "
                   [title]="project.projectName"
                 >
+                  <span
+                    class="project-color-dot"
+                    [style.background-color]="projectColor(project.projectId)"
+                    aria-hidden="true"
+                  ></span>
                   {{ project.projectName }}
                 </button>
               } @else {
-                <span class="ws-project-label ws-summary-project" [title]="project.projectName">
+                <span
+                  class="ws-project-label ws-summary-project"
+                  [title]="project.projectName"
+                >
+                  <span
+                    class="project-color-dot"
+                    [style.background-color]="projectColor(project.projectId)"
+                    aria-hidden="true"
+                  ></span>
                   {{ project.projectName }}
                 </span>
               }
@@ -84,8 +97,7 @@
     <div class="table-shell">
       <div class="table-toolbar">
         <div>
-          <p class="eyebrow">Summary</p>
-          <h2>Hours by project</h2>
+          <h2 class="eyebrow">Summary</h2>
           <p>Compare total, approved, and pending time across every project in scope.</p>
         </div>
       </div>
@@ -117,10 +129,22 @@
                         'Open timesheet for ' + project.projectName
                       "
                     >
+                      <span
+                        class="project-color-dot"
+                        [style.background-color]="projectColor(project.projectId)"
+                        aria-hidden="true"
+                      ></span>
                       {{ project.projectName }}
                     </button>
                   } @else {
-                    <span class="project-pill">{{ project.projectName }}</span>
+                    <span class="project-pill">
+                      <span
+                        class="project-color-dot"
+                        [style.background-color]="projectColor(project.projectId)"
+                        aria-hidden="true"
+                      ></span>
+                      {{ project.projectName }}
+                    </span>
                   }
                 </td>
                 <td class="text-end value-primary">

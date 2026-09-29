@@ -97,8 +97,19 @@ export class TimeSheetPage {
   }
 
   public onTimeSheetEntrySaved() {
-    this.syncFilterProject();
+    this.adoptSavedEntryProjectFilter();
     this.fetchTimeSheetEntries();
+  }
+
+  /** After saving an entry, follow it into the filter — but only when a specific
+   * project was already selected. "All projects" stays "all projects". */
+  private adoptSavedEntryProjectFilter(): void {
+    if (this.filterProjectId() === null) return;
+
+    const projectId = getStoredTimeSheetProjectId();
+    if (!projectId) return;
+
+    this.filterProjectId.set(projectId);
   }
 
   public onFilterProjectSelected(project: Project | null): void {
@@ -110,9 +121,10 @@ export class TimeSheetPage {
     }
   }
 
+  /** Re-validates the active filter against the loaded projects; never pulls in the
+   * modal's "last used project" so saving an entry can't silently change the filter. */
   private syncFilterProject(): void {
-    const projectId = getStoredTimeSheetProjectId();
-    this.filterProjectId.set(projectId);
+    const projectId = this.filterProjectId();
     if (!projectId) return;
 
     const project = this.projects().find((item) => item.id === projectId);
