@@ -14,6 +14,7 @@ import { TimeSheetDisplayUtil, getProjectColor } from '@utils';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 export interface TimelineEntryTooltipContext {
+  project: string;
   category: string;
   description: string;
   duration: string;
@@ -124,6 +125,13 @@ export class TimeSheetNumberLineComponent {
     return this.formatBlockHours(hoverTotal - logged);
   });
 
+  public readonly previewIsQuarterHourBlock = computed(() => {
+    const hoverTotal = this.hoverTotalHours();
+    const logged = this.loggedHours();
+    if (hoverTotal === null || hoverTotal <= logged) return false;
+    return hoverTotal - logged === 0.25;
+  });
+
   public readonly previewBackgroundColor = computed(() =>
     this.getPreviewBackground('var(--color-primary)'),
   );
@@ -190,6 +198,7 @@ export class TimeSheetNumberLineComponent {
     entry: TimeSheetEntry,
   ): TimelineEntryTooltipContext {
     return {
+      project: this.getProjectName(entry),
       category: entry.category?.trim() || 'No category',
       description: this.getEntryDescription(entry),
       duration: this.formatBlockHours(entry.hours),

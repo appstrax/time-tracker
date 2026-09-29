@@ -19,12 +19,14 @@
 
     <ng-template
       #entryTooltip
+      let-project="project"
       let-category="category"
       let-description="description"
       let-duration="duration"
     >
       <div class="timeline-entry-tooltip-content">
-        <strong>{{ category }}</strong>
+        <strong>{{ project }}</strong>
+        <span>{{ category }}</span>
         <span>{{ description }}</span>
         <span>{{ duration }}</span>
       </div>
@@ -39,11 +41,11 @@
         [style.left.%]="segment.leftPercent"
         [style.width.%]="segment.widthPercent"
         [style.background-color]="segment.backgroundColor"
-        [disabled]="disabled()"
+        [class.timeline-block-disabled]="disabled()"
+        [attr.aria-disabled]="disabled() || null"
         [ngbTooltip]="entryTooltip"
         [tooltipContext]="segment.tooltipContext"
         tooltipClass="timeline-entry-tooltip"
-        [disableTooltip]="disabled()"
         container="body"
         triggers="hover focus"
         (click)="onBlockClick(segment.entry, $event)"
@@ -58,6 +60,7 @@
     @if (previewWidthPercent()) {
       <div
         class="timeline-preview timeline-block"
+        [class.timeline-block-quarter]="previewIsQuarterHourBlock()"
         [class.timeline-preview-from-start]="!loggedHours()"
         [class.timeline-preview-after-logged]="loggedHours() > 0"
         [style.left.%]="previewLeftPercent()"
