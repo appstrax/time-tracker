@@ -5,28 +5,16 @@
         <h2>Hours logged</h2>
         <p>{{ subtitle() }}</p>
       </div>
-      <div class="chart-legend">
-        <span><i class="swatch swatch--approved"></i>Approved</span>
-        <span><i class="swatch swatch--pending"></i>Pending</span>
-      </div>
     </header>
 
     @if (buckets().length) {
-      <div class="bars" role="img" aria-label="Hours logged per period">
-        @for (b of buckets(); track b.key) {
-          <div class="bar-col">
-            <span class="bar-total">{{ b.total | number: '1.0-1' }}</span>
-            <div class="bar" [style.height.%]="b.heightPercent">
-              <div class="bar-pending" [style.flex-grow]="b.pending"></div>
-              <div class="bar-approved" [style.flex-grow]="b.approved"></div>
-            </div>
-          </div>
-        }
-      </div>
-      <div class="bar-labels">
-        @for (b of buckets(); track b.key) {
-          <span>{{ b.label }}</span>
-        }
+      <div class="chart-canvas">
+        <canvas
+          baseChart
+          type="bar"
+          [data]="chartData()"
+          [options]="chartOptions()"
+        ></canvas>
       </div>
     } @else {
       <p class="chart-empty">No hours match the current filters.</p>

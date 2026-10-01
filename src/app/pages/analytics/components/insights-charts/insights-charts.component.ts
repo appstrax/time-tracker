@@ -1,5 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { DecimalPipe } from '@angular/common';
+import { BaseChartDirective } from 'ng2-charts';
+import { Chart, ChartConfiguration, registerables } from 'chart.js';
 
 import { Project, TimeSheetEntry } from '@models';
 import { buildProjectColorMap } from '@utils';
@@ -10,7 +12,6 @@ interface HoursBucket {
   approved: number;
   pending: number;
   total: number;
-  heightPercent: number;
 }
 
 interface ProjectShare {
@@ -22,13 +23,15 @@ interface ProjectShare {
   widthPercent: number;
 }
 
+Chart.register(...registerables);
+
 const MAX_BUCKETS = 14;
 const MAX_PROJECTS = 5;
 
 @Component({
   selector: 'app-insights-charts',
   standalone: true,
-  imports: [DecimalPipe],
+  imports: [DecimalPipe, BaseChartDirective],
   templateUrl: './insights-charts.component.html',
   styleUrl: './insights-charts.component.scss',
 })
@@ -76,7 +79,6 @@ export class InsightsChartsComponent {
           approved: 0,
           pending: 0,
           total: 0,
-          heightPercent: 0,
         };
         byKey.set(key, bucket);
       }
@@ -89,9 +91,69 @@ export class InsightsChartsComponent {
     const list = [...byKey.values()]
       .sort((a, b) => a.sort - b.sort)
       .slice(-MAX_BUCKETS);
-    const max = Math.max(1, ...list.map((b) => b.total));
-    return list.map((b) => ({ ...b, heightPercent: (b.total / max) * 100 }));
+    return list;
   });
+
+  public readonly chartData = computed<ChartConfiguration<'bar'>['data']>(() => {
+    const css = getComputedStyle(document.documentElement);
+    const primary = css.getPropertyValue('--color-primary').trim() || '#560078';
+    const surface = css.getPropertyValue('--color-surface').trim() || '#ffffff';
+    const buckets = this.buckets();
+    return {
+      labels: buckets.map((b) => b.label),
+      datasets: [
+        {
+          label: 'Approved',
+          data: buckets.map((b) => b.approved),
+          backgroundColor: primary,
+          borderRadius: 4,
+          maxBarThickness: 48,
+        },
+        {
+          label: 'Pending',
+          data: buckets.map((b) => b.pending),
+          backgroundColor: `color-mix(in srgb, ${primary} 30%, ${surface})`,
+          borderRadius: 4,
+          maxBarThickness: 48,
+        },
+      ],
+    };
+  });
+
+  public readonly chartOptions = computed<ChartConfiguration<'bar'>['options']>(
+    () => {
+      const css = getComputedStyle(document.documentElement);
+      const muted = css.getPropertyValue('--text-muted').trim() || '#6b6676';
+      const grid = css.getPropertyValue('--color-border').trim() || '#ece9f1';
+      return {
+        responsive: true,
+        maintainAspectRatio: false,
+        font: { family: 'Manrope, system-ui, sans-serif' },
+        plugins: {
+          legend: {
+            position: 'top',
+            align: 'end',
+            labels: { usePointStyle: true, boxWidth: 8, color: muted },
+          },
+          tooltip: { mode: 'index', intersect: false },
+        },
+        scales: {
+          x: {
+            stacked: true,
+            grid: { display: false },
+            ticks: { color: muted },
+          },
+          y: {
+            stacked: true,
+            beginAtZero: true,
+            grid: { color: grid },
+            border: { display: false },
+            ticks: { color: muted, precision: 0 },
+          },
+        },
+      };
+    },
+  );
 
   public readonly projectShares = computed<ProjectShare[]>(() => {
     const colors = buildProjectColorMap(this.projects());

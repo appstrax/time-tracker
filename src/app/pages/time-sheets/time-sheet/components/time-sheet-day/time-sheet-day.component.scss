@@ -5,7 +5,7 @@
 .day-card {
   padding: 1.25rem 1.5rem 1.1rem;
   border: none;
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   background: var(--color-surface);
   box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
@@ -40,7 +40,7 @@
 .day-total-badge {
   flex-shrink: 0;
   padding: 0.28rem 0.7rem;
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   font-size: 13px;
@@ -91,7 +91,7 @@
   width: 100%;
   padding: 0.65rem 0.85rem;
   border: none;
-  border-radius: var(--radius-control, 12px);
+  border-radius: var(--radius-control, 8px);
   background: var(--color-surface-muted);
   color: var(--text-primary);
   font: inherit;
@@ -122,7 +122,7 @@
 .entry-project-dot {
   width: 0.55rem;
   height: 0.55rem;
-  border-radius: 999px;
+  border-radius: 6px;
   flex-shrink: 0;
 }
 

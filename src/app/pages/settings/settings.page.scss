@@ -1,5 +1,5 @@
 .settings-section {
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   box-shadow: var(--shadow-card);
   width: 100%;
   padding: 0.5rem 1.75rem 0.75rem;
@@ -29,7 +29,7 @@
 
   .btn {
     min-height: 44px;
-    border-radius: var(--radius-control, 12px);
+    border-radius: var(--radius-control, 8px);
     font-weight: 700;
   }
 }
@@ -75,7 +75,7 @@
 .tile-visual {
   width: 140px;
   height: 100px;
-  border-radius: var(--radius-control, 12px);
+  border-radius: var(--radius-control, 8px);
   border: 1px solid var(--color-border);
   box-shadow: none;
   overflow: hidden;

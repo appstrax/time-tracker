@@ -60,7 +60,7 @@
   align-items: center;
   gap: 0.3rem;
   padding: 0.25rem 0.55rem;
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.02em;
@@ -88,7 +88,7 @@
   padding: 2rem 1rem;
   text-align: center;
   border: 1px dashed color-mix(in srgb, var(--color-border) 80%, transparent);
-  border-radius: var(--radius-control, 12px);
+  border-radius: var(--radius-control, 8px);
   color: var(--text-muted);
 
   i {
@@ -121,7 +121,7 @@
   gap: 0.65rem 0.85rem;
   padding: 0.85rem 1rem;
   border: none;
-  border-radius: var(--radius-control, 12px);
+  border-radius: var(--radius-control, 8px);
   background: var(--color-surface-muted);
   text-align: left;
   cursor: pointer;
@@ -349,7 +349,7 @@
   height: 2rem;
   padding: 0;
   border: 1px solid var(--color-border-strong);
-  border-radius: 10px;
+  border-radius: 6px;
   background: var(--color-surface);
   color: var(--color-primary);
   cursor: pointer;
@@ -363,7 +363,7 @@
 // Details tab — day groups + entry rows
 .ws-day-block {
   border: none;
-  border-radius: var(--radius-control, 12px);
+  border-radius: var(--radius-control, 8px);
   overflow: hidden;
   background: var(--color-surface-muted);
 
@@ -430,7 +430,7 @@
 .ws-status {
   justify-self: end;
   padding: 0.15rem 0.45rem;
-  border-radius: 999px;
+  border-radius: 6px;
   font-size: 0.68rem;
   font-weight: 700;
   background: color-mix(in srgb, #2bb8a8 20%, var(--color-surface));
@@ -460,7 +460,7 @@
   width: 100%;
   padding: 0.85rem 1rem;
   border: none;
-  border-radius: var(--radius-control, 12px);
+  border-radius: var(--radius-control, 8px);
   background: var(--color-surface-muted);
   text-align: left;
   color: inherit;
@@ -501,7 +501,7 @@
 
 .ws-timeline-bar {
   height: 0.5rem;
-  border-radius: 999px;
+  border-radius: 6px;
   background: color-mix(in srgb, var(--color-border) 70%, transparent);
   display: flex;
   overflow: hidden;

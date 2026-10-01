@@ -1,6 +1,6 @@
 .timeline-shell {
   border: none;
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -38,7 +38,7 @@
   width: 100%;
   padding: 1.25rem;
   border: none;
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   background: var(--color-surface-muted);
   text-align: left;
   color: inherit;
@@ -95,7 +95,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   font-weight: 600;
@@ -104,7 +104,7 @@
 .timeline-bar {
   height: 18px;
   background: color-mix(in srgb, var(--color-border) 65%, transparent);
-  border-radius: 999px;
+  border-radius: 6px;
   display: flex;
   overflow: hidden;
   margin-bottom: 0.85rem;
@@ -140,7 +140,7 @@
 .legend-color {
   width: 0.8rem;
   height: 0.8rem;
-  border-radius: 999px;
+  border-radius: 6px;
 
   &.approved {
     background: #198754;

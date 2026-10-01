@@ -32,7 +32,7 @@
   position: relative;
   min-height: 2.65rem;
   padding-block: 5px;
-  border-radius: var(--track-radius, 12px);
+  border-radius: var(--track-radius, 8px);
   background: var(--color-surface-muted);
   overflow: visible;
   cursor: pointer;
@@ -86,7 +86,7 @@
   box-sizing: border-box;
   min-height: 2rem;
   overflow: hidden;
-  border-radius: var(--segment-radius, 8px);
+  border-radius: var(--segment-radius, 6px);
   box-shadow: none;
   transition:
     transform 0.16s ease,
@@ -149,7 +149,7 @@
   z-index: 2;
   min-width: 0;
   overflow: hidden;
-  border-radius: var(--segment-radius, 8px);
+  border-radius: var(--segment-radius, 6px);
   pointer-events: none;
   box-sizing: border-box;
 }

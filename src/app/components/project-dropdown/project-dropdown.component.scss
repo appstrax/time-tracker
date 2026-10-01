@@ -70,7 +70,7 @@
 
 .project-dropdown:not(.project-dropdown--compact) .dropdown-toggle {
   min-height: 3.25rem;
-  border-radius: 16px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
   color: var(--text-primary);
@@ -82,7 +82,7 @@
   height: var(--page-header-control-height, 44px);
   max-height: var(--page-header-control-height, 44px);
   padding: 0 0.65rem;
-  border-radius: var(--radius-control, 12px);
+  border-radius: var(--radius-control, 8px);
   font-size: 14px;
   font-weight: 700;
   border: 1px solid var(--color-border-strong);
@@ -115,7 +115,7 @@
 }
 
 .project-dropdown .dropdown-menu {
-  border-radius: 20px;
+  border-radius: 8px;
   background-color: var(--color-surface);
   border: 1px solid var(--color-border);
   max-height: 300px;
@@ -135,7 +135,7 @@
 }
 
 .project-dropdown-search {
-  border-radius: 12px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
   font-size: 0.875rem;
@@ -155,7 +155,7 @@
   width: 24px;
   height: 24px;
   object-fit: cover;
-  border-radius: 15px;
+  border-radius: 8px;
   flex-shrink: 0;
   transition: transform 0.2s ease;
 }
@@ -168,7 +168,7 @@
   font-size: 16px;
   width: 24px;
   height: 24px;
-  border-radius: 15px;
+  border-radius: 8px;
   background-color: var(--color-border);
   display: inline-flex;
   align-items: center;

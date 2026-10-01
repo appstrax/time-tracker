@@ -1,6 +1,6 @@
 .table-shell {
   border: none;
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   background: var(--color-surface);
   box-shadow: var(--shadow-card);
   overflow: hidden;
@@ -35,7 +35,7 @@
 
 .date-group {
   border: none;
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   background: var(--color-surface-muted);
   overflow: hidden;
 
@@ -68,7 +68,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 6px;
   font-weight: 600;
 }
 
@@ -130,7 +130,7 @@
   display: inline-flex;
   align-items: center;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
+  border-radius: 6px;
   background: color-mix(in srgb, #dcf3ef 100%, transparent);
   color: #0b5f58;
   font-weight: 700;
@@ -162,7 +162,7 @@
 .field-value-pill {
   display: inline-flex;
   padding: 0.15rem 0.5rem;
-  border-radius: 999px;
+  border-radius: 6px;
   background: color-mix(in srgb, var(--color-border) 60%, transparent);
   font-size: 0.8rem;
   white-space: nowrap;

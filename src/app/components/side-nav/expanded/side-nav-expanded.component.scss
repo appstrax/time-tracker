@@ -121,7 +121,7 @@ $nav-width-transition: $nav-width-transition-duration ease-out;
   justify-content: flex-start;
   gap: 10px;
   padding: 10px 12px;
-  border-radius: 12px;
+  border-radius: 8px;
   text-decoration: none;
   color: inherit;
   background: transparent;
@@ -208,7 +208,7 @@ $nav-width-transition: $nav-width-transition-duration ease-out;
   .nav-panel--compact & {
     width: 35px;
     height: 35px;
-    border-radius: 12px;
+    border-radius: 8px;
   }
 }
 

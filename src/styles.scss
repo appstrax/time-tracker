@@ -119,8 +119,8 @@ select:-webkit-autofill {
   --color-primary-contrast: #ffffff;
   --text-primary: #17151c;
   --text-muted: #6b6676;
-  --radius-card: 20px;
-  --radius-control: 12px;
+  --radius-card: 12px;
+  --radius-control: 8px;
   --shadow-card:
     0 1px 2px rgba(23, 21, 28, 0.04), 0 8px 24px rgba(23, 21, 28, 0.04);
   --side-nav-text: #5c5c5c;
@@ -493,7 +493,7 @@ body::-webkit-scrollbar-thumb:hover {
 .form-control:not(.form-control-color),
 .form-select {
   min-height: 3.25rem;
-  border-radius: 16px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
   color: var(--text-primary);
   border: 1px solid var(--color-border);
@@ -510,7 +510,7 @@ body::-webkit-scrollbar-thumb:hover {
 .form-control-sm:not(.form-control-color),
 .form-select-sm {
   min-height: 2.5rem;
-  border-radius: 12px;
+  border-radius: 8px;
   background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
   color: var(--text-primary);
   border: 1px solid var(--color-border);

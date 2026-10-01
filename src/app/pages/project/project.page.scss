@@ -57,7 +57,7 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.45rem 0.85rem;
-    border-radius: 999px;
+    border-radius: 6px;
     background: var(--color-primary-soft);
     color: var(--color-primary);
     font-weight: 700;
@@ -178,7 +178,7 @@
   .logo-preview-fallback {
     width: 4.5rem;
     height: 4.5rem;
-    border-radius: 20px;
+    border-radius: 8px;
     flex-shrink: 0;
   }
 
@@ -250,7 +250,7 @@
   }
 
   .fields-error {
-    border-radius: 14px;
+    border-radius: 8px;
   }
 
   .field-rows {
@@ -322,7 +322,7 @@
 
   .field-unsaved-pill {
     padding: 0.35rem 0.75rem;
-    border-radius: 999px;
+    border-radius: 6px;
     background: rgba(245, 158, 11, 0.12);
     color: #b45309;
     font-size: 0.82rem;

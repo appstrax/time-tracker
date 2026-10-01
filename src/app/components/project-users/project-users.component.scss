@@ -46,7 +46,7 @@
   align-items: center;
   gap: 0.4rem;
   padding: 0.45rem 0.85rem;
-  border-radius: 999px;
+  border-radius: 6px;
   background: var(--color-primary-soft);
   color: var(--color-primary);
   font-weight: 600;
@@ -93,7 +93,7 @@
   z-index: 20;
   max-height: 18rem;
   overflow-y: auto;
-  border-radius: 20px;
+  border-radius: 8px;
   border: 1px solid var(--color-border);
   background: var(--color-surface);
   box-shadow: 0 16px 35px rgba(15, 23, 42, 0.12);
@@ -125,7 +125,7 @@
 .member-avatar {
   width: 2.75rem;
   height: 2.75rem;
-  border-radius: 999px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -176,13 +176,13 @@
 
 .add-user-button {
   min-height: 50px;
-  border-radius: 16px;
+  border-radius: 8px;
   font-weight: 600;
 }
 
 .table-shell {
   border: 1px solid var(--color-border);
-  border-radius: 24px;
+  border-radius: 8px;
   overflow: hidden;
   background: color-mix(in srgb, var(--color-surface) 96%, var(--color-bg));
 }
@@ -257,7 +257,7 @@
 .state-icon {
   width: 4rem;
   height: 4rem;
-  border-radius: 999px;
+  border-radius: 6px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -279,7 +279,7 @@
 @media (max-width: 767px) {
   .members-card {
     padding: 1.25rem;
-    border-radius: 24px;
+    border-radius: 8px;
   }
 
   .card-header {

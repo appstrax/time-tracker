@@ -35,7 +35,7 @@
 
 .kanban-column {
   border: 0;
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   background: var(--color-surface-muted, var(--color-bg));
   min-width: 280px;
   max-width: 360px;
@@ -83,7 +83,7 @@
 .card-item {
   background: var(--color-surface);
   border: 0;
-  border-radius: var(--radius-card, 20px);
+  border-radius: var(--radius-card, 12px);
   box-shadow: var(--shadow-card);
   padding: 14px 16px;
 }
