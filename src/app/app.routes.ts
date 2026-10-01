@@ -17,6 +17,7 @@ import {
   AgentTokensPage,
   ProfilePage,
   AnalyticsPage,
+  ProjectAnalyticsPage,
   LandingPage,
 } from '@pages';
 
@@ -68,6 +69,11 @@ export const routes: Routes = [
         path: 'analytics',
         canActivate: [AdminGuard],
         component: AnalyticsPage,
+      },
+      {
+        path: 'analytics/:projectId',
+        canActivate: [AdminGuard],
+        component: ProjectAnalyticsPage,
       },
     ],
   },

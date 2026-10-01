@@ -1,61 +1,129 @@
 <section class="analytics-page insights-page">
   <div class="insights-shell">
-    <header class="insights-hero">
-      <div class="insights-hero-copy">
+    <header class="page-head">
+      <div>
         <h1>Analytics</h1>
-        <p class="insights-lead">
-          Hours, approvals, and activity across your workspace.
-        </p>
+        <p>Pick a project to drill into its days and activity.</p>
       </div>
-
-      <div class="hero-actions">
-        @if (!loading() && container(); as c) {
-          <div class="view-type-segmented" role="tablist" aria-label="Time entry view">
-            @for (viewType of c.visibleViewTypes(); track viewType.value) {
-              <button
-                type="button"
-                role="tab"
-                class="view-segment"
-                [class.active]="c.activeView() === viewType.value"
-                [attr.aria-selected]="c.activeView() === viewType.value"
-                (click)="c.onViewTypeChange(viewType.value)"
-              >
-                {{ viewType.label }}
-              </button>
-            }
-          </div>
-          <button type="button" class="export-button" (click)="c.exportAllProjects()">
-            <i class="bi bi-download" aria-hidden="true"></i>
-            Export
-          </button>
-        }
-      </div>
+      <button type="button" class="primary-button" (click)="exportAll()">
+        <i class="bi bi-download" aria-hidden="true"></i>
+        Export
+      </button>
     </header>
+
+    <div class="filter-row">
+      <app-analytics-filters
+        [users]="users()"
+        (filterChange)="onFilterChange($event)"
+      />
+      <span class="result-count">
+        {{ rows().length }} {{ rows().length === 1 ? 'project' : 'projects' }}
+      </span>
+    </div>
 
     @if (loading()) {
       <section class="insights-state" aria-busy="true">
         <p>Loading analytics data…</p>
       </section>
     } @else {
-      <app-filter-view-container
-        [projects]="projects()"
-        [entries]="entries()"
-        [users]="users()"
-        [showExport]="true"
-        [showInsights]="true"
-        [compact]="true"
-        [canManageStatus]="true"
-        [canApprove]="true"
-        [showToolbar]="false"
-        (entryUpdated)="onEntryUpdated($event)"
-      >
-        <app-summary-metrics
-          kpis
-          [entries]="entries()"
-          [projects]="projects()"
+      <div class="kpi-grid">
+        <app-metric-card
+          label="Total hours"
+          [value]="(totals().total | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-clock-history text-primary"
           [compact]="true"
         />
-      </app-filter-view-container>
+        <app-metric-card
+          label="Approved"
+          [value]="(totals().approved | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-check2-circle text-success"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Pending review"
+          [value]="(totals().pending | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-hourglass-split text-warning"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Active contributors"
+          [value]="totals().contributors"
+          iconClass="bi bi-people text-primary"
+          [compact]="true"
+        />
+      </div>
+
+      <app-insights-charts
+        [entries]="filteredEntries()"
+        [projects]="projects()"
+      />
+
+      <section class="project-list card-surface" aria-label="Projects">
+        <header class="list-head">
+          <h2>Projects</h2>
+          <span>Sorted by hours</span>
+        </header>
+
+        @if (!rows().length) {
+          <p class="empty-card">No projects available.</p>
+        } @else {
+          <div class="list-columns" aria-hidden="true">
+            <span>Project</span>
+            <span>Approval</span>
+            <span>Hours</span>
+            <span>Team</span>
+            <span>Last activity</span>
+            <span></span>
+          </div>
+          @for (row of rows(); track row.id) {
+            <a
+              class="project-row"
+              [routerLink]="['/analytics', row.id]"
+              queryParamsHandling="preserve"
+            >
+              <span class="cell-project">
+                <i class="swatch" [style.background]="row.color"></i>
+                <span class="project-copy">
+                  <b>{{ row.name }}</b>
+                  <small>{{ row.description }}</small>
+                </span>
+              </span>
+              <span class="cell-approval">
+                <span class="approval-track">
+                  <span
+                    class="approval-fill"
+                    [style.width.%]="row.approvedPercent"
+                  ></span>
+                </span>
+                <small>
+                  {{ row.approved | number: '1.0-1' }} approved
+                  @if (row.pending) {
+                    · {{ row.pending | number: '1.0-1' }} pending
+                  }
+                </small>
+              </span>
+              <b class="cell-hours">{{ row.hours | number: '1.0-1' }} h</b>
+              <span class="cell-team">
+                @for (initials of row.contributors; track $index) {
+                  <i class="member">{{ initials }}</i>
+                }
+                @if (row.contributorCount > row.contributors.length) {
+                  <i class="member member--more">
+                    +{{ row.contributorCount - row.contributors.length }}
+                  </i>
+                }
+              </span>
+              <span class="cell-last">
+                {{ row.lastActivity ? (row.lastActivity | date: 'mediumDate') : '—' }}
+              </span>
+              <i class="bi bi-chevron-right chevron" aria-hidden="true"></i>
+            </a>
+          }
+        }
+      </section>
     }
   </div>
 </section>
