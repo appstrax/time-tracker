@@ -81,7 +81,11 @@
   }
 
   .project-content-grid {
-    align-items: start;
+    align-items: stretch;
+  }
+
+  .project-side-column > .preview-card {
+    flex: 1;
   }
 
   .project-side-column {
