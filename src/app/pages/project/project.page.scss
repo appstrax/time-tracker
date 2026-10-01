@@ -27,12 +27,11 @@
   }
 
   .back-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
+    display: inline-block;
     margin-bottom: 1rem;
     color: var(--color-primary);
     text-decoration: none;
+    font-size: 14px;
     font-weight: 700;
   }
 
@@ -79,6 +78,17 @@
   .preview-card,
   .members-card {
     padding: 1.5rem;
+  }
+
+  .project-content-grid {
+    align-items: start;
+  }
+
+  .project-side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
   }
 
   .card-header {

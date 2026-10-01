@@ -2,10 +2,7 @@
   <div class="project-shell">
     <div class="page-header">
       <div>
-        <a class="back-button" routerLink="/projects">
-          <i class="bi bi-arrow-left"></i>
-          Back
-        </a>
+        <a class="back-button" routerLink="/projects">‹ Projects</a>
         <h1 class="eyebrow">
           {{ editing() ? 'Project workspace' : 'New project' }}
         </h1>
@@ -128,6 +125,7 @@
         </form>
       </section>
 
+      <div class="project-side-column">
       <aside class="preview-card">
         <div class="card-header">
           <div>
@@ -187,6 +185,26 @@
           </div>
         </div>
       </aside>
+
+    @if (editing() && project().id) {
+    <app-project-users
+      [project]="project()"
+      (projectChange)="onProjectUsersChange($event)"
+    />
+    } @else {
+    <section class="members-card members-card--placeholder">
+      <div class="card-header">
+        <div>
+          <h2 class="eyebrow">Project Users</h2>
+          <p>
+            Create the project first, then return here to search users and
+            assign roles.
+          </p>
+        </div>
+      </div>
+    </section>
+    }
+      </div>
     </div>
 
     <section class="editor-card fields-card">
@@ -461,23 +479,5 @@
       }
     </section>
 
-    @if (editing() && project().id) {
-    <app-project-users
-      [project]="project()"
-      (projectChange)="onProjectUsersChange($event)"
-    />
-    } @else {
-    <section class="members-card members-card--placeholder">
-      <div class="card-header">
-        <div>
-          <h2 class="eyebrow">Project Users</h2>
-          <p>
-            Create the project first, then return here to search users and
-            assign roles.
-          </p>
-        </div>
-      </div>
-    </section>
-    }
   </div>
 </div>

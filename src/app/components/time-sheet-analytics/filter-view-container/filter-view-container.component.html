@@ -1,4 +1,8 @@
-<div class="filter-view-container" [class.compact]="compact()">
+<div
+  class="filter-view-container"
+  [class.compact]="compact()"
+  [class.dashboard]="showInsights()"
+>
   <section class="filter-panel" [class.workspace-panel]="compact()">
     @if (!compact()) {
       <div class="panel-header">
@@ -38,6 +42,7 @@
             </div>
           </div>
         } @else {
+          @if (showToolbar()) {
           <div class="compact-toolbar">
             <div
               class="view-type-segmented"
@@ -75,6 +80,7 @@
               }
             </div>
           </div>
+          }
         }
 
         @if (!compact()) {
@@ -245,6 +251,8 @@
         </div>
       </div>
     </div>
+
+    <ng-content select="[kpis]" />
 
     @if (showInsights()) {
       <app-insights-charts

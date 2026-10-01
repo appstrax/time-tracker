@@ -1,5 +1,5 @@
 import { FormsModule } from '@angular/forms';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal, viewChild } from '@angular/core';
 
 import { FilterViewContainerComponent } from '@components';
 import { TimeSheetEntry, User } from '@models';
@@ -20,6 +20,7 @@ export class AnalyticsPage implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
 
+  public readonly container = viewChild(FilterViewContainerComponent);
   public readonly loading = signal(false);
 
   public readonly projects = this.store.projects.projects;

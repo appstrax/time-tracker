@@ -75,6 +75,8 @@ export class FilterViewContainerComponent
   public readonly showExport = input(false);
   /** Show the hours chart and per-project breakdown above the results. */
   public readonly showInsights = input(false);
+  /** Render the view switcher + export inside the panel (false when the host page renders them). */
+  public readonly showToolbar = input(true);
   public readonly linkProjectsToTimeSheet = input(false);
   /** Tighter layout with less marketing copy — used on /home. */
   public readonly compact = input(false);

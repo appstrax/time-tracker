@@ -8,25 +8,26 @@
         </p>
       </div>
 
-      <div class="insights-chips" aria-live="polite">
-        @if (loading()) {
-          <span class="insights-chip insights-chip--accent">
-            <span
-              class="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            Loading…
-          </span>
-        } @else {
-          <span class="insights-chip">
-            {{ projects().length }}
-            {{ projects().length === 1 ? 'project' : 'projects' }}
-          </span>
-          <span class="insights-chip insights-chip--accent">
-            {{ entries().length }}
-            {{ entries().length === 1 ? 'entry' : 'entries' }}
-          </span>
+      <div class="hero-actions">
+        @if (!loading() && container(); as c) {
+          <div class="view-type-segmented" role="tablist" aria-label="Time entry view">
+            @for (viewType of c.visibleViewTypes(); track viewType.value) {
+              <button
+                type="button"
+                role="tab"
+                class="view-segment"
+                [class.active]="c.activeView() === viewType.value"
+                [attr.aria-selected]="c.activeView() === viewType.value"
+                (click)="c.onViewTypeChange(viewType.value)"
+              >
+                {{ viewType.label }}
+              </button>
+            }
+          </div>
+          <button type="button" class="export-button" (click)="c.exportAllProjects()">
+            <i class="bi bi-download" aria-hidden="true"></i>
+            Export
+          </button>
         }
       </div>
     </header>
@@ -36,18 +37,6 @@
         <p>Loading analytics data…</p>
       </section>
     } @else {
-      <section class="insights-kpis" aria-label="All-time totals">
-        <div class="kpi-header">
-          <span class="kpi-badge">All-time snapshot</span>
-          <span class="kpi-hint">Not affected by filters below</span>
-        </div>
-        <app-summary-metrics
-          [entries]="entries()"
-          [projects]="projects()"
-          [compact]="true"
-        />
-      </section>
-
       <app-filter-view-container
         [projects]="projects()"
         [entries]="entries()"
@@ -57,8 +46,16 @@
         [compact]="true"
         [canManageStatus]="true"
         [canApprove]="true"
+        [showToolbar]="false"
         (entryUpdated)="onEntryUpdated($event)"
-      />
+      >
+        <app-summary-metrics
+          kpis
+          [entries]="entries()"
+          [projects]="projects()"
+          [compact]="true"
+        />
+      </app-filter-view-container>
     }
   </div>
 </section>
