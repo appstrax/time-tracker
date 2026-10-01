@@ -246,6 +246,14 @@
       </div>
     </div>
 
+    @if (showInsights()) {
+      <app-insights-charts
+        class="insights-block"
+        [entries]="filteredEntries()"
+        [projects]="projects()"
+      />
+    }
+
     @if (compact()) {
       <div class="workspace-results">
         <ng-container *ngTemplateOutlet="viewResults" />

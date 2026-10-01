@@ -19,6 +19,7 @@ import { FilterViewSummaryComponent } from '../filter-view-summary/filter-view-s
 import { FilterViewDetailsComponent } from '../filter-view-details/filter-view-details.component';
 import { FilterViewTimelineComponent } from '../filter-view-timeline/filter-view-timeline.component';
 import { UnapprovedEntriesComponent } from '../unapproved-entries/unapproved-entries.component';
+import { InsightsChartsComponent } from '../../../pages/analytics/components/insights-charts/insights-charts.component';
 import { FilterBlockComponent } from '../filter-block/filter-block.component';
 import {
   TimeSheetEntry,
@@ -45,6 +46,7 @@ export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
     NgTemplateOutlet,
     FormsModule,
     FilterBlockComponent,
+    InsightsChartsComponent,
     FilterViewSummaryComponent,
     FilterViewDetailsComponent,
     FilterViewTimelineComponent,
@@ -71,6 +73,8 @@ export class FilterViewContainerComponent
   ]);
   public readonly showUserFilter = input(true);
   public readonly showExport = input(false);
+  /** Show the hours chart and per-project breakdown above the results. */
+  public readonly showInsights = input(false);
   public readonly linkProjectsToTimeSheet = input(false);
   /** Tighter layout with less marketing copy — used on /home. */
   public readonly compact = input(false);
