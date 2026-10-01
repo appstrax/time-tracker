@@ -1,27 +1,58 @@
 .settings-section {
-  border-radius: 20px;
-  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-card, 20px);
+  box-shadow: var(--shadow-card);
   width: 100%;
-  padding: 2rem 3rem;
+  padding: 0.5rem 1.75rem 0.75rem;
   margin-top: 1rem;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
   background-color: var(--color-surface);
+
+  hr {
+    display: none;
+  }
+
+  .setting-card.card {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    border-bottom: 1px solid var(--color-border);
+
+    &:last-child {
+      border-bottom: none;
+    }
+
+    .card-body {
+      padding: 1.1rem 0;
+      min-height: 44px;
+    }
+  }
+
+  .btn {
+    min-height: 44px;
+    border-radius: var(--radius-control, 12px);
+    font-weight: 700;
+  }
 }
 
 .section-title {
-  color: var(--primary-color-dark);
-  font-size: 1.5rem;
-  font-weight: 600;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  margin: 1.1rem 0 0.25rem;
 }
 
 .setting-card .setting-title {
   color: var(--text-primary);
-  font-weight: 600;
+  font-size: 15px;
+  font-weight: 700;
 }
 
 .setting-card .setting-desc {
-  font-size: 0.9rem;
+  font-size: 0.85rem;
   color: var(--text-muted);
+  margin-top: 2px;
 }
 
 .theme-options {
@@ -44,9 +75,9 @@
 .tile-visual {
   width: 140px;
   height: 100px;
-  border-radius: 10px;
-  border: 1px solid rgba(0,0,0,0.08);
-  box-shadow: 0 1px 2px rgba(0,0,0,0.05);
+  border-radius: var(--radius-control, 12px);
+  border: 1px solid var(--color-border);
+  box-shadow: none;
   overflow: hidden;
   display: flex;
   flex-direction: column;
@@ -68,7 +99,7 @@
 .tile-visual.custom .tile-body { background: var(--color-bg); }
 
 .theme-tile input[type='radio']:checked + .tile-visual {
-  outline: 2px solid var(--primary-color);
+  outline: 2px solid var(--color-primary);
   outline-offset: 2px;
 }
 
@@ -88,7 +119,14 @@
 }
 
 .form-switch .form-check-input {
-  background-color: var(--color-border);
+  background-color: var(--color-border-strong);
+  border-color: transparent;
+  width: 2.75em;
+  height: 1.5em;
+}
+
+.form-switch .form-check-input:checked {
+  background-color: var(--color-primary);
 }
 
 .custom-theme-editor .form-label { font-weight: 500; }

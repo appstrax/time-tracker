@@ -68,7 +68,8 @@
   width: 100%;
   color: var(--side-nav-text);
   background-color: var(--color-surface);
-  box-shadow: 2px 0 5px rgba(0, 0, 0, 0.1);
+  box-shadow: none;
+  border-right: 1px solid var(--color-border);
   overflow: hidden;
 
   .nav-content {
@@ -128,12 +129,8 @@
       color: var(--primary-color);
 
       .icon-box {
-        background-color: color-mix(
-          in srgb,
-          var(--primary-color) 15%,
-          transparent
-        );
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: var(--color-primary-soft);
+        box-shadow: none;
 
         i {
           color: var(--primary-color);
@@ -144,12 +141,8 @@
     &:active,
     &:focus-visible {
       .icon-box {
-        background-color: color-mix(
-          in srgb,
-          var(--primary-color) 15%,
-          transparent
-        );
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: var(--color-primary-soft);
+        box-shadow: none;
 
         i {
           color: var(--primary-color);
@@ -163,15 +156,15 @@
       display: flex;
       align-items: center;
       justify-content: center;
-      border-radius: 8px;
-        background-color: var(--color-border);
-      box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+      border-radius: 12px;
+        background-color: var(--color-surface-muted);
+      box-shadow: none;
       transition: all 0.2s ease;
       cursor: pointer;
 
         &:hover {
-        background-color: color-mix(in srgb, var(--color-border) 70%, transparent);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        background-color: var(--color-border);
+        box-shadow: none;
       }
 
         i {

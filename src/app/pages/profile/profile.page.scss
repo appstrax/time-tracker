@@ -5,14 +5,16 @@
 }
 
 .profile-section {
-  border-radius: 20px;
-  box-shadow: 0 0 3px 0 rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-card, 20px);
+  box-shadow: var(--shadow-card);
   width: 100%;
-  padding: 2rem 3rem;
+  max-width: 820px;
+  padding: 2rem 2.25rem;
   margin-top: 1rem;
-  margin-bottom: 3rem;
+  margin-bottom: 1.5rem;
+  margin-inline: auto;
   background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
+  border: none;
 
   text-align: left;
   color: var(--text-primary);
@@ -26,9 +28,12 @@
 }
 
 .btn-primary {
-  background-color: var(--primary-color-light);
-  border-color: var(--primary-color);
-  color: var(--primary-color);
+  min-height: 44px;
+  border-radius: var(--radius-control, 12px);
+  font-weight: 700;
+  background-color: var(--color-primary-soft);
+  border-color: transparent;
+  color: var(--color-primary);
 }
 
 .btn-primary:hover {

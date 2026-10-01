@@ -1,8 +1,8 @@
 .table-shell {
-  border: 1px solid var(--color-border);
-  border-radius: 24px;
+  border: none;
+  border-radius: var(--radius-card, 20px);
   background: var(--color-surface);
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -40,10 +40,30 @@
 
   th {
     color: var(--text-muted);
-    font-size: 0.78rem;
+    font-size: 12px;
     font-weight: 700;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     text-transform: uppercase;
+    border-bottom: 1px solid var(--color-border);
+  }
+
+  td,
+  th {
+    padding: 14px 0.75rem;
+    border-left: 0;
+    border-right: 0;
+  }
+
+  td {
+    border-bottom: 1px solid color-mix(in srgb, var(--color-border) 70%, transparent);
+  }
+
+  tbody tr:last-child td {
+    border-bottom: 0;
+  }
+
+  tbody tr:hover > * {
+    background: color-mix(in srgb, var(--color-primary) 5%, transparent);
   }
 }
 
@@ -78,7 +98,7 @@
   transition: background-color 0.2s ease, transform 0.15s ease;
 
   &:hover {
-    background: color-mix(in srgb, var(--primary-color) 6%, var(--color-surface));
+    background: color-mix(in srgb, var(--color-primary) 5%, var(--color-surface));
   }
 }
 

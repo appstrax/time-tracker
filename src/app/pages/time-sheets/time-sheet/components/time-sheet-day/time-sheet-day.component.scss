@@ -3,9 +3,9 @@
 }
 
 .day-card {
-  padding: 1.1rem 1.25rem 1rem;
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-card, 12px);
+  padding: 1.25rem 1.5rem 1.1rem;
+  border: none;
+  border-radius: var(--radius-card, 20px);
   background: var(--color-surface);
   box-shadow: var(--shadow-card, 0 1px 2px rgba(15, 23, 42, 0.04));
 }
@@ -27,13 +27,13 @@
 }
 
 .day-name {
-  font-size: 1rem;
+  font-size: 18px;
   font-weight: 700;
   color: var(--text-primary);
 }
 
 .day-date {
-  font-size: 0.92rem;
+  font-size: 14px;
   color: var(--text-muted);
 }
 
@@ -41,9 +41,9 @@
   flex-shrink: 0;
   padding: 0.28rem 0.7rem;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--tag-teal) 14%, var(--color-surface));
-  color: var(--tag-teal);
-  font-size: 0.78rem;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  font-size: 13px;
   font-weight: 700;
   white-space: nowrap;
 }
@@ -58,8 +58,8 @@
   background: transparent;
   color: var(--text-muted);
   font: inherit;
-  font-size: 0.82rem;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   cursor: pointer;
 
   &:hover {
@@ -73,17 +73,14 @@
 
 .entry-list {
   list-style: none;
-  margin: 0.5rem 0 0;
+  margin: 0.6rem 0 0;
   padding: 0;
-  border-top: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
 .entry-list li {
-  border-bottom: 1px solid var(--color-border);
-
-  &:last-child {
-    border-bottom: none;
-  }
 }
 
 .entry-row {
@@ -92,10 +89,10 @@
   justify-content: space-between;
   gap: 1rem;
   width: 100%;
-  padding: 0.65rem 0;
+  padding: 0.65rem 0.85rem;
   border: none;
-  border-radius: 0;
-  background: transparent;
+  border-radius: var(--radius-control, 12px);
+  background: var(--color-surface-muted);
   color: var(--text-primary);
   font: inherit;
   font-size: 0.84rem;
@@ -104,7 +101,7 @@
   overflow: hidden;
 
   &:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--color-border) 18%, transparent);
+    background: color-mix(in srgb, var(--color-border) 45%, var(--color-surface-muted));
   }
 
   &:disabled {

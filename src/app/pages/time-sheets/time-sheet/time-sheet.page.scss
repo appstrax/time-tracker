@@ -76,9 +76,9 @@
 
 .time-sheet-spinner {
   min-height: 14rem;
-  border-radius: var(--radius-card, 12px);
+  border-radius: var(--radius-card, 20px);
   background: var(--color-surface);
-  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-card);
 }
 
 @media (max-width: 900px) {
