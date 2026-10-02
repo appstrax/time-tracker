@@ -65,20 +65,29 @@
   border-top: 1px solid var(--color-border);
 }
 
+.days {
+  // Shared column rhythm so day headers and their entries line up.
+  --day-columns: 24px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 2fr) 5.5rem
+    minmax(0, 12rem);
+  --day-gutter: 0.5rem;
+  // Width of the approve/decline pair, so the day action lines up above it.
+  --day-action-slot: 3.75rem;
+}
+
 .day-row {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
+  gap: 1rem;
 }
 
 .day-toggle {
   flex: 1;
   min-width: 0;
   display: grid;
-  grid-template-columns: 24px 1.6fr 1fr 1fr 1fr;
+  grid-template-columns: var(--day-columns);
   gap: 1rem;
   align-items: center;
-  padding: 1rem 0.5rem;
+  padding: 1rem 0 1rem var(--day-gutter);
   border: none;
   background: transparent;
   color: var(--text-primary);
@@ -97,6 +106,7 @@
 }
 
 .chevron {
+  grid-column: 1;
   color: var(--text-muted);
   transition: transform 0.15s ease;
 
@@ -106,36 +116,47 @@
 }
 
 .day-date {
+  grid-column: 2;
   font-size: 0.95rem;
 }
 
 .day-count {
+  grid-column: 3;
   color: var(--text-muted);
 }
 
+.day-total {
+  grid-column: 5;
+}
+
 .day-toggle .status-pill {
+  grid-column: 6;
   justify-self: start;
 }
 
-.day-approve {
-  min-height: 36px;
-  white-space: nowrap;
+.day-actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  width: var(--day-action-slot);
+  flex-shrink: 0;
 }
 
 .entries {
   list-style: none;
-  margin: 0 0.5rem 1rem 2.5rem;
-  padding: 0.375rem;
+  margin: 0 0 1rem;
+  padding: 0.375rem 0;
   border-radius: var(--radius-control);
   background: var(--color-surface-muted);
 }
 
 .entry {
   display: grid;
-  grid-template-columns: 1.3fr 1fr 2.2fr 0.6fr 1.6fr;
+  grid-template-columns: var(--day-columns) var(--day-action-slot);
   gap: 1rem;
   align-items: center;
-  padding: 0.75rem;
+  padding: 0.75rem 0 0.75rem var(--day-gutter);
   font-size: 0.875rem;
 
   & + & {
@@ -143,7 +164,16 @@
   }
 }
 
+.entry-description {
+  grid-column: 4;
+}
+
+.entry-hours {
+  grid-column: 5;
+}
+
 .entry-who {
+  grid-column: 1 / 3;
   display: inline-flex;
   align-items: center;
   gap: 0.625rem;
@@ -166,28 +196,75 @@
 }
 
 .entry-category {
+  grid-column: 3;
   color: var(--text-muted);
 }
 
 .entry-status {
-  display: inline-flex;
+  grid-column: 6;
+  display: flex;
   align-items: center;
   gap: 0.625rem;
   flex-wrap: wrap;
 }
 
-.link-button {
-  border: none;
-  background: transparent;
+.status-actions {
+  grid-column: 7;
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 0.25rem;
+  margin-left: auto;
+}
+
+.status-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  width: 1.75rem;
+  height: 1.75rem;
   padding: 0;
-  color: var(--color-primary);
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
   font-size: 0.8125rem;
-  font-weight: 700;
+  line-height: 1;
   cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
 
   &:disabled {
     opacity: 0.5;
     cursor: default;
+  }
+}
+
+.status-action--approve:hover:not(:disabled),
+.status-action--approve:focus-visible {
+  color: #0b5f58;
+  background: #dcf3ef;
+}
+
+.status-action--decline:hover:not(:disabled),
+.status-action--decline:focus-visible {
+  color: #9b1c1c;
+  background: #fde8e8;
+}
+
+:host-context([data-theme='dark']) {
+  .status-action--approve:hover:not(:disabled),
+  .status-action--approve:focus-visible {
+    color: #5eead4;
+    background: color-mix(in srgb, #2dd4bf 18%, var(--color-surface));
+  }
+
+  .status-action--decline:hover:not(:disabled),
+  .status-action--decline:focus-visible {
+    color: #fca5a5;
+    background: color-mix(in srgb, #f87171 18%, var(--color-surface));
   }
 }
 
@@ -200,12 +277,20 @@
     }
   }
 
-  .entries {
-    margin-left: 0;
+  .chevron,
+  .day-date,
+  .day-total,
+  .day-toggle .status-pill,
+  .entry-who,
+  .entry-category,
+  .entry-hours,
+  .status-actions {
+    grid-column: auto;
   }
 
   .entry {
     grid-template-columns: 1fr auto;
+    padding-inline: var(--day-gutter);
   }
 
   .entry-description,
