@@ -75,34 +75,7 @@
 }
 
 .cell-project {
-  display: flex;
-  align-items: center;
-  gap: 0.875rem;
   min-width: 0;
-}
-
-.swatch {
-  width: 10px;
-  height: 36px;
-  border-radius: 4px;
-  flex-shrink: 0;
-}
-
-.project-copy {
-  display: flex;
-  flex-direction: column;
-  min-width: 0;
-
-  b {
-    font-size: 0.95rem;
-  }
-
-  small {
-    color: var(--text-muted);
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
 }
 
 .cell-approval {

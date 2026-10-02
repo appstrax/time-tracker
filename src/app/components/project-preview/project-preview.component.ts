@@ -13,4 +13,6 @@ export class ProjectPreviewComponent {
   @Input() description = '';
   @Input() namePlaceholder = 'Untitled project';
   @Input() descriptionPlaceholder = 'No description provided.';
+  /** Tighter sizing for list rows. */
+  @Input() compact = false;
 }
