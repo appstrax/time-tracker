@@ -13,5 +13,4 @@ export class ProjectPreviewComponent {
   @Input() description = '';
   @Input() namePlaceholder = 'Untitled project';
   @Input() descriptionPlaceholder = 'No description provided.';
-  @Input() clampDescription = false;
 }
