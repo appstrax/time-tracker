@@ -257,16 +257,50 @@
   background: color-mix(in srgb, var(--tag-amber) 16%, var(--color-surface));
 }
 
-.entry-card__approve {
+.entry-card__actions {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-end;
+  margin-left: auto;
+  gap: 0.35rem;
+}
+
+.entry-card__action {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.35rem;
-  min-width: 6.25rem;
-  padding: 0.4rem 0.85rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+  border: none;
   border-radius: 6px;
-  font-size: 0.82rem;
-  font-weight: 600;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.95rem;
+  line-height: 1;
+  cursor: pointer;
+  transition:
+    background-color 0.15s ease,
+    color 0.15s ease;
+}
+
+.entry-card__action--approve:hover,
+.entry-card__action--approve:focus-visible {
+  color: var(--tag-teal);
+  background: color-mix(in srgb, var(--tag-teal) 16%, var(--color-surface));
+}
+
+.entry-card__action--decline:hover,
+.entry-card__action--decline:focus-visible {
+  color: var(--tag-rose);
+  background: color-mix(in srgb, var(--tag-rose) 16%, var(--color-surface));
+}
+
+.entry-card__spinner {
+  width: 1rem;
+  height: 1rem;
+  margin: 0.5rem;
+  color: var(--text-muted);
 }
 
 .pending-modal__footer {
