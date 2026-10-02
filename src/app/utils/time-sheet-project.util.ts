@@ -30,7 +30,17 @@ function assignProjectColors(projects: Project[]): Map<string, string> {
   const usedColors = new Set<string>();
   const map = new Map<string, string>();
 
-  const ordered = [...projects].sort((a, b) => {
+  const unassigned: Project[] = [];
+  for (const project of projects) {
+    if (project.color) {
+      map.set(project.id, project.color);
+      usedColors.add(project.color);
+    } else {
+      unassigned.push(project);
+    }
+  }
+
+  const ordered = unassigned.sort((a, b) => {
     const hashDiff = hashProjectId(a.id) - hashProjectId(b.id);
     return hashDiff !== 0 ? hashDiff : a.id.localeCompare(b.id);
   });
@@ -63,6 +73,16 @@ export function getProjectColor(projectId: string, projects: Project[]): string 
     known ? projects : [...projects, { id: projectId } as Project],
   );
   return map.get(projectId) ?? ColorList.tagThemeVars[0];
+}
+
+/** Colour for a new project: the first unused palette slot, else a stable pick from the seed. */
+export function pickNewProjectColor(projects: Project[], seed: string): string {
+  const slots = getThemeProjectColorSlots();
+  const used = new Set(projects.map((project) => project.color));
+  return (
+    slots.find((slot) => !used.has(slot)) ??
+    slots[hashProjectId(seed) % slots.length]
+  );
 }
 
 export function getStoredTimeSheetProjectId(): string | null {

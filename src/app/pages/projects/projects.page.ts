@@ -5,6 +5,7 @@ import { Router, RouterModule } from '@angular/router';
 import { Project } from '@models';
 import { ToastService } from '@services';
 import { Store } from '@state';
+import { ProjectPreviewComponent } from '@components';
 import { buildProjectColorMap, getProjectColor } from '@utils';
 
 @Component({
@@ -12,7 +13,7 @@ import { buildProjectColorMap, getProjectColor } from '@utils';
   templateUrl: './projects.page.html',
   styleUrls: ['./projects.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule],
+  imports: [CommonModule, RouterModule, ProjectPreviewComponent],
 })
 export class ProjectsPage implements OnInit {
   private readonly store = inject(Store);

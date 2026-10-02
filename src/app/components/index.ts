@@ -13,3 +13,4 @@ export * from './time-sheet-analytics/filter-view-summary/filter-view-summary.co
 export * from './time-sheet-analytics/filter-view-details/filter-view-details.component';
 export * from './time-sheet-analytics/filter-view-timeline/filter-view-timeline.component';
 export * from './time-sheet-analytics/unapproved-entries/unapproved-entries.component';
+export * from './project-preview/project-preview.component';

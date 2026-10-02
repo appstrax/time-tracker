@@ -45,7 +45,6 @@
   }
 
   .card-header p,
-  .preview-description,
   .members-card--placeholder p {
     margin: 0;
     color: var(--text-muted);
@@ -154,6 +153,38 @@
     gap: 0.75rem;
   }
 
+  .logo-color-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+  }
+
+  .color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 18rem;
+  }
+
+  .color-swatch {
+    width: 1.75rem;
+    height: 1.75rem;
+    padding: 0;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+
+    &.selected {
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 2px var(--color-surface) inset;
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+
   .submit-button {
     height: 3rem;
     min-width: 180px;
@@ -165,9 +196,6 @@
   }
 
   .project-preview-tile {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
     padding: 1.25rem;
     border-radius: var(--radius-control);
     background: color-mix(
@@ -176,41 +204,6 @@
       var(--color-surface)
     );
     
-  }
-
-  .logo-preview-image,
-  .logo-preview-fallback {
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 8px;
-    flex-shrink: 0;
-  }
-
-  .logo-preview-image {
-    object-fit: cover;
-    border: 1px solid rgba(148, 163, 184, 0.25);
-  }
-
-  .logo-preview-fallback {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(
-      135deg,
-      rgba(59, 130, 246, 0.18),
-      rgba(14, 165, 233, 0.08)
-    );
-    color: var(--primary-color-dark);
-    font-size: 1.45rem;
-  }
-
-  .preview-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-  }
-
-  .preview-description {
-    margin-top: 0.4rem;
   }
 
   .preview-points {

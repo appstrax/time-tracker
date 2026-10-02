@@ -88,6 +88,7 @@
             </div>
           </div>
 
+          <div class="logo-color-row">
           <div class="form-group">
             <label>Project logo</label>
             <div class="logo-upload-row">
@@ -119,6 +120,25 @@
             />
           </div>
 
+          <div class="form-group">
+            <label>Project colour</label>
+            <div class="color-swatches" role="radiogroup" aria-label="Project colour">
+              @for (color of colorOptions; track color) {
+              <button
+                type="button"
+                class="color-swatch"
+                role="radio"
+                [class.selected]="color === displayColor()"
+                [style.background-color]="color"
+                [attr.aria-checked]="color === displayColor()"
+                aria-label="Select colour"
+                (click)="updateProjectColor(color)"
+              ></button>
+              }
+            </div>
+          </div>
+          </div>
+
           @if (error()) {
           <div class="alert alert-danger mb-0">{{ error() }}</div>
           }
@@ -138,26 +158,14 @@
         </div>
 
         <div class="project-preview-tile">
-          @if (logoPreviewUrl()) {
-          <img
-            [src]="logoPreviewUrl()"
-            alt="Logo preview"
-            class="logo-preview-image"
+          <app-project-preview
+            [logoUrl]="logoPreviewUrl()"
+            [color]="displayColor()"
+            [name]="project().name"
+            [description]="project().description"
+            namePlaceholder="Your project name"
+            descriptionPlaceholder="Add a short description to help teammates understand the project at a glance."
           />
-          } @else {
-          <div class="logo-preview-fallback" aria-hidden="true">
-            <i class="bi bi-kanban"></i>
-          </div>
-          }
-
-          <div>
-            <div class="preview-title">
-              {{ project().name || 'Your project name' }}
-            </div>
-            <p class="preview-description">
-              {{ project().description || 'Add a short description to help teammates understand the project at a glance.' }}
-            </p>
-          </div>
         </div>
 
         <div class="preview-points">

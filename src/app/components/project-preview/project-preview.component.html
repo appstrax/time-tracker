@@ -1,0 +1,26 @@
+<div class="project-preview">
+  <div class="project-preview-media">
+    <span
+      class="project-preview-color"
+      [style.background-color]="color"
+      aria-hidden="true"
+    ></span>
+    @if (logoUrl) {
+    <img [src]="logoUrl" alt="Project logo" class="project-preview-logo" />
+    } @else {
+    <div class="project-preview-logo project-preview-fallback" aria-hidden="true">
+      <i class="bi bi-kanban"></i>
+    </div>
+    }
+  </div>
+
+  <div class="project-preview-body">
+    <div class="project-preview-name">{{ name || namePlaceholder }}</div>
+    <p
+      class="project-preview-description"
+      [class.project-preview-description--clamped]="clampDescription"
+    >
+      {{ description || descriptionPlaceholder }}
+    </p>
+  </div>
+</div>
