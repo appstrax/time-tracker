@@ -6,10 +6,10 @@ import { ToastService, TimeSheetEntryService } from '@services';
 import { Store } from '@state';
 import {
   buildProjectColorMap,
-  clearStoredTimeSheetProjectId,
-  getStoredTimeSheetProjectId,
+  clearStoredTimeSheetFilterProjectId,
+  getStoredTimeSheetFilterProjectId,
   localCalendarDayKey,
-  storeTimeSheetProjectId,
+  storeTimeSheetFilterProjectId,
 } from '@utils';
 
 import { TimeSheetDayComponent } from './components';
@@ -31,7 +31,7 @@ export class TimeSheetPage {
   private readonly weekStart = signal(new Date());
   private readonly weekEnd = signal(new Date());
   private readonly filterProjectId = signal<string | null>(
-    getStoredTimeSheetProjectId(),
+    getStoredTimeSheetFilterProjectId(),
   );
 
   public readonly projects = computed(() => this.store.projects.projects());
@@ -96,28 +96,29 @@ export class TimeSheetPage {
     }
   }
 
-  public onTimeSheetEntrySaved() {
-    this.adoptSavedEntryProjectFilter();
+  public onTimeSheetEntrySaved(entry?: TimeSheetEntry) {
+    this.adoptSavedEntryProjectFilter(entry);
     this.fetchTimeSheetEntries();
   }
 
   /** After saving an entry, follow it into the filter — but only when a specific
    * project was already selected. "All projects" stays "all projects". */
-  private adoptSavedEntryProjectFilter(): void {
+  private adoptSavedEntryProjectFilter(entry?: TimeSheetEntry): void {
     if (this.filterProjectId() === null) return;
 
-    const projectId = getStoredTimeSheetProjectId();
+    const projectId = entry?.projectId;
     if (!projectId) return;
 
     this.filterProjectId.set(projectId);
+    storeTimeSheetFilterProjectId(projectId);
   }
 
   public onFilterProjectSelected(project: Project | null): void {
     this.filterProjectId.set(project?.id ?? null);
     if (project?.id) {
-      storeTimeSheetProjectId(project.id);
+      storeTimeSheetFilterProjectId(project.id);
     } else {
-      clearStoredTimeSheetProjectId();
+      clearStoredTimeSheetFilterProjectId();
     }
   }
 
@@ -130,7 +131,7 @@ export class TimeSheetPage {
     const project = this.projects().find((item) => item.id === projectId);
     if (!project) {
       this.filterProjectId.set(null);
-      clearStoredTimeSheetProjectId();
+      clearStoredTimeSheetFilterProjectId();
     }
   }
 

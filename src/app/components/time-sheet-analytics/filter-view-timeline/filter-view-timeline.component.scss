@@ -1,8 +1,8 @@
 .timeline-shell {
-  border: 1px solid var(--color-border);
-  border-radius: 24px;
+  border: none;
+  border-radius: var(--radius-card, 12px);
   background: var(--color-surface);
-  box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+  box-shadow: var(--shadow-card);
   overflow: hidden;
 }
 
@@ -37,9 +37,9 @@
   display: block;
   width: 100%;
   padding: 1.25rem;
-  border: 1px solid var(--color-border);
-  border-radius: 20px;
-  background: color-mix(in srgb, var(--color-surface) 96%, var(--color-bg));
+  border: none;
+  border-radius: var(--radius-card, 12px);
+  background: var(--color-surface-muted);
   text-align: left;
   color: inherit;
   font: inherit;
@@ -57,7 +57,6 @@
     transform 0.16s ease;
 
   &:hover {
-    border-color: color-mix(in srgb, var(--color-primary) 35%, var(--color-border));
     box-shadow: 0 8px 24px color-mix(in srgb, var(--text-primary) 8%, transparent);
     transform: translateY(-1px);
   }
@@ -96,16 +95,16 @@
   display: inline-flex;
   align-items: center;
   padding: 0.35rem 0.75rem;
-  border-radius: 999px;
-  background: rgba(59, 130, 246, 0.08);
-  color: var(--primary-color-dark);
+  border-radius: 6px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
   font-weight: 600;
 }
 
 .timeline-bar {
   height: 18px;
   background: color-mix(in srgb, var(--color-border) 65%, transparent);
-  border-radius: 999px;
+  border-radius: 6px;
   display: flex;
   overflow: hidden;
   margin-bottom: 0.85rem;
@@ -141,7 +140,7 @@
 .legend-color {
   width: 0.8rem;
   height: 0.8rem;
-  border-radius: 999px;
+  border-radius: 6px;
 
   &.approved {
     background: #198754;

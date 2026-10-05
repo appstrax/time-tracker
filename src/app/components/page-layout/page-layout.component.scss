@@ -1,5 +1,6 @@
 .layout {
   display: flex;
+  background: var(--color-bg);
   height: 100vh;
 }
 
@@ -17,6 +18,7 @@
 
 .page-content {
   position: relative;
+  background: var(--color-bg);
   padding: 1rem;
   height: calc(100vh);
   overflow-y: auto;

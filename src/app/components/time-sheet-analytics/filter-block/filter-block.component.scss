@@ -6,7 +6,7 @@
 
 .filter-block {
   min-height: 100%;
-  border-radius: 20px;
+  border-radius: 8px;
   font-size: 0.9rem;
   display: flex;
   flex-direction: column;
@@ -28,7 +28,7 @@
     :ng-deep .form-select {
       width: 100%;
       min-height: 2.75rem;
-      border-radius: 14px;
+      border-radius: 8px;
       border-color: var(--color-border);
       background: var(--color-surface);
       color: var(--text-primary);

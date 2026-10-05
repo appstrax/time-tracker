@@ -2,10 +2,7 @@
   <div class="project-shell">
     <div class="page-header">
       <div>
-        <a class="back-button" routerLink="/projects">
-          <i class="bi bi-arrow-left"></i>
-          Back
-        </a>
+        <a class="back-button" routerLink="/projects">‹ Projects</a>
         <h1 class="eyebrow">
           {{ editing() ? 'Project workspace' : 'New project' }}
         </h1>
@@ -91,6 +88,7 @@
             </div>
           </div>
 
+          <div class="logo-color-row">
           <div class="form-group">
             <label>Project logo</label>
             <div class="logo-upload-row">
@@ -122,12 +120,37 @@
             />
           </div>
 
+          <fieldset class="color-fieldset">
+            <legend>Project colour</legend>
+            <div class="color-swatches">
+              @for (option of colorOptions; track option.value) {
+              <label
+                class="color-swatch"
+                [class.selected]="option.value === displayColor()"
+                [style.background-color]="option.value"
+              >
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="projectColor"
+                  [value]="option.value"
+                  [checked]="option.value === displayColor()"
+                  (change)="updateProjectColor(option.value)"
+                />
+                <span class="visually-hidden">{{ option.label }}</span>
+              </label>
+              }
+            </div>
+          </fieldset>
+          </div>
+
           @if (error()) {
           <div class="alert alert-danger mb-0">{{ error() }}</div>
           }
         </form>
       </section>
 
+      <div class="project-side-column">
       <aside class="preview-card">
         <div class="card-header">
           <div>
@@ -140,26 +163,14 @@
         </div>
 
         <div class="project-preview-tile">
-          @if (logoPreviewUrl()) {
-          <img
-            [src]="logoPreviewUrl()"
-            alt="Logo preview"
-            class="logo-preview-image"
+          <app-project-preview
+            [logoUrl]="logoPreviewUrl()"
+            [color]="displayColor()"
+            [name]="project().name"
+            [description]="project().description"
+            namePlaceholder="Your project name"
+            descriptionPlaceholder="Add a short description to help teammates understand the project at a glance."
           />
-          } @else {
-          <div class="logo-preview-fallback" aria-hidden="true">
-            <i class="bi bi-kanban"></i>
-          </div>
-          }
-
-          <div>
-            <div class="preview-title">
-              {{ project().name || 'Your project name' }}
-            </div>
-            <p class="preview-description">
-              {{ project().description || 'Add a short description to help teammates understand the project at a glance.' }}
-            </p>
-          </div>
         </div>
 
         <div class="preview-points">
@@ -187,7 +198,28 @@
           </div>
         </div>
       </aside>
+
+      </div>
     </div>
+
+    @if (editing() && project().id) {
+    <app-project-users
+      [project]="project()"
+      (projectChange)="onProjectUsersChange($event)"
+    />
+    } @else {
+    <section class="members-card members-card--placeholder">
+      <div class="card-header">
+        <div>
+          <h2 class="eyebrow">Project Users</h2>
+          <p>
+            Create the project first, then return here to search users and
+            assign roles.
+          </p>
+        </div>
+      </div>
+    </section>
+    }
 
     <section class="editor-card fields-card">
       <div class="card-header">
@@ -461,23 +493,5 @@
       }
     </section>
 
-    @if (editing() && project().id) {
-    <app-project-users
-      [project]="project()"
-      (projectChange)="onProjectUsersChange($event)"
-    />
-    } @else {
-    <section class="members-card members-card--placeholder">
-      <div class="card-header">
-        <div>
-          <h2 class="eyebrow">Project Users</h2>
-          <p>
-            Create the project first, then return here to search users and
-            assign roles.
-          </p>
-        </div>
-      </div>
-    </section>
-    }
   </div>
 </div>

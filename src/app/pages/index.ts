@@ -9,3 +9,4 @@ export * from './settings/agent-tokens/agent-tokens.page';
 export * from './time-sheets/time-sheet/time-sheet.page';
 export * from './analytics/analytics.page';
 export * from './auth/forgot-password/forgot-password.page';
+export * from './analytics/project/project-analytics.page';

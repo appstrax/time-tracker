@@ -1,16 +1,15 @@
 <article class="metric-card" [class.compact]="compact()">
-  <div class="metric-copy">
+  <div class="metric-top">
     <p class="metric-label">{{ label() }}</p>
-    <div class="metric-value">
-      {{ value() }}
-      @if (valueSuffix()) {
-        <span class="value-suffix">{{ valueSuffix() }}</span>
-      }
-    </div>
+    <span class="metric-icon" aria-hidden="true">
+      <i [ngClass]="iconClass()"></i>
+    </span>
   </div>
 
-  <div class="metric-icon" aria-hidden="true">
-    <i [ngClass]="iconClass()"></i>
+  <div class="metric-value">
+    {{ value() }}
+    @if (valueSuffix()) {
+      <span class="value-suffix">{{ valueSuffix() }}</span>
+    }
   </div>
 </article>
-

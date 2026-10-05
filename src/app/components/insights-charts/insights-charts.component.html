@@ -1,0 +1,58 @@
+<div class="insights-charts">
+  <section class="chart-card">
+    <header class="chart-head">
+      <div>
+        <h2>Hours logged</h2>
+        <p>{{ subtitle() }}</p>
+      </div>
+    </header>
+
+    @if (buckets().length) {
+      <div class="chart-canvas">
+        <canvas
+          baseChart
+          type="bar"
+          [data]="chartData()"
+          [options]="chartOptions()"
+        ></canvas>
+      </div>
+    } @else {
+      <p class="chart-empty">No hours match the current filters.</p>
+    }
+  </section>
+
+  <section class="chart-card">
+    <header class="chart-head">
+      <div>
+        <h2>By project</h2>
+        <p>Share of hours</p>
+      </div>
+    </header>
+
+    @if (projectShares().length) {
+      <ul class="shares">
+        @for (p of projectShares(); track p.id) {
+          <li>
+            <div class="share-row">
+              <span class="share-name">
+                <i class="dot" [style.background]="p.color"></i>{{ p.name }}
+              </span>
+              <span class="share-value">
+                <b>{{ p.hours | number: '1.0-1' }}</b> h · {{ p.percent }}%
+              </span>
+            </div>
+            <div class="share-track">
+              <div
+                class="share-fill"
+                [style.width.%]="p.widthPercent"
+                [style.background]="p.color"
+              ></div>
+            </div>
+          </li>
+        }
+      </ul>
+    } @else {
+      <p class="chart-empty">No projects to show.</p>
+    }
+  </section>
+</div>

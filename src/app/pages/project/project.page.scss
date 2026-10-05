@@ -13,10 +13,9 @@
   .editor-card,
   .preview-card,
   .members-card {
-    border: 1px solid var(--color-border);
-    border-radius: 28px;
+    border-radius: var(--radius-card);
     background: var(--color-surface);
-    box-shadow: 0 20px 45px rgba(15, 23, 42, 0.08);
+    box-shadow: var(--shadow-card);
   }
 
   .page-header {
@@ -28,13 +27,12 @@
   }
 
   .back-button {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.45rem;
+    display: inline-block;
     margin-bottom: 1rem;
-    color: var(--primary-color);
+    color: var(--color-primary);
     text-decoration: none;
-    font-weight: 600;
+    font-size: 14px;
+    font-weight: 700;
   }
 
   .eyebrow {
@@ -47,7 +45,6 @@
   }
 
   .card-header p,
-  .preview-description,
   .members-card--placeholder p {
     margin: 0;
     color: var(--text-muted);
@@ -59,10 +56,10 @@
     align-items: center;
     gap: 0.4rem;
     padding: 0.45rem 0.85rem;
-    border-radius: 999px;
-    background: rgba(59, 130, 246, 0.08);
-    color: var(--primary-color-dark);
-    font-weight: 600;
+    border-radius: 6px;
+    background: var(--color-primary-soft);
+    color: var(--color-primary);
+    font-weight: 700;
   }
 
   .file-pill.muted {
@@ -72,7 +69,7 @@
 
   .project-content-grid {
     display: grid;
-    grid-template-columns: minmax(0, 1.35fr) minmax(280px, 0.85fr);
+    grid-template-columns: minmax(0, 1.5fr) minmax(280px, 1fr);
     gap: 1.5rem;
   }
 
@@ -80,6 +77,21 @@
   .preview-card,
   .members-card {
     padding: 1.5rem;
+  }
+
+  .project-content-grid {
+    align-items: stretch;
+  }
+
+  .project-side-column > .preview-card {
+    flex: 1;
+  }
+
+  .project-side-column {
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    min-width: 0;
   }
 
   .card-header {
@@ -107,9 +119,31 @@
 
   .form-group label {
     display: inline-block;
-    margin-bottom: 0.55rem;
-    font-size: 0.92rem;
-    font-weight: 600;
+    margin-bottom: 0.45rem;
+    font-size: 13px;
+    font-weight: 700;
+  }
+
+  .form-control,
+  .form-select {
+    min-height: 44px;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control);
+  }
+
+  .btn {
+    min-height: 44px;
+    border-radius: var(--radius-control);
+    font-weight: 700;
+  }
+
+  .btn-sm {
+    min-height: 36px;
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
   }
 
   .logo-upload-row {
@@ -119,10 +153,57 @@
     gap: 0.75rem;
   }
 
+  .logo-color-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem 2.5rem;
+  }
+
+  .color-fieldset {
+    border: 0;
+    margin: 0 0 1.25rem;
+    min-inline-size: 0;
+    padding: 0;
+
+    legend {
+      float: none;
+      width: auto;
+      margin-bottom: 0.45rem;
+      padding: 0;
+      font-size: 13px;
+      font-weight: 700;
+    }
+  }
+
+  .color-swatches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    max-width: 18rem;
+  }
+
+  .color-swatch {
+    position: relative;
+    display: inline-block;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 2px solid transparent;
+    border-radius: 50%;
+    cursor: pointer;
+
+    &.selected {
+      border-color: var(--text-primary);
+      box-shadow: 0 0 0 2px var(--color-surface) inset;
+    }
+
+    &:focus-within {
+      outline: 2px solid var(--color-primary);
+      outline-offset: 2px;
+    }
+  }
+
   .submit-button {
     height: 3rem;
-    border-radius: 16px;
-    font-weight: 600;
     min-width: 180px;
   }
 
@@ -132,53 +213,14 @@
   }
 
   .project-preview-tile {
-    display: flex;
-    align-items: flex-start;
-    gap: 1rem;
     padding: 1.25rem;
-    border-radius: 24px;
+    border-radius: var(--radius-control);
     background: color-mix(
       in srgb,
       var(--primary-color) 8%,
       var(--color-surface)
     );
-    border: 1px solid
-      color-mix(in srgb, var(--primary-color) 12%, var(--color-border));
-  }
-
-  .logo-preview-image,
-  .logo-preview-fallback {
-    width: 4.5rem;
-    height: 4.5rem;
-    border-radius: 20px;
-    flex-shrink: 0;
-  }
-
-  .logo-preview-image {
-    object-fit: cover;
-    border: 1px solid rgba(148, 163, 184, 0.25);
-  }
-
-  .logo-preview-fallback {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    background: linear-gradient(
-      135deg,
-      rgba(59, 130, 246, 0.18),
-      rgba(14, 165, 233, 0.08)
-    );
-    color: var(--primary-color-dark);
-    font-size: 1.45rem;
-  }
-
-  .preview-title {
-    font-size: 1.15rem;
-    font-weight: 700;
-  }
-
-  .preview-description {
-    margin-top: 0.4rem;
+    
   }
 
   .preview-points {
@@ -218,13 +260,11 @@
   }
 
   .fields-save-button {
-    border-radius: 14px;
-    font-weight: 600;
     min-width: 130px;
   }
 
   .fields-error {
-    border-radius: 14px;
+    border-radius: 8px;
   }
 
   .field-rows {
@@ -238,10 +278,8 @@
     flex-direction: column;
     gap: 1rem;
     padding: 1rem 1.25rem;
-    border: 1px solid var(--color-border);
-    border-radius: 24px;
-    background: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
-    box-shadow: 0 12px 30px rgba(15, 23, 42, 0.05);
+    border-radius: var(--radius-control);
+    background: var(--color-surface-muted);
   }
 
   .field-card-header {
@@ -298,7 +336,7 @@
 
   .field-unsaved-pill {
     padding: 0.35rem 0.75rem;
-    border-radius: 999px;
+    border-radius: 6px;
     background: rgba(245, 158, 11, 0.12);
     color: #b45309;
     font-size: 0.82rem;
@@ -323,7 +361,7 @@
     .preview-card,
     .members-card {
       padding: 1.25rem;
-      border-radius: 24px;
+      border-radius: var(--radius-card);
     }
 
     .page-header,

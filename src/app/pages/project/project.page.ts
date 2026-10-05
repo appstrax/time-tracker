@@ -6,19 +6,33 @@ import { appstraxStorage } from '@appstrax/services/storage';
 import { ToastService, ProjectService, ProjectUserService } from '@services';
 import { Project, ProjectField, ProjectFieldType, ProjectUser, ProjectUserRole } from '@models';
 import { Store } from '@state';
-import { ProjectUsersComponent } from '@components';
+import { ProjectPreviewComponent, ProjectUsersComponent } from '@components';
 import {
+  buildProjectColorMap,
+  getThemeProjectColorOptions,
   normalizeProjectCategories,
+  pickNewProjectColor,
   seedNewProjectCategories,
   validateProjectCategoryPolicy,
 } from '@utils';
+
+function sameColorSources(left: Project[], right: Project[]): boolean {
+  if (left === right) return true;
+  if (left.length !== right.length) return false;
+  for (let i = 0; i < left.length; i++) {
+    if (left[i].id !== right[i].id || left[i].color !== right[i].color) {
+      return false;
+    }
+  }
+  return true;
+}
 
 @Component({
   selector: 'app-create-project',
   templateUrl: './project.page.html',
   styleUrls: ['./project.page.scss'],
   standalone: true,
-  imports: [FormsModule, RouterModule, ProjectUsersComponent],
+  imports: [FormsModule, RouterModule, ProjectUsersComponent, ProjectPreviewComponent],
 })
 export class ProjectPage implements OnInit {
   readonly project = signal(new Project());
@@ -34,6 +48,34 @@ export class ProjectPage implements OnInit {
   readonly logoFile = signal<File | null>(null);
   readonly logoPreviewUrl = signal<string | null>(null);
   readonly projectUsersCount = computed(() => this.project().users.length);
+  readonly colorOptions = getThemeProjectColorOptions();
+  /** Stable across form edits, so the colour map is not rebuilt on each keystroke. */
+  private readonly colorSourceProjects = computed(
+    () => {
+      const projects = this.store.projects.projects();
+      const current = this.project();
+      if (
+        current.color ||
+        !current.id ||
+        projects.some((item) => item.id === current.id)
+      ) {
+        return projects;
+      }
+      return [...projects, Object.assign(new Project(), { id: current.id })];
+    },
+    { equal: sameColorSources },
+  );
+  private readonly projectColorById = computed(() =>
+    buildProjectColorMap(this.colorSourceProjects()),
+  );
+  /** Stored colour, or the derived one for projects that predate stored colours. */
+  readonly displayColor = computed(() => {
+    const project = this.project();
+    if (project.color) return project.color;
+    return (
+      this.projectColorById().get(project.id) ?? this.colorOptions[0].value
+    );
+  });
 
   readonly fieldTypeOptions: { value: ProjectFieldType; label: string }[] = [
     { value: 'text', label: 'Text' },
@@ -49,6 +91,7 @@ export class ProjectPage implements OnInit {
     name: '',
     description: '',
     logoUrl: '',
+    color: '',
     categories: [] as string[],
     allowCustomCategory: true,
   };
@@ -84,7 +127,13 @@ export class ProjectPage implements OnInit {
         this.toast.error('Failed to load project for editing', 'Error');
       }
     } else {
-      this.updateProject((project) => seedNewProjectCategories(project));
+      this.updateProject((project) => {
+        seedNewProjectCategories(project);
+        project.color = pickNewProjectColor(
+          this.store.projects.projects(),
+          String(Date.now()),
+        );
+      });
     }
   }
 
@@ -232,6 +281,7 @@ export class ProjectPage implements OnInit {
       project.name !== this.savedCoreSnapshot.name ||
       project.description !== this.savedCoreSnapshot.description ||
       project.logoUrl !== this.savedCoreSnapshot.logoUrl ||
+      project.color !== this.savedCoreSnapshot.color ||
       this.areCategoriesDirty()
     );
   }
@@ -397,7 +447,8 @@ export class ProjectPage implements OnInit {
     return (
       project.name !== this.savedCoreSnapshot.name ||
       project.description !== this.savedCoreSnapshot.description ||
-      project.logoUrl !== this.savedCoreSnapshot.logoUrl
+      project.logoUrl !== this.savedCoreSnapshot.logoUrl ||
+      project.color !== this.savedCoreSnapshot.color
     );
   }
 
@@ -441,6 +492,7 @@ export class ProjectPage implements OnInit {
       name: project.name,
       description: project.description,
       logoUrl: project.logoUrl,
+      color: project.color,
       categories: [...project.categories],
       allowCustomCategory: project.allowCustomCategory,
     };
@@ -475,6 +527,7 @@ export class ProjectPage implements OnInit {
     payload.name = this.savedCoreSnapshot.name;
     payload.description = this.savedCoreSnapshot.description;
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
+    payload.color = this.savedCoreSnapshot.color;
     payload.categories = [...this.savedCoreSnapshot.categories];
     payload.allowCustomCategory = this.savedCoreSnapshot.allowCustomCategory;
 
@@ -488,6 +541,7 @@ export class ProjectPage implements OnInit {
     payload.name = this.savedCoreSnapshot.name;
     payload.description = this.savedCoreSnapshot.description;
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
+    payload.color = this.savedCoreSnapshot.color;
     payload.categories = normalizeProjectCategories(current.categories);
     payload.allowCustomCategory = current.allowCustomCategory;
     payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
@@ -520,6 +574,7 @@ export class ProjectPage implements OnInit {
       overrides.description = live.description;
     }
     if (live.logoUrl !== submitted.logoUrl) overrides.logoUrl = live.logoUrl;
+    if (live.color !== submitted.color) overrides.color = live.color;
     if (JSON.stringify(live.fields) !== JSON.stringify(submitted.fields)) {
       overrides.fields = live.fields;
     }
@@ -544,6 +599,12 @@ export class ProjectPage implements OnInit {
     this.error.set('');
     this.updateProject((project) => {
       project.description = description;
+    });
+  }
+
+  public updateProjectColor(color: string): void {
+    this.updateProject((project) => {
+      project.color = color;
     });
   }
 

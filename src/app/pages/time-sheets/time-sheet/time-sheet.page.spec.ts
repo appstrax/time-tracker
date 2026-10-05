@@ -3,12 +3,9 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { patchState } from '@ngrx/signals';
 
-import { Project } from '@models';
+import { Project, TimeSheetEntry } from '@models';
 import { Store } from '@state';
-import {
-  clearStoredTimeSheetProjectId,
-  storeTimeSheetProjectId,
-} from '@utils';
+import { clearStoredTimeSheetFilterProjectId } from '@utils';
 
 import { TimeSheetPage } from './time-sheet.page';
 
@@ -17,6 +14,12 @@ function makeProject(id: string): Project {
   project.id = id;
   project.name = id;
   return project;
+}
+
+function makeSavedEntry(projectId: string): TimeSheetEntry {
+  const entry = new TimeSheetEntry();
+  entry.projectId = projectId;
+  return entry;
 }
 
 describe('TimeSheetPage', () => {
@@ -33,8 +36,16 @@ describe('TimeSheetPage', () => {
     patchState(store.projects as never, state);
   }
 
+  /** Re-creates the page the way navigating back to it does: a fresh component
+   * instance reading whatever is in storage at that moment. */
+  function recreateComponent(): void {
+    fixture = TestBed.createComponent(TimeSheetPage);
+    component = fixture.componentInstance;
+    fixture.detectChanges();
+  }
+
   beforeEach(async () => {
-    clearStoredTimeSheetProjectId();
+    clearStoredTimeSheetFilterProjectId();
 
     await TestBed.configureTestingModule({
       imports: [TimeSheetPage],
@@ -44,13 +55,11 @@ describe('TimeSheetPage', () => {
 
     store = TestBed.inject(Store);
 
-    fixture = TestBed.createComponent(TimeSheetPage);
-    component = fixture.componentInstance;
-    fixture.detectChanges();
+    recreateComponent();
   });
 
   afterEach(() => {
-    clearStoredTimeSheetProjectId();
+    clearStoredTimeSheetFilterProjectId();
   });
 
   it('should create', () => {
@@ -68,11 +77,7 @@ describe('TimeSheetPage', () => {
       component.onFilterProjectSelected(null);
       expect(component.filterProject()).toBeNull();
 
-      // Simulates TimeSheetEntryModal.onSaveTimeSheetEntry() remembering the
-      // saved entry's project as the "last used project" for its own defaults.
-      storeTimeSheetProjectId(projectX.id);
-
-      component.onTimeSheetEntrySaved();
+      component.onTimeSheetEntrySaved(makeSavedEntry(projectX.id));
 
       expect(component.filterProject()).toBeNull();
     });
@@ -88,9 +93,63 @@ describe('TimeSheetPage', () => {
       component.onFilterProjectSelected(projectA);
       expect(component.filterProject()?.id).toBe(projectA.id);
 
-      storeTimeSheetProjectId(projectB.id);
+      component.onTimeSheetEntrySaved(makeSavedEntry(projectB.id));
 
-      component.onTimeSheetEntrySaved();
+      expect(component.filterProject()?.id).toBe(projectB.id);
+    });
+
+    it('keeps the filter when an entry is deleted rather than saved', () => {
+      const projectA = makeProject('project-a');
+      patchProjectsState({ projects: [projectA], fetchedAt: new Date() });
+
+      component.onFilterProjectSelected(projectA);
+      component.onTimeSheetEntrySaved(undefined);
+
+      expect(component.filterProject()?.id).toBe(projectA.id);
+    });
+  });
+
+  describe('filter persistence across page re-creation', () => {
+    it('stays on "all projects" after saving an entry for a project', () => {
+      const projectX = makeProject('project-x');
+
+      component.onFilterProjectSelected(null);
+      component.onTimeSheetEntrySaved(makeSavedEntry(projectX.id));
+
+      recreateComponent();
+      patchProjectsState({ projects: [projectX], fetchedAt: new Date() });
+
+      expect(component.filterProject()).toBeNull();
+    });
+
+    it('restores a project filter the user explicitly selected', () => {
+      const projectA = makeProject('project-a');
+      patchProjectsState({ projects: [projectA], fetchedAt: new Date() });
+
+      component.onFilterProjectSelected(projectA);
+
+      recreateComponent();
+      patchProjectsState({ projects: [projectA], fetchedAt: new Date() });
+
+      expect(component.filterProject()?.id).toBe(projectA.id);
+    });
+
+    it('adopting a saved entry\'s project persists across re-creation', () => {
+      const projectA = makeProject('project-a');
+      const projectB = makeProject('project-b');
+      patchProjectsState({
+        projects: [projectA, projectB],
+        fetchedAt: new Date(),
+      });
+
+      component.onFilterProjectSelected(projectA);
+      component.onTimeSheetEntrySaved(makeSavedEntry(projectB.id));
+
+      recreateComponent();
+      patchProjectsState({
+        projects: [projectA, projectB],
+        fetchedAt: new Date(),
+      });
 
       expect(component.filterProject()?.id).toBe(projectB.id);
     });

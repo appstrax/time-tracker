@@ -8,7 +8,7 @@ import {
   getProjectColor,
   TimeSheetDisplayUtil,
   TimeSheetExportUtil,
-  storeTimeSheetProjectId,
+  storeTimeSheetFilterProjectId,
 } from '@utils';
 
 @Component({
@@ -94,7 +94,7 @@ export class FilterViewSummaryComponent {
   }
 
   public openTimeSheetForProject(projectId: string): void {
-    storeTimeSheetProjectId(projectId);
+    storeTimeSheetFilterProjectId(projectId);
     void this.router.navigate(['/time-sheet']);
   }
 

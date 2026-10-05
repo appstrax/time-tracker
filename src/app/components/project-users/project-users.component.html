@@ -7,122 +7,26 @@
         list up to date.
       </p>
     </div>
-    <span class="metric-pill">
-      {{ memberCount() }} {{ memberCount() === 1 ? "member" : "members" }}
-    </span>
-  </div>
-
-  <div class="members-toolbar">
-    <div class="user-search-stack">
-      <label for="project-user-search" class="toolbar-label"
-        >Search users</label
+    <div class="members-header-actions">
+      <span class="metric-pill">
+        {{ memberCount() }} {{ memberCount() === 1 ? "member" : "members" }}
+      </span>
+      <button
+        type="button"
+        class="btn btn-primary add-user-button"
+        (click)="onAddUserClick()"
+        [disabled]="loading() || addingUser()"
       >
-      <div class="user-search-grid">
-        <div class="input-with-icon search-field">
-          <i class="bi bi-search"></i>
-          <input
-            id="project-user-search"
-            type="text"
-            class="form-control"
-            [ngModel]="searchTerm()"
-            (ngModelChange)="onSearchTermChange($event)"
-            (focus)="onSearchFocus()"
-            (blur)="onSearchBlur()"
-            placeholder="Search by name or email"
-            autocomplete="off"
-          />
-
-          @if (isSearchOpen()) {
-            <div class="search-results">
-              @if (!searchResults().length) {
-                <div class="search-state">No matching users found.</div>
-              } @else {
-                @for (user of searchResults(); track user.id) {
-                  <button
-                    type="button"
-                    class="search-result"
-                    (click)="onUserSelect(user)"
-                  >
-                    <span class="search-result-avatar">
-                      @if (user.profilePictureUrl) {
-                        <img
-                          [src]="user.profilePictureUrl"
-                          [alt]="getDisplayName(user)"
-                        />
-                      } @else {
-                        <span>{{ getUserInitials(user) }}</span>
-                      }
-                    </span>
-                    <span class="search-result-copy">
-                      <span class="search-result-title">{{
-                        getDisplayName(user)
-                      }}</span>
-                      <span class="search-result-subtitle">
-                        {{ getUserSecondaryText(user) }}
-                      </span>
-                    </span>
-                  </button>
-                }
-              }
-            </div>
-          }
-        </div>
-
-        <div class="role-field">
-          <label
-            for="project-user-role"
-            class="toolbar-label toolbar-label--inline"
-          >
-            Role
-          </label>
-
-          <div class="role-select-wrap ms-2">
-            <select
-              id="project-user-role"
-              class="form-select"
-              [ngModel]="selectedUserRole()"
-              (ngModelChange)="selectedUserRole.set($event)"
-            >
-              @for (role of userRoles(); track role) {
-                <option [ngValue]="role">{{ formatRole(role) }}</option>
-              }
-            </select>
-            <i
-              class="bi bi-chevron-down role-select-caret"
-              aria-hidden="true"
-            ></i>
-          </div>
-        </div>
-
-        <button
-          type="button"
-          class="btn btn-primary add-user-button"
-          (click)="onAddUserClick()"
-          [disabled]="!selectedUser() || saving() === selectedUser()?.id"
-        >
-          @if (saving() === selectedUser()?.id) {
-            <span
-              class="spinner-border spinner-border-sm me-2"
-              aria-hidden="true"
-            ></span>
-          }
-          Add user
-        </button>
-      </div>
-
-      @if (selectedUser()) {
-        <div class="selected-user-pill">
-          <span>Selected: {{ getDisplayName(selectedUser()) }}</span>
-          <span class="selected-user-email">
-            {{ getUserSecondaryText(selectedUser()) }}
-          </span>
-        </div>
-      } @else {
-        <p class="helper-text">
-          Choose a user from the search results, then assign the role you want
-          to grant.
-        </p>
-      }
+        @if (addingUser()) {
+          <span
+            class="spinner-border spinner-border-sm me-2"
+            aria-hidden="true"
+          ></span>
+        } @else {
+          <i class="bi bi-person-plus me-2" aria-hidden="true"></i>
+        }
+        Add user
+      </button>
     </div>
   </div>
 
@@ -142,7 +46,16 @@
         <i class="bi bi-people"></i>
       </div>
       <h3>No project users yet</h3>
-      <p>Search for a workspace user above to add the first collaborator.</p>
+      <p>Add a workspace user to start collaborating on this project.</p>
+      <button
+        type="button"
+        class="btn btn-primary add-user-button"
+        (click)="onAddUserClick()"
+        [disabled]="addingUser()"
+      >
+        <i class="bi bi-person-plus me-2" aria-hidden="true"></i>
+        Add user
+      </button>
     </div>
   } @else {
     <div class="table-shell">
@@ -153,7 +66,9 @@
               <th scope="col">User</th>
               <th scope="col">Email</th>
               <th scope="col">Role</th>
-              <th scope="col" class="text-end">Actions</th>
+              <th scope="col" class="text-end">
+                <span class="visually-hidden">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -175,9 +90,6 @@
                     <div>
                       <div class="member-name">
                         {{ getDisplayName(member.user) }}
-                      </div>
-                      <div class="member-meta">
-                        User ID: {{ member.projectUser.userId }}
                       </div>
                     </div>
                   </div>
@@ -204,20 +116,28 @@
                   </div>
                 </td>
                 <td class="text-end">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    (click)="onRemoveUserClick(member)"
-                    [disabled]="isMemberBusy(member)"
-                  >
+                  <div class="member-actions">
                     @if (isMemberBusy(member)) {
                       <span
-                        class="spinner-border spinner-border-sm me-2"
-                        aria-hidden="true"
-                      ></span>
+                        class="spinner-border spinner-border-sm member-action-spinner"
+                        role="status"
+                      >
+                        <span class="visually-hidden">Updating…</span>
+                      </span>
+                    } @else {
+                      <button
+                        type="button"
+                        class="member-action member-action--remove"
+                        [title]="'Remove ' + getDisplayName(member.user)"
+                        [attr.aria-label]="
+                          'Remove ' + getDisplayName(member.user)
+                        "
+                        (click)="onRemoveUserClick(member)"
+                      >
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                      </button>
                     }
-                    Remove
-                  </button>
+                  </div>
                 </td>
               </tr>
             }

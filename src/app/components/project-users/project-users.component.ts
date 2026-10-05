@@ -10,7 +10,11 @@ import {
 import { FormsModule } from '@angular/forms';
 import { NgbModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { ConfirmModalComponent } from '@modals';
+import {
+  AddProjectUserModal,
+  AddProjectUserResult,
+  ConfirmModalComponent,
+} from '@modals';
 import { Project, ProjectUser, ProjectUserRole, User } from '@models';
 import { getUserDisplayName, getUserInitials } from '@utils';
 import { ProjectUserService, ToastService, UsersService } from '@services';
@@ -43,11 +47,7 @@ export class ProjectUsersComponent implements OnInit {
   readonly userRoles = signal<ProjectUserRole[]>(
     Object.values(ProjectUserRole),
   );
-  readonly searchTerm = signal('');
-  readonly searchResults = signal<User[]>([]);
-  readonly selectedUser = signal<User | null>(null);
-  readonly selectedUserRole = signal(ProjectUserRole.CONTRIBUTOR);
-  readonly isSearchOpen = signal(false);
+  readonly addingUser = signal(false);
 
   constructor(
     private store: Store,
@@ -65,7 +65,6 @@ export class ProjectUsersComponent implements OnInit {
     this.loading.set(true);
     this.error.set('');
     this.members.set([]);
-    this.clearSearch();
 
     try {
       this.users = await this.usersService.fetchUsers();
@@ -114,51 +113,64 @@ export class ProjectUsersComponent implements OnInit {
   }
 
   public async onAddUserClick(): Promise<void> {
-    const user = this.selectedUser();
+    if (!this.project.id) return;
 
-    if (!this.project.id || !user) return;
+    const modalRef = this.modalService.open(AddProjectUserModal, {
+      centered: true,
+    });
+    modalRef.componentInstance.users = this.availableUsers();
 
-    if (this.members().some((x) => x.projectUser.userId === user.id)) {
-      this.error.set('This user already belongs to the project.');
+    let result: AddProjectUserResult;
+
+    try {
+      result = await modalRef.result;
+    } catch {
       return;
     }
 
-    this.saving.set(user.id);
+    if (!result?.user) return;
+
+    await this.addProjectUser(result.user, result.role);
+  }
+
+  private availableUsers(): User[] {
+    const memberUserIds = new Set(
+      this.members().map((member) => member.projectUser.userId),
+    );
+
+    return this.users.filter((user) => !memberUserIds.has(user.id));
+  }
+
+  private async addProjectUser(
+    user: User,
+    role: ProjectUserRole,
+  ): Promise<void> {
+    this.addingUser.set(true);
     this.error.set('');
 
     try {
       const projectUser = new ProjectUser();
       projectUser.projectId = this.project.id;
       projectUser.userId = user.id;
-      projectUser.role = this.selectedUserRole();
+      projectUser.role = role;
       const savedProjectUser = await this.projectUserService.save(projectUser);
 
       this.members.set(
         this.sortMembers([
           ...this.members(),
-          {
-            projectUser: savedProjectUser,
-            user: user,
-          },
+          { projectUser: savedProjectUser, user },
         ]),
       );
 
       this.emitProjectUsers();
-      this.clearSearch();
-      this.refreshProjectsStore();
+      await this.refreshProjectsStore();
       this.toast.success('Project user added', 'Success');
     } catch (error: any) {
       this.error.set(error.message || 'Failed to add project user.');
       this.toast.error(this.error(), 'Error');
     } finally {
-      this.saving.set('');
+      this.addingUser.set(false);
     }
-  }
-
-  public onUserSelect(user: User): void {
-    this.selectedUser.set(user);
-    this.searchTerm.set(this.getSearchResultLabel(user));
-    this.isSearchOpen.set(false);
   }
 
   public async updateProjectUserRole(
@@ -224,43 +236,6 @@ export class ProjectUsersComponent implements OnInit {
     return this.saving() === member.projectUser.userId;
   }
 
-  public onSearchFocus(): void {
-    this.isSearchOpen.set(true);
-    this.searchProjectUsers();
-  }
-
-  public onSearchBlur(): void {
-    setTimeout(() => this.isSearchOpen.set(false), 150);
-  }
-
-  public onSearchTermChange(term: string): void {
-    this.searchTerm.set(term);
-    this.searchProjectUsers();
-  }
-
-  private searchProjectUsers(): void {
-    const term = this.searchTerm().trim().toLowerCase();
-    this.error.set('');
-    this.isSearchOpen.set(true);
-
-    const existingUserIds = new Set(
-      this.members().map((member) => member.projectUser.userId),
-    );
-
-    this.searchResults.set(
-      this.users.filter((user) => {
-        if (existingUserIds.has(user.id)) return false;
-
-        const searchableText = [user.name, user.surname, user.email, user.id]
-          .filter(Boolean)
-          .join(' ')
-          .toLowerCase();
-
-        return searchableText.includes(term);
-      }),
-    );
-  }
-
   public getDisplayName(user: User | null): string {
     return getUserDisplayName(user);
   }
@@ -287,24 +262,6 @@ export class ProjectUsersComponent implements OnInit {
     });
 
     this.projectChange.emit(project);
-  }
-
-  private clearSearch(): void {
-    this.searchTerm.set('');
-    this.searchResults.set([]);
-    this.selectedUser.set(null);
-    this.selectedUserRole.set(ProjectUserRole.CONTRIBUTOR);
-    this.isSearchOpen.set(false);
-  }
-
-  private getSearchResultLabel(user: User): string {
-    const displayName = this.getDisplayName(user);
-
-    if (displayName === user.email || !user.email) {
-      return displayName;
-    }
-
-    return `${displayName} · ${user.email}`;
   }
 
   private async refreshProjectsStore(): Promise<void> {
