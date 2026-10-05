@@ -158,6 +158,67 @@ describe('ProjectUsersComponent', () => {
     expect(toast.error).toHaveBeenCalledWith('Server said no', 'Error');
   });
 
+  async function createComponentWithMember() {
+    const existing = new ProjectUser();
+    existing.id = 'pu-1';
+    existing.userId = 'user-1';
+    existing.role = ProjectUserRole.CONTRIBUTOR;
+    await createComponent([existing]);
+  }
+
+  it('drops the labelled actions column header', async () => {
+    await createComponentWithMember();
+
+    const headers = fixture.debugElement
+      .queryAll(By.css('thead th'))
+      .map((th) => th.nativeElement as HTMLElement);
+
+    expect(headers.map((th) => th.textContent?.trim())).toEqual([
+      'User',
+      'Email',
+      'Role',
+      'Actions',
+    ]);
+
+    // The last header keeps its label for screen readers only.
+    const actionsHeader = headers[headers.length - 1];
+    expect(actionsHeader.querySelector('.visually-hidden')).not.toBeNull();
+    expect(actionsHeader.childNodes.length).toBe(1);
+  });
+
+  it('removes a member from a cross icon rather than a button', async () => {
+    await createComponentWithMember();
+
+    expect(
+      fixture.debugElement.query(By.css('.btn-outline-danger')),
+    ).toBeNull();
+
+    const action = fixture.debugElement.query(By.css('.member-action--remove'));
+    expect(action).not.toBeNull();
+
+    const element = action.nativeElement as HTMLButtonElement;
+    expect(element.getAttribute('aria-label')).toBe('Remove Ada Tester');
+    expect(element.querySelector('i.bi-x-lg')).not.toBeNull();
+
+    modalService.open.and.returnValue({ componentInstance: {} } as any);
+    element.click();
+
+    expect(modalService.open).toHaveBeenCalled();
+  });
+
+  it('swaps the cross for a spinner while the member is busy', async () => {
+    await createComponentWithMember();
+    component.saving.set('user-1');
+    fixture.detectChanges();
+
+    expect(
+      fixture.debugElement.query(By.css('.member-action--remove')),
+    ).toBeNull();
+    expect(
+      fixture.debugElement.query(By.css('.member-action-spinner')),
+    ).not.toBeNull();
+  });
+
   it('offers the dialog from the empty state too', async () => {
     await createComponent();
 

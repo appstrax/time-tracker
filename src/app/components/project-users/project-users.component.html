@@ -66,7 +66,9 @@
               <th scope="col">User</th>
               <th scope="col">Email</th>
               <th scope="col">Role</th>
-              <th scope="col" class="text-end">Actions</th>
+              <th scope="col" class="text-end">
+                <span class="visually-hidden">Actions</span>
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -114,20 +116,28 @@
                   </div>
                 </td>
                 <td class="text-end">
-                  <button
-                    type="button"
-                    class="btn btn-sm btn-outline-danger"
-                    (click)="onRemoveUserClick(member)"
-                    [disabled]="isMemberBusy(member)"
-                  >
+                  <div class="member-actions">
                     @if (isMemberBusy(member)) {
                       <span
-                        class="spinner-border spinner-border-sm me-2"
-                        aria-hidden="true"
-                      ></span>
+                        class="spinner-border spinner-border-sm member-action-spinner"
+                        role="status"
+                      >
+                        <span class="visually-hidden">Updating…</span>
+                      </span>
+                    } @else {
+                      <button
+                        type="button"
+                        class="member-action member-action--remove"
+                        [title]="'Remove ' + getDisplayName(member.user)"
+                        [attr.aria-label]="
+                          'Remove ' + getDisplayName(member.user)
+                        "
+                        (click)="onRemoveUserClick(member)"
+                      >
+                        <i class="bi bi-x-lg" aria-hidden="true"></i>
+                      </button>
                     }
-                    Remove
-                  </button>
+                  </div>
                 </td>
               </tr>
             }
