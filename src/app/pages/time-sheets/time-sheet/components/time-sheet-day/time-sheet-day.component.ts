@@ -29,6 +29,8 @@ export class TimeSheetDayComponent {
   public readonly projectColorById = input<Map<string, string>>(new Map());
   public readonly categories = input<string[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
+  /** Active project filter, or '' on "all projects". Seeds a new entry's project. */
+  public readonly defaultProjectId = input('');
 
   public readonly save = output<TimeSheetEntry | undefined>();
   public readonly entriesExpanded = signal(false);
@@ -134,6 +136,7 @@ export class TimeSheetDayComponent {
       timeSheetEntry,
       date: this.date(),
       categories: this.categories(),
+      defaultProjectId: this.defaultProjectId(),
     };
 
     const modalRef = this.modalService.open(TimeSheetEntryModal, {

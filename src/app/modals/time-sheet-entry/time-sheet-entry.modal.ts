@@ -18,11 +18,8 @@ import { ProjectDropdownComponent } from '@components';
 import { ToastService } from '@services';
 import {
   categorySuggestions,
-  clearStoredTimeSheetProjectId,
   FUTURE_TIMESHEET_ENTRY_TOAST,
-  getStoredTimeSheetProjectId,
   isCategoryAllowed,
-  storeTimeSheetProjectId,
   TimeSheetDisplayUtil,
   isFutureLocalCalendarDay,
 } from '@utils';
@@ -39,6 +36,9 @@ export class TimeSheetEntryModal
   @Input() timeSheetEntry = new TimeSheetEntry();
   @Input() categories!: string[];
   @Input() date!: Date;
+  /** The time sheet's active project filter, or '' on "all projects". A new
+   * entry starts on it; the dropdown opens empty when there is no filter. */
+  @Input() defaultProjectId = '';
 
   projects = computed(() => this.store.projects.projects());
 
@@ -93,14 +93,11 @@ export class TimeSheetEntryModal
       this.timeSheetEntry.fieldValues.map((fv) => fv.key),
     );
 
-    const projectId =
-      this.timeSheetEntry.projectId || getStoredTimeSheetProjectId();
+    const projectId = this.timeSheetEntry.projectId || this.defaultProjectId;
     if (projectId) {
       this.project = this.projects().find((x) => x.id === projectId);
       if (this.project) {
         this.timeSheetEntry.projectId = this.project.id;
-      } else if (!this.timeSheetEntry.projectId) {
-        clearStoredTimeSheetProjectId();
       }
     }
 
@@ -270,7 +267,6 @@ export class TimeSheetEntryModal
 
       this.pruneStaleFieldValues();
       this.timeSheetEntry.category = this.timeSheetEntry.category.trim();
-      storeTimeSheetProjectId(this.timeSheetEntry.projectId);
       this.clearCategoryDropdownCloseTimer();
       this.activeModal.close({
         action: 'save',
@@ -382,4 +378,5 @@ export interface TimeSheetEntryModalOptions {
   timeSheetEntry?: TimeSheetEntry;
   date: Date;
   categories: string[];
+  defaultProjectId?: string;
 }

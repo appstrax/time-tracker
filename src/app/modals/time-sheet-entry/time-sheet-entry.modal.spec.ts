@@ -11,7 +11,6 @@ import { TimeSheetDisplayUtil } from '@utils';
 import { TimeSheetEntryModal } from './time-sheet-entry.modal';
 
 describe('TimeSheetEntryComponent', () => {
-  const storageKey = 'timeSheet.lastProjectId';
   const project = {
     id: 'project-1',
     name: 'Alpha',
@@ -125,15 +124,12 @@ describe('TimeSheetEntryComponent', () => {
     }).compileComponents();
   });
 
-  afterEach(() => {
-    localStorage.removeItem(storageKey);
-  });
-
-  async function createComponent(): Promise<void> {
+  async function createComponent(defaultProjectId = ''): Promise<void> {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
     component.categories = [];
     component.date = new Date();
+    component.defaultProjectId = defaultProjectId;
     fixture.detectChanges();
     await fixture.whenStable();
   }
@@ -149,35 +145,48 @@ describe('TimeSheetEntryComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should preselect the last stored project for a new entry', async () => {
-    localStorage.setItem(storageKey, project.id);
-
-    await createComponent();
+  it('should preselect the active filter project for a new entry', async () => {
+    await createComponent(project.id);
 
     expect(component.project?.id).toBe(project.id);
     expect(component.timeSheetEntry.projectId).toBe(project.id);
   });
 
-  it('should not write to storage merely by selecting a project', async () => {
+  it('should leave the project empty for a new entry on "all projects"', async () => {
     await createComponent();
 
-    component.onProjectSelected(project);
-
-    expect(component.timeSheetEntry.projectId).toBe(project.id);
-    expect(localStorage.getItem(storageKey)).toBeNull();
+    expect(component.project).toBeUndefined();
+    expect(component.timeSheetEntry.projectId).toBe('');
   });
 
-  it('should store the selected project id only on save', async () => {
+  it('should not remember a saved entry\'s project for the next new entry', async () => {
     await createComponent();
-
     component.onProjectSelected(project);
     fillRequiredBaseFields();
     component.onSaveTimeSheetEntry();
 
-    expect(localStorage.getItem(storageKey)).toBe(project.id);
     expect(activeModal.close).toHaveBeenCalledWith(
       jasmine.objectContaining({ action: 'save' }),
     );
+
+    await createComponent();
+
+    expect(component.project).toBeUndefined();
+    expect(component.timeSheetEntry.projectId).toBe('');
+  });
+
+  it('should keep an existing entry\'s project over the active filter', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.defaultProjectId = project.id;
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectWithFields.id;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.project?.id).toBe(projectWithFields.id);
   });
 
   it('should expose no configured fields for a project with none', async () => {
@@ -322,9 +331,7 @@ describe('TimeSheetEntryComponent', () => {
   });
 
   it('should default a required boolean when the project is pre-selected on open', async () => {
-    localStorage.setItem(storageKey, projectWithRequiredBoolean.id);
-
-    await createComponent();
+    await createComponent(projectWithRequiredBoolean.id);
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 

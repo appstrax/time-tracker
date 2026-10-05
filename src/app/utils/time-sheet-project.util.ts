@@ -2,7 +2,9 @@ import { Project } from '@models';
 
 import { ColorList } from './color-list';
 
-const LAST_SELECTED_PROJECT_KEY = 'timeSheet.lastProjectId';
+/** The time sheet page's project filter. Absent means "all projects". The entry
+ * modal has no persisted default of its own — it seeds from this filter. */
+const FILTER_PROJECT_KEY = 'timeSheet.filterProjectId';
 
 /** Theme tag colours plus mixes — still derived from `--tag-*` and `--color-bg`. */
 const TAG_MIXES = [
@@ -113,23 +115,23 @@ export function pickNewProjectColor(projects: Project[], seed: string): string {
   );
 }
 
-export function getStoredTimeSheetProjectId(): string | null {
+export function getStoredTimeSheetFilterProjectId(): string | null {
   try {
-    return localStorage.getItem(LAST_SELECTED_PROJECT_KEY);
+    return localStorage.getItem(FILTER_PROJECT_KEY);
   } catch {
     return null;
   }
 }
 
-export function storeTimeSheetProjectId(projectId: string): void {
+export function storeTimeSheetFilterProjectId(projectId: string): void {
   if (!projectId) return;
   try {
-    localStorage.setItem(LAST_SELECTED_PROJECT_KEY, projectId);
+    localStorage.setItem(FILTER_PROJECT_KEY, projectId);
   } catch {}
 }
 
-export function clearStoredTimeSheetProjectId(): void {
+export function clearStoredTimeSheetFilterProjectId(): void {
   try {
-    localStorage.removeItem(LAST_SELECTED_PROJECT_KEY);
+    localStorage.removeItem(FILTER_PROJECT_KEY);
   } catch {}
 }
