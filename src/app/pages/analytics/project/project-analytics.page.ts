@@ -1,6 +1,7 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AnalyticsFilter, Project, TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService, UsersService } from '@services';
@@ -38,6 +39,7 @@ const localDayKey = (date: Date): string => {
     RouterLink,
     DatePipe,
     DecimalPipe,
+    NgbTooltipModule,
     AnalyticsFiltersComponent,
     MetricCardComponent,
   ],
@@ -216,6 +218,7 @@ export class ProjectAnalyticsPage implements OnInit {
   }
 
   public async setApproved(entry: TimeSheetEntry, approved: boolean): Promise<void> {
+    if (entry.approved === approved) return;
     await this.saveStatus([entry], approved);
   }
 
@@ -224,6 +227,17 @@ export class ProjectAnalyticsPage implements OnInit {
       day.entries.filter((e) => !e.approved),
       true,
     );
+  }
+
+  public async declineDay(day: DayGroup): Promise<void> {
+    await this.saveStatus(
+      day.entries.filter((e) => e.approved),
+      false,
+    );
+  }
+
+  public isDayBusy(day: DayGroup): boolean {
+    return day.entries.some((entry) => this.isBusy(entry.id));
   }
 
   private async saveStatus(
@@ -242,7 +256,7 @@ export class ProjectAnalyticsPage implements OnInit {
         );
       }
       this.toast.success(
-        approved ? 'Time entries approved' : 'Time entry marked pending',
+        approved ? 'Time entries approved' : 'Time entries declined',
       );
     } catch {
       this.toast.error('Error updating time entry status');

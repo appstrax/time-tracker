@@ -138,7 +138,7 @@ export class UnapprovedEntriesComponent {
       const savedEntry = await this.timeSheetEntryService.save(toSave);
       this.entryUpdated.emit(savedEntry);
       this.toastService.success(
-        approved ? 'Time entry approved' : 'Time entry marked pending',
+        approved ? 'Time entry approved' : 'Time entry declined',
       );
       return savedEntry;
     } catch {

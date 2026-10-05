@@ -107,44 +107,43 @@
               </span>
 
               @if (canManageStatus && onEntryStatusChange) {
-                @if (!entry.approved) {
-                  <button
-                    type="button"
-                    class="btn btn-success entry-card__approve"
-                    (click)="setEntryStatus(entry, true)"
-                    [disabled]="isProcessingEntry(entry.id)"
-                  >
-                    @if (isProcessingEntry(entry.id)) {
-                      <span
-                        class="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span class="visually-hidden">Updating…</span>
-                      </span>
-                    } @else {
+                <div
+                  class="entry-card__actions"
+                  role="group"
+                  aria-label="Approval status"
+                >
+                  @if (isProcessingEntry(entry.id)) {
+                    <span
+                      class="spinner-border spinner-border-sm entry-card__spinner"
+                      role="status"
+                    >
+                      <span class="visually-hidden">Updating…</span>
+                    </span>
+                  } @else if (entry.approved) {
+                    <button
+                      type="button"
+                      class="entry-card__action entry-card__action--decline"
+                      title="Undo approval"
+                      aria-label="Undo approval"
+                      (click)="setEntryStatus(entry, false)"
+                    >
+                      <i
+                        class="bi bi-arrow-counterclockwise"
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="entry-card__action entry-card__action--approve"
+                      title="Approve"
+                      aria-label="Approve"
+                      (click)="setEntryStatus(entry, true)"
+                    >
                       <i class="bi bi-check-lg" aria-hidden="true"></i>
-                      Approve
-                    }
-                  </button>
-                } @else {
-                  <button
-                    type="button"
-                    class="btn btn-outline-secondary entry-card__approve"
-                    (click)="setEntryStatus(entry, false)"
-                    [disabled]="isProcessingEntry(entry.id)"
-                  >
-                    @if (isProcessingEntry(entry.id)) {
-                      <span
-                        class="spinner-border spinner-border-sm"
-                        role="status"
-                      >
-                        <span class="visually-hidden">Updating…</span>
-                      </span>
-                    } @else {
-                      Mark pending
-                    }
-                  </button>
-                }
+                    </button>
+                  }
+                </div>
               }
             </div>
           </div>
