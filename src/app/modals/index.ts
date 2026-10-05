@@ -1,3 +1,4 @@
+export * from './add-project-user/add-project-user.modal';
 export * from './agent-token-created/agent-token-created.modal';
 export * from './change-password/change-password.modal';
 export * from './confirm/confirm.modal';
