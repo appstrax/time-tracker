@@ -88,6 +88,7 @@
             </div>
           </div>
 
+          <div class="logo-color-row">
           <div class="form-group">
             <label>Project logo</label>
             <div class="logo-upload-row">
@@ -119,6 +120,30 @@
             />
           </div>
 
+          <fieldset class="color-fieldset">
+            <legend>Project colour</legend>
+            <div class="color-swatches">
+              @for (option of colorOptions; track option.value) {
+              <label
+                class="color-swatch"
+                [class.selected]="option.value === displayColor()"
+                [style.background-color]="option.value"
+              >
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="projectColor"
+                  [value]="option.value"
+                  [checked]="option.value === displayColor()"
+                  (change)="updateProjectColor(option.value)"
+                />
+                <span class="visually-hidden">{{ option.label }}</span>
+              </label>
+              }
+            </div>
+          </fieldset>
+          </div>
+
           @if (error()) {
           <div class="alert alert-danger mb-0">{{ error() }}</div>
           }
@@ -138,26 +163,14 @@
         </div>
 
         <div class="project-preview-tile">
-          @if (logoPreviewUrl()) {
-          <img
-            [src]="logoPreviewUrl()"
-            alt="Logo preview"
-            class="logo-preview-image"
+          <app-project-preview
+            [logoUrl]="logoPreviewUrl()"
+            [color]="displayColor()"
+            [name]="project().name"
+            [description]="project().description"
+            namePlaceholder="Your project name"
+            descriptionPlaceholder="Add a short description to help teammates understand the project at a glance."
           />
-          } @else {
-          <div class="logo-preview-fallback" aria-hidden="true">
-            <i class="bi bi-kanban"></i>
-          </div>
-          }
-
-          <div>
-            <div class="preview-title">
-              {{ project().name || 'Your project name' }}
-            </div>
-            <p class="preview-description">
-              {{ project().description || 'Add a short description to help teammates understand the project at a glance.' }}
-            </p>
-          </div>
         </div>
 
         <div class="preview-points">

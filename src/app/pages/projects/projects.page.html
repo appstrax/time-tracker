@@ -54,15 +54,12 @@
           (keydown.enter)="goToProject(project)"
           (keydown.space)="goToProject(project); $event.preventDefault()"
         >
-          <span
-            class="project-color-bar"
-            [style.background-color]="projectColor(project)"
-            aria-hidden="true"
-          ></span>
-          <h2 class="project-name">{{ project.name || 'Untitled project' }}</h2>
-          <p class="project-description">
-            {{ project.description || 'No description provided.' }}
-          </p>
+          <app-project-preview
+            [logoUrl]="project.logoUrl"
+            [color]="projectColor(project)"
+            [name]="project.name"
+            [description]="project.description"
+          />
           <div class="project-card-footer">
             <div
               class="avatar-stack"
