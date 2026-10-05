@@ -4,7 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService, UsersService } from '@services';
-import { ProjectPreviewComponent } from '@components';
+import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
 import { Store } from '@state';
 import {
   TimeSheetExportUtil,
@@ -13,11 +13,7 @@ import {
 } from '@utils';
 
 import { filterAnalyticsEntries, formatDateInput } from './analytics-filter.util';
-import {
-  AnalyticsFiltersComponent,
-  InsightsChartsComponent,
-  MetricCardComponent,
-} from './components';
+import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
 
 interface ProjectRow {
   id: string;

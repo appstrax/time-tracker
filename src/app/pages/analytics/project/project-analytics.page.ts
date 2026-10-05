@@ -247,25 +247,57 @@ export class ProjectAnalyticsPage implements OnInit {
     if (!entries.length) return;
     this.busy.update((set) => new Set([...set, ...entries.map((e) => e.id)]));
     try {
-      for (const entry of entries) {
-        const toSave = entry.clone();
-        toSave.approved = approved;
-        const saved = await this.entryService.save(toSave);
+      const results = await Promise.allSettled(
+        entries.map(async (entry) => {
+          const toSave = entry.clone();
+          toSave.approved = approved;
+          return this.entryService.save(toSave);
+        }),
+      );
+      const saved = results
+        .filter(
+          (r): r is PromiseFulfilledResult<TimeSheetEntry> =>
+            r.status === 'fulfilled',
+        )
+        .map((r) => r.value);
+      const failedCount = results.length - saved.length;
+
+      if (saved.length) {
+        const byId = new Map(saved.map((e) => [e.id, e]));
         this.entries.update((list) =>
-          list.map((e) => (e.id === saved.id ? saved : e)),
+          list.map((e) => byId.get(e.id) ?? e),
         );
       }
+
+      if (failedCount) {
+        await this.reloadEntriesAfterStatusError();
+        const total = entries.length;
+        this.toast.error(
+          failedCount === total
+            ? 'Error updating time entry status'
+            : `${failedCount} of ${total} time entries could not be updated. List refreshed from server.`,
+        );
+        return;
+      }
+
       this.toast.success(
         approved ? 'Time entries approved' : 'Time entries declined',
       );
-    } catch {
-      this.toast.error('Error updating time entry status');
     } finally {
       this.busy.update((set) => {
         const next = new Set(set);
         entries.forEach((e) => next.delete(e.id));
         return next;
       });
+    }
+  }
+
+  private async reloadEntriesAfterStatusError(): Promise<void> {
+    try {
+      const fresh = await this.entryService.findByProjectId([this.projectId()]);
+      this.entries.set(fresh);
+    } catch {
+      this.toast.error('Failed to refresh time sheet entries');
     }
   }
 

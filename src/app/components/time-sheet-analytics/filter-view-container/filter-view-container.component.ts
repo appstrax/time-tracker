@@ -19,7 +19,7 @@ import { FilterViewSummaryComponent } from '../filter-view-summary/filter-view-s
 import { FilterViewDetailsComponent } from '../filter-view-details/filter-view-details.component';
 import { FilterViewTimelineComponent } from '../filter-view-timeline/filter-view-timeline.component';
 import { UnapprovedEntriesComponent } from '../unapproved-entries/unapproved-entries.component';
-import { InsightsChartsComponent } from '../../../pages/analytics/components/insights-charts/insights-charts.component';
+import { InsightsChartsComponent } from '../../insights-charts/insights-charts.component';
 import { FilterBlockComponent } from '../filter-block/filter-block.component';
 import {
   TimeSheetEntry,

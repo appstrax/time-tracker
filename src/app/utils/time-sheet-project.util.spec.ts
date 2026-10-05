@@ -3,6 +3,7 @@ import { Project } from '@models';
 import {
   buildProjectColorMap,
   getProjectColor,
+  getStoredTimeSheetFilterProjectId,
   getThemeProjectColorOptions,
   getThemeProjectColorSlots,
   hashProjectId,
@@ -10,6 +11,21 @@ import {
 } from './time-sheet-project.util';
 
 describe('time-sheet-project.util', () => {
+  const filterKey = 'timeSheet.filterProjectId';
+  const legacyKey = 'timeSheet.lastProjectId';
+
+  afterEach(() => {
+    localStorage.removeItem(filterKey);
+    localStorage.removeItem(legacyKey);
+  });
+
+  it('migrates legacy filter project id from localStorage', () => {
+    localStorage.setItem(legacyKey, 'project-legacy');
+    expect(getStoredTimeSheetFilterProjectId()).toBe('project-legacy');
+    expect(localStorage.getItem(filterKey)).toBe('project-legacy');
+    expect(localStorage.getItem(legacyKey)).toBeNull();
+  });
+
   function project(id: string): Project {
     const p = new Project();
     p.id = id;

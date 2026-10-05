@@ -5,6 +5,7 @@ import { ColorList } from './color-list';
 /** The time sheet page's project filter. Absent means "all projects". The entry
  * modal has no persisted default of its own — it seeds from this filter. */
 const FILTER_PROJECT_KEY = 'timeSheet.filterProjectId';
+const LEGACY_FILTER_PROJECT_KEY = 'timeSheet.lastProjectId';
 
 /** Theme tag colours plus mixes — still derived from `--tag-*` and `--color-bg`. */
 const TAG_MIXES = [
@@ -117,7 +118,17 @@ export function pickNewProjectColor(projects: Project[], seed: string): string {
 
 export function getStoredTimeSheetFilterProjectId(): string | null {
   try {
-    return localStorage.getItem(FILTER_PROJECT_KEY);
+    const stored = localStorage.getItem(FILTER_PROJECT_KEY);
+    if (stored !== null) {
+      return stored;
+    }
+    const legacy = localStorage.getItem(LEGACY_FILTER_PROJECT_KEY);
+    if (!legacy) {
+      return null;
+    }
+    localStorage.setItem(FILTER_PROJECT_KEY, legacy);
+    localStorage.removeItem(LEGACY_FILTER_PROJECT_KEY);
+    return legacy;
   } catch {
     return null;
   }
