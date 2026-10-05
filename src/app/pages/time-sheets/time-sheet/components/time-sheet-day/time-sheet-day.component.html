@@ -15,7 +15,6 @@
     (onCreateEntry)="openTimeSheetEntryModal($event)"
     [projects]="projects()"
     [entries]="sortedEntries()"
-    [disabled]="approved()"
     [allowCreate]="!isFutureDay()"
   />
 
@@ -46,7 +45,7 @@
             <button
               type="button"
               class="entry-row"
-              [disabled]="approved()"
+              [disabled]="entry.approved"
               (click)="openTimeSheetEntryModal(entry)"
             >
               <span class="entry-leading">

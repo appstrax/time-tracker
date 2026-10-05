@@ -33,10 +33,6 @@ export class TimeSheetDayComponent {
   public readonly save = output<TimeSheetEntry | undefined>();
   public readonly entriesExpanded = signal(false);
 
-  public readonly approved = computed(() =>
-    this.entries().some((entry) => entry.approved),
-  );
-
   public readonly isFutureDay = computed(() =>
     isFutureLocalCalendarDay(this.date()),
   );
