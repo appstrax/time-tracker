@@ -16,6 +16,7 @@ import {
 import {
   filterAnalyticsEntries,
   formatDateInput,
+  userCategoryOptions,
 } from '../analytics-filter.util';
 import { AnalyticsFiltersComponent, MetricCardComponent } from '../components';
 
@@ -81,11 +82,41 @@ export class ProjectAnalyticsPage implements OnInit {
     () => new Map(this.users().map((u) => [u.id, u])),
   );
 
-  public readonly categories = computed(() =>
-    this.project()
-      ? categoryFilterOptions(this.entries(), [this.project()!], this.projectId())
-      : [],
-  );
+  /**
+   * People the team member filter offers here: this project's members plus
+   * anyone who has logged time on it, so an ex-member's hours stay reachable.
+   * A user already selected in the filter is kept on the list even if they
+   * match neither, so the dropdown reflects what is applied.
+   */
+  public readonly filterUsers = computed<User[]>(() => {
+    const members = this.project()?.users ?? [];
+    const contributorIds = this.entries().map((entry) => entry.userId);
+    const relatedIds = new Set([
+      ...members.map((member) => member.id),
+      ...contributorIds,
+    ]);
+    if (!relatedIds.size) return this.users();
+
+    const scoped = this.users().filter((user) => relatedIds.has(user.id));
+
+    const selectedId = this.filter().userId;
+    if (selectedId && !relatedIds.has(selectedId)) {
+      const selected = this.usersById().get(selectedId);
+      if (selected) return [...scoped, selected];
+    }
+
+    return scoped;
+  });
+
+  public readonly categories = computed(() => {
+    const project = this.project();
+    if (!project) return [];
+
+    const userId = this.filter().userId;
+    if (userId) return userCategoryOptions(this.entries(), userId);
+
+    return categoryFilterOptions(this.entries(), [project], this.projectId());
+  });
 
   public readonly filteredEntries = computed(() =>
     filterAnalyticsEntries(this.entries(), this.filter()),
