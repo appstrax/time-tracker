@@ -84,13 +84,14 @@
               [routerLink]="['/analytics', row.id]"
               queryParamsHandling="preserve"
             >
-              <span class="cell-project">
-                <i class="swatch" [style.background]="row.color"></i>
-                <span class="project-copy">
-                  <b>{{ row.name }}</b>
-                  <small>{{ row.description }}</small>
-                </span>
-              </span>
+              <app-project-preview
+                class="cell-project"
+                [compact]="true"
+                [logoUrl]="row.logoUrl"
+                [color]="row.color"
+                [name]="row.name"
+                [description]="row.description"
+              />
               <span class="cell-approval">
                 <span class="approval-track">
                   <span

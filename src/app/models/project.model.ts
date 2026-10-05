@@ -7,6 +7,7 @@ export class Project extends Model {
   name: string = '';
   description: string = '';
   logoUrl: string = '';
+  color: string = '';
 
   users: User[] = [];
   fields: ProjectField[] = [];

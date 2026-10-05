@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 
 import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService, UsersService } from '@services';
+import { ProjectPreviewComponent } from '@components';
 import { Store } from '@state';
 import {
   TimeSheetExportUtil,
@@ -22,6 +23,7 @@ interface ProjectRow {
   id: string;
   name: string;
   description: string;
+  logoUrl: string;
   color: string;
   hours: number;
   approved: number;
@@ -41,6 +43,7 @@ interface ProjectRow {
     AnalyticsFiltersComponent,
     InsightsChartsComponent,
     MetricCardComponent,
+    ProjectPreviewComponent,
   ],
   templateUrl: './analytics.page.html',
   styleUrl: './analytics.page.scss',
@@ -104,6 +107,7 @@ export class AnalyticsPage implements OnInit {
           id: project.id,
           name: project.name,
           description: project.description,
+          logoUrl: project.logoUrl,
           color: colors.get(project.id) ?? 'var(--color-primary)',
           hours,
           approved,
