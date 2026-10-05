@@ -3,6 +3,7 @@ import { Project } from '@models';
 import {
   buildProjectColorMap,
   getProjectColor,
+  getThemeProjectColorOptions,
   getThemeProjectColorSlots,
   hashProjectId,
   pickNewProjectColor,
@@ -57,6 +58,30 @@ describe('time-sheet-project.util', () => {
 
     expect(pickNewProjectColor([], 'seed')).toBe(slots[0]);
     expect(pickNewProjectColor([taken], 'seed')).toBe(slots[1]);
+  });
+
+  it('pickNewProjectColor skips a colour derived for a project with no stored colour', () => {
+    const slots = getThemeProjectColorSlots();
+    let id = 'legacy';
+    let n = 0;
+    while (hashProjectId(id) % slots.length !== 0) {
+      n += 1;
+      id = `legacy-${n}`;
+    }
+
+    const legacy = project(id);
+    expect(buildProjectColorMap([legacy]).get(legacy.id)).toBe(slots[0]);
+    expect(pickNewProjectColor([legacy], 'seed')).toBe(slots[1]);
+  });
+
+  it('gives each palette slot a distinct accessible name', () => {
+    const options = getThemeProjectColorOptions();
+    const slots = getThemeProjectColorSlots();
+
+    expect(options.map((option) => option.value)).toEqual(slots);
+    expect(new Set(options.map((option) => option.label)).size).toBe(
+      options.length,
+    );
   });
 
   it('hashProjectId is deterministic', () => {

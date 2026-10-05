@@ -120,23 +120,28 @@
             />
           </div>
 
-          <div class="form-group">
-            <label>Project colour</label>
-            <div class="color-swatches" role="radiogroup" aria-label="Project colour">
-              @for (color of colorOptions; track color) {
-              <button
-                type="button"
+          <fieldset class="color-fieldset">
+            <legend>Project colour</legend>
+            <div class="color-swatches">
+              @for (option of colorOptions; track option.value) {
+              <label
                 class="color-swatch"
-                role="radio"
-                [class.selected]="color === displayColor()"
-                [style.background-color]="color"
-                [attr.aria-checked]="color === displayColor()"
-                aria-label="Select colour"
-                (click)="updateProjectColor(color)"
-              ></button>
+                [class.selected]="option.value === displayColor()"
+                [style.background-color]="option.value"
+              >
+                <input
+                  class="visually-hidden"
+                  type="radio"
+                  name="projectColor"
+                  [value]="option.value"
+                  [checked]="option.value === displayColor()"
+                  (change)="updateProjectColor(option.value)"
+                />
+                <span class="visually-hidden">{{ option.label }}</span>
+              </label>
               }
             </div>
-          </div>
+          </fieldset>
           </div>
 
           @if (error()) {

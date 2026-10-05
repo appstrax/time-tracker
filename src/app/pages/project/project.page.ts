@@ -8,13 +8,24 @@ import { Project, ProjectField, ProjectFieldType, ProjectUser, ProjectUserRole }
 import { Store } from '@state';
 import { ProjectPreviewComponent, ProjectUsersComponent } from '@components';
 import {
-  getProjectColor,
-  getThemeProjectColorSlots,
+  buildProjectColorMap,
+  getThemeProjectColorOptions,
   normalizeProjectCategories,
   pickNewProjectColor,
   seedNewProjectCategories,
   validateProjectCategoryPolicy,
 } from '@utils';
+
+function sameColorSources(left: Project[], right: Project[]): boolean {
+  if (left === right) return true;
+  if (left.length !== right.length) return false;
+  for (let i = 0; i < left.length; i++) {
+    if (left[i].id !== right[i].id || left[i].color !== right[i].color) {
+      return false;
+    }
+  }
+  return true;
+}
 
 @Component({
   selector: 'app-create-project',
@@ -37,13 +48,34 @@ export class ProjectPage implements OnInit {
   readonly logoFile = signal<File | null>(null);
   readonly logoPreviewUrl = signal<string | null>(null);
   readonly projectUsersCount = computed(() => this.project().users.length);
-  readonly colorOptions = getThemeProjectColorSlots();
-  /** Stored colour, or the derived one for projects that predate stored colours. */
-  readonly displayColor = computed(
-    () =>
-      this.project().color ||
-      getProjectColor(this.project().id, this.store.projects.projects()),
+  readonly colorOptions = getThemeProjectColorOptions();
+  /** Stable across form edits, so the colour map is not rebuilt on each keystroke. */
+  private readonly colorSourceProjects = computed(
+    () => {
+      const projects = this.store.projects.projects();
+      const current = this.project();
+      if (
+        current.color ||
+        !current.id ||
+        projects.some((item) => item.id === current.id)
+      ) {
+        return projects;
+      }
+      return [...projects, Object.assign(new Project(), { id: current.id })];
+    },
+    { equal: sameColorSources },
   );
+  private readonly projectColorById = computed(() =>
+    buildProjectColorMap(this.colorSourceProjects()),
+  );
+  /** Stored colour, or the derived one for projects that predate stored colours. */
+  readonly displayColor = computed(() => {
+    const project = this.project();
+    if (project.color) return project.color;
+    return (
+      this.projectColorById().get(project.id) ?? this.colorOptions[0].value
+    );
+  });
 
   readonly fieldTypeOptions: { value: ProjectFieldType; label: string }[] = [
     { value: 'text', label: 'Text' },

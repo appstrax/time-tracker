@@ -5,16 +5,44 @@ import { ColorList } from './color-list';
 const LAST_SELECTED_PROJECT_KEY = 'timeSheet.lastProjectId';
 
 /** Theme tag colours plus mixes — still derived from `--tag-*` and `--color-bg`. */
-const TAG_MIX_STOPS = [82, 68, 54] as const;
+const TAG_MIXES = [
+  { stop: 82, tone: 'Light' },
+  { stop: 68, tone: 'Lighter' },
+  { stop: 54, tone: 'Lightest' },
+] as const;
 
-export function getThemeProjectColorSlots(): string[] {
-  const slots: string[] = [...ColorList.tagThemeVars];
-  for (const tag of ColorList.tagThemeVars) {
-    for (const stop of TAG_MIX_STOPS) {
-      slots.push(`color-mix(in srgb, ${tag} ${stop}%, var(--color-bg))`);
+export interface ThemeProjectColorOption {
+  value: string;
+  label: string;
+}
+
+function themeTagLabel(tag: string): string {
+  const name = tag.match(/--tag-([a-z0-9-]+)/i)?.[1] ?? 'colour';
+  return name.charAt(0).toUpperCase() + name.slice(1);
+}
+
+export function getThemeProjectColorOptions(): ThemeProjectColorOption[] {
+  const tags = ColorList.tagThemeVars;
+  const options: ThemeProjectColorOption[] = tags.map((tag) => ({
+    value: tag,
+    label: themeTagLabel(tag),
+  }));
+
+  for (const tag of tags) {
+    const name = themeTagLabel(tag).toLowerCase();
+    for (const mix of TAG_MIXES) {
+      options.push({
+        value: `color-mix(in srgb, ${tag} ${mix.stop}%, var(--color-bg))`,
+        label: `${mix.tone} ${name}`,
+      });
     }
   }
-  return slots;
+
+  return options;
+}
+
+export function getThemeProjectColorSlots(): string[] {
+  return getThemeProjectColorOptions().map((option) => option.value);
 }
 
 export function hashProjectId(projectId: string): number {
@@ -75,10 +103,10 @@ export function getProjectColor(projectId: string, projects: Project[]): string 
   return map.get(projectId) ?? ColorList.tagThemeVars[0];
 }
 
-/** Colour for a new project: the first unused palette slot, else a stable pick from the seed. */
+/** Colour for a new project: the first slot not already shown, else a stable pick from the seed. */
 export function pickNewProjectColor(projects: Project[], seed: string): string {
   const slots = getThemeProjectColorSlots();
-  const used = new Set(projects.map((project) => project.color));
+  const used = new Set(buildProjectColorMap(projects).values());
   return (
     slots.find((slot) => !used.has(slot)) ??
     slots[hashProjectId(seed) % slots.length]
