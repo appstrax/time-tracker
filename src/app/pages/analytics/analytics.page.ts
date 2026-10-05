@@ -12,7 +12,11 @@ import {
   getUserDisplayName,
 } from '@utils';
 
-import { filterAnalyticsEntries, formatDateInput } from './analytics-filter.util';
+import {
+  filterAnalyticsEntries,
+  formatDateInput,
+  scopeProjectsToUser,
+} from './analytics-filter.util';
 import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
 
 interface ProjectRow {
@@ -58,9 +62,21 @@ export class AnalyticsPage implements OnInit {
   public readonly users = signal<User[]>([]);
   public readonly filter = signal<AnalyticsFilter>({});
 
-  public readonly filteredEntries = computed(() =>
-    filterAnalyticsEntries(this.entries(), this.filter()),
+  /**
+   * Projects the selected team member is in or has logged time on (all of them
+   * when nobody is selected). Scoped against the unfiltered entries so changing
+   * the date range never makes a project vanish from the list.
+   */
+  public readonly visibleProjects = computed(() =>
+    scopeProjectsToUser(this.projects(), this.filter().userId, this.entries()),
   );
+
+  public readonly filteredEntries = computed(() => {
+    const visibleIds = new Set(this.visibleProjects().map((p) => p.id));
+    return filterAnalyticsEntries(this.entries(), this.filter()).filter((e) =>
+      visibleIds.has(e.projectId),
+    );
+  });
 
   public readonly totals = computed(() => {
     const entries = this.filteredEntries();
@@ -84,7 +100,7 @@ export class AnalyticsPage implements OnInit {
     const usersById = new Map(this.users().map((u) => [u.id, u]));
     const entries = this.filteredEntries();
 
-    return this.projects()
+    return this.visibleProjects()
       .map((project) => {
         const own = entries.filter((e) => e.projectId === project.id);
         const approved = own

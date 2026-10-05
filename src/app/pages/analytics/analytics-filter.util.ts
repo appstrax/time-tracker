@@ -1,4 +1,4 @@
-import { AnalyticsFilter, TimeSheetEntry } from '@models';
+import { AnalyticsFilter, Project, TimeSheetEntry } from '@models';
 
 /** Applies the shared analytics filter (dates, user, category, status) to entries. */
 export function filterAnalyticsEntries(
@@ -14,6 +14,44 @@ export function filterAnalyticsEntries(
     if (filter.status === 'pending' && e.approved) return false;
     return true;
   });
+}
+
+/**
+ * Narrows projects to the ones the selected team member belongs to, plus any
+ * they have logged time on — so hours stay reachable after they are removed
+ * from a project.
+ */
+export function scopeProjectsToUser(
+  projects: Project[],
+  userId: string | undefined,
+  entries: TimeSheetEntry[],
+): Project[] {
+  if (!userId) return projects;
+
+  const loggedProjectIds = new Set(
+    entries.filter((e) => e.userId === userId).map((e) => e.projectId),
+  );
+
+  return projects.filter(
+    (project) =>
+      (project.users ?? []).some((user) => user.id === userId) ||
+      loggedProjectIds.has(project.id),
+  );
+}
+
+/** Categories the selected team member has actually logged, sorted. */
+export function userCategoryOptions(
+  entries: TimeSheetEntry[],
+  userId: string,
+): string[] {
+  return [
+    ...new Set(
+      entries
+        .filter((entry) => entry.userId === userId)
+        .map((entry) => entry.category?.trim())
+        .filter((category): category is string => !!category),
+    ),
+  ].sort();
 }
 
 export function formatDateInput(date?: Date): string {

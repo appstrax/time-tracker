@@ -23,7 +23,7 @@
     </header>
 
     <app-analytics-filters
-      [users]="users()"
+      [users]="filterUsers()"
       [categories]="categories()"
       [showCategory]="true"
       (filterChange)="onFilterChange($event)"
