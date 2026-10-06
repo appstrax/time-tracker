@@ -476,6 +476,14 @@ select:-webkit-autofill {
   font-weight: 700;
 }
 
+.timeline-entry-tooltip-approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+  font-weight: 700;
+}
+
 /* Themed global scrollbar */
 html {
   scrollbar-width: thin;
