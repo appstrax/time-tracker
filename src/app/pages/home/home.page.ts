@@ -1,18 +1,41 @@
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 
-import { FilterView, FilterViewContainerComponent } from '@components';
-import { TimeSheetEntry, User } from '@models';
+import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
+import { AnalyticsFilter, TimeSheetEntry, UserRole } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
 import { TimeSheetFilterUtil } from '@utils';
+
+import {
+  filterAnalyticsEntries,
+  scopeProjectsToUser,
+} from '../analytics/analytics-filter.util';
+import {
+  ProjectRow,
+  buildProjectRows,
+  summarizeEntries,
+} from '../analytics/analytics-rows.util';
+import {
+  AnalyticsFiltersComponent,
+  MetricCardComponent,
+} from '../analytics/components';
 
 @Component({
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [FilterViewContainerComponent],
+  imports: [
+    RouterLink,
+    DatePipe,
+    DecimalPipe,
+    AnalyticsFiltersComponent,
+    InsightsChartsComponent,
+    MetricCardComponent,
+    ProjectPreviewComponent,
+  ],
 })
 export class HomePage {
   private readonly store = inject(Store);
@@ -28,16 +51,36 @@ export class HomePage {
   public readonly isLoading = signal(true);
   public readonly hasLoaded = signal(false);
   public readonly entries = signal<TimeSheetEntry[]>([]);
-  public readonly filteredEntryCount = signal(0);
-  public readonly projects = computed(() => this.store.projects.projects());
+  public readonly filter = signal<AnalyticsFilter>({});
+  /**
+   * Projects the signed-in user is assigned to (including ones with no time
+   * logged yet) or has logged time on. A regular user's store already holds
+   * only their projects, and their `users` lists are not populated, so only
+   * admins, whose store holds every project, need scoping — the way the admin
+   * analytics page scopes a selected team member.
+   */
+  public readonly projects = computed(() => {
+    const all = this.store.projects.projects();
+    const user = this.store.user.user();
+    if (user?.role !== UserRole.ADMIN) return all;
+    return scopeProjectsToUser(all, user.id, this.entries());
+  });
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
-  public readonly noUsers: User[] = [];
-  public readonly homeAvailableViews: FilterView[] = [
-    'summary',
-    'details',
-    'timeline',
-  ];
+  public readonly filteredEntries = computed(() =>
+    filterAnalyticsEntries(this.entries(), this.filter()),
+  );
+  public readonly totals = computed(() =>
+    summarizeEntries(this.filteredEntries()),
+  );
+  public readonly rows = computed<ProjectRow[]>(() =>
+    buildProjectRows(
+      this.projects(),
+      this.filteredEntries(),
+      [],
+      this.store.projects.projects(),
+    ),
+  );
 
   private latestLoadId = 0;
   /** Bounds key for which `entries` was last loaded successfully. */
@@ -62,7 +105,6 @@ export class HomePage {
         this.isLoading.set(false);
         this.hasLoaded.set(true);
         this.entries.set([]);
-        this.filteredEntryCount.set(0);
         this.loadedBoundsKey = null;
         this.pendingBoundsKey = null;
         return;
@@ -84,7 +126,6 @@ export class HomePage {
       this.loadedBoundsKey = null;
       this.isLoading.set(true);
       this.entries.set([]);
-      this.filteredEntryCount.set(0);
       void this.loadEntriesForRange(user.id, start, end, boundsKey);
     });
   }
@@ -131,13 +172,7 @@ export class HomePage {
     }
   }
 
-  public onFilteredEntryCountChange(count: number): void {
-    this.filteredEntryCount.set(count);
-  }
-
-  public onEntryUpdated(entry: TimeSheetEntry): void {
-    this.entries.update((entries) =>
-      entries.map((e) => (e.id === entry.id ? entry : e)),
-    );
+  public onFilterChange(filter: AnalyticsFilter): void {
+    this.filter.set(filter);
   }
 }

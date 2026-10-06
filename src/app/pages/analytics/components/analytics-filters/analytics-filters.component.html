@@ -46,19 +46,21 @@
     </select>
   </label>
 
-  <label class="pill">
-    <span class="pill-label">Team member</span>
-    <select
-      [ngModel]="filter().userId ?? ''"
-      (ngModelChange)="onUser($event)"
-      aria-label="Team member"
-    >
-      <option value="">Everyone</option>
-      @for (user of users(); track user.id) {
-        <option [value]="user.id">{{ displayName(user) }}</option>
-      }
-    </select>
-  </label>
+  @if (showUser()) {
+    <label class="pill">
+      <span class="pill-label">Team member</span>
+      <select
+        [ngModel]="filter().userId ?? ''"
+        (ngModelChange)="onUser($event)"
+        aria-label="Team member"
+      >
+        <option value="">Everyone</option>
+        @for (user of users(); track user.id) {
+          <option [value]="user.id">{{ displayName(user) }}</option>
+        }
+      </select>
+    </label>
+  }
 
   @if (showCategory()) {
     <label class="pill">
