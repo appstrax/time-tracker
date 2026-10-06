@@ -11,7 +11,7 @@
         layout="pill"
         (weekChange)="onWeekChange($event)"
       />
-      @if (myProjects().length) {
+      @if (myProjects().length || filterProject()) {
         <app-project-dropdown
           class="header-project-dropdown"
           [projects]="myProjects()"
