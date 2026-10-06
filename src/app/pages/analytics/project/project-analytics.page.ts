@@ -182,13 +182,13 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
   );
 
   public ngOnInit(): void {
+    void this.fetchUsers();
     this.paramSubscription = this.route.paramMap.subscribe((params) => {
       const id = params.get('projectId') ?? '';
       if (id === this.projectId()) return;
       this.projectId.set(id);
       this.resetForProject();
       void this.load();
-      void this.fetchUsers();
     });
   }
 
