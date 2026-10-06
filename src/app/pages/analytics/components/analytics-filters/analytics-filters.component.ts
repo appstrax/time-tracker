@@ -30,6 +30,7 @@ export class AnalyticsFiltersComponent implements OnInit, OnDestroy {
   private subscription?: Subscription;
 
   public readonly users = input<User[]>([]);
+  public readonly showUser = input(true);
   public readonly categories = input<string[]>([]);
   public readonly showCategory = input(false);
 

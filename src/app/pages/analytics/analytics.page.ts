@@ -6,33 +6,19 @@ import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService, UsersService } from '@services';
 import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
 import { Store } from '@state';
-import {
-  TimeSheetExportUtil,
-  buildProjectColorMap,
-  getUserDisplayName,
-} from '@utils';
+import { TimeSheetExportUtil } from '@utils';
 
 import {
   filterAnalyticsEntries,
   formatDateInput,
   scopeProjectsToUser,
 } from './analytics-filter.util';
+import {
+  ProjectRow,
+  buildProjectRows,
+  summarizeEntries,
+} from './analytics-rows.util';
 import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
-
-interface ProjectRow {
-  id: string;
-  name: string;
-  description: string;
-  logoUrl: string;
-  color: string;
-  hours: number;
-  approved: number;
-  pending: number;
-  approvedPercent: number;
-  contributors: string[];
-  contributorCount: number;
-  lastActivity: Date | null;
-}
 
 @Component({
   standalone: true,
@@ -78,62 +64,18 @@ export class AnalyticsPage implements OnInit {
     );
   });
 
-  public readonly totals = computed(() => {
-    const entries = this.filteredEntries();
-    const approved = entries
-      .filter((e) => e.approved)
-      .reduce((sum, e) => sum + (e.hours || 0), 0);
-    const pending = entries
-      .filter((e) => !e.approved)
-      .reduce((sum, e) => sum + (e.hours || 0), 0);
-    return {
-      total: approved + pending,
-      approved,
-      pending,
-      pendingCount: entries.filter((e) => !e.approved).length,
-      contributors: new Set(entries.map((e) => e.userId)).size,
-    };
-  });
+  public readonly totals = computed(() =>
+    summarizeEntries(this.filteredEntries()),
+  );
 
-  public readonly rows = computed<ProjectRow[]>(() => {
-    const colors = buildProjectColorMap(this.projects());
-    const usersById = new Map(this.users().map((u) => [u.id, u]));
-    const entries = this.filteredEntries();
-
-    return this.visibleProjects()
-      .map((project) => {
-        const own = entries.filter((e) => e.projectId === project.id);
-        const approved = own
-          .filter((e) => e.approved)
-          .reduce((sum, e) => sum + (e.hours || 0), 0);
-        const pending = own
-          .filter((e) => !e.approved)
-          .reduce((sum, e) => sum + (e.hours || 0), 0);
-        const hours = approved + pending;
-        const userIds = [...new Set(own.map((e) => e.userId))];
-        const latest = own.reduce<Date | null>(
-          (max, e) => (!max || e.date > max ? e.date : max),
-          null,
-        );
-        return {
-          id: project.id,
-          name: project.name,
-          description: project.description,
-          logoUrl: project.logoUrl,
-          color: colors.get(project.id) ?? 'var(--color-primary)',
-          hours,
-          approved,
-          pending,
-          approvedPercent: hours ? (approved / hours) * 100 : 0,
-          contributors: userIds
-            .slice(0, 3)
-            .map((id) => this.initials(usersById.get(id) ?? null)),
-          contributorCount: userIds.length,
-          lastActivity: latest,
-        };
-      })
-      .sort((a, b) => b.hours - a.hours);
-  });
+  public readonly rows = computed<ProjectRow[]>(() =>
+    buildProjectRows(
+      this.visibleProjects(),
+      this.filteredEntries(),
+      this.users(),
+      this.projects(),
+    ),
+  );
 
   public onFilterChange(filter: AnalyticsFilter): void {
     this.filter.set(filter);
@@ -151,18 +93,6 @@ export class AnalyticsPage implements OnInit {
       this.users(),
       this.filter(),
       formatDateInput,
-    );
-  }
-
-  private initials(user: User | null): string {
-    const name = getUserDisplayName(user, '?');
-    return (
-      name
-        .split(/\s+/)
-        .map((part) => part[0])
-        .join('')
-        .slice(0, 2)
-        .toUpperCase() || '?'
     );
   }
 
