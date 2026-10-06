@@ -10,7 +10,7 @@ import {
   NgbInputDatepicker,
 } from '@ng-bootstrap/ng-bootstrap';
 
-import { AppDateFormatter } from './date-formatter';
+import { AppDateFormatter, validDate } from './date-formatter';
 
 /**
  * Themed date field bound to a `yyyy-MM-dd` string. Replaces the native
@@ -35,6 +35,7 @@ export class DateInputComponent implements ControlValueAccessor {
   public readonly inputId = input<string>('');
   public readonly placeholder = input('Select date');
   public readonly required = input(false);
+  public readonly ariaLabel = input<string | null>(null);
   /** `field` looks like a Bootstrap form-control; `bare` blends into a pill. */
   public readonly variant = input<'field' | 'bare'>('field');
 
@@ -79,8 +80,7 @@ export class DateInputComponent implements ControlValueAccessor {
   private static parse(value: string | null): NgbDateStruct | null {
     if (!value) return null;
     const [year, month, day] = value.slice(0, 10).split('-').map(Number);
-    if (!year || !month || !day) return null;
-    return { year, month, day };
+    return validDate(year, month, day);
   }
 
   private static serialize(date: NgbDateStruct): string {

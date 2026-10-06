@@ -27,6 +27,30 @@
   pointer-events: none;
 }
 
+.date-input-clear {
+  position: absolute;
+  top: 50%;
+  right: 0.35rem;
+  transform: translateY(-50%);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1.5rem;
+  height: 1.5rem;
+  padding: 0;
+  border: none;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text-muted);
+  font-size: 0.75rem;
+  cursor: pointer;
+
+  &:hover {
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+  }
+}
+
 .date-input.bare {
   .date-input-field {
     width: 100%;
@@ -40,7 +64,8 @@
     outline: none;
   }
 
-  .date-input-icon {
+  .date-input-icon,
+  .date-input-clear {
     right: 0.25rem;
   }
 }

@@ -6,17 +6,37 @@ const MONTHS = [
   'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
 ];
 
-/** Displays dates as `6 Oct 2026`; fields are read-only so parsing is a fallback. */
 @Injectable()
 export class AppDateFormatter extends NgbDateParserFormatter {
   public parse(value: string): NgbDateStruct | null {
-    const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value?.trim() ?? '');
-    if (!match) return null;
-    return { year: +match[1], month: +match[2], day: +match[3] };
+    const text = value?.trim() ?? '';
+    const iso = /^(\d{4})-(\d{2})-(\d{2})$/.exec(text);
+    if (iso) return validDate(+iso[1], +iso[2], +iso[3]);
+    const display = /^(\d{1,2}) ([A-Za-z]{3}) (\d{4})$/.exec(text);
+    if (display) {
+      const month = MONTHS.findIndex(
+        (m) => m.toLowerCase() === display[2].toLowerCase(),
+      );
+      return validDate(+display[3], month + 1, +display[1]);
+    }
+    return null;
   }
 
   public format(date: NgbDateStruct | null): string {
     if (!date) return '';
     return `${date.day} ${MONTHS[date.month - 1]} ${date.year}`;
   }
+}
+
+export function validDate(
+  year: number,
+  month: number,
+  day: number,
+): NgbDateStruct | null {
+  const date = new Date(Date.UTC(year, month - 1, day));
+  const valid =
+    date.getUTCFullYear() === year &&
+    date.getUTCMonth() === month - 1 &&
+    date.getUTCDate() === day;
+  return valid ? { year, month, day } : null;
 }

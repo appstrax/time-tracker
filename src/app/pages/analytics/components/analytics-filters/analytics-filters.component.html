@@ -19,6 +19,7 @@
       <span class="pill-label">From</span>
       <app-date-input
         variant="bare"
+        ariaLabel="From date"
         [ngModel]="formatDate(filter().start)"
         (ngModelChange)="onCustomDate('start', $event)"
       />
@@ -27,6 +28,7 @@
       <span class="pill-label">To</span>
       <app-date-input
         variant="bare"
+        ariaLabel="To date"
         [ngModel]="formatDate(filter().end)"
         (ngModelChange)="onCustomDate('end', $event)"
       />

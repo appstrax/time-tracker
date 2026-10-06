@@ -49,26 +49,29 @@ describe('TimeSheetDateSelectorComponent', () => {
   it('should highlight the selected week in the picker', () => {
     component.onDateSelected({ year: 2030, month: 6, day: 12 });
 
-    expect(component.dayClasses({ year: 2030, month: 6, day: 10 })).toEqual(
-      jasmine.objectContaining({ 'in-week': true, 'week-start': true }),
-    );
-    expect(component.dayClasses({ year: 2030, month: 6, day: 16 })).toEqual(
-      jasmine.objectContaining({ 'in-week': true, 'week-end': true }),
-    );
-    expect(component.dayClasses({ year: 2030, month: 6, day: 17 })['in-week']).toBe(
-      false,
-    );
+    const classes = (day: number) =>
+      component.dayClasses({ year: 2030, month: 6, day }).split(' ');
+
+    expect(classes(10)).toEqual(jasmine.arrayContaining(['in-week', 'week-start']));
+    expect(classes(16)).toEqual(jasmine.arrayContaining(['in-week', 'week-end']));
+    expect(classes(17)).not.toContain('in-week');
   });
 
   it('should highlight the whole hovered week and clear on leave', () => {
+    const hovered = (day: number) =>
+      component
+        .dayClasses({ year: 2030, month: 6, day })
+        .split(' ')
+        .includes('hover-week');
+
     component.onDayHover({ year: 2030, month: 6, day: 12 });
 
-    expect(component.dayClasses({ year: 2030, month: 6, day: 10 })['hover-week']).toBe(true);
-    expect(component.dayClasses({ year: 2030, month: 6, day: 16 })['hover-week']).toBe(true);
-    expect(component.dayClasses({ year: 2030, month: 6, day: 17 })['hover-week']).toBe(false);
-    expect(component.dayClasses({ year: 2030, month: 6, day: 9 })['hover-week']).toBe(false);
+    expect(hovered(10)).toBeTrue();
+    expect(hovered(16)).toBeTrue();
+    expect(hovered(17)).toBeFalse();
+    expect(hovered(9)).toBeFalse();
 
     component.onDayHover(null);
-    expect(component.dayClasses({ year: 2030, month: 6, day: 12 })['hover-week']).toBe(false);
+    expect(hovered(12)).toBeFalse();
   });
 });

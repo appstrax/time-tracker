@@ -1,6 +1,7 @@
 import { DatePipe, NgClass } from '@angular/common';
 import {
   Component,
+  ElementRef,
   input,
   OnInit,
   ViewChild,
@@ -12,6 +13,8 @@ import {
   NgbDateStruct,
   NgbInputDatepicker,
 } from '@ng-bootstrap/ng-bootstrap';
+
+const DAY_MS = 86_400_000;
 
 @Component({
   selector: 'app-time-sheet-date-selector',
@@ -27,7 +30,9 @@ export class TimeSheetDateSelectorComponent implements OnInit {
   @ViewChild(NgbInputDatepicker)
   public datePicker?: NgbInputDatepicker;
 
-  private lastClosedAt = 0;
+  @ViewChild('pickerTarget')
+  public pickerTarget?: ElementRef<HTMLElement>;
+
   private readonly hoveredDay = signal<number | null>(null);
 
   public readonly selectedWeekEnd = signal(new Date());
@@ -104,14 +109,15 @@ export class TimeSheetDateSelectorComponent implements OnInit {
   }
 
   public toggleDatePicker(): void {
-    // The popup closes itself on outside clicks, which includes the trigger;
-    // ignore the click that follows so it doesn't immediately reopen.
-    if (Date.now() - this.lastClosedAt < 200) return;
-    this.datePicker?.toggle();
+    const picker = this.datePicker;
+    if (!picker) return;
+    if (this.pickerTarget) {
+      picker.positionTarget = this.pickerTarget.nativeElement;
+    }
+    picker.toggle();
   }
 
   public onPickerClosed(): void {
-    this.lastClosedAt = Date.now();
     this.hoveredDay.set(null);
   }
 
@@ -126,25 +132,36 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     this.datePicker?.close();
   }
 
-  public dayClasses(date: NgbDateStruct): Record<string, boolean> {
+  /** Space-separated classes for one calendar day cell. */
+  public dayClasses(date: NgbDateStruct): string {
     const time = Date.UTC(date.year, date.month - 1, date.day);
-    const start = this.selectedWeekStart().getTime();
-    const end = this.selectedWeekEnd().getTime();
-    const now = new Date();
-    const hovered = this.hoveredDay();
-    let hoverWeek = false;
-    if (hovered !== null) {
-      const dayOfWeek = new Date(hovered).getUTCDay();
-      const hoverStart = hovered - ((dayOfWeek + 6) % 7) * 86_400_000;
-      hoverWeek = time >= hoverStart && time <= hoverStart + 6 * 86_400_000;
+    const { start, end, today, hoverStart } = this.highlight();
+    const classes: string[] = [];
+    if (time >= start && time <= end) classes.push('in-week');
+    if (time === start) classes.push('week-start');
+    if (time === end) classes.push('week-end');
+    if (time === today) classes.push('today');
+    if (
+      hoverStart !== null &&
+      time >= hoverStart &&
+      time <= hoverStart + 6 * DAY_MS
+    ) {
+      classes.push('hover-week');
     }
-    return {
-      'hover-week': hoverWeek,
-      'in-week': time >= start && time <= end,
-      'week-start': time === start,
-      'week-end': time === end,
-      today:
-        time === Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
-    };
+    return classes.join(' ');
   }
+
+  private readonly highlight = computed(() => {
+    const hovered = this.hoveredDay();
+    const now = new Date();
+    return {
+      start: this.selectedWeekStart().getTime(),
+      end: this.selectedWeekEnd().getTime(),
+      today: Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+      hoverStart:
+        hovered === null
+          ? null
+          : hovered - ((new Date(hovered).getUTCDay() + 6) % 7) * DAY_MS,
+    };
+  });
 }

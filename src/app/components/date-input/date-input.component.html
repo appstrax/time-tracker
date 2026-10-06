@@ -10,13 +10,28 @@
     [attr.id]="inputId() || null"
     [class.form-control]="variant() === 'field'"
     class="date-input-field"
+    [attr.aria-label]="ariaLabel()"
     [placeholder]="placeholder()"
     [required]="required()"
     [disabled]="disabled()"
     [ngModel]="model()"
     (dateSelect)="onDateSelect($event)"
     (click)="dp.toggle()"
+    (keydown.enter)="dp.toggle(); $event.preventDefault()"
+    (keydown.space)="dp.toggle(); $event.preventDefault()"
+    (keydown.arrowdown)="dp.open(); $event.preventDefault()"
     (blur)="markTouched()"
   />
-  <i class="bi bi-calendar3 date-input-icon" aria-hidden="true"></i>
+  @if (model() && !disabled() && !required()) {
+    <button
+      type="button"
+      class="date-input-clear"
+      aria-label="Clear date"
+      (click)="clear()"
+    >
+      <i class="bi bi-x-lg" aria-hidden="true"></i>
+    </button>
+  } @else {
+    <i class="bi bi-calendar3 date-input-icon" aria-hidden="true"></i>
+  }
 </div>

@@ -682,7 +682,9 @@ ngb-datepicker.app-datepicker {
     border-radius: var(--ngb-dp-radius);
   }
 
-  .ngb-dp-day > div:hover,
+  .ngb-dp-day > div:hover {
+    background: var(--color-primary-soft);
+  }
 
   .btn-light {
     color: var(--text-primary);
