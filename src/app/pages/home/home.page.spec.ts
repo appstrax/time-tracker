@@ -149,6 +149,22 @@ describe('HomePage', () => {
     expect(component.totals().total).toBe(6);
   });
 
+  it('leaves hours on a project outside the list out of the totals', () => {
+    // gamma is in the admin's store but they are not assigned to it.
+    component.entries.update((entries) => [
+      ...entries,
+      makeEntry('e4', 'gamma', 4, true),
+    ]);
+    expect(component.totals().total).toBe(6);
+    expect(
+      component.filteredEntries().every((entry) => entry.projectId !== 'gamma'),
+    ).toBeTrue();
+    const rowHours = component
+      .rows()
+      .reduce((sum, row) => sum + row.hours, 0);
+    expect(rowHours).toBe(component.totals().total);
+  });
+
   it('ignores a category in the URL filter', () => {
     component.onFilterChange({ category: 'Meetings' });
     expect(component.filter().category).toBeUndefined();

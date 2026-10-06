@@ -67,9 +67,16 @@ export class HomePage {
   });
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
-  public readonly filteredEntries = computed(() =>
-    filterAnalyticsEntries(this.entries(), this.filter()),
-  );
+  /**
+   * Entries on the listed projects only, as on the analytics page, so the KPIs
+   * and charts always agree with the project rows.
+   */
+  public readonly filteredEntries = computed(() => {
+    const visibleIds = new Set(this.projects().map((p) => p.id));
+    return filterAnalyticsEntries(this.entries(), this.filter()).filter((e) =>
+      visibleIds.has(e.projectId),
+    );
+  });
   public readonly totals = computed(() =>
     summarizeEntries(this.filteredEntries()),
   );
