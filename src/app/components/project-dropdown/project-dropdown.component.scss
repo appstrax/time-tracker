@@ -3,6 +3,13 @@
   position: relative;
 }
 
+.project-color-dot {
+  flex-shrink: 0;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+}
+
 .project-dropdown--compact {
   margin-bottom: 0;
   height: 100%;

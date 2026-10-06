@@ -14,6 +14,11 @@
       <span class="project-dropdown-selection d-flex align-items-center gap-2">
         @if (selectedProject) {
         <span
+          class="project-color-dot"
+          [style.background-color]="resolveProjectColor(selectedProject)"
+          aria-hidden="true"
+        ></span>
+        <span
           class="project-dropdown-name"
           [attr.title]="selectedProject.name"
           >{{ selectedProject.name }}</span>
@@ -74,6 +79,11 @@
           [class.active]="selectedProject?.id === project.id"
           [disabled]="disabled"
         >
+          <span
+            class="project-color-dot"
+            [style.background-color]="resolveProjectColor(project)"
+            aria-hidden="true"
+          ></span>
           <span [attr.title]="project.name">{{ project.name }}</span>
         </button>
       </li>
