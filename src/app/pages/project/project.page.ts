@@ -92,6 +92,7 @@ export class ProjectPage implements OnInit {
     description: '',
     logoUrl: '',
     color: '',
+    billable: true,
     categories: [] as string[],
   };
 
@@ -278,6 +279,7 @@ export class ProjectPage implements OnInit {
       project.description !== this.savedCoreSnapshot.description ||
       project.logoUrl !== this.savedCoreSnapshot.logoUrl ||
       project.color !== this.savedCoreSnapshot.color ||
+      project.billable !== this.savedCoreSnapshot.billable ||
       this.areCategoriesDirty()
     );
   }
@@ -442,7 +444,8 @@ export class ProjectPage implements OnInit {
       project.name !== this.savedCoreSnapshot.name ||
       project.description !== this.savedCoreSnapshot.description ||
       project.logoUrl !== this.savedCoreSnapshot.logoUrl ||
-      project.color !== this.savedCoreSnapshot.color
+      project.color !== this.savedCoreSnapshot.color ||
+      project.billable !== this.savedCoreSnapshot.billable
     );
   }
 
@@ -487,6 +490,7 @@ export class ProjectPage implements OnInit {
       description: project.description,
       logoUrl: project.logoUrl,
       color: project.color,
+      billable: project.billable,
       categories: [...project.categories],
     };
   }
@@ -520,6 +524,7 @@ export class ProjectPage implements OnInit {
     payload.description = this.savedCoreSnapshot.description;
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
     payload.color = this.savedCoreSnapshot.color;
+    payload.billable = this.savedCoreSnapshot.billable;
     payload.categories = [...this.savedCoreSnapshot.categories];
 
     return payload;
@@ -533,6 +538,7 @@ export class ProjectPage implements OnInit {
     payload.description = this.savedCoreSnapshot.description;
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
     payload.color = this.savedCoreSnapshot.color;
+    payload.billable = this.savedCoreSnapshot.billable;
     payload.categories = normalizeProjectCategories(current.categories);
     payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
 
@@ -565,6 +571,7 @@ export class ProjectPage implements OnInit {
     }
     if (live.logoUrl !== submitted.logoUrl) overrides.logoUrl = live.logoUrl;
     if (live.color !== submitted.color) overrides.color = live.color;
+    if (live.billable !== submitted.billable) overrides.billable = live.billable;
     if (JSON.stringify(live.fields) !== JSON.stringify(submitted.fields)) {
       overrides.fields = live.fields;
     }
@@ -592,6 +599,12 @@ export class ProjectPage implements OnInit {
   public updateProjectColor(color: string): void {
     this.updateProject((project) => {
       project.color = color;
+    });
+  }
+
+  public updateProjectBillable(billable: boolean): void {
+    this.updateProject((project) => {
+      project.billable = billable;
     });
   }
 

@@ -12,4 +12,5 @@ export class Project extends Model {
   users: User[] = [];
   fields: ProjectField[] = [];
   categories: string[] = [];
+  billable: boolean = true;
 }

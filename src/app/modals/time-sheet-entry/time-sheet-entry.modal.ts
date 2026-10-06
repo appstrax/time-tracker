@@ -115,6 +115,7 @@ export class TimeSheetEntryModal
     this.refreshCategorySuggestions();
     this.projectIdAtOpen = this.timeSheetEntry.projectId;
     this.initializeBooleanFieldDefaults();
+    this.initializeBillableDefault();
 
     void this.assignEntryUser();
   }
@@ -176,6 +177,7 @@ export class TimeSheetEntryModal
     this.project = project || undefined;
     this.timeSheetEntry.projectId = project ? project.id : '';
     this.initializeBooleanFieldDefaults();
+    this.initializeBillableDefault();
     this.refreshCategorySuggestions();
   }
 
@@ -365,6 +367,11 @@ export class TimeSheetEntryModal
         this.setFieldValue(field.key, 'false');
       }
     }
+  }
+
+  private initializeBillableDefault(): void {
+    if (this.wasExistingEntryOnOpen) return;
+    this.timeSheetEntry.billable = this.project?.billable ?? true;
   }
 
   private pruneStaleFieldValues(): void {

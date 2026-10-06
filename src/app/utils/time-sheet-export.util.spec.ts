@@ -104,4 +104,36 @@ describe('TimeSheetExportUtil', () => {
 
     expect(csv).toContain('"\'=A1,B1"');
   });
+
+  it('includes a Billable column with Yes/No values in the all-projects export', async () => {
+    const billableEntry = makeEntry({ billable: true });
+    const nonBillableEntry = makeEntry({ billable: false });
+
+    const csv = await csvTextFor(() =>
+      util.exportFilteredEntries(
+        [billableEntry, nonBillableEntry],
+        [project],
+        [user],
+        {},
+        formatDate,
+      ),
+    );
+
+    const [header, firstRow, secondRow] = csv.trim().split('\r\n');
+    expect(header).toContain('Billable');
+    expect(firstRow).toContain('Yes');
+    expect(secondRow).toContain('No');
+  });
+
+  it('includes a Billable column in a single-project export', async () => {
+    const entry = makeEntry({ billable: false });
+
+    const csv = await csvTextFor(() =>
+      util.exportProjectEntries('project-1', [entry], [project], [user], formatDate),
+    );
+
+    const [header, firstRow] = csv.trim().split('\r\n');
+    expect(header).toContain('Billable');
+    expect(firstRow).toContain('No');
+  });
 });
