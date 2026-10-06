@@ -19,7 +19,6 @@ import { ToastService } from '@services';
 import {
   categorySuggestions,
   FUTURE_TIMESHEET_ENTRY_TOAST,
-  isCategoryAllowed,
   TimeSheetDisplayUtil,
   isFutureLocalCalendarDay,
 } from '@utils';
@@ -60,7 +59,6 @@ export class TimeSheetEntryModal
   /** Keys present when the modal opened — kept on save only if the project is unchanged. */
   private fieldValueKeysAtOpen = new Set<string>();
   private projectIdAtOpen = '';
-  private categoryAtOpen = '';
 
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
   @ViewChild('categoryDropdownMenu', { static: false })
@@ -101,7 +99,6 @@ export class TimeSheetEntryModal
       }
     }
 
-    this.categoryAtOpen = this.timeSheetEntry.category ?? '';
     this.refreshCategorySuggestions();
     this.projectIdAtOpen = this.timeSheetEntry.projectId;
     this.initializeBooleanFieldDefaults();
@@ -303,22 +300,11 @@ export class TimeSheetEntryModal
           (field) => field.required && this.isConfiguredFieldMissing(field),
         );
 
-    const categoryGrandfather =
-      this.timeSheetEntry.projectId === this.projectIdAtOpen
-        ? this.categoryAtOpen
-        : undefined;
-
-    const categoryAllowed = isCategoryAllowed(
-      this.project,
-      this.timeSheetEntry.category,
-      categoryGrandfather,
-    );
-
     let isValid =
       this.timeSheetEntry.projectId &&
       this.timeSheetEntry.hours &&
       this.timeSheetEntry.description &&
-      categoryAllowed &&
+      this.timeSheetEntry.category.trim() &&
       missingFields.length === 0;
 
     if (isValid) return true;
@@ -327,9 +313,6 @@ export class TimeSheetEntryModal
       errorMessage += '\n\t• Please select a project';
     if (!this.timeSheetEntry.category.trim())
       errorMessage += '\n\t• Category is required';
-    else if (!categoryAllowed)
-      errorMessage +=
-        "\n\t• Category must be one of this project's categories";
     if (!this.timeSheetEntry.hours)
       errorMessage += '\n\t• Hours must be greater than 0';
     if (!this.timeSheetEntry.description)

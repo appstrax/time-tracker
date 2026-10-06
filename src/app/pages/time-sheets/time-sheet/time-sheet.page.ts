@@ -68,7 +68,7 @@ export class TimeSheetPage {
   });
 
   public readonly categories = computed(() => [
-    ...new Set(this.filteredEntries().map((entry) => entry.category)),
+    ...new Set(this.entries().map((entry) => entry.category)),
   ]);
 
   public readonly entriesByDate = computed(() => {
