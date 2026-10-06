@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { Project } from '@models';
+import { Project, TimeSheetEntry } from '@models';
 import { Store } from '@state';
 import { ToastService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
@@ -118,11 +118,18 @@ describe('TimeSheetEntryComponent', () => {
   async function createComponent(defaultProjectId = ''): Promise<void> {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = defaultProjectId;
     fixture.detectChanges();
     await fixture.whenStable();
+  }
+
+  function entryFor(projectId: string, category: string): TimeSheetEntry {
+    const entry = new TimeSheetEntry();
+    entry.projectId = projectId;
+    entry.category = category;
+    return entry;
   }
 
   function fillRequiredBaseFields(): void {
@@ -169,7 +176,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should keep an existing entry\'s project over the active filter', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = project.id;
     component.timeSheetEntry.id = 'existing-entry-id';
@@ -242,7 +249,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should preserve field values for keys that existed when editing a pre-existing entry', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = projectWithFields.id;
@@ -269,7 +276,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should drop orphaned field values when a pre-existing entry is moved to another project', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = projectWithFields.id;
@@ -330,9 +337,12 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.isFormValid()).toBe(true);
   });
 
-  it('should list project categories first, then the week custom categories', async () => {
+  it('lists the selected project categories, then only that project\'s week categories', async () => {
     await createComponent();
-    component.categories = ['Legacy'];
+    component.weekEntries = [
+      entryFor(projectWithCategories.id, 'Legacy'),
+      entryFor(project.id, 'Dob'),
+    ];
     component.onProjectSelected(projectWithCategories);
 
     expect(component.filteredCategories).toEqual([
@@ -344,10 +354,20 @@ describe('TimeSheetEntryComponent', () => {
 
   it('should keep week fallback when project has no category list', async () => {
     await createComponent();
-    component.categories = ['Legacy'];
+    component.weekEntries = [entryFor(project.id, 'Legacy')];
     component.onProjectSelected(project);
 
     expect(component.filteredCategories).toEqual(['Legacy']);
+  });
+
+  it('rejects a blank category', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithCategories);
+    fillRequiredBaseFields();
+    component.timeSheetEntry.category = '   ';
+
+    expect(component.isFormValid()).toBe(false);
+    expect(component.errorMessage).toContain('Category is required');
   });
 
   it('should allow custom category text for any project', async () => {

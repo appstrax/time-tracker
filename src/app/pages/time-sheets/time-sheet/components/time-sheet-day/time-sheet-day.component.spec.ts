@@ -46,7 +46,9 @@ describe('TimeSheetDayComponent', () => {
     fixture = TestBed.createComponent(TimeSheetDayComponent);
     component = fixture.componentInstance;
     fixture.componentRef.setInput('date', new Date('2026-04-08T00:00:00.000Z'));
-    fixture.componentRef.setInput('categories', ['Development']);
+    const weekEntry = new TimeSheetEntry();
+    weekEntry.category = 'Development';
+    fixture.componentRef.setInput('weekEntries', [weekEntry]);
     fixture.detectChanges();
   });
 
@@ -62,13 +64,13 @@ describe('TimeSheetDayComponent', () => {
       .componentInstance as {
       timeSheetEntry: TimeSheetEntry;
       date: Date;
-      categories: string[];
+      weekEntries: TimeSheetEntry[];
     };
 
     expect(modalComponent.timeSheetEntry.hours).toBe(2.75);
     expect(modalComponent.timeSheetEntry.projectId).toBe('');
     expect(modalComponent.date).toEqual(component.date());
-    expect(modalComponent.categories).toEqual(component.categories());
+    expect(modalComponent.weekEntries).toEqual(component.weekEntries());
   });
 
   function makeEntry(id: string, approved: boolean): TimeSheetEntry {

@@ -49,12 +49,16 @@ export function categorySuggestions(
   fallback: string[],
 ): string[] {
   const fromProject = trimmedProjectCategories(project);
-  return [
-    ...new Set([
-      ...fromProject,
-      ...fallback.map((c) => c.trim()).filter((c) => c.length > 0),
-    ]),
-  ];
+  const seen = new Set(fromProject.map((category) => category.toLowerCase()));
+  const extras: string[] = [];
+  for (const raw of fallback) {
+    const trimmed = raw.trim();
+    const key = trimmed.toLowerCase();
+    if (!trimmed || seen.has(key)) continue;
+    seen.add(key);
+    extras.push(trimmed);
+  }
+  return [...fromProject, ...extras];
 }
 
 export function categoryFilterOptions(

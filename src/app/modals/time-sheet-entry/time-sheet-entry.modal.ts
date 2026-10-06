@@ -33,7 +33,7 @@ export class TimeSheetEntryModal
   implements OnInit, OnDestroy, AfterViewChecked
 {
   @Input() timeSheetEntry = new TimeSheetEntry();
-  @Input() categories!: string[];
+  @Input() weekEntries: TimeSheetEntry[] = [];
   @Input() date!: Date;
   /** The time sheet's active project filter, or '' on "all projects". A new
    * entry starts on it; the dropdown opens empty when there is no filter. */
@@ -79,9 +79,9 @@ export class TimeSheetEntryModal
     this.initializeFromOptions();
   }
 
-  /** Called after NgbModal `Object.assign` so categories/date are available. */
+  /** Called after NgbModal `Object.assign` so the week entries and date are available. */
   initializeFromOptions(): void {
-    if (this.modalInputsInitialized || !this.date || !this.categories) {
+    if (this.modalInputsInitialized || !this.date) {
       return;
     }
     this.modalInputsInitialized = true;
@@ -167,9 +167,20 @@ export class TimeSheetEntryModal
   }
 
   private refreshCategorySuggestions(): void {
-    this.filteredCategories = [
-      ...categorySuggestions(this.project, this.categories),
-    ];
+    this.filteredCategories = [...this.suggestions()];
+  }
+
+  private suggestions(): string[] {
+    return categorySuggestions(this.project, this.categoriesForSelectedProject());
+  }
+
+  private categoriesForSelectedProject(): string[] {
+    const projectId = this.project?.id;
+    if (!projectId) return [];
+    return this.weekEntries
+      .filter((entry) => entry.projectId === projectId)
+      .map((entry) => (entry.category ?? '').trim())
+      .filter((category) => category.length > 0);
   }
 
   get projectFields(): ProjectField[] {
@@ -212,7 +223,7 @@ export class TimeSheetEntryModal
     const input = event.target as HTMLInputElement;
     const value = input.value.toLowerCase().trim();
 
-    const suggestions = categorySuggestions(this.project, this.categories);
+    const suggestions = this.suggestions();
     if (value === '') {
       this.filteredCategories = [...suggestions];
       this.setCategoryDropdownVisible(
@@ -234,16 +245,14 @@ export class TimeSheetEntryModal
   }
 
   onCategoryFocus(): void {
-    const suggestions = categorySuggestions(this.project, this.categories);
+    const suggestions = this.suggestions();
     if (this.timeSheetEntry.category) {
       const value = this.timeSheetEntry.category.toLowerCase().trim();
       this.filteredCategories = suggestions.filter((category) =>
         category.toLowerCase().includes(value),
       );
     } else {
-      this.filteredCategories = [
-        ...categorySuggestions(this.project, this.categories),
-      ];
+      this.filteredCategories = [...this.suggestions()];
     }
     this.setCategoryDropdownVisible(this.filteredCategories.length > 0);
   }
@@ -300,18 +309,19 @@ export class TimeSheetEntryModal
           (field) => field.required && this.isConfiguredFieldMissing(field),
         );
 
+    const category = this.timeSheetEntry.category?.trim() ?? '';
     let isValid =
       this.timeSheetEntry.projectId &&
       this.timeSheetEntry.hours &&
       this.timeSheetEntry.description &&
-      this.timeSheetEntry.category.trim() &&
+      category &&
       missingFields.length === 0;
 
     if (isValid) return true;
     let errorMessage = 'Please fill in all required fields';
     if (!this.timeSheetEntry.projectId)
       errorMessage += '\n\t• Please select a project';
-    if (!this.timeSheetEntry.category.trim())
+    if (!category)
       errorMessage += '\n\t• Category is required';
     if (!this.timeSheetEntry.hours)
       errorMessage += '\n\t• Hours must be greater than 0';
@@ -360,6 +370,6 @@ export class TimeSheetEntryModal
 export interface TimeSheetEntryModalOptions {
   timeSheetEntry?: TimeSheetEntry;
   date: Date;
-  categories: string[];
+  weekEntries?: TimeSheetEntry[];
   defaultProjectId?: string;
 }

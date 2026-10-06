@@ -32,7 +32,12 @@ describe('project-category.util', () => {
     const project = new Project();
     project.categories = ['Development'];
     expect(
-      categorySuggestions(project, ['Legacy', 'Development', ' Legacy ']),
+      categorySuggestions(project, [
+        'Legacy',
+        'Development',
+        ' Legacy ',
+        'development',
+      ]),
     ).toEqual(['Development', 'Legacy']);
   });
 

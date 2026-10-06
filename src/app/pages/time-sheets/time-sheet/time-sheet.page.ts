@@ -59,21 +59,13 @@ export class TimeSheetPage {
     () => this.fetching() || !this.store.projects.fetchedAt(),
   );
 
-  private readonly entries = signal<TimeSheetEntry[]>([]);
+  public readonly weekEntries = signal<TimeSheetEntry[]>([]);
   private readonly filteredEntries = computed(() => {
     const projectId = this.filterProjectId();
-    const entries = this.entries();
+    const entries = this.weekEntries();
     if (!projectId) return entries;
     return entries.filter((entry) => entry.projectId === projectId);
   });
-
-  public readonly categories = computed(() => [
-    ...new Set(
-      this.filteredEntries()
-        .map((entry) => entry.category.trim())
-        .filter((category) => category.length > 0),
-    ),
-  ]);
 
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
@@ -161,7 +153,7 @@ export class TimeSheetPage {
         end,
       );
 
-      this.entries.set(entries);
+      this.weekEntries.set(entries);
     } catch {
       this.toastService.error('Error initializing time sheet entries');
     } finally {

@@ -109,44 +109,6 @@ describe('TimeSheetPage', () => {
     });
   });
 
-  describe('categories', () => {
-    function entry(projectId: string, category: string): TimeSheetEntry {
-      const item = makeSavedEntry(projectId);
-      item.category = category;
-      return item;
-    }
-
-    function setEntries(entries: TimeSheetEntry[]): void {
-      (
-        component as unknown as {
-          entries: { set(value: TimeSheetEntry[]): void };
-        }
-      ).entries.set(entries);
-      fixture.detectChanges();
-    }
-
-    it('limits week category suggestions to the filtered project', () => {
-      const projectA = makeProject('project-a');
-      const projectB = makeProject('project-b');
-      patchProjectsState({
-        projects: [projectA, projectB],
-        fetchedAt: new Date(),
-      });
-
-      setEntries([
-        entry(projectA.id, 'Design'),
-        entry(projectB.id, 'Support'),
-        entry(projectA.id, '  '),
-      ]);
-
-      component.onFilterProjectSelected(null);
-      expect(component.categories()).toEqual(['Design', 'Support']);
-
-      component.onFilterProjectSelected(projectA);
-      expect(component.categories()).toEqual(['Design']);
-    });
-  });
-
   describe('filter persistence across page re-creation', () => {
     it('stays on "all projects" after saving an entry for a project', () => {
       const projectX = makeProject('project-x');
