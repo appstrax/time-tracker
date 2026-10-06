@@ -18,6 +18,7 @@
       <div class="form-group">
         <label class="form-label">* Project</label>
         <app-project-dropdown
+          [projects]="projects()"
           [selectedProject]="project"
           (projectSelected)="onProjectSelected($event)"
           [disabled]="timeSheetEntry.approved"

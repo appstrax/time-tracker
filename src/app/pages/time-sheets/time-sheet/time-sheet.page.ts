@@ -7,6 +7,7 @@ import { Store } from '@state';
 import {
   buildProjectColorMap,
   clearStoredTimeSheetFilterProjectId,
+  filterAssignedProjects,
   getStoredTimeSheetFilterProjectId,
   localCalendarDayKey,
   storeTimeSheetFilterProjectId,
@@ -35,6 +36,13 @@ export class TimeSheetPage {
   );
 
   public readonly projects = computed(() => this.store.projects.projects());
+  /** Projects offered in the filter dropdown — narrowed to the current user's
+   * own memberships so an admin can't filter by (or log against) projects
+   * they're not part of. `projects` above stays unfiltered for colour lookups
+   * against entries that may reference a project the user's since left. */
+  public readonly myProjects = computed(() =>
+    filterAssignedProjects(this.projects(), this.store.user.user()),
+  );
   public readonly filterProject = computed(() => {
     const projectId = this.filterProjectId();
     if (!projectId) return null;

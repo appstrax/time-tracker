@@ -1,7 +1,8 @@
-import { Project } from '@models';
+import { Project, User, UserRole } from '@models';
 
 import {
   buildProjectColorMap,
+  filterAssignedProjects,
   getProjectColor,
   getStoredTimeSheetFilterProjectId,
   getThemeProjectColorOptions,
@@ -9,6 +10,48 @@ import {
   hashProjectId,
   pickNewProjectColor,
 } from './time-sheet-project.util';
+
+describe('filterAssignedProjects', () => {
+  function projectWithMembers(id: string, memberIds: string[]): Project {
+    const p = new Project();
+    p.id = id;
+    p.name = id;
+    p.users = memberIds.map((memberId) => {
+      const u = new User();
+      u.id = memberId;
+      return u;
+    });
+    return p;
+  }
+
+  it('returns every project unchanged for a non-admin user', () => {
+    const user = { id: 'me', role: UserRole.USER } as User;
+    const projects = [projectWithMembers('p1', []), projectWithMembers('p2', ['someone-else'])];
+
+    expect(filterAssignedProjects(projects, user)).toEqual(projects);
+  });
+
+  it('returns every project unchanged when there is no user', () => {
+    const projects = [projectWithMembers('p1', [])];
+
+    expect(filterAssignedProjects(projects, null)).toEqual(projects);
+  });
+
+  it('narrows an admin to only the projects they are a member of', () => {
+    const admin = { id: 'admin-1', role: UserRole.ADMIN } as User;
+    const mine = projectWithMembers('mine', ['admin-1']);
+    const notMine = projectWithMembers('not-mine', ['someone-else']);
+
+    expect(filterAssignedProjects([mine, notMine], admin)).toEqual([mine]);
+  });
+
+  it('returns an empty list for an admin with no project memberships', () => {
+    const admin = { id: 'admin-1', role: UserRole.ADMIN } as User;
+    const notMine = projectWithMembers('not-mine', ['someone-else']);
+
+    expect(filterAssignedProjects([notMine], admin)).toEqual([]);
+  });
+});
 
 describe('time-sheet-project.util', () => {
   const filterKey = 'timeSheet.filterProjectId';
