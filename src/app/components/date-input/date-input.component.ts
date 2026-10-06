@@ -35,6 +35,8 @@ export class DateInputComponent implements ControlValueAccessor {
   public readonly inputId = input<string>('');
   public readonly placeholder = input('Select date');
   public readonly required = input(false);
+  /** Shows a clear button; only for fields where an empty value is meaningful. */
+  public readonly clearable = input(false);
   public readonly ariaLabel = input<string | null>(null);
   /** `field` looks like a Bootstrap form-control; `bare` blends into a pill. */
   public readonly variant = input<'field' | 'bare'>('field');

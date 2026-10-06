@@ -22,7 +22,7 @@
     (keydown.arrowdown)="dp.open(); $event.preventDefault()"
     (blur)="markTouched()"
   />
-  @if (model() && !disabled() && !required()) {
+  @if (clearable() && model() && !disabled() && !required()) {
     <button
       type="button"
       class="date-input-clear"
