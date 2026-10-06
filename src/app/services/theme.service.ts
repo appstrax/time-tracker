@@ -8,8 +8,6 @@ export class ThemeService {
   private static readonly THEME_MODE_KEY = 'app.theme.mode';
   private prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)');
   private systemListener?: (this: MediaQueryList, ev: MediaQueryListEvent) => any;
-  // If true, 'system' mode mirrors OS preference; if false, we use branded dark
-  private readonly useOsPreferenceForSystem = false;
 
   private currentThemeSubject = new BehaviorSubject<ThemeMode>('light');
   currentTheme$ = this.currentThemeSubject.asObservable();
@@ -27,7 +25,7 @@ export class ThemeService {
   private applyTheme(mode: ThemeMode) {
     const htmlEl = document.documentElement;
     const effectiveBase = mode === 'system'
-      ? (this.useOsPreferenceForSystem ? (this.prefersDark?.matches ? 'dark' : 'light') : 'dark')
+      ? (this.prefersDark?.matches ? 'dark' : 'light')
       : mode;
     htmlEl.setAttribute('data-theme', effectiveBase);
 
@@ -36,7 +34,7 @@ export class ThemeService {
       this.prefersDark.removeEventListener('change', this.systemListener);
       this.systemListener = undefined;
     }
-    if (mode === 'system' && this.prefersDark && this.useOsPreferenceForSystem) {
+    if (mode === 'system' && this.prefersDark) {
       this.systemListener = () => {
         const nowDark = this.prefersDark!.matches;
         htmlEl.setAttribute('data-theme', nowDark ? 'dark' : 'light');
@@ -44,49 +42,6 @@ export class ThemeService {
       this.prefersDark.addEventListener('change', this.systemListener);
     }
 
-    // Apply variable overrides
-    const styleId = 'theme-vars';
-    let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
-    if (!styleEl) {
-      styleEl = document.createElement('style');
-      styleEl.id = styleId;
-      document.head.appendChild(styleEl);
-    }
-    let vars: Record<string, string> = {};
-    let selector = ':root';
-    if (mode === 'system' && !this.useOsPreferenceForSystem) {
-      // Branded dark: keep dark base tokens but override primary to gold palette
-      vars = this.getBrandedSystemVars();
-      selector = ':root[data-theme="dark"]';
-    } else {
-      // In light/dark (and system with OS preference), do not apply any custom overrides
-      vars = {};
-      selector = ':root';
-    }
-    styleEl.textContent = this.buildVarsCss(vars, selector);
-
     this.currentThemeSubject.next(mode);
-  }
-
-  private buildVarsCss(vars: Record<string, string>, selector = ':root'): string {
-    const entries = Object.entries(vars);
-    if (!entries.length) return '';
-    const body = entries.map(([k, v]) => `${k}: ${v};`).join(' ');
-    return `${selector} { ${body} }`;
-  }
-
-  private getBrandedSystemVars(): Record<string, string> {
-    // Gold accents inspired by the brand logo; dark theme base remains from CSS tokens
-    const goldPrimary = '#bfa25a';       // softer, less glaring gold
-    const goldPrimaryDark = '#8e793b';   // muted dark gold for titles/accents
-    const goldPrimaryLight = '#cbb072';  // subtle lighter shade
-    return {
-      '--color-primary': goldPrimary,
-      '--color-primary-contrast': '#0f0f10',
-      '--primary-color': goldPrimary,
-      '--primary-color-dark': goldPrimaryDark,
-      '--primary-color-light': `color-mix(in srgb, ${goldPrimary} 6%, transparent)`,
-      '--bs-primary': goldPrimary,
-    };
   }
 }
