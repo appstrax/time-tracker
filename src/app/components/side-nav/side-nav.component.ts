@@ -22,7 +22,6 @@ interface NavItem {
   imports: [RouterModule, SideNavExpandedComponent],
 })
 export class SideNavComponent implements AfterViewInit {
-  isVisible = true;
   mode: 'collapsed' | 'expanded' = 'collapsed';
 
   @ViewChild(SideNavExpandedComponent) navPanel?: SideNavExpandedComponent;
