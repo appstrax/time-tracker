@@ -116,24 +116,6 @@
   border-color: #4ade80;
 }
 
-.entry-approved-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.3rem;
-  flex-shrink: 0;
-  padding: 0.2rem 0.5rem;
-  border-radius: 999px;
-  background: color-mix(in srgb, var(--tag-teal) 16%, var(--color-surface));
-  color: var(--tag-teal);
-  font-size: 0.72rem;
-  font-weight: 700;
-  white-space: nowrap;
-
-  i {
-    font-size: 0.68rem;
-  }
-}
-
 .entry-leading {
   display: flex;
   align-items: center;

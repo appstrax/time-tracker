@@ -46,6 +46,7 @@ describe('TimeSheetNumberLineComponent', () => {
       category: 'Development',
       description: 'API work',
       duration: '1h 30m',
+      approved: false,
     });
   });
 
