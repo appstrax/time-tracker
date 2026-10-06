@@ -14,7 +14,7 @@
       </div>
 
       @if (editing()) {
-      <span class="metric-pill">
+      <span class="metric-note">
         {{ projectUsersCount() }} {{ projectUsersCount() === 1 ? 'member' :
         'members' }}
       </span>
@@ -101,12 +101,24 @@
                 {{ logoPreviewUrl() ? 'Change logo' : 'Choose logo' }}
               </button>
 
+              @if (logoPreviewUrl()) {
+              <button
+                type="button"
+                class="btn btn-outline-danger"
+                [disabled]="isPersisting()"
+                (click)="removeLogo(logoFileInput)"
+              >
+                <i class="bi bi-trash me-2"></i>
+                Remove logo
+              </button>
+              }
+
               @if (logoFile()) {
-              <span class="file-pill">{{ logoFile()?.name }}</span>
+              <span class="file-note">{{ logoFile()?.name }}</span>
               } @else if (logoPreviewUrl()) {
-              <span class="file-pill">Existing logo</span>
+              <span class="file-note">Existing logo</span>
               } @else {
-              <span class="file-pill muted">Optional</span>
+              <span class="file-note">Optional</span>
               }
             </div>
             <input

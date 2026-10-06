@@ -246,6 +246,51 @@ export class ProjectPage implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  public async removeLogo(fileInput: HTMLInputElement): Promise<void> {
+    fileInput.value = '';
+    this.logoFile.set(null);
+    this.error.set('');
+
+    const hasSavedLogo = !!this.savedCoreSnapshot.logoUrl;
+    if (!this.editing() || !this.project().id || !hasSavedLogo) {
+      this.logoPreviewUrl.set(null);
+      return;
+    }
+
+    if (!this.beginPersist('core')) {
+      return;
+    }
+
+    try {
+      const current = this.project();
+      const payload = Object.assign(new Project(), current);
+      payload.name = this.savedCoreSnapshot.name;
+      payload.description = this.savedCoreSnapshot.description;
+      payload.color = this.savedCoreSnapshot.color;
+      payload.billable = this.savedCoreSnapshot.billable;
+      payload.categories = [...this.savedCoreSnapshot.categories];
+      payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
+      payload.logoUrl = '';
+
+      const project = await this.projectService.save(payload);
+      this.project.set(
+        this.mergeProjectAfterSave(project, {
+          ...this.liveEditOverrides(payload),
+          logoUrl: project.logoUrl,
+        }),
+      );
+      this.logoPreviewUrl.set(null);
+      this.syncPersistedSnapshots(project);
+      await this.refreshProjectsStore();
+      this.toast.success('Logo removed', 'Success');
+    } catch (error: any) {
+      this.error.set(error.message);
+      this.toast.error(error.message || 'Failed to remove logo', 'Error');
+    } finally {
+      this.endPersist();
+    }
+  }
+
   public isCoreFormValid(): boolean {
     const project = this.project();
     if (project.name == '' || project.description == '') {
