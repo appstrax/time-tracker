@@ -1,3 +1,4 @@
+import { DateInputComponent } from '../../../components/date-input/date-input.component';
 import { CommonModule } from '@angular/common';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
@@ -20,7 +21,13 @@ import { environment } from '../../../../environments/environment';
 @Component({
   selector: 'app-agent-tokens',
   standalone: true,
-  imports: [CommonModule, FormsModule, RouterModule, NgSelectComponent],
+  imports: [
+    CommonModule,
+    FormsModule,
+    RouterModule,
+    NgSelectComponent,
+    DateInputComponent,
+  ],
   templateUrl: './agent-tokens.page.html',
   styleUrls: ['./agent-tokens.page.scss'],
 })

@@ -246,6 +246,51 @@ export class ProjectPage implements OnInit {
     reader.readAsDataURL(file);
   }
 
+  public async removeLogo(fileInput: HTMLInputElement): Promise<void> {
+    if (this.isPersisting()) {
+      return;
+    }
+
+    this.error.set('');
+
+    if (this.logoFile()) {
+      fileInput.value = '';
+      this.logoFile.set(null);
+      this.logoPreviewUrl.set(this.project().logoUrl || null);
+      return;
+    }
+
+    if (!this.editing() || !this.project().id || !this.savedCoreSnapshot.logoUrl) {
+      this.logoPreviewUrl.set(null);
+      return;
+    }
+
+    if (!this.beginPersist('core')) {
+      return;
+    }
+
+    try {
+      const submitted = this.buildProjectForLogoRemoval();
+      const project = await this.projectService.save(submitted);
+
+      this.project.set(
+        this.mergeProjectAfterSave(project, {
+          ...this.liveEditOverrides(submitted),
+          logoUrl: project.logoUrl,
+        }),
+      );
+      this.logoPreviewUrl.set(null);
+      this.syncPersistedSnapshots(project);
+      await this.refreshProjectsStore();
+      this.toast.success('Logo removed', 'Success');
+    } catch (error: any) {
+      this.error.set(error.message);
+      this.toast.error(error.message || 'Failed to remove logo', 'Error');
+    } finally {
+      this.endPersist();
+    }
+  }
+
   public isCoreFormValid(): boolean {
     const project = this.project();
     if (project.name == '' || project.description == '') {
@@ -526,6 +571,20 @@ export class ProjectPage implements OnInit {
     payload.color = this.savedCoreSnapshot.color;
     payload.billable = this.savedCoreSnapshot.billable;
     payload.categories = [...this.savedCoreSnapshot.categories];
+
+    return payload;
+  }
+
+  private buildProjectForLogoRemoval(): Project {
+    const payload = Object.assign(new Project(), this.project());
+
+    payload.name = this.savedCoreSnapshot.name;
+    payload.description = this.savedCoreSnapshot.description;
+    payload.logoUrl = '';
+    payload.color = this.savedCoreSnapshot.color;
+    payload.billable = this.savedCoreSnapshot.billable;
+    payload.categories = [...this.savedCoreSnapshot.categories];
+    payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
 
     return payload;
   }

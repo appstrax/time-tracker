@@ -50,21 +50,11 @@
     color: var(--text-muted);
   }
 
-  .metric-pill,
-  .file-pill {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    padding: 0.45rem 0.85rem;
-    border-radius: 6px;
-    background: var(--color-primary-soft);
-    color: var(--color-primary);
-    font-weight: 700;
-  }
-
-  .file-pill.muted {
-    background: color-mix(in srgb, var(--color-border) 50%, transparent);
+  .metric-note,
+  .file-note {
     color: var(--text-muted);
+    font-size: 0.9rem;
+    font-weight: 400;
   }
 
   .project-content-grid {

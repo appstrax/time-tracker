@@ -39,12 +39,9 @@
 
 .day-total-badge {
   flex-shrink: 0;
-  padding: 0.28rem 0.7rem;
-  border-radius: 6px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-size: 13px;
-  font-weight: 700;
+  color: var(--text-muted);
+  font-size: 14px;
+  font-weight: 400;
   white-space: nowrap;
 }
 

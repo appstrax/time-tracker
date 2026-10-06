@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import {
   Component,
   ElementRef,
@@ -9,20 +9,31 @@ import {
   output,
   signal,
 } from '@angular/core';
+import {
+  NgbDateStruct,
+  NgbInputDatepicker,
+} from '@ng-bootstrap/ng-bootstrap';
+
+const DAY_MS = 86_400_000;
 
 @Component({
   selector: 'app-time-sheet-date-selector',
   standalone: true,
   templateUrl: './time-sheet-date-selector.component.html',
   styleUrl: './time-sheet-date-selector.component.scss',
-  imports: [DatePipe],
+  imports: [DatePipe, NgClass, NgbInputDatepicker],
 })
 export class TimeSheetDateSelectorComponent implements OnInit {
   public readonly layout = input<'default' | 'pill'>('default');
   public readonly weekChange = output<{ start: Date; end: Date }>();
 
-  @ViewChild('datePicker')
-  public datePicker?: ElementRef<HTMLInputElement>;
+  @ViewChild(NgbInputDatepicker)
+  public datePicker?: NgbInputDatepicker;
+
+  @ViewChild('pickerTarget')
+  public pickerTarget?: ElementRef<HTMLElement>;
+
+  private readonly hoveredDay = signal<number | null>(null);
 
   public readonly selectedWeekEnd = signal(new Date());
   public readonly selectedWeekStart = signal(new Date());
@@ -34,12 +45,13 @@ export class TimeSheetDateSelectorComponent implements OnInit {
       newDate.getTime() <= this.selectedWeekEnd().getTime()
     );
   });
-  public readonly datePickerValue = computed(() => {
-    const selectedWeekStart = this.selectedWeekStart();
-    const year = selectedWeekStart.getUTCFullYear();
-    const month = String(selectedWeekStart.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(selectedWeekStart.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  public readonly datePickerStart = computed<NgbDateStruct>(() => {
+    const start = this.selectedWeekStart();
+    return {
+      year: start.getUTCFullYear(),
+      month: start.getUTCMonth() + 1,
+      day: start.getUTCDate(),
+    };
   });
   public readonly selectedYear = computed(() =>
     this.selectedWeekStart().getFullYear(),
@@ -96,22 +108,60 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     });
   }
 
-  public openDatePicker(): void {
-    if (this.datePicker) {
-      const input = this.datePicker.nativeElement;
-      try {
-        input.showPicker();
-      } catch {
-        input.click(); //older and non chrome browsers
-      }
+  public toggleDatePicker(): void {
+    const picker = this.datePicker;
+    if (!picker) return;
+    if (this.pickerTarget) {
+      picker.positionTarget = this.pickerTarget.nativeElement;
     }
+    picker.toggle();
   }
 
-  public onDateSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.value) {
-      const selectedDate = new Date(input.value);
-      this.navigateToWeek(selectedDate);
-    }
+  public onPickerClosed(): void {
+    this.hoveredDay.set(null);
   }
+
+  public onDayHover(date: NgbDateStruct | null): void {
+    this.hoveredDay.set(
+      date ? Date.UTC(date.year, date.month - 1, date.day) : null,
+    );
+  }
+
+  public onDateSelected(date: NgbDateStruct): void {
+    this.navigateToWeek(new Date(Date.UTC(date.year, date.month - 1, date.day)));
+    this.datePicker?.close();
+  }
+
+  /** Space-separated classes for one calendar day cell. */
+  public dayClasses(date: NgbDateStruct): string {
+    const time = Date.UTC(date.year, date.month - 1, date.day);
+    const { start, end, today, hoverStart } = this.highlight();
+    const classes: string[] = [];
+    if (time >= start && time <= end) classes.push('in-week');
+    if (time === start) classes.push('week-start');
+    if (time === end) classes.push('week-end');
+    if (time === today) classes.push('today');
+    if (
+      hoverStart !== null &&
+      time >= hoverStart &&
+      time <= hoverStart + 6 * DAY_MS
+    ) {
+      classes.push('hover-week');
+    }
+    return classes.join(' ');
+  }
+
+  private readonly highlight = computed(() => {
+    const hovered = this.hoveredDay();
+    const now = new Date();
+    return {
+      start: this.selectedWeekStart().getTime(),
+      end: this.selectedWeekEnd().getTime(),
+      today: Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+      hoverStart:
+        hovered === null
+          ? null
+          : hovered - ((new Date(hovered).getUTCDay() + 6) % 7) * DAY_MS,
+    };
+  });
 }
