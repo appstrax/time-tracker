@@ -5,6 +5,7 @@ import {
   ElementRef,
   EventEmitter,
   HostListener,
+  input,
   Input,
   Output,
   signal,
@@ -30,9 +31,16 @@ export class ProjectDropdownComponent {
 
   @Output() projectSelected = new EventEmitter<Project | null>();
 
+  /** Overrides the default (all projects visible to the current user) list, e.g. to scope it to the user's own project memberships. */
+  readonly projectsOverride = input<Project[] | null>(null, {
+    alias: 'projects',
+  });
+
   @ViewChild('searchInput') searchInput?: ElementRef<HTMLInputElement>;
 
-  projects = computed(() => this.store.projects.projects());
+  projects = computed(
+    () => this.projectsOverride() ?? this.store.projects.projects(),
+  );
   projectSearchTerm = signal('');
   filteredProjects = computed(() => {
     const term = this.projectSearchTerm().trim().toLowerCase();

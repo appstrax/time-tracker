@@ -18,6 +18,7 @@ import { ProjectDropdownComponent } from '@components';
 import { ToastService } from '@services';
 import {
   categorySuggestions,
+  filterAssignedProjects,
   FUTURE_TIMESHEET_ENTRY_TOAST,
   TimeSheetDisplayUtil,
   isFutureLocalCalendarDay,
@@ -39,7 +40,19 @@ export class TimeSheetEntryModal
    * entry starts on it; the dropdown opens empty when there is no filter. */
   @Input() defaultProjectId = '';
 
-  projects = computed(() => this.store.projects.projects());
+  /** Projects assigned to the current user, plus the entry's existing project
+   * (if any) so editing one they're no longer assigned to still displays it. */
+  projects = computed(() => {
+    const all = this.store.projects.projects();
+    const assigned = filterAssignedProjects(all, this.store.user.user());
+
+    const existingProjectId = this.timeSheetEntry.projectId;
+    if (!existingProjectId || assigned.some((p) => p.id === existingProjectId)) {
+      return assigned;
+    }
+    const existing = all.find((p) => p.id === existingProjectId);
+    return existing ? [...assigned, existing] : assigned;
+  });
 
   project: Project | undefined;
   filteredCategories: string[] = [];
