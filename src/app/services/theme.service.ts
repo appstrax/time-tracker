@@ -1,12 +1,11 @@
 import { Injectable } from '@angular/core';
 import { BehaviorSubject } from 'rxjs';
 
-export type ThemeMode = 'light' | 'dark' | 'system' | 'custom';
+export type ThemeMode = 'light' | 'dark' | 'system';
 
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private static readonly THEME_MODE_KEY = 'app.theme.mode';
-  private static readonly THEME_CUSTOM_VARS_KEY = 'app.theme.custom.vars';
   private prefersDark = window.matchMedia?.('(prefers-color-scheme: dark)');
   private systemListener?: (this: MediaQueryList, ev: MediaQueryListEvent) => any;
   // If true, 'system' mode mirrors OS preference; if false, we use branded dark
@@ -17,25 +16,20 @@ export class ThemeService {
 
   constructor() {
     const storedMode = (localStorage.getItem(ThemeService.THEME_MODE_KEY) as ThemeMode) || 'system';
-    const storedVarsRaw = localStorage.getItem(ThemeService.THEME_CUSTOM_VARS_KEY);
-    const customVars: Record<string, string> = storedVarsRaw ? JSON.parse(storedVarsRaw) : {};
-    this.applyTheme(storedMode, customVars);
+    this.applyTheme(storedMode);
   }
 
-  setTheme(mode: ThemeMode, customVars?: Record<string, string>) {
+  setTheme(mode: ThemeMode) {
     localStorage.setItem(ThemeService.THEME_MODE_KEY, mode);
-    if (mode === 'custom' && customVars) {
-      localStorage.setItem(ThemeService.THEME_CUSTOM_VARS_KEY, JSON.stringify(customVars));
-    }
-    this.applyTheme(mode, customVars);
+    this.applyTheme(mode);
   }
 
-  private applyTheme(mode: ThemeMode, customVars?: Record<string, string>) {
+  private applyTheme(mode: ThemeMode) {
     const htmlEl = document.documentElement;
     const effectiveBase = mode === 'system'
       ? (this.useOsPreferenceForSystem ? (this.prefersDark?.matches ? 'dark' : 'light') : 'dark')
       : mode;
-    htmlEl.setAttribute('data-theme', effectiveBase === 'custom' ? 'light' : effectiveBase);
+    htmlEl.setAttribute('data-theme', effectiveBase);
 
     // Manage system listener
     if (this.systemListener && this.prefersDark) {
@@ -50,7 +44,7 @@ export class ThemeService {
       this.prefersDark.addEventListener('change', this.systemListener);
     }
 
-    // Apply custom variable overrides
+    // Apply variable overrides
     const styleId = 'theme-vars';
     let styleEl = document.getElementById(styleId) as HTMLStyleElement | null;
     if (!styleEl) {
@@ -60,9 +54,7 @@ export class ThemeService {
     }
     let vars: Record<string, string> = {};
     let selector = ':root';
-    if (mode === 'custom' && customVars) {
-      vars = customVars;
-    } else if (mode === 'system' && !this.useOsPreferenceForSystem) {
+    if (mode === 'system' && !this.useOsPreferenceForSystem) {
       // Branded dark: keep dark base tokens but override primary to gold palette
       vars = this.getBrandedSystemVars();
       selector = ':root[data-theme="dark"]';
@@ -83,23 +75,6 @@ export class ThemeService {
     return `${selector} { ${body} }`;
   }
 
-  getStoredCustomVars(): Record<string, string> {
-    try {
-      const raw = localStorage.getItem(ThemeService.THEME_CUSTOM_VARS_KEY);
-      return raw ? JSON.parse(raw) : {};
-    } catch {
-      return {};
-    }
-  }
-
-  clearCustomVars() {
-    try {
-      localStorage.removeItem(ThemeService.THEME_CUSTOM_VARS_KEY);
-      const styleEl = document.getElementById('theme-vars') as HTMLStyleElement | null;
-      if (styleEl) styleEl.textContent = '';
-    } catch {}
-  }
-
   private getBrandedSystemVars(): Record<string, string> {
     // Gold accents inspired by the brand logo; dark theme base remains from CSS tokens
     const goldPrimary = '#bfa25a';       // softer, less glaring gold
@@ -115,5 +90,3 @@ export class ThemeService {
     };
   }
 }
-
-

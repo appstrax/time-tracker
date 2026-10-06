@@ -95,9 +95,6 @@
 .tile-visual.system .tile-header { background: linear-gradient(90deg, #bfa25a 0%, #8e793b 100%); }
 .tile-visual.system .tile-body { background: #111; }
 
-.tile-visual.custom .tile-header { background: var(--color-primary); }
-.tile-visual.custom .tile-body { background: var(--color-bg); }
-
 .theme-tile input[type='radio']:checked + .tile-visual {
   outline: 2px solid var(--color-primary);
   outline-offset: 2px;
@@ -128,7 +125,4 @@
 .form-switch .form-check-input:checked {
   background-color: var(--color-primary);
 }
-
-.custom-theme-editor .form-label { font-weight: 500; }
-
 
