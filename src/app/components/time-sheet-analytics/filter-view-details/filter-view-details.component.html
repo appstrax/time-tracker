@@ -54,6 +54,9 @@
                   >
                     {{ entry.approved ? 'Approved' : 'Pending' }}
                   </span>
+                  <span class="ws-entry-billable ws-tag">
+                    {{ entry.billable ? 'Billable' : 'Non-billable' }}
+                  </span>
                   @if (entry.fieldValues.length) {
                     <p class="ws-field-hint">
                       @for (
@@ -107,6 +110,7 @@
                     <th>Hours</th>
                     <th>Category</th>
                     <th>Details</th>
+                    <th>Billable</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -147,6 +151,11 @@
                         } @else {
                           <span class="text-muted">—</span>
                         }
+                      </td>
+                      <td>
+                        <span class="category-pill">
+                          {{ entry.billable ? 'Yes' : 'No' }}
+                        </span>
                       </td>
                       <td>
                         <span

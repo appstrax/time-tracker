@@ -10,6 +10,7 @@ export class TimeSheetEntry extends Model {
   public description: string = '';
   public category: string = '';
   public approved: boolean = false;
+  public billable: boolean = true;
   public fieldValues: TimeSheetFieldValue[] = [];
 
   clone(): TimeSheetEntry {

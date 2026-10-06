@@ -144,6 +144,20 @@
           </fieldset>
           </div>
 
+          <div class="form-check form-switch">
+            <input
+              type="checkbox"
+              class="form-check-input"
+              id="projectBillable"
+              name="projectBillable"
+              [ngModel]="project().billable"
+              (ngModelChange)="updateProjectBillable($event)"
+            />
+            <label class="form-check-label" for="projectBillable"
+              >Billable by default</label
+            >
+          </div>
+
           @if (error()) {
           <div class="alert alert-danger mb-0">{{ error() }}</div>
           }

@@ -110,6 +110,23 @@
       </div>
     </div>
 
+    <div class="form-group">
+      <label class="toggle-switch" for="billable">
+        <input
+          type="checkbox"
+          class="toggle-switch__input"
+          id="billable"
+          name="billable"
+          [(ngModel)]="timeSheetEntry.billable"
+          [disabled]="timeSheetEntry.approved"
+        />
+        <span class="toggle-switch__track">
+          <span class="toggle-switch__thumb"></span>
+        </span>
+        <span class="toggle-switch__label">Billable</span>
+      </label>
+    </div>
+
     @if (projectFields.length) {
       <div class="custom-fields-section">
         <span class="custom-fields-section__label">Project Details</span>

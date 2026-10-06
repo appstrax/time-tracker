@@ -49,13 +49,27 @@ describe('TimeSheetEntryComponent', () => {
     fields: [
       { key: 'notes', label: 'Notes', type: 'text', required: true, options: [] },
       {
-        key: 'billable',
-        label: 'Billable',
+        key: 'reviewed',
+        label: 'Reviewed',
         type: 'boolean',
         required: true,
         options: [],
       },
     ],
+  } as any as Project;
+
+  const projectBillableByDefault = {
+    id: 'project-billable',
+    name: 'Billable Co',
+    fields: [],
+    billable: true,
+  } as any as Project;
+
+  const projectNonBillableByDefault = {
+    id: 'project-non-billable',
+    name: 'Non-Billable Co',
+    fields: [],
+    billable: false,
   } as any as Project;
 
   const projectWithCategories = {
@@ -99,6 +113,8 @@ describe('TimeSheetEntryComponent', () => {
                 projectWithFields,
                 projectWithOptionalBoolean,
                 projectWithRequiredBoolean,
+                projectBillableByDefault,
+                projectNonBillableByDefault,
               ]),
             },
           },
@@ -330,7 +346,7 @@ describe('TimeSheetEntryComponent', () => {
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 
-    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.getFieldValue('reviewed')).toBe('false');
     expect(component.isFormValid()).toBe(true);
   });
 
@@ -339,8 +355,39 @@ describe('TimeSheetEntryComponent', () => {
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 
-    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.getFieldValue('reviewed')).toBe('false');
     expect(component.isFormValid()).toBe(true);
+  });
+
+  it('should default a new entry\'s billable flag from the selected project', async () => {
+    await createComponent();
+    component.onProjectSelected(projectBillableByDefault);
+
+    expect(component.timeSheetEntry.billable).toBe(true);
+
+    component.onProjectSelected(projectNonBillableByDefault);
+
+    expect(component.timeSheetEntry.billable).toBe(false);
+  });
+
+  it('should default a new entry\'s billable flag when the project is pre-selected on open', async () => {
+    await createComponent(projectNonBillableByDefault.id);
+
+    expect(component.timeSheetEntry.billable).toBe(false);
+  });
+
+  it('should preserve an existing entry\'s billable value regardless of the project default', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.weekEntries = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectBillableByDefault.id;
+    component.timeSheetEntry.billable = false;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.timeSheetEntry.billable).toBe(false);
   });
 
   it('lists the selected project categories, then only that project\'s week categories', async () => {

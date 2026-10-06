@@ -38,6 +38,7 @@ export class TimeSheetExportUtil {
     'Category',
     'Description',
     'Status',
+    'Billable',
   ];
 
   private static readonly BASE_HEADERS_WITH_PROJECT = [
@@ -129,6 +130,7 @@ export class TimeSheetExportUtil {
           entry.category ?? '',
           entry.description ?? '',
           entry.approved ? 'Approved' : 'Pending',
+          entry.billable ? 'Yes' : 'No',
         ]
       : [
           getUserDisplayName(user),
@@ -137,6 +139,7 @@ export class TimeSheetExportUtil {
           entry.category ?? '',
           entry.description ?? '',
           entry.approved ? 'Approved' : 'Pending',
+          entry.billable ? 'Yes' : 'No',
         ];
 
     const customValues = fieldColumns.map((column) =>
