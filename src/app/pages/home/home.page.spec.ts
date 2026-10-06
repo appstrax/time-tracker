@@ -149,6 +149,22 @@ describe('HomePage', () => {
     expect(component.totals().total).toBe(6);
   });
 
+  it('ignores a category in the URL filter', () => {
+    component.onFilterChange({ category: 'Meetings' });
+    expect(component.filter().category).toBeUndefined();
+    expect(component.totals().total).toBe(6);
+  });
+
+  it('keeps an admin’s project list steady while entries reload', () => {
+    // The load effect empties the entries on every range change.
+    component.entries.set([]);
+    expect(component.projects().map((project) => project.id)).toEqual([
+      'alpha',
+      'beta',
+    ]);
+    expect(component.hasProjects()).toBeTrue();
+  });
+
   it('opens the time sheet on the clicked project', () => {
     clearStoredTimeSheetFilterProjectId();
     component.rememberProject('beta');

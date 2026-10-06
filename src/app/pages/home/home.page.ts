@@ -53,17 +53,17 @@ export class HomePage {
   public readonly entries = signal<TimeSheetEntry[]>([]);
   public readonly filter = signal<AnalyticsFilter>({});
   /**
-   * Projects the signed-in user is assigned to (including ones with no time
-   * logged yet) or has logged time on. A regular user's store already holds
-   * only their projects, and their `users` lists are not populated, so only
-   * admins, whose store holds every project, need scoping — the way the admin
-   * analytics page scopes a selected team member.
+   * Projects the signed-in user is assigned to, including ones with no time
+   * logged yet. A regular user's store already holds only their projects, and
+   * their `users` lists are not populated, so only admins, whose store holds
+   * every project, need scoping. It goes by assignment alone, not entries, so
+   * the list does not change while a new date range loads.
    */
   public readonly projects = computed(() => {
     const all = this.store.projects.projects();
     const user = this.store.user.user();
     if (user?.role !== UserRole.ADMIN) return all;
-    return scopeProjectsToUser(all, user.id, this.entries());
+    return scopeProjectsToUser(all, user.id, []);
   });
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
@@ -173,9 +173,10 @@ export class HomePage {
   }
 
   public onFilterChange(filter: AnalyticsFilter): void {
-    // Home only ever holds the signed-in user's entries and has no control to
-    // clear it, so ignore a stray `userId` in the URL.
-    this.filter.set({ ...filter, userId: undefined });
+    // Home only ever holds the signed-in user's entries and has no team member
+    // or category control to clear them, so ignore stray `userId` and
+    // `category` values in the URL.
+    this.filter.set({ ...filter, userId: undefined, category: undefined });
   }
 
   /** Makes the time sheet, opened by the row link, filter to this project. */
