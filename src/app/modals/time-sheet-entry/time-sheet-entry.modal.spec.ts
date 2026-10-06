@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { Project, User, UserRole } from '@models';
+import { Project, TimeSheetEntry, User, UserRole } from '@models';
 import { Store } from '@state';
 import { ToastService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
@@ -463,7 +463,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
   it('only lists projects the admin is a member of', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = '';
     fixture.detectChanges();
@@ -475,7 +475,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
   it('still shows an existing entry\'s project even if the admin is not a member', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = otherProject.id;
@@ -495,7 +495,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
     });
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = '';
     fixture.detectChanges();
