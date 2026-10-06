@@ -169,11 +169,6 @@ $nav-width-transition: $nav-width-transition-duration ease-out;
     .menu-item-icon i {
       color: var(--primary-color);
     }
-
-    .menu-item-icon i.bi-house-door::before { content: "\f422"; }
-    .menu-item-icon i.bi-stopwatch::before { content: "\f596"; }
-    .menu-item-icon i.bi-bar-chart::before { content: "\f17a"; }
-    .menu-item-icon i.bi-folder::before { content: "\f3d1"; }
   }
 
   .nav-panel--compact &:not(.active):hover .menu-item-icon {

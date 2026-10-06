@@ -13,6 +13,7 @@
     <a
       routerLink="/home"
       routerLinkActive="active"
+      #homeActive="routerLinkActive"
       class="nav-item"
       ngbTooltip="Home"
       placement="end"
@@ -20,12 +21,17 @@
       triggers="hover"
     >
       <div class="icon-box">
-        <i class="bi bi-house-door"></i>
+        <i
+          class="bi"
+          [class.bi-house-door]="!homeActive.isActive"
+          [class.bi-house-door-fill]="homeActive.isActive"
+        ></i>
       </div>
     </a>
     <a
       routerLink="/time-sheet"
       routerLinkActive="active"
+      #timeSheetActive="routerLinkActive"
       class="nav-item"
       ngbTooltip="Time Sheets"
       placement="end"
@@ -33,13 +39,18 @@
       triggers="hover"
     >
       <div class="icon-box">
-        <i class="bi bi-stopwatch"></i>
+        <i
+          class="bi"
+          [class.bi-stopwatch]="!timeSheetActive.isActive"
+          [class.bi-stopwatch-fill]="timeSheetActive.isActive"
+        ></i>
       </div>
     </a>
     @if (admin()) {
       <a
         routerLink="/analytics"
         routerLinkActive="active"
+        #analyticsActive="routerLinkActive"
         class="nav-item"
         ngbTooltip="Analytics"
         placement="end"
@@ -47,13 +58,18 @@
         triggers="hover"
       >
         <div class="icon-box">
-          <i class="bi bi-bar-chart"></i>
+          <i
+            class="bi"
+            [class.bi-bar-chart]="!analyticsActive.isActive"
+            [class.bi-bar-chart-fill]="analyticsActive.isActive"
+          ></i>
         </div>
       </a>
 
       <a
         routerLink="/projects"
         routerLinkActive="active"
+        #projectsActive="routerLinkActive"
         class="nav-item"
         ngbTooltip="Projects"
         placement="end"
@@ -61,7 +77,11 @@
         triggers="hover"
       >
         <div class="icon-box">
-          <i class="bi bi-folder"></i>
+          <i
+            class="bi"
+            [class.bi-folder]="!projectsActive.isActive"
+            [class.bi-folder-fill]="projectsActive.isActive"
+          ></i>
         </div>
       </a>
     }
