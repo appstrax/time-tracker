@@ -330,6 +330,10 @@
   }
 }
 
+:host-context([data-theme="dark"]) .project-page .field-unsaved-pill {
+  color: #fcd34d;
+}
+
 @media (max-width: 991px) {
   .project-page {
     .project-content-grid {

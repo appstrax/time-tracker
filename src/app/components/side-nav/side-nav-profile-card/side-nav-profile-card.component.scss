@@ -199,11 +199,11 @@ $nav-width-transition: $nav-width-transition-duration ease-out;
 }
 
 .profile-dropdown-item--danger {
-  color: #dc3545;
+  color: var(--color-danger);
 
   &:hover,
   &:focus {
-    color: #dc3545;
-    background: color-mix(in srgb, #dc3545 10%, transparent);
+    color: var(--color-danger);
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
   }
 }
