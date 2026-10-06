@@ -7,7 +7,7 @@ import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
 import { AnalyticsFilter, TimeSheetEntry, UserRole } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
-import { TimeSheetFilterUtil } from '@utils';
+import { TimeSheetFilterUtil, storeTimeSheetFilterProjectId } from '@utils';
 
 import {
   filterAnalyticsEntries,
@@ -173,6 +173,13 @@ export class HomePage {
   }
 
   public onFilterChange(filter: AnalyticsFilter): void {
-    this.filter.set(filter);
+    // Home only ever holds the signed-in user's entries and has no control to
+    // clear it, so ignore a stray `userId` in the URL.
+    this.filter.set({ ...filter, userId: undefined });
+  }
+
+  /** Makes the time sheet, opened by the row link, filter to this project. */
+  public rememberProject(projectId: string): void {
+    storeTimeSheetFilterProjectId(projectId);
   }
 }

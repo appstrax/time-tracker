@@ -82,7 +82,11 @@
             <span></span>
           </div>
           @for (row of rows(); track row.id) {
-            <a class="project-row" [routerLink]="['/time-sheet']">
+            <a
+              class="project-row"
+              [routerLink]="['/time-sheet']"
+              (click)="rememberProject(row.id)"
+            >
               <app-project-preview
                 class="cell-project"
                 [compact]="true"

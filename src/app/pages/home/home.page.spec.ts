@@ -9,6 +9,10 @@ import { provideRouter } from '@angular/router';
 import { Project, TimeSheetEntry, User, UserRole } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
+import {
+  clearStoredTimeSheetFilterProjectId,
+  getStoredTimeSheetFilterProjectId,
+} from '@utils';
 
 import { HomePage } from './home.page';
 
@@ -137,6 +141,19 @@ describe('HomePage', () => {
   it('applies the status filter to the totals', () => {
     component.onFilterChange({ status: 'pending' });
     expect(component.totals().total).toBe(1);
+  });
+
+  it('ignores a userId in the URL filter', () => {
+    component.onFilterChange({ userId: 'someone-else' });
+    expect(component.filter().userId).toBeUndefined();
+    expect(component.totals().total).toBe(6);
+  });
+
+  it('opens the time sheet on the clicked project', () => {
+    clearStoredTimeSheetFilterProjectId();
+    component.rememberProject('beta');
+    expect(getStoredTimeSheetFilterProjectId()).toBe('beta');
+    clearStoredTimeSheetFilterProjectId();
   });
 
   it('does not offer a team member filter', () => {
