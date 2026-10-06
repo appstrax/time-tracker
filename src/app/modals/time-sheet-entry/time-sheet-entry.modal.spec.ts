@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { Project, User, UserRole } from '@models';
+import { Project, TimeSheetEntry, User, UserRole } from '@models';
 import { Store } from '@state';
 import { ToastService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
@@ -63,15 +63,6 @@ describe('TimeSheetEntryComponent', () => {
     name: 'Cat Project',
     fields: [],
     categories: ['Development', 'Meetings'],
-    allowCustomCategory: true,
-  } as any as Project;
-
-  const projectStrictCategories = {
-    id: 'project-strict',
-    name: 'Strict Project',
-    fields: [],
-    categories: ['Development'],
-    allowCustomCategory: false,
   } as any as Project;
 
   let component: TimeSheetEntryModal;
@@ -133,11 +124,18 @@ describe('TimeSheetEntryComponent', () => {
   async function createComponent(defaultProjectId = ''): Promise<void> {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = defaultProjectId;
     fixture.detectChanges();
     await fixture.whenStable();
+  }
+
+  function entryFor(projectId: string, category: string): TimeSheetEntry {
+    const entry = new TimeSheetEntry();
+    entry.projectId = projectId;
+    entry.category = category;
+    return entry;
   }
 
   function fillRequiredBaseFields(): void {
@@ -184,7 +182,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should keep an existing entry\'s project over the active filter', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = project.id;
     component.timeSheetEntry.id = 'existing-entry-id';
@@ -257,7 +255,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should preserve field values for keys that existed when editing a pre-existing entry', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = projectWithFields.id;
@@ -284,7 +282,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should drop orphaned field values when a pre-existing entry is moved to another project', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = projectWithFields.id;
@@ -345,73 +343,46 @@ describe('TimeSheetEntryComponent', () => {
     expect(component.isFormValid()).toBe(true);
   });
 
-  it('should use project categories for suggestions instead of week fallback', async () => {
+  it('lists the selected project categories, then only that project\'s week categories', async () => {
     await createComponent();
-    component.categories = ['Legacy'];
+    component.weekEntries = [
+      entryFor(projectWithCategories.id, 'Legacy'),
+      entryFor(project.id, 'Dob'),
+    ];
     component.onProjectSelected(projectWithCategories);
 
-    expect(component.filteredCategories).toEqual(['Development', 'Meetings']);
+    expect(component.filteredCategories).toEqual([
+      'Development',
+      'Meetings',
+      'Legacy',
+    ]);
   });
 
   it('should keep week fallback when project has no category list', async () => {
     await createComponent();
-    component.categories = ['Legacy'];
+    component.weekEntries = [entryFor(project.id, 'Legacy')];
     component.onProjectSelected(project);
 
     expect(component.filteredCategories).toEqual(['Legacy']);
   });
 
-  it('should allow custom category text when allowCustomCategory is true', async () => {
+  it('rejects a blank category', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithCategories);
+    fillRequiredBaseFields();
+    component.timeSheetEntry.category = '   ';
+
+    expect(component.isFormValid()).toBe(false);
+    expect(component.errorMessage).toContain('Category is required');
+  });
+
+  it('should allow custom category text for any project', async () => {
     await createComponent();
     component.onProjectSelected(projectWithCategories);
     fillRequiredBaseFields();
     component.timeSheetEntry.category = 'Custom work';
 
     expect(component.isFormValid()).toBe(true);
-  });
-
-  it('should reject custom category when allowCustomCategory is false', async () => {
-    await createComponent();
-    component.onProjectSelected(projectStrictCategories);
-    fillRequiredBaseFields();
-    component.timeSheetEntry.category = 'Custom work';
-
-    expect(component.isFormValid()).toBe(false);
-    expect(component.errorMessage).toContain("project's categories");
-  });
-
-  it('should grandfather an existing off-list category when custom is disabled', async () => {
-    fixture = TestBed.createComponent(TimeSheetEntryModal);
-    component = fixture.componentInstance;
-    component.categories = [];
-    component.date = new Date();
-    component.timeSheetEntry.id = 'existing-entry-id';
-    component.timeSheetEntry.category = 'Legacy standup';
-    component.timeSheetEntry.projectId = projectStrictCategories.id;
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    fillRequiredBaseFields();
-
-    expect(component.isFormValid()).toBe(true);
-  });
-
-  it('should reject an off-list category when an existing entry is moved to a strict project', async () => {
-    fixture = TestBed.createComponent(TimeSheetEntryModal);
-    component = fixture.componentInstance;
-    component.categories = [];
-    component.date = new Date();
-    component.timeSheetEntry.id = 'existing-entry-id';
-    component.timeSheetEntry.category = 'Legacy standup';
-    component.timeSheetEntry.projectId = project.id;
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    component.onProjectSelected(projectStrictCategories);
-    fillRequiredBaseFields();
-
-    expect(component.isFormValid()).toBe(false);
-    expect(component.errorMessage).toContain("project's categories");
   });
 
   it('should skip required-configured-field validation for a pre-existing entry (capture-forward)', async () => {
@@ -492,7 +463,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
   it('only lists projects the admin is a member of', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = '';
     fixture.detectChanges();
@@ -504,7 +475,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
   it('still shows an existing entry\'s project even if the admin is not a member', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = otherProject.id;
@@ -524,7 +495,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
     });
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.defaultProjectId = '';
     fixture.detectChanges();

@@ -225,7 +225,10 @@
       <div class="card-header">
         <div>
           <h2 class="eyebrow">Time entry categories</h2>
-          <p>Suggested categories when logging time on this project.</p>
+          <p>
+            Suggested categories when logging time on this project. Users can
+            also type their own.
+          </p>
         </div>
         <div class="fields-header-actions">
           @if (editing() && project().id && areCategoriesDirty()) {
@@ -261,24 +264,11 @@
       </div>
       }
 
-      <div class="form-check mb-3">
-        <input
-          type="checkbox"
-          class="form-check-input"
-          id="allowCustomCategory"
-          [ngModel]="project().allowCustomCategory"
-          (ngModelChange)="updateAllowCustomCategory($event)"
-          name="allowCustomCategory"
-        />
-        <label class="form-check-label" for="allowCustomCategory">
-          Allow users to type their own category
-        </label>
-      </div>
-
       @if (!project().categories.length) {
       <p class="text-muted mb-0">
         No categories configured. Time capture will suggest categories from
-        recent entries on the week view.
+        recent entries on the week view. Users can always type their own
+        category.
       </p>
       } @else {
       <div class="field-rows">

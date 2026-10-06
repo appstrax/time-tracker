@@ -40,7 +40,7 @@
           [projects]="projects()"
           [projectColorById]="projectColorById()"
           [entries]="entriesByDate().get(localCalendarDayKey(day)) ?? []"
-          [categories]="categories()"
+          [weekEntries]="weekEntries()"
           [defaultProjectId]="filterProject()?.id ?? ''"
           (save)="onTimeSheetEntrySaved($event)"
         />

@@ -39,25 +39,6 @@ export function validateProjectCategories(categories: string[]): string | null {
   return null;
 }
 
-export function validateProjectCategoryPolicy(
-  categories: string[],
-  allowCustomCategory: boolean,
-): string | null {
-  const listError = validateProjectCategories(categories);
-  if (listError) {
-    return listError;
-  }
-
-  if (
-    allowCustomCategory === false &&
-    normalizeProjectCategories(categories).length === 0
-  ) {
-    return 'Add at least one category when custom entry is disabled';
-  }
-
-  return null;
-}
-
 function trimmedProjectCategories(project: Project | undefined): string[] {
   if (!project?.categories?.length) return [];
   return project.categories.map((c) => c.trim()).filter((c) => c.length > 0);
@@ -68,39 +49,16 @@ export function categorySuggestions(
   fallback: string[],
 ): string[] {
   const fromProject = trimmedProjectCategories(project);
-  if (fromProject.length) return fromProject;
-  return [
-    ...new Set(
-      fallback.map((c) => c.trim()).filter((c) => c.length > 0),
-    ),
-  ];
-}
-
-export function isCategoryAllowed(
-  project: Project | undefined,
-  category: string,
-  grandfather?: string,
-): boolean {
-  const trimmed = category.trim();
-  if (!trimmed) return false;
-
-  const list = trimmedProjectCategories(project);
-  const customAllowed = project?.allowCustomCategory !== false;
-
-  if (customAllowed) {
-    return true;
+  const seen = new Set(fromProject.map((category) => category.toLowerCase()));
+  const extras: string[] = [];
+  for (const raw of fallback) {
+    const trimmed = raw.trim();
+    const key = trimmed.toLowerCase();
+    if (!trimmed || seen.has(key)) continue;
+    seen.add(key);
+    extras.push(trimmed);
   }
-
-  const grandfatherTrimmed = grandfather?.trim();
-  if (grandfatherTrimmed && trimmed === grandfatherTrimmed) {
-    return true;
-  }
-
-  if (!list.length) {
-    return false;
-  }
-
-  return list.includes(trimmed);
+  return [...fromProject, ...extras];
 }
 
 export function categoryFilterOptions(

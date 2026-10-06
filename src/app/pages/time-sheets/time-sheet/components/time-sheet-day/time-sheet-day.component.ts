@@ -27,7 +27,7 @@ export class TimeSheetDayComponent {
   public readonly date = input(new Date());
   public readonly projects = input<Project[]>([]);
   public readonly projectColorById = input<Map<string, string>>(new Map());
-  public readonly categories = input<string[]>([]);
+  public readonly weekEntries = input<TimeSheetEntry[]>([]);
   public readonly entries = input<TimeSheetEntry[]>([]);
   /** Active project filter, or '' on "all projects". Seeds a new entry's project. */
   public readonly defaultProjectId = input('');
@@ -135,7 +135,7 @@ export class TimeSheetDayComponent {
     const options = {
       timeSheetEntry,
       date: this.date(),
-      categories: this.categories(),
+      weekEntries: this.weekEntries(),
       defaultProjectId: this.defaultProjectId(),
     };
 

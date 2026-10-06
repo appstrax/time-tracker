@@ -13,7 +13,7 @@ import {
   normalizeProjectCategories,
   pickNewProjectColor,
   seedNewProjectCategories,
-  validateProjectCategoryPolicy,
+  validateProjectCategories,
 } from '@utils';
 
 function sameColorSources(left: Project[], right: Project[]): boolean {
@@ -93,7 +93,6 @@ export class ProjectPage implements OnInit {
     logoUrl: '',
     color: '',
     categories: [] as string[],
-    allowCustomCategory: true,
   };
 
   constructor(
@@ -253,10 +252,7 @@ export class ProjectPage implements OnInit {
       return false;
     }
 
-    const categoryError = validateProjectCategoryPolicy(
-      project.categories,
-      project.allowCustomCategory,
-    );
+    const categoryError = validateProjectCategories(project.categories);
     if (categoryError) {
       this.error.set(categoryError);
       return false;
@@ -290,8 +286,7 @@ export class ProjectPage implements OnInit {
     const project = this.project();
     return (
       JSON.stringify(project.categories) !==
-        JSON.stringify(this.savedCoreSnapshot.categories) ||
-      project.allowCustomCategory !== this.savedCoreSnapshot.allowCustomCategory
+      JSON.stringify(this.savedCoreSnapshot.categories)
     );
   }
 
@@ -346,9 +341,8 @@ export class ProjectPage implements OnInit {
     try {
       const hadUnsavedCoreEdits = this.hasUnsavedCoreDetailsEdits();
 
-      const validationError = validateProjectCategoryPolicy(
+      const validationError = validateProjectCategories(
         this.project().categories,
-        this.project().allowCustomCategory,
       );
       if (validationError) {
         this.categoriesError.set(validationError);
@@ -494,7 +488,6 @@ export class ProjectPage implements OnInit {
       logoUrl: project.logoUrl,
       color: project.color,
       categories: [...project.categories],
-      allowCustomCategory: project.allowCustomCategory,
     };
   }
 
@@ -511,7 +504,6 @@ export class ProjectPage implements OnInit {
     const payload = Object.assign(new Project(), current);
 
     payload.categories = normalizeProjectCategories(current.categories);
-    payload.allowCustomCategory = current.allowCustomCategory;
 
     if (this.editing()) {
       payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
@@ -529,7 +521,6 @@ export class ProjectPage implements OnInit {
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
     payload.color = this.savedCoreSnapshot.color;
     payload.categories = [...this.savedCoreSnapshot.categories];
-    payload.allowCustomCategory = this.savedCoreSnapshot.allowCustomCategory;
 
     return payload;
   }
@@ -543,7 +534,6 @@ export class ProjectPage implements OnInit {
     payload.logoUrl = this.savedCoreSnapshot.logoUrl;
     payload.color = this.savedCoreSnapshot.color;
     payload.categories = normalizeProjectCategories(current.categories);
-    payload.allowCustomCategory = current.allowCustomCategory;
     payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
 
     return payload;
@@ -580,9 +570,6 @@ export class ProjectPage implements OnInit {
     }
     if (JSON.stringify(live.categories) !== JSON.stringify(submitted.categories)) {
       overrides.categories = live.categories;
-    }
-    if (live.allowCustomCategory !== submitted.allowCustomCategory) {
-      overrides.allowCustomCategory = live.allowCustomCategory;
     }
 
     return overrides;
@@ -659,14 +646,6 @@ export class ProjectPage implements OnInit {
       const categories = [...project.categories];
       categories[index] = value;
       project.categories = categories;
-    });
-  }
-
-  public updateAllowCustomCategory(allow: boolean): void {
-    this.error.set('');
-    this.categoriesError.set('');
-    this.updateProject((project) => {
-      project.allowCustomCategory = allow;
     });
   }
 
