@@ -18,11 +18,8 @@ import { ProjectDropdownComponent } from '@components';
 import { ToastService } from '@services';
 import {
   categorySuggestions,
-  clearStoredTimeSheetProjectId,
+  filterAssignedProjects,
   FUTURE_TIMESHEET_ENTRY_TOAST,
-  getStoredTimeSheetProjectId,
-  isCategoryAllowed,
-  storeTimeSheetProjectId,
   TimeSheetDisplayUtil,
   isFutureLocalCalendarDay,
 } from '@utils';
@@ -37,10 +34,25 @@ export class TimeSheetEntryModal
   implements OnInit, OnDestroy, AfterViewChecked
 {
   @Input() timeSheetEntry = new TimeSheetEntry();
-  @Input() categories!: string[];
+  @Input() weekEntries: TimeSheetEntry[] = [];
   @Input() date!: Date;
+  /** The time sheet's active project filter, or '' on "all projects". A new
+   * entry starts on it; the dropdown opens empty when there is no filter. */
+  @Input() defaultProjectId = '';
 
-  projects = computed(() => this.store.projects.projects());
+  /** Projects assigned to the current user, plus the entry's existing project
+   * (if any) so editing one they're no longer assigned to still displays it. */
+  projects = computed(() => {
+    const all = this.store.projects.projects();
+    const assigned = filterAssignedProjects(all, this.store.user.user());
+
+    const existingProjectId = this.timeSheetEntry.projectId;
+    if (!existingProjectId || assigned.some((p) => p.id === existingProjectId)) {
+      return assigned;
+    }
+    const existing = all.find((p) => p.id === existingProjectId);
+    return existing ? [...assigned, existing] : assigned;
+  });
 
   project: Project | undefined;
   filteredCategories: string[] = [];
@@ -60,7 +72,6 @@ export class TimeSheetEntryModal
   /** Keys present when the modal opened — kept on save only if the project is unchanged. */
   private fieldValueKeysAtOpen = new Set<string>();
   private projectIdAtOpen = '';
-  private categoryAtOpen = '';
 
   @ViewChild('hoursTooltip', { static: false }) hoursTooltip!: ElementRef;
   @ViewChild('categoryDropdownMenu', { static: false })
@@ -81,9 +92,9 @@ export class TimeSheetEntryModal
     this.initializeFromOptions();
   }
 
-  /** Called after NgbModal `Object.assign` so categories/date are available. */
+  /** Called after NgbModal `Object.assign` so the week entries and date are available. */
   initializeFromOptions(): void {
-    if (this.modalInputsInitialized || !this.date || !this.categories) {
+    if (this.modalInputsInitialized || !this.date) {
       return;
     }
     this.modalInputsInitialized = true;
@@ -93,21 +104,18 @@ export class TimeSheetEntryModal
       this.timeSheetEntry.fieldValues.map((fv) => fv.key),
     );
 
-    const projectId =
-      this.timeSheetEntry.projectId || getStoredTimeSheetProjectId();
+    const projectId = this.timeSheetEntry.projectId || this.defaultProjectId;
     if (projectId) {
       this.project = this.projects().find((x) => x.id === projectId);
       if (this.project) {
         this.timeSheetEntry.projectId = this.project.id;
-      } else if (!this.timeSheetEntry.projectId) {
-        clearStoredTimeSheetProjectId();
       }
     }
 
-    this.categoryAtOpen = this.timeSheetEntry.category ?? '';
     this.refreshCategorySuggestions();
     this.projectIdAtOpen = this.timeSheetEntry.projectId;
     this.initializeBooleanFieldDefaults();
+    this.initializeBillableDefault();
 
     void this.assignEntryUser();
   }
@@ -169,13 +177,25 @@ export class TimeSheetEntryModal
     this.project = project || undefined;
     this.timeSheetEntry.projectId = project ? project.id : '';
     this.initializeBooleanFieldDefaults();
+    this.initializeBillableDefault();
     this.refreshCategorySuggestions();
   }
 
   private refreshCategorySuggestions(): void {
-    this.filteredCategories = [
-      ...categorySuggestions(this.project, this.categories),
-    ];
+    this.filteredCategories = [...this.suggestions()];
+  }
+
+  private suggestions(): string[] {
+    return categorySuggestions(this.project, this.categoriesForSelectedProject());
+  }
+
+  private categoriesForSelectedProject(): string[] {
+    const projectId = this.project?.id;
+    if (!projectId) return [];
+    return this.weekEntries
+      .filter((entry) => entry.projectId === projectId)
+      .map((entry) => (entry.category ?? '').trim())
+      .filter((category) => category.length > 0);
   }
 
   get projectFields(): ProjectField[] {
@@ -218,7 +238,7 @@ export class TimeSheetEntryModal
     const input = event.target as HTMLInputElement;
     const value = input.value.toLowerCase().trim();
 
-    const suggestions = categorySuggestions(this.project, this.categories);
+    const suggestions = this.suggestions();
     if (value === '') {
       this.filteredCategories = [...suggestions];
       this.setCategoryDropdownVisible(
@@ -240,16 +260,14 @@ export class TimeSheetEntryModal
   }
 
   onCategoryFocus(): void {
-    const suggestions = categorySuggestions(this.project, this.categories);
+    const suggestions = this.suggestions();
     if (this.timeSheetEntry.category) {
       const value = this.timeSheetEntry.category.toLowerCase().trim();
       this.filteredCategories = suggestions.filter((category) =>
         category.toLowerCase().includes(value),
       );
     } else {
-      this.filteredCategories = [
-        ...categorySuggestions(this.project, this.categories),
-      ];
+      this.filteredCategories = [...this.suggestions()];
     }
     this.setCategoryDropdownVisible(this.filteredCategories.length > 0);
   }
@@ -270,7 +288,6 @@ export class TimeSheetEntryModal
 
       this.pruneStaleFieldValues();
       this.timeSheetEntry.category = this.timeSheetEntry.category.trim();
-      storeTimeSheetProjectId(this.timeSheetEntry.projectId);
       this.clearCategoryDropdownCloseTimer();
       this.activeModal.close({
         action: 'save',
@@ -307,33 +324,20 @@ export class TimeSheetEntryModal
           (field) => field.required && this.isConfiguredFieldMissing(field),
         );
 
-    const categoryGrandfather =
-      this.timeSheetEntry.projectId === this.projectIdAtOpen
-        ? this.categoryAtOpen
-        : undefined;
-
-    const categoryAllowed = isCategoryAllowed(
-      this.project,
-      this.timeSheetEntry.category,
-      categoryGrandfather,
-    );
-
+    const category = this.timeSheetEntry.category?.trim() ?? '';
     let isValid =
       this.timeSheetEntry.projectId &&
       this.timeSheetEntry.hours &&
       this.timeSheetEntry.description &&
-      categoryAllowed &&
+      category &&
       missingFields.length === 0;
 
     if (isValid) return true;
     let errorMessage = 'Please fill in all required fields';
     if (!this.timeSheetEntry.projectId)
       errorMessage += '\n\t• Please select a project';
-    if (!this.timeSheetEntry.category.trim())
+    if (!category)
       errorMessage += '\n\t• Category is required';
-    else if (!categoryAllowed)
-      errorMessage +=
-        "\n\t• Category must be one of this project's categories";
     if (!this.timeSheetEntry.hours)
       errorMessage += '\n\t• Hours must be greater than 0';
     if (!this.timeSheetEntry.description)
@@ -365,6 +369,11 @@ export class TimeSheetEntryModal
     }
   }
 
+  private initializeBillableDefault(): void {
+    if (this.wasExistingEntryOnOpen) return;
+    this.timeSheetEntry.billable = this.project?.billable ?? true;
+  }
+
   private pruneStaleFieldValues(): void {
     const currentKeys = new Set(this.projectFields.map((field) => field.key));
     const preserveOrphanedKeys =
@@ -381,5 +390,6 @@ export class TimeSheetEntryModal
 export interface TimeSheetEntryModalOptions {
   timeSheetEntry?: TimeSheetEntry;
   date: Date;
-  categories: string[];
+  weekEntries?: TimeSheetEntry[];
+  defaultProjectId?: string;
 }

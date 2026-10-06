@@ -1,0 +1,136 @@
+<div class="add-project-user-modal">
+  <div class="modal-header align-items-center d-flex justify-content-between">
+    <h4 class="modal-title mb-0 d-inline-flex align-items-center gap-2">
+      <i class="bi bi-person-plus"></i>
+      Add User
+    </h4>
+    <button
+      type="button"
+      class="btn-close btn-close-white"
+      aria-label="Close"
+      (click)="close()"
+    ></button>
+  </div>
+
+  <div class="modal-body">
+    <p class="add-project-user-intro">
+      Pick the person you want on this project, then choose what they can do.
+    </p>
+
+    <div class="form-group">
+      <label for="add-project-user-search" class="form-label">User</label>
+      <div class="input-with-icon search-field">
+        <i class="bi bi-search" aria-hidden="true"></i>
+        <input
+          id="add-project-user-search"
+          type="text"
+          class="form-control"
+          [ngModel]="searchTerm()"
+          (ngModelChange)="onSearchTermChange($event)"
+          (focus)="onSearchFocus()"
+          (blur)="onSearchBlur()"
+          placeholder="Search by name or email"
+          autocomplete="off"
+        />
+
+        @if (isSearchOpen()) {
+          <div class="search-results">
+            @if (!searchResults().length) {
+              <div class="search-state">
+                Everyone matching that search is already on the project.
+              </div>
+            } @else {
+              @for (user of searchResults(); track user.id) {
+                <button
+                  type="button"
+                  class="search-result"
+                  (click)="onUserSelect(user)"
+                >
+                  <span class="search-result-avatar">
+                    @if (user.profilePictureUrl) {
+                      <img
+                        [src]="user.profilePictureUrl"
+                        [alt]="getDisplayName(user)"
+                      />
+                    } @else {
+                      <span>{{ getUserInitials(user) }}</span>
+                    }
+                  </span>
+                  <span class="search-result-copy">
+                    <span class="search-result-title">
+                      {{ getDisplayName(user) }}
+                    </span>
+                    <span class="search-result-subtitle">
+                      {{ getUserSecondaryText(user) }}
+                    </span>
+                  </span>
+                </button>
+              }
+            }
+          </div>
+        }
+      </div>
+
+      @if (selectedUser()) {
+        <div class="selected-user-pill">
+          <span class="selected-user-avatar">
+            @if (selectedUser()?.profilePictureUrl) {
+              <img
+                [src]="selectedUser()?.profilePictureUrl"
+                [alt]="getDisplayName(selectedUser())"
+              />
+            } @else {
+              <span>{{ getUserInitials(selectedUser()) }}</span>
+            }
+          </span>
+          <span class="selected-user-copy">
+            <span class="selected-user-name">
+              {{ getDisplayName(selectedUser()) }}
+            </span>
+            <span class="selected-user-email">
+              {{ getUserSecondaryText(selectedUser()) }}
+            </span>
+          </span>
+          <button
+            type="button"
+            class="selected-user-remove"
+            (click)="clearSelectedUser()"
+            [attr.aria-label]="
+              'Clear selected user ' + getDisplayName(selectedUser())
+            "
+          >
+            <i class="bi bi-x-lg" aria-hidden="true"></i>
+          </button>
+        </div>
+      }
+    </div>
+
+    <div class="form-group">
+      <label for="add-project-user-role" class="form-label">Role</label>
+      <select
+        id="add-project-user-role"
+        class="form-select"
+        [ngModel]="role()"
+        (ngModelChange)="role.set($event)"
+      >
+        @for (userRole of userRoles(); track userRole) {
+          <option [ngValue]="userRole">{{ formatRole(userRole) }}</option>
+        }
+      </select>
+    </div>
+  </div>
+
+  <div class="modal-footer d-flex justify-content-end">
+    <button type="button" class="btn btn-outline-secondary" (click)="close()">
+      Cancel
+    </button>
+    <button
+      type="button"
+      class="btn btn-primary add-user-button"
+      (click)="onAddClick()"
+      [disabled]="!selectedUser()"
+    >
+      Add user
+    </button>
+  </div>
+</div>

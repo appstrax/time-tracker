@@ -4,9 +4,11 @@ import { Router } from '@angular/router';
 import { TimeSheetEntry, Project, User } from '@models';
 import { ToastService } from '@services';
 import {
+  buildProjectColorMap,
+  getProjectColor,
   TimeSheetDisplayUtil,
   TimeSheetExportUtil,
-  storeTimeSheetProjectId,
+  storeTimeSheetFilterProjectId,
 } from '@utils';
 
 @Component({
@@ -80,8 +82,19 @@ export class FilterViewSummaryComponent {
       .sort((a, b) => b.hours - a.hours);
   });
 
+  public readonly projectColorById = computed(() =>
+    buildProjectColorMap(this.projects()),
+  );
+
+  public projectColor(projectId: string): string {
+    return (
+      this.projectColorById().get(projectId) ??
+      getProjectColor(projectId, this.projects())
+    );
+  }
+
   public openTimeSheetForProject(projectId: string): void {
-    storeTimeSheetProjectId(projectId);
+    storeTimeSheetFilterProjectId(projectId);
     void this.router.navigate(['/time-sheet']);
   }
 

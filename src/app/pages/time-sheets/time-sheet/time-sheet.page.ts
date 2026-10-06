@@ -6,10 +6,11 @@ import { ToastService, TimeSheetEntryService } from '@services';
 import { Store } from '@state';
 import {
   buildProjectColorMap,
-  clearStoredTimeSheetProjectId,
-  getStoredTimeSheetProjectId,
+  clearStoredTimeSheetFilterProjectId,
+  filterAssignedProjects,
+  getStoredTimeSheetFilterProjectId,
   localCalendarDayKey,
-  storeTimeSheetProjectId,
+  storeTimeSheetFilterProjectId,
 } from '@utils';
 
 import { TimeSheetDayComponent } from './components';
@@ -31,10 +32,17 @@ export class TimeSheetPage {
   private readonly weekStart = signal(new Date());
   private readonly weekEnd = signal(new Date());
   private readonly filterProjectId = signal<string | null>(
-    getStoredTimeSheetProjectId(),
+    getStoredTimeSheetFilterProjectId(),
   );
 
   public readonly projects = computed(() => this.store.projects.projects());
+  /** Projects offered in the filter dropdown — narrowed to the current user's
+   * own memberships so an admin can't filter by (or log against) projects
+   * they're not part of. `projects` above stays unfiltered for colour lookups
+   * against entries that may reference a project the user's since left. */
+  public readonly myProjects = computed(() =>
+    filterAssignedProjects(this.projects(), this.store.user.user()),
+  );
   public readonly filterProject = computed(() => {
     const projectId = this.filterProjectId();
     if (!projectId) return null;
@@ -59,17 +67,13 @@ export class TimeSheetPage {
     () => this.fetching() || !this.store.projects.fetchedAt(),
   );
 
-  private readonly entries = signal<TimeSheetEntry[]>([]);
+  public readonly weekEntries = signal<TimeSheetEntry[]>([]);
   private readonly filteredEntries = computed(() => {
     const projectId = this.filterProjectId();
-    const entries = this.entries();
+    const entries = this.weekEntries();
     if (!projectId) return entries;
     return entries.filter((entry) => entry.projectId === projectId);
   });
-
-  public readonly categories = computed(() => [
-    ...new Set(this.filteredEntries().map((entry) => entry.category)),
-  ]);
 
   public readonly entriesByDate = computed(() => {
     const entriesByDate = new Map<string, TimeSheetEntry[]>();
@@ -96,29 +100,44 @@ export class TimeSheetPage {
     }
   }
 
-  public onTimeSheetEntrySaved() {
-    this.syncFilterProject();
+  public onTimeSheetEntrySaved(entry?: TimeSheetEntry) {
+    this.adoptSavedEntryProjectFilter(entry);
     this.fetchTimeSheetEntries();
+  }
+
+  /** After saving an entry, follow it into the filter — but only when a specific
+   * project was already selected. "All projects" stays "all projects". */
+  private adoptSavedEntryProjectFilter(entry?: TimeSheetEntry): void {
+    if (this.filterProjectId() === null) return;
+
+    const projectId = entry?.projectId;
+    if (!projectId) return;
+
+    this.filterProjectId.set(projectId);
+    storeTimeSheetFilterProjectId(projectId);
   }
 
   public onFilterProjectSelected(project: Project | null): void {
     this.filterProjectId.set(project?.id ?? null);
     if (project?.id) {
-      storeTimeSheetProjectId(project.id);
+      storeTimeSheetFilterProjectId(project.id);
     } else {
-      clearStoredTimeSheetProjectId();
+      clearStoredTimeSheetFilterProjectId();
     }
   }
 
+  /** Re-validates the active filter against the user's own projects (not the full,
+   * unfiltered list) so a stored filter for a project the user isn't assigned to
+   * gets reset; never pulls in the modal's "last used project" so saving an entry
+   * can't silently change the filter. */
   private syncFilterProject(): void {
-    const projectId = getStoredTimeSheetProjectId();
-    this.filterProjectId.set(projectId);
+    const projectId = this.filterProjectId();
     if (!projectId) return;
 
-    const project = this.projects().find((item) => item.id === projectId);
+    const project = this.myProjects().find((item) => item.id === projectId);
     if (!project) {
       this.filterProjectId.set(null);
-      clearStoredTimeSheetProjectId();
+      clearStoredTimeSheetFilterProjectId();
     }
   }
 
@@ -144,7 +163,7 @@ export class TimeSheetPage {
         end,
       );
 
-      this.entries.set(entries);
+      this.weekEntries.set(entries);
     } catch {
       this.toastService.error('Error initializing time sheet entries');
     } finally {

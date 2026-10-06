@@ -1,10 +1,13 @@
-<div class="filter-view-container" [class.compact]="compact()">
+<div
+  class="filter-view-container"
+  [class.compact]="compact()"
+  [class.dashboard]="showInsights()"
+>
   <section class="filter-panel" [class.workspace-panel]="compact()">
     @if (!compact()) {
       <div class="panel-header">
         <div>
-          <p class="eyebrow">Explore data</p>
-          <h2>Filters and views</h2>
+          <h2 class="eyebrow">Explore data</h2>
           <p>
             Switch between summary, detail, timeline, and approval-focused views,
             then narrow the results by status, teammate, category, and date range.
@@ -39,6 +42,7 @@
             </div>
           </div>
         } @else {
+          @if (showToolbar()) {
           <div class="compact-toolbar">
             <div
               class="view-type-segmented"
@@ -76,6 +80,7 @@
               }
             </div>
           </div>
+          }
         }
 
         @if (!compact()) {
@@ -246,6 +251,16 @@
         </div>
       </div>
     </div>
+
+    <ng-content select="[kpis]" />
+
+    @if (showInsights()) {
+      <app-insights-charts
+        class="insights-block"
+        [entries]="filteredEntries()"
+        [projects]="projects()"
+      />
+    }
 
     @if (compact()) {
       <div class="workspace-results">

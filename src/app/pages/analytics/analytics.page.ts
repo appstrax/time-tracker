@@ -1,16 +1,36 @@
-import { FormsModule } from '@angular/forms';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { DatePipe, DecimalPipe } from '@angular/common';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
-import { FilterViewContainerComponent } from '@components';
-import { TimeSheetEntry, User } from '@models';
+import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService, UsersService } from '@services';
+import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
 import { Store } from '@state';
+import { TimeSheetExportUtil } from '@utils';
 
-import { SummaryMetricsComponent } from './components';
+import {
+  filterAnalyticsEntries,
+  formatDateInput,
+  scopeProjectsToUser,
+} from './analytics-filter.util';
+import {
+  ProjectRow,
+  buildProjectRows,
+  summarizeEntries,
+} from './analytics-rows.util';
+import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
 
 @Component({
   standalone: true,
-  imports: [FormsModule, FilterViewContainerComponent, SummaryMetricsComponent],
+  imports: [
+    RouterLink,
+    DatePipe,
+    DecimalPipe,
+    AnalyticsFiltersComponent,
+    InsightsChartsComponent,
+    MetricCardComponent,
+    ProjectPreviewComponent,
+  ],
   templateUrl: './analytics.page.html',
   styleUrl: './analytics.page.scss',
 })
@@ -19,12 +39,62 @@ export class AnalyticsPage implements OnInit {
   private readonly entryService = inject(TimeSheetEntryService);
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
+  private readonly exportUtil = inject(TimeSheetExportUtil);
 
   public readonly loading = signal(false);
 
   public readonly projects = this.store.projects.projects;
   public readonly entries = signal<TimeSheetEntry[]>([]);
   public readonly users = signal<User[]>([]);
+  public readonly filter = signal<AnalyticsFilter>({});
+
+  /**
+   * Projects the selected team member is in or has logged time on (all of them
+   * when nobody is selected). Scoped against the unfiltered entries so changing
+   * the date range never makes a project vanish from the list.
+   */
+  public readonly visibleProjects = computed(() =>
+    scopeProjectsToUser(this.projects(), this.filter().userId, this.entries()),
+  );
+
+  public readonly filteredEntries = computed(() => {
+    const visibleIds = new Set(this.visibleProjects().map((p) => p.id));
+    return filterAnalyticsEntries(this.entries(), this.filter()).filter((e) =>
+      visibleIds.has(e.projectId),
+    );
+  });
+
+  public readonly totals = computed(() =>
+    summarizeEntries(this.filteredEntries()),
+  );
+
+  public readonly rows = computed<ProjectRow[]>(() =>
+    buildProjectRows(
+      this.visibleProjects(),
+      this.filteredEntries(),
+      this.users(),
+      this.projects(),
+    ),
+  );
+
+  public onFilterChange(filter: AnalyticsFilter): void {
+    this.filter.set(filter);
+  }
+
+  public exportAll(): void {
+    const entries = this.filteredEntries();
+    if (!entries.length) {
+      this.toast.info('No entries to export for the current filters.');
+      return;
+    }
+    this.exportUtil.exportFilteredEntries(
+      entries,
+      this.projects(),
+      this.users(),
+      this.filter(),
+      formatDateInput,
+    );
+  }
 
   public ngOnInit(): void {
     this.fetchTimeSheetEntries();
@@ -71,11 +141,5 @@ export class AnalyticsPage implements OnInit {
       this.toast.error('Failed to fetch users');
       this.users.set([]);
     }
-  }
-
-  public onEntryUpdated(entry: TimeSheetEntry): void {
-    this.entries.update((entries) =>
-      entries.map((e) => (e.id === entry.id ? entry : e)),
-    );
   }
 }

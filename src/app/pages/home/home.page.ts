@@ -1,18 +1,41 @@
+import { DatePipe, DecimalPipe } from '@angular/common';
 import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { ActivatedRoute, Params } from '@angular/router';
+import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 
-import { FilterView, FilterViewContainerComponent } from '@components';
-import { TimeSheetEntry, User } from '@models';
+import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
+import { AnalyticsFilter, TimeSheetEntry, UserRole } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
-import { TimeSheetFilterUtil } from '@utils';
+import { TimeSheetFilterUtil, storeTimeSheetFilterProjectId } from '@utils';
+
+import {
+  filterAnalyticsEntries,
+  scopeProjectsToUser,
+} from '../analytics/analytics-filter.util';
+import {
+  ProjectRow,
+  buildProjectRows,
+  summarizeEntries,
+} from '../analytics/analytics-rows.util';
+import {
+  AnalyticsFiltersComponent,
+  MetricCardComponent,
+} from '../analytics/components';
 
 @Component({
   templateUrl: './home.page.html',
   styleUrls: ['./home.page.scss'],
   standalone: true,
-  imports: [FilterViewContainerComponent],
+  imports: [
+    RouterLink,
+    DatePipe,
+    DecimalPipe,
+    AnalyticsFiltersComponent,
+    InsightsChartsComponent,
+    MetricCardComponent,
+    ProjectPreviewComponent,
+  ],
 })
 export class HomePage {
   private readonly store = inject(Store);
@@ -28,16 +51,43 @@ export class HomePage {
   public readonly isLoading = signal(true);
   public readonly hasLoaded = signal(false);
   public readonly entries = signal<TimeSheetEntry[]>([]);
-  public readonly filteredEntryCount = signal(0);
-  public readonly projects = computed(() => this.store.projects.projects());
+  public readonly filter = signal<AnalyticsFilter>({});
+  /**
+   * Projects the signed-in user is assigned to, including ones with no time
+   * logged yet. A regular user's store already holds only their projects, and
+   * their `users` lists are not populated, so only admins, whose store holds
+   * every project, need scoping. It goes by assignment alone, not entries, so
+   * the list does not change while a new date range loads.
+   */
+  public readonly projects = computed(() => {
+    const all = this.store.projects.projects();
+    const user = this.store.user.user();
+    if (user?.role !== UserRole.ADMIN) return all;
+    return scopeProjectsToUser(all, user.id, []);
+  });
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
-  public readonly noUsers: User[] = [];
-  public readonly homeAvailableViews: FilterView[] = [
-    'summary',
-    'details',
-    'timeline',
-  ];
+  /**
+   * Entries on the listed projects only, as on the analytics page, so the KPIs
+   * and charts always agree with the project rows.
+   */
+  public readonly filteredEntries = computed(() => {
+    const visibleIds = new Set(this.projects().map((p) => p.id));
+    return filterAnalyticsEntries(this.entries(), this.filter()).filter((e) =>
+      visibleIds.has(e.projectId),
+    );
+  });
+  public readonly totals = computed(() =>
+    summarizeEntries(this.filteredEntries()),
+  );
+  public readonly rows = computed<ProjectRow[]>(() =>
+    buildProjectRows(
+      this.projects(),
+      this.filteredEntries(),
+      [],
+      this.store.projects.projects(),
+    ),
+  );
 
   private latestLoadId = 0;
   /** Bounds key for which `entries` was last loaded successfully. */
@@ -62,7 +112,6 @@ export class HomePage {
         this.isLoading.set(false);
         this.hasLoaded.set(true);
         this.entries.set([]);
-        this.filteredEntryCount.set(0);
         this.loadedBoundsKey = null;
         this.pendingBoundsKey = null;
         return;
@@ -84,7 +133,6 @@ export class HomePage {
       this.loadedBoundsKey = null;
       this.isLoading.set(true);
       this.entries.set([]);
-      this.filteredEntryCount.set(0);
       void this.loadEntriesForRange(user.id, start, end, boundsKey);
     });
   }
@@ -131,13 +179,15 @@ export class HomePage {
     }
   }
 
-  public onFilteredEntryCountChange(count: number): void {
-    this.filteredEntryCount.set(count);
+  public onFilterChange(filter: AnalyticsFilter): void {
+    // Home only ever holds the signed-in user's entries and has no team member
+    // or category control to clear them, so ignore stray `userId` and
+    // `category` values in the URL.
+    this.filter.set({ ...filter, userId: undefined, category: undefined });
   }
 
-  public onEntryUpdated(entry: TimeSheetEntry): void {
-    this.entries.update((entries) =>
-      entries.map((e) => (e.id === entry.id ? entry : e)),
-    );
+  /** Makes the time sheet, opened by the row link, filter to this project. */
+  public rememberProject(projectId: string): void {
+    storeTimeSheetFilterProjectId(projectId);
   }
 }

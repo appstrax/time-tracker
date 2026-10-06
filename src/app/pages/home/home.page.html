@@ -1,29 +1,21 @@
-<section class="home-hours-page insights-page">
+<section class="home-page insights-page">
   <div class="insights-shell">
-    <header class="insights-hero">
-      <div class="insights-hero-copy">
+    <header class="page-head">
+      <div>
         <h1>My time</h1>
-        <p class="insights-lead">Your captured hours, filtered by project and period.</p>
-      </div>
-
-      <div class="insights-chips" aria-live="polite">
-        @if (isLoading()) {
-          <span class="insights-chip insights-chip--accent">
-            <span
-              class="spinner-border spinner-border-sm"
-              role="status"
-              aria-hidden="true"
-            ></span>
-            Loading…
-          </span>
-        } @else if (hasLoaded() && hasProjects()) {
-          <span class="insights-chip insights-chip--accent">
-            {{ filteredEntryCount() }}
-            {{ filteredEntryCount() === 1 ? 'entry' : 'entries' }}
-          </span>
-        }
+        <p>Your hours and project breakdown for the selected period.</p>
       </div>
     </header>
+
+    <div class="filter-row">
+      <app-analytics-filters
+        [showUser]="false"
+        (filterChange)="onFilterChange($event)"
+      />
+      <span class="result-count">
+        {{ rows().length }} {{ rows().length === 1 ? 'project' : 'projects' }}
+      </span>
+    </div>
 
     @if (isLoading() && !hasLoaded()) {
       <section class="insights-state" aria-busy="true">
@@ -35,17 +27,97 @@
         <p>There are no projects available for this account yet.</p>
       </section>
     } @else {
-      <app-filter-view-container
+      <div class="kpi-grid">
+        <app-metric-card
+          label="Total hours"
+          [value]="(totals().total | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-clock-history text-primary"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Approved"
+          [value]="(totals().approved | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-check2-circle text-success"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Pending review"
+          [value]="(totals().pending | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-hourglass-split text-warning"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Entries"
+          [value]="filteredEntries().length"
+          iconClass="bi bi-list-check text-primary"
+          [compact]="true"
+        />
+      </div>
+
+      <app-insights-charts
+        [entries]="filteredEntries()"
         [projects]="projects()"
-        [entries]="entries()"
-        [users]="noUsers"
-        [showUserFilter]="false"
-        [linkProjectsToTimeSheet]="true"
-        [availableViews]="homeAvailableViews"
-        [compact]="true"
-        (entryUpdated)="onEntryUpdated($event)"
-        (filteredEntryCountChange)="onFilteredEntryCountChange($event)"
       />
+
+      <section
+        class="project-list project-list--solo card-surface"
+        aria-label="Projects"
+      >
+        <header class="list-head">
+          <h2>Projects</h2>
+          <span>Sorted by hours</span>
+        </header>
+
+        @if (!rows().length) {
+          <p class="empty-card">No projects available.</p>
+        } @else {
+          <div class="list-columns" aria-hidden="true">
+            <span>Project</span>
+            <span>Approval</span>
+            <span>Hours</span>
+            <span>Last activity</span>
+            <span></span>
+          </div>
+          @for (row of rows(); track row.id) {
+            <a
+              class="project-row"
+              [routerLink]="['/time-sheet']"
+              (click)="rememberProject(row.id)"
+            >
+              <app-project-preview
+                class="cell-project"
+                [compact]="true"
+                [logoUrl]="row.logoUrl"
+                [color]="row.color"
+                [name]="row.name"
+                [description]="row.description"
+              />
+              <span class="cell-approval">
+                <span class="approval-track">
+                  <span
+                    class="approval-fill"
+                    [style.width.%]="row.approvedPercent"
+                  ></span>
+                </span>
+                <small>
+                  {{ row.approved | number: '1.0-1' }} approved
+                  @if (row.pending) {
+                    · {{ row.pending | number: '1.0-1' }} pending
+                  }
+                </small>
+              </span>
+              <b class="cell-hours">{{ row.hours | number: '1.0-1' }} h</b>
+              <span class="cell-last">
+                {{ row.lastActivity ? (row.lastActivity | date: 'mediumDate') : '—' }}
+              </span>
+              <i class="bi bi-chevron-right chevron" aria-hidden="true"></i>
+            </a>
+          }
+        }
+      </section>
     }
   </div>
 </section>

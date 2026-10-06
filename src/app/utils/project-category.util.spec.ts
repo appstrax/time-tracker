@@ -4,11 +4,9 @@ import {
   categoryFilterOptions,
   categorySuggestions,
   DEFAULT_PROJECT_CATEGORIES,
-  isCategoryAllowed,
   normalizeProjectCategories,
   seedNewProjectCategories,
   validateProjectCategories,
-  validateProjectCategoryPolicy,
 } from './project-category.util';
 
 describe('project-category.util', () => {
@@ -30,10 +28,17 @@ describe('project-category.util', () => {
     expect(validateProjectCategories(['A', 'B'])).toBeNull();
   });
 
-  it('categorySuggestions uses project list when non-empty', () => {
+  it('categorySuggestions lists project categories first, then custom ones without duplicates', () => {
     const project = new Project();
     project.categories = ['Development'];
-    expect(categorySuggestions(project, ['Legacy'])).toEqual(['Development']);
+    expect(
+      categorySuggestions(project, [
+        'Legacy',
+        'Development',
+        ' Legacy ',
+        'development',
+      ]),
+    ).toEqual(['Development', 'Legacy']);
   });
 
   it('categorySuggestions falls back when project list is empty', () => {
@@ -41,39 +46,6 @@ describe('project-category.util', () => {
     expect(categorySuggestions(project, ['Legacy', 'Legacy'])).toEqual([
       'Legacy',
     ]);
-  });
-
-  it('isCategoryAllowed allows any value when custom is allowed', () => {
-    const project = new Project();
-    expect(isCategoryAllowed(project, 'Custom')).toBe(true);
-
-    project.categories = ['Development'];
-    project.allowCustomCategory = true;
-    expect(isCategoryAllowed(project, 'Custom')).toBe(true);
-  });
-
-  it('isCategoryAllowed rejects new categories when custom is off and list is empty', () => {
-    const project = new Project();
-    project.categories = [];
-    project.allowCustomCategory = false;
-    expect(isCategoryAllowed(project, 'Custom')).toBe(false);
-    expect(isCategoryAllowed(project, 'Legacy', 'Legacy')).toBe(true);
-  });
-
-  it('validateProjectCategoryPolicy requires a list when custom entry is disabled', () => {
-    expect(validateProjectCategoryPolicy([], false)).toContain(
-      'at least one category',
-    );
-    expect(validateProjectCategoryPolicy(['Development'], false)).toBeNull();
-  });
-
-  it('isCategoryAllowed enforces list when custom is off', () => {
-    const project = new Project();
-    project.categories = ['Development'];
-    project.allowCustomCategory = false;
-    expect(isCategoryAllowed(project, 'Development')).toBe(true);
-    expect(isCategoryAllowed(project, 'Custom')).toBe(false);
-    expect(isCategoryAllowed(project, 'Old', 'Old')).toBe(true);
   });
 
   it('categoryFilterOptions merges project list with stray entry values', () => {

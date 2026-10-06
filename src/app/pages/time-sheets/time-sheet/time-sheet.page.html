@@ -11,9 +11,10 @@
         layout="pill"
         (weekChange)="onWeekChange($event)"
       />
-      @if (projects().length) {
+      @if (myProjects().length || filterProject()) {
         <app-project-dropdown
           class="header-project-dropdown"
+          [projects]="myProjects()"
           [selectedProject]="filterProject()"
           [allowNull]="true"
           [nullOptionLabel]="'All projects'"
@@ -39,8 +40,9 @@
           [projects]="projects()"
           [projectColorById]="projectColorById()"
           [entries]="entriesByDate().get(localCalendarDayKey(day)) ?? []"
-          [categories]="categories()"
-          (save)="onTimeSheetEntrySaved()"
+          [weekEntries]="weekEntries()"
+          [defaultProjectId]="filterProject()?.id ?? ''"
+          (save)="onTimeSheetEntrySaved($event)"
         />
       }
     </div>

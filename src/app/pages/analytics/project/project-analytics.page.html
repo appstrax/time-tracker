@@ -1,0 +1,236 @@
+<section class="project-analytics-page insights-page">
+  <div class="insights-shell">
+    <a
+      class="back-link"
+      routerLink="/analytics"
+      queryParamsHandling="preserve"
+    >
+      <i class="bi bi-chevron-left" aria-hidden="true"></i> Analytics
+    </a>
+
+    <header class="page-head">
+      <div class="title-block">
+        <i class="swatch" [style.background]="color()"></i>
+        <div>
+          <h1>{{ project()?.name ?? 'Project' }}</h1>
+          <p>{{ project()?.description }}</p>
+        </div>
+      </div>
+      <button type="button" class="primary-button" (click)="exportProject()">
+        <i class="bi bi-download" aria-hidden="true"></i>
+        Export
+      </button>
+    </header>
+
+    <app-analytics-filters
+      [users]="filterUsers()"
+      [categories]="categories()"
+      [showCategory]="true"
+      (filterChange)="onFilterChange($event)"
+    />
+
+    @if (loading()) {
+      <section class="insights-state" aria-busy="true">
+        <p>Loading project activity…</p>
+      </section>
+    } @else if (!project()) {
+      <section class="insights-state">
+        <h2>Project not found</h2>
+        <p>This project doesn't exist or you don't have access to it.</p>
+      </section>
+    } @else {
+      <div class="kpi-grid">
+        <app-metric-card
+          label="Total hours"
+          [value]="(totals().total | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-clock-history text-primary"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Approved"
+          [value]="(totals().approved | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-check2-circle text-success"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Pending review"
+          [value]="(totals().pending | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-hourglass-split text-warning"
+          [compact]="true"
+        />
+        <app-metric-card
+          label="Average per day"
+          [value]="(totals().average | number: '1.0-1') ?? ''"
+          valueSuffix="h"
+          iconClass="bi bi-calendar3 text-primary"
+          [compact]="true"
+        />
+      </div>
+
+      <section class="days card-surface" aria-label="Days">
+        <header class="days-head">
+          <div>
+            <h2>Days</h2>
+            <p>Select a day to see its activity</p>
+          </div>
+          @if (days().length) {
+            <button type="button" class="ghost-button" (click)="toggleAll()">
+              {{ allExpanded() ? 'Collapse all' : 'Expand all' }}
+            </button>
+          }
+        </header>
+
+        @if (!days().length) {
+          <p class="empty-card">No entries match the current filters.</p>
+        }
+
+        @for (day of days(); track day.key) {
+          <div class="day">
+            <div class="day-row">
+              <button
+                type="button"
+                class="day-toggle"
+                [attr.aria-expanded]="expanded().has(day.key)"
+                (click)="toggleDay(day.key)"
+              >
+                <i
+                  class="bi bi-chevron-right chevron"
+                  [class.open]="expanded().has(day.key)"
+                  aria-hidden="true"
+                ></i>
+                <b class="day-date">{{ day.date | date: 'EEE d MMM y' }}</b>
+                <span class="day-count">
+                  {{ day.entries.length }}
+                  {{ day.entries.length === 1 ? 'entry' : 'entries' }}
+                </span>
+                <b class="day-total">{{ day.total | number: '1.0-2' }} h</b>
+                <span
+                  class="status-pill"
+                  [class.status-pill--approved]="day.allApproved"
+                  [class.status-pill--pending]="!day.allApproved"
+                >
+                  {{ day.allApproved ? 'Approved' : day.pending + ' pending' }}
+                </span>
+              </button>
+              <span class="day-actions">
+                @if (day.allApproved) {
+                  <button
+                    type="button"
+                    class="status-action status-action--decline"
+                    [disabled]="isDayBusy(day)"
+                    ngbTooltip="Undo day approval"
+                    container="body"
+                    triggers="hover"
+                    aria-label="Undo day approval"
+                    (click)="declineDay(day)"
+                  >
+                    <i
+                      class="bi bi-arrow-counterclockwise"
+                      aria-hidden="true"
+                    ></i>
+                  </button>
+                } @else {
+                  <button
+                    type="button"
+                    class="status-action status-action--approve"
+                    [disabled]="isDayBusy(day)"
+                    ngbTooltip="Approve day"
+                    container="body"
+                    triggers="hover"
+                    aria-label="Approve day"
+                    (click)="approveDay(day)"
+                  >
+                    <i class="bi bi-calendar2-check" aria-hidden="true"></i>
+                  </button>
+                  @if (day.pending !== day.entries.length) {
+                    <button
+                      type="button"
+                      class="status-action status-action--decline"
+                      [disabled]="isDayBusy(day)"
+                      ngbTooltip="Undo approvals for day"
+                      container="body"
+                      triggers="hover"
+                      aria-label="Undo approvals for day"
+                      (click)="declineDay(day)"
+                    >
+                      <i
+                        class="bi bi-arrow-counterclockwise"
+                        aria-hidden="true"
+                      ></i>
+                    </button>
+                  }
+                }
+              </span>
+            </div>
+
+            @if (expanded().has(day.key)) {
+              <ul class="entries">
+                @for (entry of day.entries; track entry.id) {
+                  <li class="entry">
+                    <span class="entry-who">
+                      <i class="member">{{ userInitials(entry.userId) }}</i>
+                      <b>{{ userName(entry.userId) }}</b>
+                    </span>
+                    <span class="entry-category">{{ entry.category || '—' }}</span>
+                    <span class="entry-description">
+                      {{ entry.description || 'No description' }}
+                    </span>
+                    <b class="entry-hours">{{ entry.hours | number: '1.0-2' }} h</b>
+                    <span class="entry-status">
+                      <span
+                        class="status-pill"
+                        [class.status-pill--approved]="entry.approved"
+                        [class.status-pill--pending]="!entry.approved"
+                      >
+                        {{ entry.approved ? 'Approved' : 'Pending' }}
+                      </span>
+                    </span>
+                    <span
+                      class="status-actions"
+                      role="group"
+                      aria-label="Approval status"
+                    >
+                      @if (entry.approved) {
+                        <button
+                          type="button"
+                          class="status-action status-action--decline"
+                          [disabled]="isBusy(entry.id)"
+                          ngbTooltip="Undo approval"
+                          container="body"
+                          triggers="hover"
+                          aria-label="Undo approval"
+                          (click)="setApproved(entry, false)"
+                        >
+                          <i
+                            class="bi bi-arrow-counterclockwise"
+                            aria-hidden="true"
+                          ></i>
+                        </button>
+                      } @else {
+                        <button
+                          type="button"
+                          class="status-action status-action--approve"
+                          [disabled]="isBusy(entry.id)"
+                          ngbTooltip="Approve"
+                          container="body"
+                          triggers="hover"
+                          aria-label="Approve"
+                          (click)="setApproved(entry, true)"
+                        >
+                          <i class="bi bi-check-lg" aria-hidden="true"></i>
+                        </button>
+                      }
+                    </span>
+                  </li>
+                }
+              </ul>
+            }
+          </div>
+        }
+      </section>
+    }
+  </div>
+</section>

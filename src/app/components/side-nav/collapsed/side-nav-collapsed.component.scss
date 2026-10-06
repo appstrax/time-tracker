@@ -45,15 +45,12 @@
 
   &.active {
     font-weight: 400;
-    color: var(--primary-color);
+    color: var(--color-primary);
+    font-weight: 700;
 
     .icon-box {
-      background-color: color-mix(
-        in srgb,
-        var(--primary-color) 15%,
-        transparent
-      );
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      background-color: var(--color-primary-soft);
+      box-shadow: none;
 
       i {
         color: var(--primary-color);

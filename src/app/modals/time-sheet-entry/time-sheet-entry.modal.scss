@@ -64,7 +64,7 @@
   gap: 1rem;
   padding: 0.75rem;
   border: 1px solid var(--color-border);
-  border-radius: 16px;
+  border-radius: var(--radius-card, 12px);
   background-color: color-mix(in srgb, var(--color-surface) 94%, var(--color-bg));
 }
 

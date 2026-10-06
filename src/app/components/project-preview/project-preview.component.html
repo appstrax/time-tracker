@@ -1,0 +1,22 @@
+<div
+  class="project-preview"
+  [class.project-preview--with-logo]="logoUrl"
+  [class.project-preview--compact]="compact"
+>
+  <span
+    class="project-preview-color"
+    [style.background-color]="color"
+    aria-hidden="true"
+  ></span>
+
+  @if (logoUrl) {
+  <img [src]="logoUrl" alt="Project logo" class="project-preview-logo" />
+  }
+
+  <div class="project-preview-body">
+    <div class="project-preview-name">{{ name || namePlaceholder }}</div>
+    <p class="project-preview-description">
+      {{ description || descriptionPlaceholder }}
+    </p>
+  </div>
+</div>

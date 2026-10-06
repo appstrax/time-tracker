@@ -1,9 +1,20 @@
+@use '../../styles/analytics-shared';
+@use '../../styles/analytics-project-list';
+
 :host {
   display: block;
   height: 100%;
 }
 
-app-summary-metrics,
-app-filter-view-container {
-  display: block;
+.filter-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.result-count {
+  color: var(--text-muted);
+  font-size: 0.875rem;
 }

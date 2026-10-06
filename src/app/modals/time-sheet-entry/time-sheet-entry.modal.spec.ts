@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { Project } from '@models';
+import { Project, TimeSheetEntry, User, UserRole } from '@models';
 import { Store } from '@state';
 import { ToastService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
@@ -11,11 +11,13 @@ import { TimeSheetDisplayUtil } from '@utils';
 import { TimeSheetEntryModal } from './time-sheet-entry.modal';
 
 describe('TimeSheetEntryComponent', () => {
-  const storageKey = 'timeSheet.lastProjectId';
+  const regularUser = { id: 'test-user', role: UserRole.USER } as User;
+
   const project = {
     id: 'project-1',
     name: 'Alpha',
     fields: [],
+    users: [],
   } as any as Project;
 
   const projectWithFields = {
@@ -47,8 +49,8 @@ describe('TimeSheetEntryComponent', () => {
     fields: [
       { key: 'notes', label: 'Notes', type: 'text', required: true, options: [] },
       {
-        key: 'billable',
-        label: 'Billable',
+        key: 'reviewed',
+        label: 'Reviewed',
         type: 'boolean',
         required: true,
         options: [],
@@ -56,20 +58,25 @@ describe('TimeSheetEntryComponent', () => {
     ],
   } as any as Project;
 
+  const projectBillableByDefault = {
+    id: 'project-billable',
+    name: 'Billable Co',
+    fields: [],
+    billable: true,
+  } as any as Project;
+
+  const projectNonBillableByDefault = {
+    id: 'project-non-billable',
+    name: 'Non-Billable Co',
+    fields: [],
+    billable: false,
+  } as any as Project;
+
   const projectWithCategories = {
     id: 'project-cat',
     name: 'Cat Project',
     fields: [],
     categories: ['Development', 'Meetings'],
-    allowCustomCategory: true,
-  } as any as Project;
-
-  const projectStrictCategories = {
-    id: 'project-strict',
-    name: 'Strict Project',
-    fields: [],
-    categories: ['Development'],
-    allowCustomCategory: false,
   } as any as Project;
 
   let component: TimeSheetEntryModal;
@@ -97,12 +104,17 @@ describe('TimeSheetEntryComponent', () => {
         {
           provide: Store,
           useValue: {
+            user: {
+              user: signal(regularUser),
+            },
             projects: {
               projects: signal([
                 project,
                 projectWithFields,
                 projectWithOptionalBoolean,
                 projectWithRequiredBoolean,
+                projectBillableByDefault,
+                projectNonBillableByDefault,
               ]),
             },
           },
@@ -125,17 +137,21 @@ describe('TimeSheetEntryComponent', () => {
     }).compileComponents();
   });
 
-  afterEach(() => {
-    localStorage.removeItem(storageKey);
-  });
-
-  async function createComponent(): Promise<void> {
+  async function createComponent(defaultProjectId = ''): Promise<void> {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
+    component.defaultProjectId = defaultProjectId;
     fixture.detectChanges();
     await fixture.whenStable();
+  }
+
+  function entryFor(projectId: string, category: string): TimeSheetEntry {
+    const entry = new TimeSheetEntry();
+    entry.projectId = projectId;
+    entry.category = category;
+    return entry;
   }
 
   function fillRequiredBaseFields(): void {
@@ -149,35 +165,48 @@ describe('TimeSheetEntryComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('should preselect the last stored project for a new entry', async () => {
-    localStorage.setItem(storageKey, project.id);
-
-    await createComponent();
+  it('should preselect the active filter project for a new entry', async () => {
+    await createComponent(project.id);
 
     expect(component.project?.id).toBe(project.id);
     expect(component.timeSheetEntry.projectId).toBe(project.id);
   });
 
-  it('should not write to storage merely by selecting a project', async () => {
+  it('should leave the project empty for a new entry on "all projects"', async () => {
     await createComponent();
 
-    component.onProjectSelected(project);
-
-    expect(component.timeSheetEntry.projectId).toBe(project.id);
-    expect(localStorage.getItem(storageKey)).toBeNull();
+    expect(component.project).toBeUndefined();
+    expect(component.timeSheetEntry.projectId).toBe('');
   });
 
-  it('should store the selected project id only on save', async () => {
+  it('should not remember a saved entry\'s project for the next new entry', async () => {
     await createComponent();
-
     component.onProjectSelected(project);
     fillRequiredBaseFields();
     component.onSaveTimeSheetEntry();
 
-    expect(localStorage.getItem(storageKey)).toBe(project.id);
     expect(activeModal.close).toHaveBeenCalledWith(
       jasmine.objectContaining({ action: 'save' }),
     );
+
+    await createComponent();
+
+    expect(component.project).toBeUndefined();
+    expect(component.timeSheetEntry.projectId).toBe('');
+  });
+
+  it('should keep an existing entry\'s project over the active filter', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.weekEntries = [];
+    component.date = new Date();
+    component.defaultProjectId = project.id;
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectWithFields.id;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.project?.id).toBe(projectWithFields.id);
   });
 
   it('should expose no configured fields for a project with none', async () => {
@@ -242,7 +271,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should preserve field values for keys that existed when editing a pre-existing entry', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = projectWithFields.id;
@@ -269,7 +298,7 @@ describe('TimeSheetEntryComponent', () => {
   it('should drop orphaned field values when a pre-existing entry is moved to another project', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
-    component.categories = [];
+    component.weekEntries = [];
     component.date = new Date();
     component.timeSheetEntry.id = 'existing-entry-id';
     component.timeSheetEntry.projectId = projectWithFields.id;
@@ -317,88 +346,90 @@ describe('TimeSheetEntryComponent', () => {
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 
-    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.getFieldValue('reviewed')).toBe('false');
     expect(component.isFormValid()).toBe(true);
   });
 
   it('should default a required boolean when the project is pre-selected on open', async () => {
-    localStorage.setItem(storageKey, projectWithRequiredBoolean.id);
-
-    await createComponent();
+    await createComponent(projectWithRequiredBoolean.id);
     fillRequiredBaseFields();
     component.setFieldValue('notes', 'done');
 
-    expect(component.getFieldValue('billable')).toBe('false');
+    expect(component.getFieldValue('reviewed')).toBe('false');
     expect(component.isFormValid()).toBe(true);
   });
 
-  it('should use project categories for suggestions instead of week fallback', async () => {
+  it('should default a new entry\'s billable flag from the selected project', async () => {
     await createComponent();
-    component.categories = ['Legacy'];
+    component.onProjectSelected(projectBillableByDefault);
+
+    expect(component.timeSheetEntry.billable).toBe(true);
+
+    component.onProjectSelected(projectNonBillableByDefault);
+
+    expect(component.timeSheetEntry.billable).toBe(false);
+  });
+
+  it('should default a new entry\'s billable flag when the project is pre-selected on open', async () => {
+    await createComponent(projectNonBillableByDefault.id);
+
+    expect(component.timeSheetEntry.billable).toBe(false);
+  });
+
+  it('should preserve an existing entry\'s billable value regardless of the project default', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.weekEntries = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = projectBillableByDefault.id;
+    component.timeSheetEntry.billable = false;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.timeSheetEntry.billable).toBe(false);
+  });
+
+  it('lists the selected project categories, then only that project\'s week categories', async () => {
+    await createComponent();
+    component.weekEntries = [
+      entryFor(projectWithCategories.id, 'Legacy'),
+      entryFor(project.id, 'Dob'),
+    ];
     component.onProjectSelected(projectWithCategories);
 
-    expect(component.filteredCategories).toEqual(['Development', 'Meetings']);
+    expect(component.filteredCategories).toEqual([
+      'Development',
+      'Meetings',
+      'Legacy',
+    ]);
   });
 
   it('should keep week fallback when project has no category list', async () => {
     await createComponent();
-    component.categories = ['Legacy'];
+    component.weekEntries = [entryFor(project.id, 'Legacy')];
     component.onProjectSelected(project);
 
     expect(component.filteredCategories).toEqual(['Legacy']);
   });
 
-  it('should allow custom category text when allowCustomCategory is true', async () => {
+  it('rejects a blank category', async () => {
+    await createComponent();
+    component.onProjectSelected(projectWithCategories);
+    fillRequiredBaseFields();
+    component.timeSheetEntry.category = '   ';
+
+    expect(component.isFormValid()).toBe(false);
+    expect(component.errorMessage).toContain('Category is required');
+  });
+
+  it('should allow custom category text for any project', async () => {
     await createComponent();
     component.onProjectSelected(projectWithCategories);
     fillRequiredBaseFields();
     component.timeSheetEntry.category = 'Custom work';
 
     expect(component.isFormValid()).toBe(true);
-  });
-
-  it('should reject custom category when allowCustomCategory is false', async () => {
-    await createComponent();
-    component.onProjectSelected(projectStrictCategories);
-    fillRequiredBaseFields();
-    component.timeSheetEntry.category = 'Custom work';
-
-    expect(component.isFormValid()).toBe(false);
-    expect(component.errorMessage).toContain("project's categories");
-  });
-
-  it('should grandfather an existing off-list category when custom is disabled', async () => {
-    fixture = TestBed.createComponent(TimeSheetEntryModal);
-    component = fixture.componentInstance;
-    component.categories = [];
-    component.date = new Date();
-    component.timeSheetEntry.id = 'existing-entry-id';
-    component.timeSheetEntry.category = 'Legacy standup';
-    component.timeSheetEntry.projectId = projectStrictCategories.id;
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    fillRequiredBaseFields();
-
-    expect(component.isFormValid()).toBe(true);
-  });
-
-  it('should reject an off-list category when an existing entry is moved to a strict project', async () => {
-    fixture = TestBed.createComponent(TimeSheetEntryModal);
-    component = fixture.componentInstance;
-    component.categories = [];
-    component.date = new Date();
-    component.timeSheetEntry.id = 'existing-entry-id';
-    component.timeSheetEntry.category = 'Legacy standup';
-    component.timeSheetEntry.projectId = project.id;
-    fixture.detectChanges();
-    await fixture.whenStable();
-
-    component.onProjectSelected(projectStrictCategories);
-    fillRequiredBaseFields();
-
-    expect(component.isFormValid()).toBe(false);
-    expect(component.errorMessage).toContain("project's categories");
   });
 
   it('should skip required-configured-field validation for a pre-existing entry (capture-forward)', async () => {
@@ -410,5 +441,113 @@ describe('TimeSheetEntryComponent', () => {
     // 'notes' (required) deliberately left blank.
 
     expect(component.isFormValid()).toBe(true);
+  });
+});
+
+describe('TimeSheetEntryModal — admin project membership', () => {
+  const adminUser = { id: 'admin-user', role: UserRole.ADMIN } as User;
+
+  const myProject = {
+    id: 'my-project',
+    name: 'My Project',
+    fields: [],
+    users: [{ id: 'admin-user' } as User],
+  } as any as Project;
+
+  const otherProject = {
+    id: 'other-project',
+    name: 'Other Project',
+    fields: [],
+    users: [{ id: 'someone-else' } as User],
+  } as any as Project;
+
+  let component: TimeSheetEntryModal;
+  let fixture: ComponentFixture<TimeSheetEntryModal>;
+  let activeModal: jasmine.SpyObj<NgbActiveModal>;
+
+  beforeEach(async () => {
+    spyOn(appstraxAuth, 'getUser').and.resolveTo({ id: adminUser.id } as any);
+    activeModal = jasmine.createSpyObj<NgbActiveModal>('NgbActiveModal', [
+      'close',
+      'dismiss',
+    ]);
+
+    await TestBed.configureTestingModule({
+      imports: [TimeSheetEntryModal],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: NgbActiveModal, useValue: activeModal },
+        {
+          provide: Store,
+          useValue: {
+            user: { user: signal(adminUser) },
+            projects: {
+              projects: signal([myProject, otherProject]),
+            },
+          },
+        },
+        {
+          provide: TimeSheetDisplayUtil,
+          useValue: jasmine.createSpyObj<TimeSheetDisplayUtil>(
+            'TimeSheetDisplayUtil',
+            ['formatHours'],
+          ),
+        },
+        {
+          provide: ToastService,
+          useValue: jasmine.createSpyObj<ToastService>('ToastService', [
+            'error',
+            'success',
+            'info',
+            'warning',
+            'show',
+          ]),
+        },
+      ],
+    }).compileComponents();
+  });
+
+  it('only lists projects the admin is a member of', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.weekEntries = [];
+    component.date = new Date();
+    component.defaultProjectId = '';
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.projects().map((p) => p.id)).toEqual([myProject.id]);
+  });
+
+  it('still shows an existing entry\'s project even if the admin is not a member', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.weekEntries = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = otherProject.id;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.project?.id).toBe(otherProject.id);
+    expect(component.projects().map((p) => p.id)).toContain(otherProject.id);
+  });
+
+  it('shows an empty list when the admin has no assigned projects', async () => {
+    TestBed.overrideProvider(Store, {
+      useValue: {
+        user: { user: signal(adminUser) },
+        projects: { projects: signal([otherProject]) },
+      },
+    });
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.weekEntries = [];
+    component.date = new Date();
+    component.defaultProjectId = '';
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.projects()).toEqual([]);
   });
 });

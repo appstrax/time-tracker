@@ -54,6 +54,9 @@
                   >
                     {{ entry.approved ? 'Approved' : 'Pending' }}
                   </span>
+                  <span class="ws-entry-billable ws-tag">
+                    {{ entry.billable ? 'Billable' : 'Non-billable' }}
+                  </span>
                   @if (entry.fieldValues.length) {
                     <p class="ws-field-hint">
                       @for (
@@ -80,8 +83,7 @@
     <div class="table-shell">
       <div class="table-toolbar">
         <div>
-          <p class="eyebrow">Details</p>
-          <h2>Entries by day</h2>
+          <h2 class="eyebrow">Details</h2>
           <p>Review each reporting day with project, category, hours, and approval state.</p>
         </div>
       </div>
@@ -108,6 +110,7 @@
                     <th>Hours</th>
                     <th>Category</th>
                     <th>Details</th>
+                    <th>Billable</th>
                     <th>Status</th>
                   </tr>
                 </thead>
@@ -148,6 +151,11 @@
                         } @else {
                           <span class="text-muted">—</span>
                         }
+                      </td>
+                      <td>
+                        <span class="category-pill">
+                          {{ entry.billable ? 'Yes' : 'No' }}
+                        </span>
                       </td>
                       <td>
                         <span

@@ -30,6 +30,7 @@ interface TimelineSegment {
   durationLabel: string;
   showInlineDetail: boolean;
   isQuarterHourBlock: boolean;
+  locked: boolean;
   tooltipContext: TimelineEntryTooltipContext;
 }
 
@@ -99,6 +100,7 @@ export class TimeSheetNumberLineComponent {
         backgroundColor: color,
         showInlineDetail: entry.hours >= 0.75,
         isQuarterHourBlock: entry.hours === 0.25,
+        locked: entry.approved,
         tooltipContext: this.getEntryTooltipContext(entry),
       };
     });
@@ -166,7 +168,7 @@ export class TimeSheetNumberLineComponent {
 
   public onBlockClick(entry: TimeSheetEntry, event: MouseEvent): void {
     event.stopPropagation();
-    if (this.disabled()) return;
+    if (this.disabled() || entry.approved) return;
     this.onEntryClick.emit(entry);
   }
 
