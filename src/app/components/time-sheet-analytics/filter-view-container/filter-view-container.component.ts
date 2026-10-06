@@ -1,3 +1,4 @@
+import { DateInputComponent } from '../../date-input/date-input.component';
 import {
   Component,
   OnChanges,
@@ -45,6 +46,7 @@ export type FilterView = 'summary' | 'details' | 'timeline' | 'unapproved';
   imports: [
     NgTemplateOutlet,
     FormsModule,
+    DateInputComponent,
     FilterBlockComponent,
     InsightsChartsComponent,
     FilterViewSummaryComponent,

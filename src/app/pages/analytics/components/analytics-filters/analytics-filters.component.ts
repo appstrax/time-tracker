@@ -1,3 +1,4 @@
+import { DateInputComponent } from '../../../../components/date-input/date-input.component';
 import {
   Component,
   OnDestroy,
@@ -20,7 +21,7 @@ import { formatDateInput } from '../../analytics-filter.util';
 @Component({
   selector: 'app-analytics-filters',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, DateInputComponent],
   templateUrl: './analytics-filters.component.html',
   styleUrl: './analytics-filters.component.scss',
 })

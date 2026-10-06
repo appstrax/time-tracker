@@ -1,6 +1,6 @@
 @if (layout() === 'pill') {
   <div class="week-controls">
-    <div class="week-pill">
+    <div class="week-pill" #pickerTarget>
       <button
         type="button"
         class="week-pill-nav"
@@ -14,7 +14,7 @@
         type="button"
         class="week-pill-label"
         aria-label="Choose week"
-        (click)="openDatePicker()"
+        (click)="toggleDatePicker()"
       >
         {{ selectedWeekStart() | date: "MMM d" }} –
         {{ selectedWeekEnd() | date: "MMM d, y" }}
@@ -29,13 +29,6 @@
         <i class="bi bi-chevron-right" aria-hidden="true"></i>
       </button>
 
-      <input
-        #datePicker
-        type="date"
-        class="date-picker-input"
-        [value]="datePickerValue()"
-        (change)="onDateSelected($event)"
-      />
     </div>
 
     <button
@@ -57,14 +50,7 @@
         <i class="bi bi-chevron-left"></i>
       </button>
 
-      <div class="week-display" (click)="openDatePicker()">
-        <input
-          #datePicker
-          type="date"
-          class="date-picker-input"
-          [value]="datePickerValue()"
-          (change)="onDateSelected($event)"
-        />
+      <div class="week-display" #pickerTarget (click)="toggleDatePicker()">
         <span class="week-range-label">{{ selectedYear() }}</span>
         <span class="week-range">
           {{ selectedWeekStart() | date: "MMM dd" }} -
@@ -90,3 +76,29 @@
     </div>
   </div>
 }
+
+<input
+  ngbDatepicker
+  class="date-picker-input"
+  tabindex="-1"
+  aria-hidden="true"
+  container="body"
+  datepickerClass="app-datepicker"
+  [firstDayOfWeek]="1"
+  [dayTemplate]="weekDay"
+  [startDate]="datePickerStart()"
+  (dateSelect)="onDateSelected($event)"
+  (closed)="onPickerClosed()"
+/>
+
+<ng-template #weekDay let-date let-disabled="disabled" let-currentMonth="currentMonth">
+  <span
+    class="app-dp-day"
+    [class.disabled]="disabled"
+    [class.outside]="date.month !== currentMonth"
+    [ngClass]="dayClasses(date)"
+    (mouseenter)="onDayHover(date)"
+    (mouseleave)="onDayHover(null)"
+    >{{ date.day }}</span
+  >
+</ng-template>

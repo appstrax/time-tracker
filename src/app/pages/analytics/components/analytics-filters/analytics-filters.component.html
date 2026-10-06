@@ -17,16 +17,18 @@
   @if (filter().dateRange === 'custom') {
     <label class="pill">
       <span class="pill-label">From</span>
-      <input
-        type="date"
+      <app-date-input
+        variant="bare"
+        ariaLabel="From date"
         [ngModel]="formatDate(filter().start)"
         (ngModelChange)="onCustomDate('start', $event)"
       />
     </label>
     <label class="pill">
       <span class="pill-label">To</span>
-      <input
-        type="date"
+      <app-date-input
+        variant="bare"
+        ariaLabel="To date"
         [ngModel]="formatDate(filter().end)"
         (ngModelChange)="onCustomDate('end', $event)"
       />

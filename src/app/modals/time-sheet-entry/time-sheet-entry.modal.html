@@ -163,10 +163,8 @@
                   />
                 }
                 @case ('date') {
-                  <input
-                    type="date"
-                    class="form-control"
-                    [id]="'field-' + field.key"
+                  <app-date-input
+                    [inputId]="'field-' + field.key"
                     [ngModel]="getFieldValue(field.key)"
                     (ngModelChange)="setFieldValue(field.key, $event)"
                     [disabled]="timeSheetEntry.approved"
