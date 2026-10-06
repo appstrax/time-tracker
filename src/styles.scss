@@ -678,15 +678,11 @@ ngb-datepicker.app-datepicker {
     line-height: 2.25rem;
   }
 
-  .ngb-dp-day > div,
-  .ngb-dp-day > .app-dp-day {
+  .ngb-dp-day > div {
     border-radius: var(--ngb-dp-radius);
   }
 
   .ngb-dp-day > div:hover,
-  .ngb-dp-day > .app-dp-day:hover {
-    background: var(--color-primary-soft);
-  }
 
   .btn-light {
     color: var(--text-primary);
@@ -715,17 +711,19 @@ ngb-datepicker.app-datepicker {
       background: var(--color-primary-soft);
       color: var(--text-primary);
     }
-    &.week-start {
-      border-radius: var(--ngb-dp-radius) 0 0 var(--ngb-dp-radius);
+    &.hover-week:not(.in-week) {
+      background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    }
+    &.hover-week.in-week {
+      background: color-mix(in srgb, var(--color-primary) 22%, var(--color-surface));
+    }
+    &.today,
+    &.today.in-week,
+    &.today.hover-week,
+    &.today.hover-week.in-week {
       background: var(--color-primary);
       color: var(--color-primary-contrast);
-    }
-    &.week-end {
-      border-radius: 0 var(--ngb-dp-radius) var(--ngb-dp-radius) 0;
-    }
-    &.today:not(.week-start) {
       font-weight: 800;
-      color: var(--color-primary);
     }
     &.outside {
       opacity: 0.45;

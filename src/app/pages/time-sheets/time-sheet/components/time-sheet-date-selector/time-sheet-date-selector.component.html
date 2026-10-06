@@ -111,6 +111,8 @@
     [class.disabled]="disabled"
     [class.outside]="date.month !== currentMonth"
     [ngClass]="dayClasses(date)"
+    (mouseenter)="onDayHover(date)"
+    (mouseleave)="onDayHover(null)"
     >{{ date.day }}</span
   >
 </ng-template>

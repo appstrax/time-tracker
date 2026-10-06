@@ -28,6 +28,7 @@ export class TimeSheetDateSelectorComponent implements OnInit {
   public datePicker?: NgbInputDatepicker;
 
   private lastClosedAt = 0;
+  private readonly hoveredDay = signal<number | null>(null);
 
   public readonly selectedWeekEnd = signal(new Date());
   public readonly selectedWeekStart = signal(new Date());
@@ -111,6 +112,13 @@ export class TimeSheetDateSelectorComponent implements OnInit {
 
   public onPickerClosed(): void {
     this.lastClosedAt = Date.now();
+    this.hoveredDay.set(null);
+  }
+
+  public onDayHover(date: NgbDateStruct | null): void {
+    this.hoveredDay.set(
+      date ? Date.UTC(date.year, date.month - 1, date.day) : null,
+    );
   }
 
   public onDateSelected(date: NgbDateStruct): void {
@@ -123,7 +131,15 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     const start = this.selectedWeekStart().getTime();
     const end = this.selectedWeekEnd().getTime();
     const now = new Date();
+    const hovered = this.hoveredDay();
+    let hoverWeek = false;
+    if (hovered !== null) {
+      const dayOfWeek = new Date(hovered).getUTCDay();
+      const hoverStart = hovered - ((dayOfWeek + 6) % 7) * 86_400_000;
+      hoverWeek = time >= hoverStart && time <= hoverStart + 6 * 86_400_000;
+    }
     return {
+      'hover-week': hoverWeek,
       'in-week': time >= start && time <= end,
       'week-start': time === start,
       'week-end': time === end,

@@ -59,4 +59,16 @@ describe('TimeSheetDateSelectorComponent', () => {
       false,
     );
   });
+
+  it('should highlight the whole hovered week and clear on leave', () => {
+    component.onDayHover({ year: 2030, month: 6, day: 12 });
+
+    expect(component.dayClasses({ year: 2030, month: 6, day: 10 })['hover-week']).toBe(true);
+    expect(component.dayClasses({ year: 2030, month: 6, day: 16 })['hover-week']).toBe(true);
+    expect(component.dayClasses({ year: 2030, month: 6, day: 17 })['hover-week']).toBe(false);
+    expect(component.dayClasses({ year: 2030, month: 6, day: 9 })['hover-week']).toBe(false);
+
+    component.onDayHover(null);
+    expect(component.dayClasses({ year: 2030, month: 6, day: 12 })['hover-week']).toBe(false);
+  });
 });
