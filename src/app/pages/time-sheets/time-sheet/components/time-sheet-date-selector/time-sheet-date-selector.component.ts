@@ -1,7 +1,6 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import {
   Component,
-  ElementRef,
   input,
   OnInit,
   ViewChild,
@@ -9,20 +8,26 @@ import {
   output,
   signal,
 } from '@angular/core';
+import {
+  NgbDateStruct,
+  NgbInputDatepicker,
+} from '@ng-bootstrap/ng-bootstrap';
 
 @Component({
   selector: 'app-time-sheet-date-selector',
   standalone: true,
   templateUrl: './time-sheet-date-selector.component.html',
   styleUrl: './time-sheet-date-selector.component.scss',
-  imports: [DatePipe],
+  imports: [DatePipe, NgClass, NgbInputDatepicker],
 })
 export class TimeSheetDateSelectorComponent implements OnInit {
   public readonly layout = input<'default' | 'pill'>('default');
   public readonly weekChange = output<{ start: Date; end: Date }>();
 
-  @ViewChild('datePicker')
-  public datePicker?: ElementRef<HTMLInputElement>;
+  @ViewChild(NgbInputDatepicker)
+  public datePicker?: NgbInputDatepicker;
+
+  private lastClosedAt = 0;
 
   public readonly selectedWeekEnd = signal(new Date());
   public readonly selectedWeekStart = signal(new Date());
@@ -34,12 +39,13 @@ export class TimeSheetDateSelectorComponent implements OnInit {
       newDate.getTime() <= this.selectedWeekEnd().getTime()
     );
   });
-  public readonly datePickerValue = computed(() => {
-    const selectedWeekStart = this.selectedWeekStart();
-    const year = selectedWeekStart.getUTCFullYear();
-    const month = String(selectedWeekStart.getUTCMonth() + 1).padStart(2, '0');
-    const day = String(selectedWeekStart.getUTCDate()).padStart(2, '0');
-    return `${year}-${month}-${day}`;
+  public readonly datePickerStart = computed<NgbDateStruct>(() => {
+    const start = this.selectedWeekStart();
+    return {
+      year: start.getUTCFullYear(),
+      month: start.getUTCMonth() + 1,
+      day: start.getUTCDate(),
+    };
   });
   public readonly selectedYear = computed(() =>
     this.selectedWeekStart().getFullYear(),
@@ -96,22 +102,33 @@ export class TimeSheetDateSelectorComponent implements OnInit {
     });
   }
 
-  public openDatePicker(): void {
-    if (this.datePicker) {
-      const input = this.datePicker.nativeElement;
-      try {
-        input.showPicker();
-      } catch {
-        input.click(); //older and non chrome browsers
-      }
-    }
+  public toggleDatePicker(): void {
+    // The popup closes itself on outside clicks, which includes the trigger;
+    // ignore the click that follows so it doesn't immediately reopen.
+    if (Date.now() - this.lastClosedAt < 200) return;
+    this.datePicker?.toggle();
   }
 
-  public onDateSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (input.value) {
-      const selectedDate = new Date(input.value);
-      this.navigateToWeek(selectedDate);
-    }
+  public onPickerClosed(): void {
+    this.lastClosedAt = Date.now();
+  }
+
+  public onDateSelected(date: NgbDateStruct): void {
+    this.navigateToWeek(new Date(Date.UTC(date.year, date.month - 1, date.day)));
+    this.datePicker?.close();
+  }
+
+  public dayClasses(date: NgbDateStruct): Record<string, boolean> {
+    const time = Date.UTC(date.year, date.month - 1, date.day);
+    const start = this.selectedWeekStart().getTime();
+    const end = this.selectedWeekEnd().getTime();
+    const now = new Date();
+    return {
+      'in-week': time >= start && time <= end,
+      'week-start': time === start,
+      'week-end': time === end,
+      today:
+        time === Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()),
+    };
   }
 }

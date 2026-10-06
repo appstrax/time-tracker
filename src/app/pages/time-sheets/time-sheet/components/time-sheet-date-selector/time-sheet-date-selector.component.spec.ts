@@ -37,14 +37,26 @@ describe('TimeSheetDateSelectorComponent', () => {
   it('should navigate to a future week via the date picker', () => {
     const currentWeekStart = new Date(component.selectedWeekStart());
 
-    const input = document.createElement('input');
-    input.value = '2030-06-12';
-    component.onDateSelected({ target: input } as unknown as Event);
+    component.onDateSelected({ year: 2030, month: 6, day: 12 });
 
     const selectedStart = component.selectedWeekStart();
     expect(selectedStart.getTime()).not.toBe(currentWeekStart.getTime());
     expect(selectedStart.getUTCFullYear()).toBe(2030);
     expect(selectedStart.getUTCMonth()).toBe(5);
     expect(selectedStart.getUTCDate()).toBe(10);
+  });
+
+  it('should highlight the selected week in the picker', () => {
+    component.onDateSelected({ year: 2030, month: 6, day: 12 });
+
+    expect(component.dayClasses({ year: 2030, month: 6, day: 10 })).toEqual(
+      jasmine.objectContaining({ 'in-week': true, 'week-start': true }),
+    );
+    expect(component.dayClasses({ year: 2030, month: 6, day: 16 })).toEqual(
+      jasmine.objectContaining({ 'in-week': true, 'week-end': true }),
+    );
+    expect(component.dayClasses({ year: 2030, month: 6, day: 17 })['in-week']).toBe(
+      false,
+    );
   });
 });

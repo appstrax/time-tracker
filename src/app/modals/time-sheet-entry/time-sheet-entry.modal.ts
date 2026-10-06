@@ -1,3 +1,4 @@
+import { DateInputComponent } from '../../components/date-input/date-input.component';
 import { FormsModule } from '@angular/forms';
 import { appstraxAuth } from '@appstrax/services/auth';
 import {
@@ -28,7 +29,7 @@ import {
   standalone: true,
   templateUrl: './time-sheet-entry.modal.html',
   styleUrl: './time-sheet-entry.modal.scss',
-  imports: [FormsModule, ProjectDropdownComponent],
+  imports: [FormsModule, ProjectDropdownComponent, DateInputComponent],
 })
 export class TimeSheetEntryModal
   implements OnInit, OnDestroy, AfterViewChecked

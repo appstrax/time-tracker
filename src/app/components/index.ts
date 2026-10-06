@@ -15,3 +15,4 @@ export * from './time-sheet-analytics/filter-view-timeline/filter-view-timeline.
 export * from './time-sheet-analytics/unapproved-entries/unapproved-entries.component';
 export * from './project-preview/project-preview.component';
 export * from './insights-charts/insights-charts.component';
+export * from './date-input/date-input.component';

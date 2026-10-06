@@ -1,0 +1,22 @@
+<div class="date-input" [class.bare]="variant() === 'bare'">
+  <input
+    #dp="ngbDatepicker"
+    ngbDatepicker
+    readonly
+    autocomplete="off"
+    container="body"
+    datepickerClass="app-datepicker"
+    [firstDayOfWeek]="1"
+    [attr.id]="inputId() || null"
+    [class.form-control]="variant() === 'field'"
+    class="date-input-field"
+    [placeholder]="placeholder()"
+    [required]="required()"
+    [disabled]="disabled()"
+    [ngModel]="model()"
+    (dateSelect)="onDateSelect($event)"
+    (click)="dp.toggle()"
+    (blur)="markTouched()"
+  />
+  <i class="bi bi-calendar3 date-input-icon" aria-hidden="true"></i>
+</div>

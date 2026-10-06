@@ -1,6 +1,6 @@
 @if (layout() === 'pill') {
   <div class="week-controls">
-    <div class="week-pill">
+    <div class="week-pill" #pillTarget>
       <button
         type="button"
         class="week-pill-nav"
@@ -14,7 +14,7 @@
         type="button"
         class="week-pill-label"
         aria-label="Choose week"
-        (click)="openDatePicker()"
+        (click)="toggleDatePicker()"
       >
         {{ selectedWeekStart() | date: "MMM d" }} –
         {{ selectedWeekEnd() | date: "MMM d, y" }}
@@ -30,11 +30,18 @@
       </button>
 
       <input
-        #datePicker
-        type="date"
+        ngbDatepicker
         class="date-picker-input"
-        [value]="datePickerValue()"
-        (change)="onDateSelected($event)"
+        tabindex="-1"
+        aria-hidden="true"
+        container="body"
+        datepickerClass="app-datepicker"
+        [firstDayOfWeek]="1"
+        [dayTemplate]="weekDay"
+        [startDate]="datePickerStart()"
+        [positionTarget]="pillTarget"
+        (dateSelect)="onDateSelected($event)"
+        (closed)="onPickerClosed()"
       />
     </div>
 
@@ -57,13 +64,20 @@
         <i class="bi bi-chevron-left"></i>
       </button>
 
-      <div class="week-display" (click)="openDatePicker()">
+      <div class="week-display" #displayTarget (click)="toggleDatePicker()">
         <input
-          #datePicker
-          type="date"
+          ngbDatepicker
           class="date-picker-input"
-          [value]="datePickerValue()"
-          (change)="onDateSelected($event)"
+          tabindex="-1"
+          aria-hidden="true"
+          container="body"
+          datepickerClass="app-datepicker"
+          [firstDayOfWeek]="1"
+          [dayTemplate]="weekDay"
+          [startDate]="datePickerStart()"
+          [positionTarget]="displayTarget"
+          (dateSelect)="onDateSelected($event)"
+          (closed)="onPickerClosed()"
         />
         <span class="week-range-label">{{ selectedYear() }}</span>
         <span class="week-range">
@@ -90,3 +104,13 @@
     </div>
   </div>
 }
+
+<ng-template #weekDay let-date let-disabled="disabled" let-currentMonth="currentMonth">
+  <span
+    class="app-dp-day"
+    [class.disabled]="disabled"
+    [class.outside]="date.month !== currentMonth"
+    [ngClass]="dayClasses(date)"
+    >{{ date.day }}</span
+  >
+</ng-template>

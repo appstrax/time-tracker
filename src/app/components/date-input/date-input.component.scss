@@ -1,0 +1,46 @@
+:host {
+  display: block;
+}
+
+.date-input {
+  position: relative;
+}
+
+.date-input-field {
+  padding-right: 2.25rem;
+  cursor: pointer;
+  background-color: var(--color-surface);
+  color: var(--text-primary);
+
+  &:disabled {
+    cursor: default;
+    opacity: 0.65;
+  }
+}
+
+.date-input-icon {
+  position: absolute;
+  top: 50%;
+  right: 0.75rem;
+  transform: translateY(-50%);
+  color: var(--text-muted);
+  pointer-events: none;
+}
+
+.date-input.bare {
+  .date-input-field {
+    width: 100%;
+    min-width: 7.5rem;
+    border: none;
+    background: transparent;
+    font: inherit;
+    font-weight: 700;
+    min-height: 38px;
+    padding: 0 1.5rem 0 0.25rem;
+    outline: none;
+  }
+
+  .date-input-icon {
+    right: 0.25rem;
+  }
+}
