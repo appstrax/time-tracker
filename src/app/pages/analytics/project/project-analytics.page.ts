@@ -1,6 +1,14 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  Component,
+  OnDestroy,
+  OnInit,
+  computed,
+  inject,
+  signal,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AnalyticsFilter, Project, TimeSheetEntry, User } from '@models';
@@ -47,8 +55,10 @@ const localDayKey = (date: Date): string => {
   templateUrl: './project-analytics.page.html',
   styleUrl: './project-analytics.page.scss',
 })
-export class ProjectAnalyticsPage implements OnInit {
+export class ProjectAnalyticsPage implements OnInit, OnDestroy {
   private readonly route = inject(ActivatedRoute);
+  private paramSubscription?: Subscription;
+  private loadSeq = 0;
   private readonly store = inject(Store);
   private readonly entryService = inject(TimeSheetEntryService);
   private readonly toast = inject(ToastService);
@@ -172,9 +182,26 @@ export class ProjectAnalyticsPage implements OnInit {
   );
 
   public ngOnInit(): void {
-    this.projectId.set(this.route.snapshot.paramMap.get('projectId') ?? '');
-    this.load();
-    this.fetchUsers();
+    this.paramSubscription = this.route.paramMap.subscribe((params) => {
+      const id = params.get('projectId') ?? '';
+      if (id === this.projectId()) return;
+      this.projectId.set(id);
+      this.resetForProject();
+      void this.load();
+      void this.fetchUsers();
+    });
+  }
+
+  public ngOnDestroy(): void {
+    this.paramSubscription?.unsubscribe();
+  }
+
+  private resetForProject(): void {
+    this.firstLoad = true;
+    this.filter.set({});
+    this.expanded.set(new Set());
+    this.busy.set(new Set());
+    this.entries.set([]);
   }
 
   public onFilterChange(filter: AnalyticsFilter): void {
@@ -186,24 +213,28 @@ export class ProjectAnalyticsPage implements OnInit {
   }
 
   private async load(): Promise<void> {
+    const seq = ++this.loadSeq;
     this.loading.set(true);
     while (!this.store.projects.fetchedAt()) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }
     try {
-      const entries = await this.entryService.findByProjectId([
-        this.projectId(),
-      ]);
+      const projectId = this.projectId();
+      const entries = await this.entryService.findByProjectId([projectId]);
+      if (seq !== this.loadSeq) return;
       this.entries.set(entries);
       if (this.days().length && !this.expanded().size) {
         this.expanded.set(new Set([this.days()[0].key]));
       }
       this.firstLoad = false;
     } catch {
+      if (seq !== this.loadSeq) return;
       this.toast.error('Failed to fetch time sheet entries');
       this.entries.set([]);
     } finally {
-      this.loading.set(false);
+      if (seq === this.loadSeq) {
+        this.loading.set(false);
+      }
     }
   }
 
