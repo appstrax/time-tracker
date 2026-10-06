@@ -12,22 +12,17 @@
       [attr.aria-expanded]="isProjectDropdownOpen"
     >
       <span class="project-dropdown-selection d-flex align-items-center gap-2">
-        @if (selectedProject) { @if (selectedProject.logoUrl) {
-        <img
-          [src]="selectedProject.logoUrl"
-          alt="logo"
-          class="proj-thumb"
-          loading="lazy"
-        />
-        } @else {
-        <i class="bi bi-image proj-thumb-fallback"></i>
-        }
+        @if (selectedProject) {
+        <span
+          class="project-color-dot"
+          [style.background-color]="resolveProjectColor(selectedProject)"
+          aria-hidden="true"
+        ></span>
         <span
           class="project-dropdown-name"
           [attr.title]="selectedProject.name"
           >{{ selectedProject.name }}</span>
         } @else {
-        <i class="bi bi-image proj-thumb-fallback"></i>
         <span class="project-dropdown-name">{{ nullOptionLabel }}</span>
         }
       </span>
@@ -64,7 +59,6 @@
           [class.active]="selectedProject === null || selectedProject === undefined"
           [disabled]="disabled"
         >
-          <i class="bi bi-image proj-thumb-fallback"></i>
           <span>{{ nullOptionLabel }}</span>
         </button>
       </li>
@@ -85,16 +79,11 @@
           [class.active]="selectedProject?.id === project.id"
           [disabled]="disabled"
         >
-          @if (project.logoUrl) {
-          <img
-            [src]="project.logoUrl"
-            alt="logo"
-            class="proj-thumb"
-            loading="lazy"
-          />
-          } @else {
-          <i class="bi bi-image proj-thumb-fallback"></i>
-          }
+          <span
+            class="project-color-dot"
+            [style.background-color]="resolveProjectColor(project)"
+            aria-hidden="true"
+          ></span>
           <span [attr.title]="project.name">{{ project.name }}</span>
         </button>
       </li>

@@ -45,7 +45,9 @@
             <button
               type="button"
               class="entry-row"
+              [class.entry-row--approved]="entry.approved"
               [disabled]="entry.approved"
+              [attr.title]="entry.approved ? 'Approved' : null"
               (click)="openTimeSheetEntryModal(entry)"
             >
               <span class="entry-leading">

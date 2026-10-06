@@ -29,32 +29,6 @@
 
   <section class="settings-section">
     <div class="d-flex align-items-center justify-content-between">
-      <h2 class="section-title">General</h2>
-    </div>
-    <hr />
-    <div class="card setting-card">
-      <div class="card-body d-flex align-items-center justify-content-between">
-        <div>
-          <div class="setting-title">Auto-collapse side menu on inactivity</div>
-          <div class="setting-desc">
-            When enabled, the side navigation hides when the pointer leaves the edge.
-          </div>
-        </div>
-        <div class="form-check form-switch">
-          <input
-            class="form-check-input"
-            type="checkbox"
-            id="autoCollapseSwitch"
-            [checked]="(settings.autoCollapse$ | async) ?? false"
-            (change)="toggleAutoCollapse($event)"
-            />
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <section class="settings-section">
-    <div class="d-flex align-items-center justify-content-between">
       <h2 class="section-title">Appearance</h2>
     </div>
     <hr />
@@ -91,54 +65,7 @@
             <div class="tile-label">System</div>
           </label>
 
-          <label class="theme-tile">
-            <input type="radio" name="theme" value="custom" (change)="onThemeChange('custom')" [checked]="(theme.currentTheme$ | async) === 'custom'" />
-            <div class="tile-visual custom">
-              <div class="tile-header"></div>
-              <div class="tile-body"></div>
-            </div>
-            <div class="tile-label">Custom</div>
-          </label>
         </div>
-
-        @if ((theme.currentTheme$ | async) === 'custom') {
-          <div class="custom-theme-editor mt-3">
-            <div class="row g-3">
-              <div class="col-md-3">
-                <label class="form-label">Primary</label>
-                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.primary" />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Primary Contrast</label>
-                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.primaryContrast" />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Background</label>
-                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.bg" />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Surface</label>
-                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.surface" />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Border</label>
-                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.border" />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Text</label>
-                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.text" />
-              </div>
-              <div class="col-md-3">
-                <label class="form-label">Muted Text</label>
-                <input class="form-control form-control-color" type="color" [(ngModel)]="custom.muted" />
-              </div>
-            </div>
-            <div class="mt-3 d-flex gap-2">
-              <button class="btn btn-primary" (click)="applyCustom()">Apply custom theme</button>
-              <button class="btn btn-light" (click)="resetCustom()">Reset</button>
-            </div>
-          </div>
-        }
       </div>
     </div>
   </section>

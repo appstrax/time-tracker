@@ -253,10 +253,6 @@
     min-width: 130px;
   }
 
-  .fields-error {
-    border-radius: 8px;
-  }
-
   .field-rows {
     display: flex;
     flex-direction: column;
@@ -332,6 +328,10 @@
     font-size: 0.82rem;
     font-weight: 600;
   }
+}
+
+:host-context([data-theme="dark"]) .project-page .field-unsaved-pill {
+  color: #fcd34d;
 }
 
 @media (max-width: 991px) {

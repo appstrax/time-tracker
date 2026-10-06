@@ -79,6 +79,10 @@
   }
 }
 
+[data-theme="dark"] .ws-tab-badge--warn {
+  color: #fcd34d;
+}
+
 .ws-empty {
   display: flex;
   flex-direction: column;
@@ -341,6 +345,16 @@
   }
 }
 
+[data-theme="dark"] .ws-num {
+  &--ok {
+    color: #5eead4;
+  }
+
+  &--warn {
+    color: #fcd34d;
+  }
+}
+
 .ws-icon-btn {
   display: inline-flex;
   align-items: center;
@@ -439,6 +453,14 @@
   &--pending {
     background: color-mix(in srgb, #f59e0b 24%, var(--color-surface));
     color: #8a4a05;
+  }
+}
+
+[data-theme="dark"] .ws-status {
+  color: #5eead4;
+
+  &--pending {
+    color: #fcd34d;
   }
 }
 

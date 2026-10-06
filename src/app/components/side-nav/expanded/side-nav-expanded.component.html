@@ -14,6 +14,7 @@
     <a
       routerLink="/home"
       routerLinkActive="active"
+      #homeActive="routerLinkActive"
       class="menu-item"
       ngbTooltip="Home"
       [disableTooltip]="!compact"
@@ -22,13 +23,18 @@
       triggers="hover"
     >
       <span class="menu-item-icon" aria-hidden="true">
-        <i class="bi bi-house-door-fill"></i>
+        <i
+          class="bi"
+          [class.bi-house-door]="!homeActive.isActive"
+          [class.bi-house-door-fill]="homeActive.isActive"
+        ></i>
       </span>
       <span class="label nav-expandable-text">Home</span>
     </a>
     <a
       routerLink="/time-sheet"
       routerLinkActive="active"
+      #timeSheetActive="routerLinkActive"
       class="menu-item"
       ngbTooltip="Time Sheets"
       [disableTooltip]="!compact"
@@ -37,7 +43,11 @@
       triggers="hover"
     >
       <span class="menu-item-icon" aria-hidden="true">
-        <i class="bi bi-stopwatch-fill"></i>
+        <i
+          class="bi"
+          [class.bi-stopwatch]="!timeSheetActive.isActive"
+          [class.bi-stopwatch-fill]="timeSheetActive.isActive"
+        ></i>
       </span>
       <span class="label nav-expandable-text">Time Sheets</span>
     </a>
@@ -45,6 +55,7 @@
       <a
         routerLink="/analytics"
         routerLinkActive="active"
+        #analyticsActive="routerLinkActive"
         class="menu-item"
         ngbTooltip="Analytics"
         [disableTooltip]="!compact"
@@ -53,7 +64,11 @@
         triggers="hover"
       >
         <span class="menu-item-icon" aria-hidden="true">
-          <i class="bi bi-bar-chart-fill"></i>
+          <i
+            class="bi"
+            [class.bi-bar-chart]="!analyticsActive.isActive"
+            [class.bi-bar-chart-fill]="analyticsActive.isActive"
+          ></i>
         </span>
         <span class="label nav-expandable-text">Analytics</span>
       </a>
@@ -61,6 +76,7 @@
       <a
         routerLink="/projects"
         routerLinkActive="active"
+        #projectsActive="routerLinkActive"
         class="menu-item"
         ngbTooltip="Projects"
         [disableTooltip]="!compact"
@@ -69,7 +85,11 @@
         triggers="hover"
       >
         <span class="menu-item-icon" aria-hidden="true">
-          <i class="bi bi-folder-fill"></i>
+          <i
+            class="bi"
+            [class.bi-folder]="!projectsActive.isActive"
+            [class.bi-folder-fill]="projectsActive.isActive"
+          ></i>
         </span>
         <span class="label nav-expandable-text">Projects</span>
       </a>

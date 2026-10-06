@@ -8,11 +8,11 @@
   overflow: visible;
   transition: width 0.3s ease-out; // keep in sync with nav-expandable-text
 
-  &.visible.collapsed {
+  &.collapsed {
     width: 80px;
   }
 
-  &.visible.expanded {
+  &.expanded {
     width: 240px;
   }
 }

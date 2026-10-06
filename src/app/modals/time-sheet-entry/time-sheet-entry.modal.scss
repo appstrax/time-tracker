@@ -70,12 +70,29 @@
 
 .hours-range-wrapper {
   position: relative;
-  width: 100%;
+  flex: 1 1 auto;
   min-width: 0;
   padding: 0.5rem 0;
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+.hours-input-container .toggle-switch {
+  flex-shrink: 0;
+  padding-left: 1rem;
+  border-left: 1px solid var(--color-border);
+
+  @media (max-width: 576px) {
+    padding-left: 0;
+    border-left: none;
+  }
+}
+
+@media (max-width: 576px) {
+  .hours-input-container {
+    flex-wrap: wrap;
+  }
 }
 
 .hours-range {
@@ -210,6 +227,7 @@
 
 /* Error message styling - preserve whitespace */
 .alert-danger {
+  margin-top: 1rem;
   white-space: pre-line;
 }
 

@@ -106,6 +106,31 @@ select:-webkit-autofill {
   transition: background-color 5000s ease-in-out 0s; /* mask default yellow */
 }
 
+/* Alerts */
+.alert-danger {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.625rem;
+  padding: 0.75rem 0.875rem;
+  border: none;
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius-control);
+  background: var(--color-danger-soft);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.alert-danger::before {
+  content: "\f332";
+  font-family: "bootstrap-icons";
+  font-size: 1rem;
+  line-height: 1;
+  margin-top: 0.1rem;
+  color: var(--color-danger);
+  flex-shrink: 0;
+}
+
 /* Theming tokens */
 :root {
   /* Semantic colors */
@@ -137,6 +162,9 @@ select:-webkit-autofill {
   --tag-purple: #7c3aed;
   --tag-amber: #d97706;
   --tag-rose: #e11d48;
+
+  --color-danger: #c0312c;
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface));
 
   /* Map legacy vars to tokens for compatibility */
   --primary-color: var(--color-primary);
@@ -180,6 +208,9 @@ select:-webkit-autofill {
   --tag-purple: #a78bfa;
   --tag-amber: #fbbf24;
   --tag-rose: #fb7185;
+
+  --color-danger: #ff8a80;
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface));
 
   --primary-color: var(--color-primary);
   --primary-color-light: color-mix(
@@ -445,6 +476,14 @@ select:-webkit-autofill {
   font-weight: 700;
 }
 
+.timeline-entry-tooltip-approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+  font-weight: 700;
+}
+
 /* Themed global scrollbar */
 html {
   scrollbar-width: thin;
@@ -615,6 +654,10 @@ textarea.form-control[disabled] {
 .modal-header .btn-close:hover {
   opacity: 1;
   background-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .modal-header .btn-close {
+  filter: invert(1);
 }
 
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {

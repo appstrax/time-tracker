@@ -22,11 +22,7 @@ interface NavItem {
   imports: [RouterModule, SideNavExpandedComponent],
 })
 export class SideNavComponent implements AfterViewInit {
-  isVisible = true;
   mode: 'collapsed' | 'expanded' = 'collapsed';
-  private closeTimeout: any;
-  private readonly THRESHOLD = 50;
-  private readonly BUFFER_ZONE = 100;
 
   @ViewChild(SideNavExpandedComponent) navPanel?: SideNavExpandedComponent;
 
@@ -36,34 +32,6 @@ export class SideNavComponent implements AfterViewInit {
     private store: Store,
   ) {
     this.mode = this.settings.getSideNavMode();
-  }
-
-  @HostListener('document:mousemove', ['$event'])
-  onMouseMove(event: MouseEvent) {
-    if (this.closeTimeout) {
-      clearTimeout(this.closeTimeout);
-    }
-
-    if (event.clientX <= this.THRESHOLD) {
-      this.isVisible = true;
-      return;
-    }
-
-    if (event.clientX <= this.BUFFER_ZONE && this.isVisible) {
-      return;
-    }
-
-    if (!this.settings.getAutoCollapse()) {
-      this.isVisible = true;
-      return;
-    }
-
-    if (event.clientX > this.BUFFER_ZONE && this.isVisible) {
-      this.closeTimeout = setTimeout(() => {
-        this.isVisible = false;
-        this.hideAllTooltips();
-      }, 1500);
-    }
   }
 
   get isAdmin(): boolean {

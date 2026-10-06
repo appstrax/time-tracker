@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 
 import { Project } from '@models';
 import { Store } from '@state';
+import { getProjectColor } from '@utils';
 
 @Component({
   selector: 'app-project-dropdown',
@@ -59,6 +60,10 @@ export class ProjectDropdownComponent {
     private store: Store,
     private elementRef: ElementRef<HTMLElement>,
   ) {}
+
+  resolveProjectColor(project: Project): string {
+    return getProjectColor(project.id, this.projects());
+  }
 
   shouldShowNullOption(): boolean {
     if (!this.allowNull) {

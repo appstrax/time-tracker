@@ -116,6 +116,16 @@
   font-weight: 600;
 }
 
+:host-context([data-theme="dark"]) {
+  .value-success {
+    color: #5eead4;
+  }
+
+  .value-warning {
+    color: #fcd34d;
+  }
+}
+
 .empty-state {
   padding: 2rem 1rem;
   text-align: center;

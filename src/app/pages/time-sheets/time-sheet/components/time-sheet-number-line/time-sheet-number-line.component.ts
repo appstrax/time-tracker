@@ -18,6 +18,7 @@ export interface TimelineEntryTooltipContext {
   category: string;
   description: string;
   duration: string;
+  approved: boolean;
 }
 
 interface TimelineSegment {
@@ -204,6 +205,7 @@ export class TimeSheetNumberLineComponent {
       category: entry.category?.trim() || 'No category',
       description: this.getEntryDescription(entry),
       duration: this.formatBlockHours(entry.hours),
+      approved: entry.approved,
     };
   }
 
