@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { appstraxAuth } from '@appstrax/services/auth';
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap';
 
-import { Project } from '@models';
+import { Project, User, UserRole } from '@models';
 import { Store } from '@state';
 import { ToastService } from '@services';
 import { TimeSheetDisplayUtil } from '@utils';
@@ -11,10 +11,13 @@ import { TimeSheetDisplayUtil } from '@utils';
 import { TimeSheetEntryModal } from './time-sheet-entry.modal';
 
 describe('TimeSheetEntryComponent', () => {
+  const regularUser = { id: 'test-user', role: UserRole.USER } as User;
+
   const project = {
     id: 'project-1',
     name: 'Alpha',
     fields: [],
+    users: [],
   } as any as Project;
 
   const projectWithFields = {
@@ -96,6 +99,9 @@ describe('TimeSheetEntryComponent', () => {
         {
           provide: Store,
           useValue: {
+            user: {
+              user: signal(regularUser),
+            },
             projects: {
               projects: signal([
                 project,
@@ -417,5 +423,113 @@ describe('TimeSheetEntryComponent', () => {
     // 'notes' (required) deliberately left blank.
 
     expect(component.isFormValid()).toBe(true);
+  });
+});
+
+describe('TimeSheetEntryModal — admin project membership', () => {
+  const adminUser = { id: 'admin-user', role: UserRole.ADMIN } as User;
+
+  const myProject = {
+    id: 'my-project',
+    name: 'My Project',
+    fields: [],
+    users: [{ id: 'admin-user' } as User],
+  } as any as Project;
+
+  const otherProject = {
+    id: 'other-project',
+    name: 'Other Project',
+    fields: [],
+    users: [{ id: 'someone-else' } as User],
+  } as any as Project;
+
+  let component: TimeSheetEntryModal;
+  let fixture: ComponentFixture<TimeSheetEntryModal>;
+  let activeModal: jasmine.SpyObj<NgbActiveModal>;
+
+  beforeEach(async () => {
+    spyOn(appstraxAuth, 'getUser').and.resolveTo({ id: adminUser.id } as any);
+    activeModal = jasmine.createSpyObj<NgbActiveModal>('NgbActiveModal', [
+      'close',
+      'dismiss',
+    ]);
+
+    await TestBed.configureTestingModule({
+      imports: [TimeSheetEntryModal],
+      providers: [
+        provideZonelessChangeDetection(),
+        { provide: NgbActiveModal, useValue: activeModal },
+        {
+          provide: Store,
+          useValue: {
+            user: { user: signal(adminUser) },
+            projects: {
+              projects: signal([myProject, otherProject]),
+            },
+          },
+        },
+        {
+          provide: TimeSheetDisplayUtil,
+          useValue: jasmine.createSpyObj<TimeSheetDisplayUtil>(
+            'TimeSheetDisplayUtil',
+            ['formatHours'],
+          ),
+        },
+        {
+          provide: ToastService,
+          useValue: jasmine.createSpyObj<ToastService>('ToastService', [
+            'error',
+            'success',
+            'info',
+            'warning',
+            'show',
+          ]),
+        },
+      ],
+    }).compileComponents();
+  });
+
+  it('only lists projects the admin is a member of', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.defaultProjectId = '';
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.projects().map((p) => p.id)).toEqual([myProject.id]);
+  });
+
+  it('still shows an existing entry\'s project even if the admin is not a member', async () => {
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.timeSheetEntry.id = 'existing-entry-id';
+    component.timeSheetEntry.projectId = otherProject.id;
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.project?.id).toBe(otherProject.id);
+    expect(component.projects().map((p) => p.id)).toContain(otherProject.id);
+  });
+
+  it('shows an empty list when the admin has no assigned projects', async () => {
+    TestBed.overrideProvider(Store, {
+      useValue: {
+        user: { user: signal(adminUser) },
+        projects: { projects: signal([otherProject]) },
+      },
+    });
+    fixture = TestBed.createComponent(TimeSheetEntryModal);
+    component = fixture.componentInstance;
+    component.categories = [];
+    component.date = new Date();
+    component.defaultProjectId = '';
+    fixture.detectChanges();
+    await fixture.whenStable();
+
+    expect(component.projects()).toEqual([]);
   });
 });

@@ -3,16 +3,21 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { patchState } from '@ngrx/signals';
 
-import { Project, TimeSheetEntry } from '@models';
+import { Project, TimeSheetEntry, User, UserRole } from '@models';
 import { Store } from '@state';
 import { clearStoredTimeSheetFilterProjectId } from '@utils';
 
 import { TimeSheetPage } from './time-sheet.page';
 
-function makeProject(id: string): Project {
+function makeProject(id: string, memberIds: string[] = []): Project {
   const project = new Project();
   project.id = id;
   project.name = id;
+  project.users = memberIds.map((memberId) => {
+    const user = new User();
+    user.id = memberId;
+    return user;
+  });
   return project;
 }
 
@@ -152,6 +157,29 @@ describe('TimeSheetPage', () => {
       });
 
       expect(component.filterProject()?.id).toBe(projectB.id);
+    });
+  });
+
+  describe('myProjects', () => {
+    function patchUserState(user: User | null): void {
+      patchState(store.user as never, { user });
+    }
+
+    it('matches the full project list for a non-admin user', () => {
+      const projectA = makeProject('project-a');
+      patchProjectsState({ projects: [projectA], fetchedAt: new Date() });
+      patchUserState({ id: 'user-1', role: UserRole.USER } as User);
+
+      expect(component.myProjects().map((p) => p.id)).toEqual([projectA.id]);
+    });
+
+    it('narrows an admin to only their own project memberships', () => {
+      const mine = makeProject('mine', ['admin-1']);
+      const notMine = makeProject('not-mine', ['someone-else']);
+      patchProjectsState({ projects: [mine, notMine], fetchedAt: new Date() });
+      patchUserState({ id: 'admin-1', role: UserRole.ADMIN } as User);
+
+      expect(component.myProjects().map((p) => p.id)).toEqual([mine.id]);
     });
   });
 });

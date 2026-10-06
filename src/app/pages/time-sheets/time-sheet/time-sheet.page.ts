@@ -7,6 +7,7 @@ import { Store } from '@state';
 import {
   buildProjectColorMap,
   clearStoredTimeSheetFilterProjectId,
+  filterAssignedProjects,
   getStoredTimeSheetFilterProjectId,
   localCalendarDayKey,
   storeTimeSheetFilterProjectId,
@@ -35,6 +36,13 @@ export class TimeSheetPage {
   );
 
   public readonly projects = computed(() => this.store.projects.projects());
+  /** Projects offered in the filter dropdown — narrowed to the current user's
+   * own memberships so an admin can't filter by (or log against) projects
+   * they're not part of. `projects` above stays unfiltered for colour lookups
+   * against entries that may reference a project the user's since left. */
+  public readonly myProjects = computed(() =>
+    filterAssignedProjects(this.projects(), this.store.user.user()),
+  );
   public readonly filterProject = computed(() => {
     const projectId = this.filterProjectId();
     if (!projectId) return null;
@@ -122,13 +130,15 @@ export class TimeSheetPage {
     }
   }
 
-  /** Re-validates the active filter against the loaded projects; never pulls in the
-   * modal's "last used project" so saving an entry can't silently change the filter. */
+  /** Re-validates the active filter against the user's own projects (not the full,
+   * unfiltered list) so a stored filter for a project the user isn't assigned to
+   * gets reset; never pulls in the modal's "last used project" so saving an entry
+   * can't silently change the filter. */
   private syncFilterProject(): void {
     const projectId = this.filterProjectId();
     if (!projectId) return;
 
-    const project = this.projects().find((item) => item.id === projectId);
+    const project = this.myProjects().find((item) => item.id === projectId);
     if (!project) {
       this.filterProjectId.set(null);
       clearStoredTimeSheetFilterProjectId();
