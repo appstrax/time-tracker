@@ -188,6 +188,14 @@ $nav-width-transition: $nav-width-transition-duration ease-out;
     font-size: 1rem;
     opacity: 0.85;
   }
+
+  &:hover,
+  &:focus,
+  &:active,
+  &.active {
+    color: var(--text-primary);
+    background-color: var(--color-primary-soft);
+  }
 }
 
 .profile-dropdown-item--danger {
