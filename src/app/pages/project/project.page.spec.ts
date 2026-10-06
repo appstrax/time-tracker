@@ -151,4 +151,77 @@ describe('ProjectPage — billable', () => {
     const saved = projectService.save.calls.mostRecent().args[0] as Project;
     expect(saved.billable).toBe(false);
   });
+
+  describe('removeLogo', () => {
+    let existing: Project;
+    let input: HTMLInputElement;
+
+    async function createWithLogo(): Promise<void> {
+      existing = new Project();
+      existing.id = 'project-1';
+      existing.name = 'Alpha';
+      existing.description = 'Alpha project';
+      existing.logoUrl = 'https://example.com/logo.png';
+
+      projectService.findById.and.resolveTo(existing);
+      projectService.save.and.callFake(async (p: Project) => p);
+      configure(existing.id);
+      TestBed.overrideProvider(Store, {
+        useValue: {
+          projects: { projects: () => [existing] },
+          user: { user: () => null },
+        },
+      });
+      await TestBed.compileComponents();
+      fixture = TestBed.createComponent(ProjectPage);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      await fixture.whenStable();
+      input = document.createElement('input');
+    }
+
+    it('saves an empty logoUrl and clears the preview for a saved logo', async () => {
+      await createWithLogo();
+
+      await component.removeLogo(input);
+
+      const saved = projectService.save.calls.mostRecent().args[0] as Project;
+      expect(saved.logoUrl).toBe('');
+      expect(component.logoPreviewUrl()).toBeNull();
+      expect(component.project().logoUrl).toBe('');
+    });
+
+    it('only discards a pending replacement file without saving', async () => {
+      await createWithLogo();
+      component.logoFile.set(new File(['x'], 'new.png'));
+      component.logoPreviewUrl.set('data:image/png;base64,eA==');
+
+      await component.removeLogo(input);
+
+      expect(projectService.save).not.toHaveBeenCalled();
+      expect(component.logoFile()).toBeNull();
+      expect(component.logoPreviewUrl()).toBe(existing.logoUrl);
+    });
+
+    it('does not send unsaved edits to other fields', async () => {
+      await createWithLogo();
+      component.updateProjectName('Edited');
+
+      await component.removeLogo(input);
+
+      const saved = projectService.save.calls.mostRecent().args[0] as Project;
+      expect(saved.name).toBe('Alpha');
+      expect(component.project().name).toBe('Edited');
+    });
+
+    it('keeps the logo and pending file when the save fails', async () => {
+      await createWithLogo();
+      projectService.save.and.rejectWith(new Error('boom'));
+
+      await component.removeLogo(input);
+
+      expect(component.logoPreviewUrl()).toBe(existing.logoUrl);
+      expect(component.project().logoUrl).toBe(existing.logoUrl);
+    });
+  });
 });

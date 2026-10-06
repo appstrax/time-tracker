@@ -247,12 +247,20 @@ export class ProjectPage implements OnInit {
   }
 
   public async removeLogo(fileInput: HTMLInputElement): Promise<void> {
-    fileInput.value = '';
-    this.logoFile.set(null);
+    if (this.isPersisting()) {
+      return;
+    }
+
     this.error.set('');
 
-    const hasSavedLogo = !!this.savedCoreSnapshot.logoUrl;
-    if (!this.editing() || !this.project().id || !hasSavedLogo) {
+    if (this.logoFile()) {
+      fileInput.value = '';
+      this.logoFile.set(null);
+      this.logoPreviewUrl.set(this.project().logoUrl || null);
+      return;
+    }
+
+    if (!this.editing() || !this.project().id || !this.savedCoreSnapshot.logoUrl) {
       this.logoPreviewUrl.set(null);
       return;
     }
@@ -262,20 +270,12 @@ export class ProjectPage implements OnInit {
     }
 
     try {
-      const current = this.project();
-      const payload = Object.assign(new Project(), current);
-      payload.name = this.savedCoreSnapshot.name;
-      payload.description = this.savedCoreSnapshot.description;
-      payload.color = this.savedCoreSnapshot.color;
-      payload.billable = this.savedCoreSnapshot.billable;
-      payload.categories = [...this.savedCoreSnapshot.categories];
-      payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
-      payload.logoUrl = '';
+      const submitted = this.buildProjectForLogoRemoval();
+      const project = await this.projectService.save(submitted);
 
-      const project = await this.projectService.save(payload);
       this.project.set(
         this.mergeProjectAfterSave(project, {
-          ...this.liveEditOverrides(payload),
+          ...this.liveEditOverrides(submitted),
           logoUrl: project.logoUrl,
         }),
       );
@@ -571,6 +571,20 @@ export class ProjectPage implements OnInit {
     payload.color = this.savedCoreSnapshot.color;
     payload.billable = this.savedCoreSnapshot.billable;
     payload.categories = [...this.savedCoreSnapshot.categories];
+
+    return payload;
+  }
+
+  private buildProjectForLogoRemoval(): Project {
+    const payload = Object.assign(new Project(), this.project());
+
+    payload.name = this.savedCoreSnapshot.name;
+    payload.description = this.savedCoreSnapshot.description;
+    payload.logoUrl = '';
+    payload.color = this.savedCoreSnapshot.color;
+    payload.billable = this.savedCoreSnapshot.billable;
+    payload.categories = [...this.savedCoreSnapshot.categories];
+    payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
 
     return payload;
   }
