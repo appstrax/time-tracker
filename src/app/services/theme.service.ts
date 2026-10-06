@@ -3,6 +3,10 @@ import { BehaviorSubject } from 'rxjs';
 
 export type ThemeMode = 'light' | 'dark' | 'system';
 
+const VALID_THEME_MODES: ThemeMode[] = ['light', 'dark', 'system'];
+/** Legacy key from the removed custom-theme feature; still cleared on startup for anyone who had it set. */
+const LEGACY_THEME_CUSTOM_VARS_KEY = 'app.theme.custom.vars';
+
 @Injectable({ providedIn: 'root' })
 export class ThemeService {
   private static readonly THEME_MODE_KEY = 'app.theme.mode';
@@ -13,7 +17,16 @@ export class ThemeService {
   currentTheme$ = this.currentThemeSubject.asObservable();
 
   constructor() {
-    const storedMode = (localStorage.getItem(ThemeService.THEME_MODE_KEY) as ThemeMode) || 'system';
+    const stored = localStorage.getItem(ThemeService.THEME_MODE_KEY);
+    const storedMode = VALID_THEME_MODES.includes(stored as ThemeMode)
+      ? (stored as ThemeMode)
+      : 'system';
+
+    if (stored !== storedMode) {
+      localStorage.setItem(ThemeService.THEME_MODE_KEY, storedMode);
+    }
+    localStorage.removeItem(LEGACY_THEME_CUSTOM_VARS_KEY);
+
     this.applyTheme(storedMode);
   }
 
