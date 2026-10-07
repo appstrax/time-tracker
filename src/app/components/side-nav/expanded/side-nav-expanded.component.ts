@@ -35,6 +35,11 @@ export class SideNavExpandedComponent {
 
   admin = computed(() => this.store.user.user()?.role === UserRole.ADMIN);
 
+  showLogTime = computed(() => !this.store.access.needsAnalyticsLanding());
+  showAnalytics = computed(
+    () => this.admin() || this.store.access.analyticsProjects().length > 0,
+  );
+
   constructor(private store: Store) {}
 
   hideAllTooltips(): void {
