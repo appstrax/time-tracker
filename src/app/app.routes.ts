@@ -2,6 +2,8 @@ import { Routes } from '@angular/router';
 
 import { AuthGuard } from './utils/auth.guard';
 import { AdminGuard } from './utils/admin.guard';
+import { LogTimeGuard } from './utils/log-time.guard';
+import { AnalyticsGuard } from './utils/analytics.guard';
 import { projectPageCanDeactivate } from './utils/project-page.guard';
 
 import { PageLayoutComponent } from '@components';
@@ -36,6 +38,7 @@ export const routes: Routes = [
     children: [
       {
         path: 'home',
+        canActivate: [LogTimeGuard],
         component: HomePage,
       },
       {
@@ -63,16 +66,17 @@ export const routes: Routes = [
       },
       {
         path: 'time-sheet',
+        canActivate: [LogTimeGuard],
         component: TimeSheetPage,
       },
       {
         path: 'analytics',
-        canActivate: [AdminGuard],
+        canActivate: [AnalyticsGuard],
         component: AnalyticsPage,
       },
       {
         path: 'analytics/:projectId',
-        canActivate: [AdminGuard],
+        canActivate: [AnalyticsGuard],
         component: ProjectAnalyticsPage,
       },
     ],
