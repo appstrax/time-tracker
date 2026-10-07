@@ -43,7 +43,7 @@ export class AnalyticsPage implements OnInit {
 
   public readonly loading = signal(false);
 
-  public readonly projects = this.store.projects.projects;
+  public readonly projects = this.store.access.analyticsProjects;
   public readonly entries = signal<TimeSheetEntry[]>([]);
   public readonly users = signal<User[]>([]);
   public readonly filter = signal<AnalyticsFilter>({});

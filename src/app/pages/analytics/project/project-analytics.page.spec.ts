@@ -44,8 +44,14 @@ describe('ProjectAnalyticsPage', () => {
   let findByProjectId: jasmine.Spy<
     (ids: string[]) => Promise<TimeSheetEntry[]>
   >;
+  let save: jasmine.Spy<(entry: TimeSheetEntry) => Promise<TimeSheetEntry>>;
+  let canApprove: boolean;
 
   beforeEach(async () => {
+    canApprove = true;
+    save = jasmine
+      .createSpy('save')
+      .and.callFake(async (entry: TimeSheetEntry) => entry);
     paramMap$ = new BehaviorSubject(convertToParamMap({ projectId: 'alpha' }));
     findByProjectId = jasmine
       .createSpy('findByProjectId')
@@ -71,6 +77,11 @@ describe('ProjectAnalyticsPage', () => {
         projects: signal<Project[]>([alpha]),
         fetchedAt: signal<Date | null>(new Date()),
       },
+      access: {
+        analyticsProjects: signal<Project[]>([alpha]),
+        can: (_projectId: string, action: string) =>
+          action === 'approve' && canApprove,
+      },
     };
 
     await TestBed.configureTestingModule({
@@ -93,7 +104,7 @@ describe('ProjectAnalyticsPage', () => {
         },
         {
           provide: TimeSheetEntryService,
-          useValue: { findByProjectId },
+          useValue: { findByProjectId, save },
         },
         {
           provide: UsersService,
@@ -167,5 +178,74 @@ describe('ProjectAnalyticsPage', () => {
     expect(component.filter()).toEqual({});
     expect(component.entries().map((e) => e.id)).toEqual(['b1']);
     expect(findByProjectId).toHaveBeenCalledWith(['beta']);
+  });
+
+  describe('approval gating', () => {
+    const buttons = () =>
+      Array.from(
+        (fixture.nativeElement as HTMLElement).querySelectorAll(
+          'button.status-action',
+        ),
+      );
+
+    const loaded = async () => {
+      while (component.loading() || !component.entries().length) {
+        await new Promise((resolve) => setTimeout(resolve));
+      }
+      component.filter.set({});
+      fixture.detectChanges();
+    };
+
+    describe('as a viewer', () => {
+      beforeEach(async () => {
+        canApprove = false;
+        await loaded();
+      });
+
+      it('renders no approve or decline buttons but keeps status pills', () => {
+        expect(buttons().length).toBe(0);
+        expect(
+          (fixture.nativeElement as HTMLElement).querySelectorAll('.status-pill')
+            .length,
+        ).toBeGreaterThan(0);
+      });
+
+      it('does not save when approval handlers are invoked directly', async () => {
+        const [first] = component.entries();
+        const day = component.days()[0];
+        await component.setApproved(first, false);
+        await component.approveDay(day);
+        await component.declineDay(day);
+        expect(save).not.toHaveBeenCalled();
+      });
+    });
+
+    describe('as an approver', () => {
+      beforeEach(loaded);
+
+      it('renders approve/decline buttons', () => {
+        expect(buttons().length).toBeGreaterThan(0);
+      });
+
+      it('saves each entry once with only approved changed', async () => {
+        const day = component.days()[0];
+        const originals = day.entries.map((e) => ({ ...e.clone() }));
+        await component.declineDay(day);
+
+        expect(save).toHaveBeenCalledTimes(originals.length);
+        const saved = save.calls.allArgs().map(([e]) => e);
+        for (const original of originals) {
+          const after = saved.find((e) => e.id === original.id)!;
+          expect(after.approved).toBe(false);
+          expect({ ...after, approved: true }).toEqual(original);
+        }
+      });
+    });
+
+    it('shows the buttons for a platform admin (can() true)', async () => {
+      canApprove = true;
+      await loaded();
+      expect(buttons().length).toBeGreaterThan(0);
+    });
   });
 });

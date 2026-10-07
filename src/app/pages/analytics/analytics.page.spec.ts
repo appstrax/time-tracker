@@ -42,19 +42,35 @@ function makeEntry(
 describe('AnalyticsPage', () => {
   let component: AnalyticsPage;
   let fixture: ComponentFixture<AnalyticsPage>;
+  let findByProjectId: jasmine.Spy<
+    (ids: string[]) => Promise<TimeSheetEntry[]>
+  >;
 
   const alpha = makeProject('alpha', ['u1']);
   const beta = makeProject('beta', ['u2']);
   /** u1 logged time here but is no longer a member. */
   const gamma = makeProject('gamma', ['u2']);
+  /** Exists in the project list but is not one the user may view analytics for. */
+  const hidden = makeProject('hidden', ['u9']);
 
   beforeEach(async () => {
     const storeStub = {
       projects: {
-        projects: signal<Project[]>([alpha, beta, gamma]),
+        projects: signal<Project[]>([alpha, beta, gamma, hidden]),
         fetchedAt: signal<Date | null>(new Date()),
       },
+      access: {
+        analyticsProjects: signal<Project[]>([alpha, beta, gamma]),
+        can: () => false,
+      },
     };
+    findByProjectId = jasmine
+      .createSpy('findByProjectId')
+      .and.callFake(async () => [
+        makeEntry('e1', 'alpha', 'u1', 3),
+        makeEntry('e2', 'beta', 'u2', 5),
+        makeEntry('e3', 'gamma', 'u1', 1),
+      ]);
 
     await TestBed.configureTestingModule({
       imports: [AnalyticsPage],
@@ -65,11 +81,7 @@ describe('AnalyticsPage', () => {
         {
           provide: TimeSheetEntryService,
           useValue: {
-            findByProjectId: async () => [
-              makeEntry('e1', 'alpha', 'u1', 3),
-              makeEntry('e2', 'beta', 'u2', 5),
-              makeEntry('e3', 'gamma', 'u1', 1),
-            ],
+            findByProjectId,
           },
         },
         {
@@ -87,6 +99,12 @@ describe('AnalyticsPage', () => {
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('lists and fetches entries only for the analytics projects', () => {
+    component.filter.set({});
+    expect(component.rows().map((row) => row.id)).not.toContain('hidden');
+    expect(findByProjectId).toHaveBeenCalledOnceWith(['alpha', 'beta', 'gamma']);
   });
 
   it('lists every project when no team member is selected', () => {

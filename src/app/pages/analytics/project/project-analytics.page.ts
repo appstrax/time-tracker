@@ -88,6 +88,10 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     );
   });
 
+  public readonly canApprove = computed(() =>
+    this.store.access.can(this.projectId(), 'approve'),
+  );
+
   public readonly usersById = computed(
     () => new Map(this.users().map((u) => [u.id, u])),
   );
@@ -306,7 +310,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     entries: TimeSheetEntry[],
     approved: boolean,
   ): Promise<void> {
-    if (!entries.length) return;
+    if (!this.canApprove() || !entries.length) return;
     this.busy.update((set) => new Set([...set, ...entries.map((e) => e.id)]));
     try {
       const results = await Promise.allSettled(
