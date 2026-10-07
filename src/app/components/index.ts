@@ -16,3 +16,4 @@ export * from './time-sheet-analytics/unapproved-entries/unapproved-entries.comp
 export * from './project-preview/project-preview.component';
 export * from './insights-charts/insights-charts.component';
 export * from './date-input/date-input.component';
+export * from './search-input/search-input.component';

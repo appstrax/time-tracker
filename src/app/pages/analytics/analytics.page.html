@@ -11,6 +11,13 @@
       </button>
     </header>
 
+    <app-search-input
+      class="project-search"
+      ariaLabel="Search projects"
+      placeholder="Search projects…"
+      [(value)]="searchTerm"
+    />
+
     <div class="filter-row">
       <app-analytics-filters
         [users]="users()"
@@ -70,9 +77,11 @@
         @if (!rows().length) {
           <p class="empty-card">
             {{
-              filter().userId
-                ? 'No projects for this team member.'
-                : 'No projects available.'
+              searchTerm().trim()
+                ? 'No projects match your search.'
+                : filter().userId
+                  ? 'No projects for this team member.'
+                  : 'No projects available.'
             }}
           </p>
         } @else {
