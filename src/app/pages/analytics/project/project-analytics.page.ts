@@ -12,7 +12,7 @@ import { Subscription } from 'rxjs';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AnalyticsFilter, Project, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, ToastService, UsersService } from '@services';
+import { AnalyticsEntriesService, ToastService, UsersService } from '@services';
 import { Store } from '@state';
 import {
   TimeSheetExportUtil,
@@ -60,7 +60,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
   private paramSubscription?: Subscription;
   private loadSeq = 0;
   private readonly store = inject(Store);
-  private readonly entryService = inject(TimeSheetEntryService);
+  private readonly entryService = inject(AnalyticsEntriesService);
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
@@ -224,7 +224,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     }
     try {
       const projectId = this.projectId();
-      const entries = await this.entryService.findByProjectId([projectId]);
+      const entries = await this.entryService.findByProjectIds([projectId]);
       if (seq !== this.loadSeq) return;
       this.entries.set(entries);
       if (this.days().length && !this.expanded().size) {
@@ -314,11 +314,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     this.busy.update((set) => new Set([...set, ...entries.map((e) => e.id)]));
     try {
       const results = await Promise.allSettled(
-        entries.map(async (entry) => {
-          const toSave = entry.clone();
-          toSave.approved = approved;
-          return this.entryService.save(toSave);
-        }),
+        entries.map((entry) => this.entryService.setApproved(entry.id, approved)),
       );
       const saved = results
         .filter(
@@ -360,7 +356,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
 
   private async reloadEntriesAfterStatusError(): Promise<void> {
     try {
-      const fresh = await this.entryService.findByProjectId([this.projectId()]);
+      const fresh = await this.entryService.findByProjectIds([this.projectId()]);
       this.entries.set(fresh);
     } catch {
       this.toast.error('Failed to refresh time sheet entries');

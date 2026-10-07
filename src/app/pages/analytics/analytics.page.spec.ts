@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { Project, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, UsersService } from '@services';
+import { AnalyticsEntriesService, UsersService } from '@services';
 import { Store } from '@state';
 
 import { AnalyticsPage } from './analytics.page';
@@ -42,7 +42,7 @@ function makeEntry(
 describe('AnalyticsPage', () => {
   let component: AnalyticsPage;
   let fixture: ComponentFixture<AnalyticsPage>;
-  let findByProjectId: jasmine.Spy<
+  let findByProjectIds: jasmine.Spy<
     (ids: string[]) => Promise<TimeSheetEntry[]>
   >;
 
@@ -64,8 +64,8 @@ describe('AnalyticsPage', () => {
         can: () => false,
       },
     };
-    findByProjectId = jasmine
-      .createSpy('findByProjectId')
+    findByProjectIds = jasmine
+      .createSpy('findByProjectIds')
       .and.callFake(async () => [
         makeEntry('e1', 'alpha', 'u1', 3),
         makeEntry('e2', 'beta', 'u2', 5),
@@ -79,9 +79,9 @@ describe('AnalyticsPage', () => {
         provideRouter([]),
         { provide: Store, useValue: storeStub },
         {
-          provide: TimeSheetEntryService,
+          provide: AnalyticsEntriesService,
           useValue: {
-            findByProjectId,
+            findByProjectIds,
           },
         },
         {
@@ -104,7 +104,7 @@ describe('AnalyticsPage', () => {
   it('lists and fetches entries only for the analytics projects', () => {
     component.filter.set({});
     expect(component.rows().map((row) => row.id)).not.toContain('hidden');
-    expect(findByProjectId).toHaveBeenCalledOnceWith(['alpha', 'beta', 'gamma']);
+    expect(findByProjectIds).toHaveBeenCalledOnceWith(['alpha', 'beta', 'gamma']);
   });
 
   it('lists every project when no team member is selected', () => {

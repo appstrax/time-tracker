@@ -14,14 +14,12 @@ export class LogTimeGuard {
   ) {}
 
   async canActivate(): Promise<boolean> {
-    let context;
-    try {
-      context = await loadAccessContext(this.store);
-    } catch {
-      // Same target as AuthGuard when the user cannot be resolved.
-      this.router.navigate(['']);
+    const context = await loadAccessContext(this.store);
+    if (!context) {
+      this.router.navigate(['/login']);
       return false;
     }
+    // A failed membership fetch fails open: pages still filter by memberships.
 
     if (needsAnalyticsLanding(context.memberships, context.platformAdmin)) {
       this.router.navigate(['/analytics']);

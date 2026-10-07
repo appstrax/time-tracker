@@ -3,7 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, ToastService, UsersService } from '@services';
+import { AnalyticsEntriesService, ToastService, UsersService } from '@services';
 import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
 import { Store } from '@state';
 import { TimeSheetExportUtil } from '@utils';
@@ -36,7 +36,7 @@ import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
 })
 export class AnalyticsPage implements OnInit {
   private readonly store = inject(Store);
-  private readonly entryService = inject(TimeSheetEntryService);
+  private readonly entryService = inject(AnalyticsEntriesService);
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
@@ -114,7 +114,7 @@ export class AnalyticsPage implements OnInit {
       const projectIds = this.projects().map((project) => project.id);
 
       if (projectIds.length) {
-        const entries = await this.entryService.findByProjectId(projectIds);
+        const entries = await this.entryService.findByProjectIds(projectIds);
         this.entries.set(entries);
       }
     } catch (error) {

@@ -74,9 +74,15 @@ describe('ProjectAccessStore', () => {
       admin.role = UserRole.ADMIN;
       return admin;
     });
+    // Admin is a member of a and b only: logs there, but sees analytics everywhere.
+    findByUserId.and.resolveTo([
+      row('a', ProjectUserRole.CONTRIBUTOR),
+      row('b', ProjectUserRole.VIEWER),
+    ]);
     await store.refresh('me');
     expect(store.platformAdmin()).toBeTrue();
     expect(store.analyticsProjects().map((p) => p.id)).toEqual(['a', 'b', 'c']);
+    expect(store.logProjects().map((p) => p.id)).toEqual(['a', 'b']);
     expect(store.isLogRestricted('b')).toBeFalse();
   });
 
@@ -112,6 +118,53 @@ describe('ProjectAccessStore', () => {
   it('clear() empties memberships', async () => {
     await store.refresh('me');
     store.clear();
+    expect(store.memberships()).toEqual({});
+  });
+
+  it('treats a row with no role as no access', async () => {
+    const roleless = new ProjectUser();
+    roleless.projectId = 'a';
+    roleless.userId = 'me';
+    findByUserId.and.resolveTo([roleless]);
+    await store.refresh('me');
+    expect(store.logProjects()).toEqual([]);
+    expect(store.analyticsProjects()).toEqual([]);
+    expect(store.needsAnalyticsLanding()).toBeFalse();
+    expect(store.hasAnalyticsAccess()).toBeFalse();
+  });
+
+  it('lets the first row win when a project has duplicate rows', async () => {
+    findByUserId.and.resolveTo([
+      row('a', ProjectUserRole.VIEWER),
+      row('a', ProjectUserRole.CONTRIBUTOR),
+    ]);
+    await store.refresh('me');
+    expect(store.memberships()).toEqual({ a: 'viewer' });
+  });
+
+  it('does not share a pending request across different users', async () => {
+    let releaseA!: (value: ProjectUser[]) => void;
+    findByUserId.and.returnValues(
+      new Promise<ProjectUser[]>((resolve) => (releaseA = resolve)),
+      Promise.resolve([row('b', ProjectUserRole.APPROVER)]),
+    );
+    const pendingA = store.refresh('userA');
+    await store.refresh('userB');
+    expect(findByUserId).toHaveBeenCalledTimes(2);
+    expect(findByUserId.calls.argsFor(1)).toEqual(['userB']);
+    releaseA([]);
+    await pendingA;
+  });
+
+  it('ignores a response that lands after clear()', async () => {
+    let release!: (value: ProjectUser[]) => void;
+    findByUserId.and.returnValue(
+      new Promise<ProjectUser[]>((resolve) => (release = resolve)),
+    );
+    const pending = store.refresh('me');
+    store.clear();
+    release(rows());
+    await pending;
     expect(store.memberships()).toEqual({});
   });
 });

@@ -11,7 +11,8 @@ describe('SideNavExpandedComponent', () => {
   let fixture: ComponentFixture<SideNavExpandedComponent>;
 
   const needsAnalyticsLanding = signal(false);
-  const analyticsProjects = signal<unknown[]>([]);
+  const hasAnalyticsAccess = signal(false);
+  const platformAdmin = signal(false);
   const user = signal<{ role: UserRole } | null>(null);
 
   const labels = (): string[] =>
@@ -26,7 +27,8 @@ describe('SideNavExpandedComponent', () => {
 
   beforeEach(() => {
     needsAnalyticsLanding.set(false);
-    analyticsProjects.set([]);
+    hasAnalyticsAccess.set(false);
+    platformAdmin.set(false);
     user.set({ role: UserRole.USER });
 
     TestBed.configureTestingModule({
@@ -36,7 +38,7 @@ describe('SideNavExpandedComponent', () => {
         {
           provide: Store,
           useValue: {
-            access: { needsAnalyticsLanding, analyticsProjects },
+            access: { needsAnalyticsLanding, hasAnalyticsAccess, platformAdmin },
             user: { user },
           },
         },
@@ -46,7 +48,7 @@ describe('SideNavExpandedComponent', () => {
 
   it('shows only Analytics for a viewer-only user', () => {
     needsAnalyticsLanding.set(true);
-    analyticsProjects.set([{ id: 'p1' }]);
+    hasAnalyticsAccess.set(true);
     render();
 
     expect(labels()).toEqual(['Analytics']);
@@ -59,14 +61,16 @@ describe('SideNavExpandedComponent', () => {
   });
 
   it('shows Home, Time Sheets and Analytics for mixed roles', () => {
-    analyticsProjects.set([{ id: 'p1' }]);
+    hasAnalyticsAccess.set(true);
     render();
 
     expect(labels()).toEqual(['Home', 'Time Sheets', 'Analytics']);
   });
 
   it('shows all four links for a platform admin', () => {
+    platformAdmin.set(true);
     user.set({ role: UserRole.ADMIN });
+    hasAnalyticsAccess.set(true);
     render();
 
     expect(labels()).toEqual(['Home', 'Time Sheets', 'Analytics', 'Projects']);

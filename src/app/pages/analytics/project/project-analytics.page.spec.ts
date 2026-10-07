@@ -8,7 +8,7 @@ import {
 import { BehaviorSubject, of } from 'rxjs';
 
 import { Project, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, UsersService } from '@services';
+import { AnalyticsEntriesService, UsersService } from '@services';
 import { Store } from '@state';
 
 import { ProjectAnalyticsPage } from './project-analytics.page';
@@ -25,6 +25,7 @@ function makeEntry(
   userId: string,
   category: string,
   projectId = 'alpha',
+  approved = true,
 ): TimeSheetEntry {
   const entry = new TimeSheetEntry();
   entry.id = id;
@@ -33,7 +34,7 @@ function makeEntry(
   entry.category = category;
   entry.hours = 1;
   entry.date = new Date(2026, 0, 15);
-  entry.approved = true;
+  entry.approved = approved;
   return entry;
 }
 
@@ -41,20 +42,31 @@ describe('ProjectAnalyticsPage', () => {
   let component: ProjectAnalyticsPage;
   let fixture: ComponentFixture<ProjectAnalyticsPage>;
   let paramMap$: BehaviorSubject<ReturnType<typeof convertToParamMap>>;
-  let findByProjectId: jasmine.Spy<
+  let findByProjectIds: jasmine.Spy<
     (ids: string[]) => Promise<TimeSheetEntry[]>
   >;
-  let save: jasmine.Spy<(entry: TimeSheetEntry) => Promise<TimeSheetEntry>>;
+  let setApproved: jasmine.Spy<
+    (id: string, approved: boolean) => Promise<TimeSheetEntry>
+  >;
   let canApprove: boolean;
 
   beforeEach(async () => {
     canApprove = true;
-    save = jasmine
-      .createSpy('save')
-      .and.callFake(async (entry: TimeSheetEntry) => entry);
+    setApproved = jasmine
+      .createSpy('setApproved')
+      .and.callFake(async (id: string, approved: boolean) => {
+        const found = [
+          makeEntry('e1', 'u1', 'Development'),
+          makeEntry('e2', 'u2', 'Support'),
+          makeEntry('e3', 'exmember', 'Admin'),
+          makeEntry('e4', 'u1', 'Development', 'alpha', false),
+        ].find((e) => e.id === id)!;
+        found.approved = approved;
+        return found;
+      });
     paramMap$ = new BehaviorSubject(convertToParamMap({ projectId: 'alpha' }));
-    findByProjectId = jasmine
-      .createSpy('findByProjectId')
+    findByProjectIds = jasmine
+      .createSpy('findByProjectIds')
       .and.callFake(async (ids: string[]) => {
         const projectId = ids[0];
         if (projectId === 'beta') {
@@ -64,6 +76,7 @@ describe('ProjectAnalyticsPage', () => {
           makeEntry('e1', 'u1', 'Development'),
           makeEntry('e2', 'u2', 'Support'),
           makeEntry('e3', 'exmember', 'Admin'),
+          makeEntry('e4', 'u1', 'Development', 'alpha', false),
         ];
       });
     const alpha = new Project();
@@ -103,8 +116,8 @@ describe('ProjectAnalyticsPage', () => {
           },
         },
         {
-          provide: TimeSheetEntryService,
-          useValue: { findByProjectId, save },
+          provide: AnalyticsEntriesService,
+          useValue: { findByProjectIds, setApproved },
         },
         {
           provide: UsersService,
@@ -177,7 +190,7 @@ describe('ProjectAnalyticsPage', () => {
     expect(component.projectId()).toBe('beta');
     expect(component.filter()).toEqual({});
     expect(component.entries().map((e) => e.id)).toEqual(['b1']);
-    expect(findByProjectId).toHaveBeenCalledWith(['beta']);
+    expect(findByProjectIds).toHaveBeenCalledWith(['beta']);
   });
 
   describe('approval gating', () => {
@@ -189,9 +202,8 @@ describe('ProjectAnalyticsPage', () => {
       );
 
     const loaded = async () => {
-      while (component.loading() || !component.entries().length) {
-        await new Promise((resolve) => setTimeout(resolve));
-      }
+      await fixture.whenStable();
+      expect(component.entries().length).toBeGreaterThan(0);
       component.filter.set({});
       fixture.detectChanges();
     };
@@ -213,10 +225,13 @@ describe('ProjectAnalyticsPage', () => {
       it('does not save when approval handlers are invoked directly', async () => {
         const [first] = component.entries();
         const day = component.days()[0];
+        // Positive control: the day has pending entries approveDay would save.
+        expect(day.entries.some((e) => !e.approved)).toBeTrue();
+        expect(day.entries.some((e) => e.approved)).toBeTrue();
         await component.setApproved(first, false);
         await component.approveDay(day);
         await component.declineDay(day);
-        expect(save).not.toHaveBeenCalled();
+        expect(setApproved).not.toHaveBeenCalled();
       });
     });
 
@@ -227,25 +242,38 @@ describe('ProjectAnalyticsPage', () => {
         expect(buttons().length).toBeGreaterThan(0);
       });
 
-      it('saves each entry once with only approved changed', async () => {
+      it('approves each entry once via setApproved', async () => {
         const day = component.days()[0];
-        const originals = day.entries.map((e) => ({ ...e.clone() }));
+        const approvedIds = day.entries.filter((e) => e.approved).map((e) => e.id);
         await component.declineDay(day);
 
-        expect(save).toHaveBeenCalledTimes(originals.length);
-        const saved = save.calls.allArgs().map(([e]) => e);
-        for (const original of originals) {
-          const after = saved.find((e) => e.id === original.id)!;
-          expect(after.approved).toBe(false);
-          expect({ ...after, approved: true }).toEqual(original);
+        expect(setApproved).toHaveBeenCalledTimes(approvedIds.length);
+        for (const id of approvedIds) {
+          expect(setApproved).toHaveBeenCalledWith(id, false);
+          expect(component.entries().find((e) => e.id === id)!.approved).toBeFalse();
         }
       });
-    });
 
-    it('shows the buttons for a platform admin (can() true)', async () => {
-      canApprove = true;
-      await loaded();
-      expect(buttons().length).toBeGreaterThan(0);
+      it('approves pending entries with approved=true', async () => {
+        const day = component.days()[0];
+        await component.approveDay(day);
+        expect(setApproved).toHaveBeenCalledWith('e4', true);
+        expect(component.entries().find((e) => e.id === 'e4')!.approved).toBeTrue();
+      });
+
+      it('refreshes from the server on partial failure and keeps successes', async () => {
+        setApproved.and.callFake(async (id: string, approved: boolean) => {
+          if (id === 'e2') throw new Error('boom');
+          const e = makeEntry(id, 'u1', 'Development');
+          e.approved = approved;
+          return e;
+        });
+        findByProjectIds.calls.reset();
+        await component.declineDay(component.days()[0]);
+
+        expect(findByProjectIds).toHaveBeenCalledOnceWith(['alpha']);
+        expect(component.busy().size).toBe(0);
+      });
     });
   });
 });

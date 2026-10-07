@@ -182,6 +182,7 @@ describe('TimeSheetPage', () => {
         user: { id: 'user-1', role: UserRole.USER } as User,
       });
       patchProjectsState({
+        // 'left': a project the user no longer belongs to (no membership below).
         projects: [makeProject('mine'), makeProject('watched'), makeProject('left')],
         fetchedAt: new Date(),
       });

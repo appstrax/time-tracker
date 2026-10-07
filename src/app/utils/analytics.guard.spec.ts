@@ -13,6 +13,7 @@ describe('AnalyticsGuard', () => {
   let guard: AnalyticsGuard;
   let refresh: jasmine.Spy;
   let navigate: jasmine.Spy;
+  let lastGood: jasmine.Spy;
   let toastError: jasmine.Spy;
 
   function setup(
@@ -21,11 +22,12 @@ describe('AnalyticsGuard', () => {
   ) {
     refresh = jasmine.createSpy('refresh').and.resolveTo(memberships);
     navigate = jasmine.createSpy('navigate');
+    lastGood = jasmine.createSpy('memberships').and.returnValue({});
     toastError = jasmine.createSpy('error');
     spyOn(appstraxAuth, 'getUser').and.resolveTo({ id: 'u1', roles } as any);
     TestBed.configureTestingModule({
       providers: [
-        { provide: Store, useValue: { access: { refresh } } },
+        { provide: Store, useValue: { access: { refresh, memberships: lastGood } } },
         { provide: Router, useValue: { navigate } },
         { provide: ToastService, useValue: { error: toastError } },
       ],
@@ -82,18 +84,48 @@ describe('AnalyticsGuard', () => {
     expect(refresh).toHaveBeenCalledTimes(2);
   });
 
-  it('denies and navigates to root when the user cannot be resolved', async () => {
+  it('denies and navigates to login when the user cannot be resolved', async () => {
     setup({ p1: 'viewer' });
     (appstraxAuth.getUser as jasmine.Spy).and.rejectWith(new Error('no'));
     expect(await guard.canActivate(route('p1'))).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['']);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
     expect(toastError).not.toHaveBeenCalled();
   });
 
-  it('denies and navigates to root when there is no user', async () => {
+  it('denies and navigates to login when there is no user', async () => {
     setup({ p1: 'viewer' });
     (appstraxAuth.getUser as jasmine.Spy).and.resolveTo(undefined);
     expect(await guard.canActivate(route())).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['']);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  it('denies an unknown role on the list and on a project, redirecting home', async () => {
+    setup({ p1: 'bogus' });
+    expect(await guard.canActivate(route())).toBeFalse();
+    expect(navigate).toHaveBeenCalledWith(['/home']);
+    navigate.calls.reset();
+    expect(await guard.canActivate(route('p1'))).toBeFalse();
+    expect(navigate).toHaveBeenCalledWith(['/home']);
+  });
+
+  describe('when the membership refresh fails', () => {
+    beforeEach(() => {
+      setup({});
+      refresh.and.rejectWith(new Error('boom'));
+      spyOn(console, 'error');
+    });
+
+    it('fails closed to /home with no previous memberships', async () => {
+      expect(await guard.canActivate(route())).toBeFalse();
+      expect(navigate).toHaveBeenCalledWith(['/home']);
+      expect(navigate).not.toHaveBeenCalledWith(['']);
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('uses the last good memberships when there are some', async () => {
+      lastGood.and.returnValue({ p1: 'viewer' });
+      expect(await guard.canActivate(route('p1'))).toBeTrue();
+      expect(navigate).not.toHaveBeenCalled();
+    });
   });
 });

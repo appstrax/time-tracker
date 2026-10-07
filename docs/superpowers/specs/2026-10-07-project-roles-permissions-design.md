@@ -65,7 +65,9 @@ selected project. Example: contributor on A, viewer on B, approver on C.
 
 Loaded alongside the projects store from the user's `project-users` rows
 (`ProjectUserService.findByUserId`; the role is currently discarded by
-`ProjectService.findByUserId`). Holds `projectId -> role`.
+`ProjectService.findByUserId`). Holds `projectId -> role`. If a project has
+duplicate rows, the first row wins (frontend and API agree); a row with no role
+means no access.
 
 Questions it exposes (pure role logic in one function, unit-testable without
 Angular):
@@ -90,8 +92,8 @@ Angular):
   Projects and other admin items for admins.
 - Landing after login: viewer-only and approver-only users go to `/analytics`;
   everyone else to `/home`, as today.
-- Stale access: reload the access store on navigation into a guarded route and
-  on tab focus, so role changes and removals apply without logging out.
+- Stale access: memberships are refetched on every guarded navigation, so role
+  changes and removals apply without logging out.
 
 ### 3. Screens
 

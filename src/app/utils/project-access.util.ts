@@ -58,16 +58,29 @@ export function filterProjectsByPermission(
   );
 }
 
+/** Whether any membership (or platform admin status) grants analytics. */
+export function hasAnalyticsAccess(
+  memberships: ProjectMemberships,
+  platformAdmin: boolean,
+): boolean {
+  return (
+    platformAdmin ||
+    Object.values(memberships).some(
+      (role) => resolveProjectPermissions(role, false).viewAnalytics,
+    )
+  );
+}
+
 /** Viewer/approver-only users have nothing to log, so they start on analytics. */
 export function needsAnalyticsLanding(
   memberships: ProjectMemberships,
   platformAdmin: boolean,
 ): boolean {
   if (platformAdmin) return false;
-  const all = Object.values(memberships).map((role) =>
-    resolveProjectPermissions(role, false),
-  );
   return (
-    all.some((p) => p.viewAnalytics) && !all.some((p) => p.logTime)
+    hasAnalyticsAccess(memberships, false) &&
+    !Object.values(memberships).some(
+      (role) => resolveProjectPermissions(role, false).logTime,
+    )
   );
 }

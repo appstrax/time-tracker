@@ -446,7 +446,7 @@ describe('TimeSheetEntryComponent', () => {
 });
 
 describe('TimeSheetEntryModal — loggable projects', () => {
-  const adminUser = { id: 'admin-user', role: UserRole.USER } as User;
+  const currentUser = { id: 'admin-user', role: UserRole.USER } as User;
 
   const myProject = {
     id: 'my-project',
@@ -467,7 +467,7 @@ describe('TimeSheetEntryModal — loggable projects', () => {
   let activeModal: jasmine.SpyObj<NgbActiveModal>;
 
   beforeEach(async () => {
-    spyOn(appstraxAuth, 'getUser').and.resolveTo({ id: adminUser.id } as any);
+    spyOn(appstraxAuth, 'getUser').and.resolveTo({ id: currentUser.id } as any);
     activeModal = jasmine.createSpyObj<NgbActiveModal>('NgbActiveModal', [
       'close',
       'dismiss',
@@ -481,7 +481,7 @@ describe('TimeSheetEntryModal — loggable projects', () => {
         {
           provide: Store,
           useValue: {
-            user: { user: signal(adminUser) },
+            user: { user: signal(currentUser) },
             projects: { projects: signal([myProject, otherProject]) },
             access: { logProjects: signal([myProject]) },
           },
@@ -536,7 +536,7 @@ describe('TimeSheetEntryModal — loggable projects', () => {
   it('shows an empty list when the user can log time on no projects', async () => {
     TestBed.overrideProvider(Store, {
       useValue: {
-        user: { user: signal(adminUser) },
+        user: { user: signal(currentUser) },
         projects: { projects: signal([otherProject]) },
         access: { logProjects: signal([]) },
       },

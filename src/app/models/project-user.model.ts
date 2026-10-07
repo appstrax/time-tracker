@@ -10,5 +10,6 @@ export enum ProjectUserRole {
 export class ProjectUser extends Model {
   projectId: string = '';
   userId: string = '';
-  role: ProjectUserRole = ProjectUserRole.VIEWER;
+  /** Empty (no access) until a role is set explicitly; never default to a real role. */
+  role: ProjectUserRole | '' = '';
 }

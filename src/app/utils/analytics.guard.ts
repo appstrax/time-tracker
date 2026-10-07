@@ -6,6 +6,7 @@ import { Store } from '@state';
 
 import { loadAccessContext } from './access-context.util';
 import {
+  hasAnalyticsAccess,
   needsAnalyticsLanding,
   resolveProjectPermissions,
   roleOf,
@@ -20,11 +21,9 @@ export class AnalyticsGuard {
   ) {}
 
   async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
-    let context;
-    try {
-      context = await loadAccessContext(this.store);
-    } catch {
-      this.router.navigate(['']);
+    const context = await loadAccessContext(this.store);
+    if (!context) {
+      this.router.navigate(['/login']);
       return false;
     }
     const { memberships, platformAdmin } = context;
@@ -33,9 +32,7 @@ export class AnalyticsGuard {
     const projectId = route.paramMap.get('projectId');
     const allowed = projectId
       ? resolveProjectPermissions(roleOf(memberships, projectId), false).viewAnalytics
-      : Object.values(memberships).some(
-          (role) => resolveProjectPermissions(role, false).viewAnalytics,
-        );
+      : hasAnalyticsAccess(memberships, false);
     if (allowed) return true;
 
     if (projectId) this.toast.error('You do not have access to that project');

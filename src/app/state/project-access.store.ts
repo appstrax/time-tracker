@@ -8,6 +8,7 @@ import {
   ProjectMemberships,
   ProjectPermissions,
   filterProjectsByPermission,
+  hasAnalyticsAccess,
   needsAnalyticsLanding,
   resolveProjectPermissions,
   roleOf,
@@ -39,6 +40,9 @@ export const ProjectAccessStore = signalStore(
         platformAdmin,
         logProjects: projectsFor('logTime'),
         analyticsProjects: projectsFor('viewAnalytics'),
+        hasAnalyticsAccess: computed(() =>
+          hasAnalyticsAccess(store.memberships(), platformAdmin()),
+        ),
         needsAnalyticsLanding: computed(() =>
           needsAnalyticsLanding(store.memberships(), platformAdmin()),
         ),
@@ -46,7 +50,10 @@ export const ProjectAccessStore = signalStore(
     },
   ),
   withMethods((store, projectUsers = inject(ProjectUserService)) => {
-    let inFlight: Promise<ProjectMemberships> | null = null;
+    // Keyed by user so one user's pending request is never handed to another;
+    // `generation` lets clear() invalidate any request still in flight.
+    let inFlight: { userId: string; promise: Promise<ProjectMemberships> } | null = null;
+    let generation = 0;
 
     const permissionsFor = (projectId: string) =>
       resolveProjectPermissions(
@@ -66,22 +73,34 @@ export const ProjectAccessStore = signalStore(
 
       /** Always refetches so role changes apply without a re-login. */
       refresh(userId: string): Promise<ProjectMemberships> {
-        inFlight ??= (async () => {
+        if (inFlight?.userId === userId) return inFlight.promise;
+        const started = generation;
+        const entry = { userId, promise: undefined as unknown as Promise<ProjectMemberships> };
+        entry.promise = (async () => {
           try {
             const rows = await projectUsers.findByUserId(userId);
-            const memberships = Object.fromEntries(
-              rows.map((row) => [row.projectId, row.role as string]),
-            );
-            patchState(store, { memberships });
+            // First row wins when a project has duplicate rows (same as the API).
+            const memberships: Record<string, string> = {};
+            for (const row of rows) {
+              if (!Object.hasOwn(memberships, row.projectId)) {
+                memberships[row.projectId] = row.role as string;
+              }
+            }
+            if (started === generation) patchState(store, { memberships });
             return memberships;
           } finally {
-            inFlight = null;
+            if (inFlight === entry) inFlight = null;
           }
         })();
-        return inFlight;
+        inFlight = entry;
+        return entry.promise;
       },
 
-      clear: () => patchState(store, { memberships: {} }),
+      clear: () => {
+        generation++;
+        inFlight = null;
+        patchState(store, { memberships: {} });
+      },
     };
   }),
 );

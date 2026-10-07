@@ -12,6 +12,7 @@ describe('LogTimeGuard', () => {
   let guard: LogTimeGuard;
   let refresh: jasmine.Spy;
   let navigate: jasmine.Spy;
+  let lastGood: jasmine.Spy;
 
   function setup(
     memberships: Record<string, string>,
@@ -19,10 +20,11 @@ describe('LogTimeGuard', () => {
   ) {
     refresh = jasmine.createSpy('refresh').and.resolveTo(memberships);
     navigate = jasmine.createSpy('navigate');
+    lastGood = jasmine.createSpy('memberships').and.returnValue({});
     spyOn(appstraxAuth, 'getUser').and.resolveTo({ id: 'u1', roles } as any);
     TestBed.configureTestingModule({
       providers: [
-        { provide: Store, useValue: { access: { refresh } } },
+        { provide: Store, useValue: { access: { refresh, memberships: lastGood } } },
         { provide: Router, useValue: { navigate } },
       ],
     });
@@ -71,18 +73,39 @@ describe('LogTimeGuard', () => {
     expect(refresh).toHaveBeenCalledTimes(2);
   });
 
-  it('denies and navigates to root when the user cannot be resolved', async () => {
+  it('denies and navigates to login when the user cannot be resolved', async () => {
     setup({ p1: 'contributor' });
     (appstraxAuth.getUser as jasmine.Spy).and.rejectWith(new Error('no'));
     expect(await guard.canActivate()).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['']);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
     expect(refresh).not.toHaveBeenCalled();
   });
 
-  it('denies and navigates to root when there is no user', async () => {
+  it('denies and navigates to login when there is no user', async () => {
     setup({ p1: 'contributor' });
     (appstraxAuth.getUser as jasmine.Spy).and.resolveTo(undefined);
     expect(await guard.canActivate()).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['']);
+    expect(navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  describe('when the membership refresh fails', () => {
+    beforeEach(() => {
+      setup({});
+      refresh.and.rejectWith(new Error('boom'));
+      spyOn(console, 'error');
+    });
+
+    it('fails open with no previous memberships and never navigates to root', async () => {
+      expect(await guard.canActivate()).toBeTrue();
+      expect(navigate).not.toHaveBeenCalled();
+      expect(console.error).toHaveBeenCalled();
+    });
+
+    it('falls back to the last good memberships', async () => {
+      lastGood.and.returnValue({ p1: 'viewer' });
+      expect(await guard.canActivate()).toBeFalse();
+      expect(navigate).toHaveBeenCalledWith(['/analytics']);
+      expect(navigate).not.toHaveBeenCalledWith(['']);
+    });
   });
 });
