@@ -1,3 +1,4 @@
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -32,7 +33,13 @@ function sameColorSources(left: Project[], right: Project[]): boolean {
   templateUrl: './project.page.html',
   styleUrls: ['./project.page.scss'],
   standalone: true,
-  imports: [FormsModule, RouterModule, ProjectUsersComponent, ProjectPreviewComponent],
+  imports: [
+    FormsModule,
+    RouterModule,
+    NgbTooltipModule,
+    ProjectUsersComponent,
+    ProjectPreviewComponent,
+  ],
 })
 export class ProjectPage implements OnInit {
   readonly project = signal(new Project());
