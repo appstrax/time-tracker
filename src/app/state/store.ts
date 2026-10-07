@@ -10,17 +10,16 @@ export class Store {
   public access = inject(ProjectAccessStore);
 
   async init(): Promise<void> {
-    try {
-      await this.user.initialize();
-      const user = this.user.user();
-      if (user) {
-        await Promise.all([
-          this.projects.fetchUserProjects(user),
-          this.access.refresh(user.id),
-        ]);
-      }
-    } catch (e: any) {
-      throw e;
+    await this.user.initialize();
+    const user = this.user.user();
+    if (user) {
+      await Promise.all([
+        this.projects.fetchUserProjects(user),
+        // Non-fatal: the guards refetch memberships on every navigation.
+        this.access.refresh(user.id).catch((error) => {
+          console.error('Failed to refresh project memberships', error);
+        }),
+      ]);
     }
   }
 }

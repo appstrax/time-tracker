@@ -45,6 +45,7 @@ describe('AnalyticsPage', () => {
   let findByProjectIds: jasmine.Spy<
     (ids: string[]) => Promise<TimeSheetEntry[]>
   >;
+  let findAllVisible: jasmine.Spy<() => Promise<TimeSheetEntry[]>>;
 
   const alpha = makeProject('alpha', ['u1']);
   const beta = makeProject('beta', ['u2']);
@@ -53,7 +54,7 @@ describe('AnalyticsPage', () => {
   /** Exists in the project list but is not one the user may view analytics for. */
   const hidden = makeProject('hidden', ['u9']);
 
-  beforeEach(async () => {
+  async function createPage(platformAdmin: boolean): Promise<void> {
     const storeStub = {
       projects: {
         projects: signal<Project[]>([alpha, beta, gamma, hidden]),
@@ -61,6 +62,7 @@ describe('AnalyticsPage', () => {
       },
       access: {
         analyticsProjects: signal<Project[]>([alpha, beta, gamma]),
+        platformAdmin: signal(platformAdmin),
         can: () => false,
       },
     };
@@ -71,6 +73,9 @@ describe('AnalyticsPage', () => {
         makeEntry('e2', 'beta', 'u2', 5),
         makeEntry('e3', 'gamma', 'u1', 1),
       ]);
+    findAllVisible = jasmine
+      .createSpy('findAllVisible')
+      .and.callFake(async () => [makeEntry('e1', 'alpha', 'u1', 3)]);
 
     await TestBed.configureTestingModule({
       imports: [AnalyticsPage],
@@ -82,6 +87,7 @@ describe('AnalyticsPage', () => {
           provide: AnalyticsEntriesService,
           useValue: {
             findByProjectIds,
+            findAllVisible,
           },
         },
         {
@@ -95,7 +101,9 @@ describe('AnalyticsPage', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
-  });
+  }
+
+  beforeEach(() => createPage(false));
 
   it('should create', () => {
     expect(component).toBeTruthy();
@@ -105,6 +113,20 @@ describe('AnalyticsPage', () => {
     component.filter.set({});
     expect(component.rows().map((row) => row.id)).not.toContain('hidden');
     expect(findByProjectIds).toHaveBeenCalledOnceWith(['alpha', 'beta', 'gamma']);
+    expect(findAllVisible).not.toHaveBeenCalled();
+  });
+
+  describe('as a platform admin', () => {
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      await createPage(true);
+    });
+
+    it('fetches every visible entry without a projectIds filter', () => {
+      expect(findAllVisible).toHaveBeenCalledTimes(1);
+      expect(findByProjectIds).not.toHaveBeenCalled();
+      expect(component.entries().map((entry) => entry.id)).toEqual(['e1']);
+    });
   });
 
   it('lists every project when no team member is selected', () => {

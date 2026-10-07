@@ -1,3 +1,4 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { provideZonelessChangeDetection, signal } from '@angular/core';
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import {
@@ -8,7 +9,7 @@ import {
 import { BehaviorSubject, of } from 'rxjs';
 
 import { Project, TimeSheetEntry, User } from '@models';
-import { AnalyticsEntriesService, UsersService } from '@services';
+import { AnalyticsEntriesService, ToastService, UsersService } from '@services';
 import { Store } from '@state';
 
 import { ProjectAnalyticsPage } from './project-analytics.page';
@@ -201,11 +202,22 @@ describe('ProjectAnalyticsPage', () => {
         ),
       );
 
+    const approvalGroups = () =>
+      (fixture.nativeElement as HTMLElement).querySelectorAll(
+        '[role="group"][aria-label="Approval status"]',
+      );
+
     const loaded = async () => {
       await fixture.whenStable();
       expect(component.entries().length).toBeGreaterThan(0);
       component.filter.set({});
+      // Expand every day so per-entry rows (and their action groups) render.
+      if (!component.allExpanded()) component.toggleAll();
       fixture.detectChanges();
+      expect(
+        (fixture.nativeElement as HTMLElement).querySelectorAll('.entry-hours')
+          .length,
+      ).toBeGreaterThan(0);
     };
 
     describe('as a viewer', () => {
@@ -216,6 +228,7 @@ describe('ProjectAnalyticsPage', () => {
 
       it('renders no approve or decline buttons but keeps status pills', () => {
         expect(buttons().length).toBe(0);
+        expect(approvalGroups().length).toBe(0);
         expect(
           (fixture.nativeElement as HTMLElement).querySelectorAll('.status-pill')
             .length,
@@ -223,12 +236,16 @@ describe('ProjectAnalyticsPage', () => {
       });
 
       it('does not save when approval handlers are invoked directly', async () => {
-        const [first] = component.entries();
+        const approved = component.entries().find((e) => e.approved)!;
+        const pending = component.entries().find((e) => !e.approved)!;
         const day = component.days()[0];
-        // Positive control: the day has pending entries approveDay would save.
+        // Positive controls: each call below would save for an approver.
+        expect(approved).toBeDefined();
+        expect(pending).toBeDefined();
         expect(day.entries.some((e) => !e.approved)).toBeTrue();
         expect(day.entries.some((e) => e.approved)).toBeTrue();
-        await component.setApproved(first, false);
+        await component.setApproved(approved, false);
+        await component.setApproved(pending, true);
         await component.approveDay(day);
         await component.declineDay(day);
         expect(setApproved).not.toHaveBeenCalled();
@@ -240,11 +257,13 @@ describe('ProjectAnalyticsPage', () => {
 
       it('renders approve/decline buttons', () => {
         expect(buttons().length).toBeGreaterThan(0);
+        expect(approvalGroups().length).toBeGreaterThan(0);
       });
 
-      it('approves each entry once via setApproved', async () => {
+      it('declines each approved entry of the day once via setApproved', async () => {
         const day = component.days()[0];
         const approvedIds = day.entries.filter((e) => e.approved).map((e) => e.id);
+        expect(approvedIds.length).toBeGreaterThan(0);
         await component.declineDay(day);
 
         expect(setApproved).toHaveBeenCalledTimes(approvedIds.length);
@@ -261,18 +280,85 @@ describe('ProjectAnalyticsPage', () => {
         expect(component.entries().find((e) => e.id === 'e4')!.approved).toBeTrue();
       });
 
-      it('refreshes from the server on partial failure and keeps successes', async () => {
-        setApproved.and.callFake(async (id: string, approved: boolean) => {
-          if (id === 'e2') throw new Error('boom');
-          const e = makeEntry(id, 'u1', 'Development');
-          e.approved = approved;
-          return e;
-        });
-        findByProjectIds.calls.reset();
-        await component.declineDay(component.days()[0]);
+      describe('when some saves fail', () => {
+        let toastError: jasmine.Spy;
+        const approvedById = () =>
+          Object.fromEntries(component.entries().map((e) => [e.id, e.approved]));
 
-        expect(findByProjectIds).toHaveBeenCalledOnceWith(['alpha']);
-        expect(component.busy().size).toBe(0);
+        beforeEach(() => {
+          toastError = spyOn(TestBed.inject(ToastService), 'error');
+          setApproved.and.callFake(async (id: string, approved: boolean) => {
+            if (id === 'e2') throw new Error('boom');
+            const e = makeEntry(id, 'u1', 'Development');
+            e.approved = approved;
+            return e;
+          });
+          findByProjectIds.calls.reset();
+        });
+
+        it('refreshes from the server on partial failure and keeps successes', async () => {
+          // The server has the two successful declines; e2 is still approved.
+          findByProjectIds.and.callFake(async () => [
+            makeEntry('e1', 'u1', 'Development', 'alpha', false),
+            makeEntry('e2', 'u2', 'Support'),
+            makeEntry('e3', 'exmember', 'Admin', 'alpha', false),
+            makeEntry('e4', 'u1', 'Development', 'alpha', false),
+          ]);
+          await component.declineDay(component.days()[0]);
+
+          expect(findByProjectIds).toHaveBeenCalledOnceWith(['alpha']);
+          expect(approvedById()).toEqual({ e1: false, e2: true, e3: false, e4: false });
+          expect(toastError).toHaveBeenCalledOnceWith(
+            '1 of 3 time entries could not be updated. List refreshed from server.',
+          );
+          expect(component.busy().size).toBe(0);
+        });
+
+        it('keeps the local successes when the refresh also fails', async () => {
+          findByProjectIds.and.rejectWith(new Error('offline'));
+          await component.declineDay(component.days()[0]);
+
+          expect(approvedById()).toEqual({ e1: false, e2: true, e3: false, e4: false });
+          expect(toastError).toHaveBeenCalledWith('Failed to refresh time sheet entries');
+          expect(toastError).toHaveBeenCalledWith(
+            '1 of 3 time entries could not be updated. List refreshed from server.',
+          );
+        });
+      });
+
+      describe('when every save fails', () => {
+        let toastError: jasmine.Spy;
+        beforeEach(() => {
+          toastError = spyOn(TestBed.inject(ToastService), 'error');
+        });
+
+        it('shows the server’s message', async () => {
+          setApproved.and.rejectWith(
+            new HttpErrorResponse({
+              status: 403,
+              error: { message: 'Your role on this project does not allow approving time' },
+            }),
+          );
+          const pending = component.entries().find((e) => !e.approved)!;
+          await component.setApproved(pending, true);
+          expect(toastError).toHaveBeenCalledOnceWith(
+            'Your role on this project does not allow approving time',
+          );
+        });
+
+        it('does not surface the message of a non-HTTP error', async () => {
+          setApproved.and.rejectWith(new Error('TypeError: internal detail'));
+          const pending = component.entries().find((e) => !e.approved)!;
+          await component.setApproved(pending, true);
+          expect(toastError).toHaveBeenCalledOnceWith('Error updating time entry status');
+        });
+
+        it('falls back to a generic message when the error has none', async () => {
+          setApproved.and.callFake(() => Promise.reject('nope'));
+          const pending = component.entries().find((e) => !e.approved)!;
+          await component.setApproved(pending, true);
+          expect(toastError).toHaveBeenCalledOnceWith('Error updating time entry status');
+        });
       });
     });
   });

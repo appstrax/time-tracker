@@ -152,8 +152,54 @@ describe('ProjectAccessStore', () => {
     await store.refresh('userB');
     expect(findByUserId).toHaveBeenCalledTimes(2);
     expect(findByUserId.calls.argsFor(1)).toEqual(['userB']);
-    releaseA([]);
+    // A's late response must not overwrite B's memberships.
+    releaseA([row('a', ProjectUserRole.CONTRIBUTOR)]);
     await pendingA;
+    expect(store.memberships()).toEqual({ b: ProjectUserRole.APPROVER });
+  });
+
+  it('keeps the same memberships object when a refresh changes nothing', async () => {
+    await store.refresh('me');
+    const memberships = store.memberships();
+    const logProjects = store.logProjects();
+    const analyticsProjects = store.analyticsProjects();
+    await store.refresh('me');
+    expect(findByUserId).toHaveBeenCalledTimes(2);
+    expect(store.memberships()).toBe(memberships);
+    expect(store.logProjects()).toBe(logProjects);
+    expect(store.analyticsProjects()).toBe(analyticsProjects);
+  });
+
+  it('replaces memberships when only a role changes', async () => {
+    await store.refresh('me');
+    const memberships = store.memberships();
+    findByUserId.and.resolveTo([
+      row('a', ProjectUserRole.CONTRIBUTOR),
+      row('b', ProjectUserRole.APPROVER),
+      row('c', ProjectUserRole.APPROVER),
+    ]);
+    await store.refresh('me');
+    expect(store.memberships()).not.toBe(memberships);
+    expect(store.memberships()).toEqual({ a: 'contributor', b: 'approver', c: 'approver' });
+  });
+
+  describe('claimStaleWarning()', () => {
+    it('grants the stale-access warning once until a refresh succeeds', async () => {
+      expect(store.claimStaleWarning()).toBeTrue();
+      expect(store.claimStaleWarning()).toBeFalse();
+      findByUserId.and.rejectWith(new Error('down'));
+      await expectAsync(store.refresh('me')).toBeRejected();
+      expect(store.claimStaleWarning()).toBeFalse();
+      findByUserId.and.callFake(async () => rows());
+      await store.refresh('me');
+      expect(store.claimStaleWarning()).toBeTrue();
+    });
+
+    it('is granted again after clear()', () => {
+      expect(store.claimStaleWarning()).toBeTrue();
+      store.clear();
+      expect(store.claimStaleWarning()).toBeTrue();
+    });
   });
 
   it('ignores a response that lands after clear()', async () => {

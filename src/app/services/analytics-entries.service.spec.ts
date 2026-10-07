@@ -69,12 +69,22 @@ describe('AnalyticsEntriesService', () => {
     expect(entry.clone().id).toBe('e1');
   });
 
-  it('omits projectIds when none are given', async () => {
-    const promise = service.findByProjectIds([]);
+  it('returns no entries for an empty project list without any request', async () => {
+    expect(await service.findByProjectIds([])).toEqual([]);
+    expect(appstraxAuth.getAuthToken).not.toHaveBeenCalled();
+    http.expectNone(() => true);
+  });
+
+  it('findAllVisible GETs every visible entry without a projectIds filter', async () => {
+    const promise = service.findAllVisible();
     const req = await nextRequest(base);
+    expect(req.request.method).toBe('GET');
     expect(req.request.params.has('projectIds')).toBeFalse();
-    req.flush({ data: [], meta: {} });
-    expect(await promise).toEqual([]);
+    expect(req.request.headers.get('Authorization')).toBe('Bearer tok');
+    req.flush({ data: [dto('e1')], meta: {} });
+    const [entry] = await promise;
+    expect(entry instanceof TimeSheetEntry).toBeTrue();
+    expect(entry.id).toBe('e1');
   });
 
   it('PUTs approval and returns the mapped entry', async () => {

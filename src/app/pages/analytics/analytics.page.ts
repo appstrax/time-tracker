@@ -111,12 +111,13 @@ export class AnalyticsPage implements OnInit {
     }
 
     try {
-      const projectIds = this.projects().map((project) => project.id);
-
-      if (projectIds.length) {
-        const entries = await this.entryService.findByProjectIds(projectIds);
-        this.entries.set(entries);
-      }
+      // Admins see every project: skip the (possibly very long) id filter.
+      const entries = this.store.access.platformAdmin()
+        ? await this.entryService.findAllVisible()
+        : await this.entryService.findByProjectIds(
+            this.projects().map((project) => project.id),
+          );
+      this.entries.set(entries);
     } catch (error) {
       this.toast.error('Failed to fetch time sheet entries');
       this.entries.set([]);

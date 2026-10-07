@@ -190,12 +190,12 @@
                         {{ entry.approved ? 'Approved' : 'Pending' }}
                       </span>
                     </span>
-                    <span
-                      class="status-actions"
-                      role="group"
-                      aria-label="Approval status"
-                    >
-                      @if (canApprove()) {
+                    @if (canApprove()) {
+                      <span
+                        class="status-actions"
+                        role="group"
+                        aria-label="Approval status"
+                      >
                         @if (entry.approved) {
                           <button
                             type="button"
@@ -226,8 +226,8 @@
                             <i class="bi bi-check-lg" aria-hidden="true"></i>
                           </button>
                         }
-                      }
-                    </span>
+                      </span>
+                    }
                   </li>
                 }
               </ul>

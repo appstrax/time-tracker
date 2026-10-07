@@ -1,4 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnDestroy,
@@ -12,7 +13,12 @@ import { Subscription } from 'rxjs';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AnalyticsFilter, Project, TimeSheetEntry, User } from '@models';
-import { AnalyticsEntriesService, ToastService, UsersService } from '@services';
+import {
+  AgentTokenService,
+  AnalyticsEntriesService,
+  ToastService,
+  UsersService,
+} from '@services';
 import { Store } from '@state';
 import {
   TimeSheetExportUtil,
@@ -334,9 +340,12 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
       if (failedCount) {
         await this.reloadEntriesAfterStatusError();
         const total = entries.length;
+        const firstFailure = results.find(
+          (r): r is PromiseRejectedResult => r.status === 'rejected',
+        );
         this.toast.error(
           failedCount === total
-            ? 'Error updating time entry status'
+            ? this.approvalErrorMessage(firstFailure?.reason)
             : `${failedCount} of ${total} time entries could not be updated. List refreshed from server.`,
         );
         return;
@@ -352,6 +361,14 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
         return next;
       });
     }
+  }
+
+  /** The API explains denials (e.g. a role that cannot approve); other errors stay generic. */
+  private approvalErrorMessage(reason: unknown): string {
+    const fallback = 'Error updating time entry status';
+    return reason instanceof HttpErrorResponse
+      ? AgentTokenService.readErrorMessage(reason, fallback)
+      : fallback;
   }
 
   private async reloadEntriesAfterStatusError(): Promise<void> {

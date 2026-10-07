@@ -1,5 +1,5 @@
 import { TestBed } from '@angular/core/testing';
-import { ActivatedRouteSnapshot, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, UrlTree, provideRouter } from '@angular/router';
 
 import { appstraxAuth } from '@appstrax/services/auth';
 
@@ -13,25 +13,37 @@ describe('AnalyticsGuard', () => {
   let guard: AnalyticsGuard;
   let refresh: jasmine.Spy;
   let navigate: jasmine.Spy;
+  let router: Router;
   let lastGood: jasmine.Spy;
   let toastError: jasmine.Spy;
+  let toastWarning: jasmine.Spy;
+
+  const urlOf = (result: boolean | UrlTree) =>
+    result instanceof UrlTree ? router.serializeUrl(result) : result;
 
   function setup(
     memberships: Record<string, string>,
     roles: string[] = [UserRole.USER],
   ) {
     refresh = jasmine.createSpy('refresh').and.resolveTo(memberships);
-    navigate = jasmine.createSpy('navigate');
     lastGood = jasmine.createSpy('memberships').and.returnValue({});
     toastError = jasmine.createSpy('error');
+    toastWarning = jasmine.createSpy('warning');
     spyOn(appstraxAuth, 'getUser').and.resolveTo({ id: 'u1', roles } as any);
     TestBed.configureTestingModule({
       providers: [
-        { provide: Store, useValue: { access: { refresh, memberships: lastGood } } },
-        { provide: Router, useValue: { navigate } },
-        { provide: ToastService, useValue: { error: toastError } },
+        {
+          provide: Store,
+          useValue: {
+            access: { refresh, memberships: lastGood, claimStaleWarning: () => true },
+          },
+        },
+        provideRouter([]),
+        { provide: ToastService, useValue: { error: toastError, warning: toastWarning } },
       ],
     });
+    router = TestBed.inject(Router);
+    navigate = spyOn(router, 'navigate');
     guard = TestBed.inject(AnalyticsGuard);
   }
 
@@ -43,20 +55,21 @@ describe('AnalyticsGuard', () => {
     expect(await guard.canActivate(route('p1'))).toBeTrue();
     expect(navigate).not.toHaveBeenCalled();
     expect(toastError).not.toHaveBeenCalled();
+    expect(toastWarning).not.toHaveBeenCalled();
   });
 
   it('denies a contributor-only project with toast and redirect home', async () => {
     setup({ p1: 'contributor' });
-    expect(await guard.canActivate(route('p1'))).toBeFalse();
+    expect(urlOf(await guard.canActivate(route('p1')))).toBe('/home');
     expect(toastError).toHaveBeenCalledWith('You do not have access to that project');
-    expect(navigate).toHaveBeenCalledWith(['/home']);
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('denies a project the user is not a member of', async () => {
     setup({ p1: 'viewer' });
-    expect(await guard.canActivate(route('p2'))).toBeFalse();
+    expect(urlOf(await guard.canActivate(route('p2')))).toBe('/analytics');
     expect(toastError).toHaveBeenCalled();
-    expect(navigate).toHaveBeenCalledWith(['/analytics']);
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('allows a platform admin anywhere', async () => {
@@ -72,9 +85,9 @@ describe('AnalyticsGuard', () => {
 
   it('denies the list for contributor-only without a toast', async () => {
     setup({ p1: 'contributor' });
-    expect(await guard.canActivate(route())).toBeFalse();
+    expect(urlOf(await guard.canActivate(route()))).toBe('/home');
     expect(toastError).not.toHaveBeenCalled();
-    expect(navigate).toHaveBeenCalledWith(['/home']);
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('refreshes on every activation', async () => {
@@ -87,25 +100,25 @@ describe('AnalyticsGuard', () => {
   it('denies and navigates to login when the user cannot be resolved', async () => {
     setup({ p1: 'viewer' });
     (appstraxAuth.getUser as jasmine.Spy).and.rejectWith(new Error('no'));
-    expect(await guard.canActivate(route('p1'))).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['/login']);
+    expect(urlOf(await guard.canActivate(route('p1')))).toBe('/login');
+    expect(navigate).not.toHaveBeenCalled();
     expect(toastError).not.toHaveBeenCalled();
   });
 
   it('denies and navigates to login when there is no user', async () => {
     setup({ p1: 'viewer' });
     (appstraxAuth.getUser as jasmine.Spy).and.resolveTo(undefined);
-    expect(await guard.canActivate(route())).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['/login']);
+    expect(urlOf(await guard.canActivate(route()))).toBe('/login');
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('denies an unknown role on the list and on a project, redirecting home', async () => {
     setup({ p1: 'bogus' });
-    expect(await guard.canActivate(route())).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['/home']);
+    expect(urlOf(await guard.canActivate(route()))).toBe('/home');
+    expect(navigate).not.toHaveBeenCalled();
     navigate.calls.reset();
-    expect(await guard.canActivate(route('p1'))).toBeFalse();
-    expect(navigate).toHaveBeenCalledWith(['/home']);
+    expect(urlOf(await guard.canActivate(route('p1')))).toBe('/home');
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   describe('when the membership refresh fails', () => {
@@ -116,16 +129,19 @@ describe('AnalyticsGuard', () => {
     });
 
     it('fails closed to /home with no previous memberships', async () => {
-      expect(await guard.canActivate(route())).toBeFalse();
-      expect(navigate).toHaveBeenCalledWith(['/home']);
-      expect(navigate).not.toHaveBeenCalledWith(['']);
+      expect(urlOf(await guard.canActivate(route()))).toBe('/home');
+      expect(navigate).not.toHaveBeenCalled();
       expect(console.error).toHaveBeenCalled();
+      expect(toastWarning).toHaveBeenCalledOnceWith(
+        "Couldn't refresh your permissions. Using your last known access.",
+      );
     });
 
     it('uses the last good memberships when there are some', async () => {
       lastGood.and.returnValue({ p1: 'viewer' });
       expect(await guard.canActivate(route('p1'))).toBeTrue();
       expect(navigate).not.toHaveBeenCalled();
+      expect(toastWarning).toHaveBeenCalledTimes(1);
     });
   });
 });

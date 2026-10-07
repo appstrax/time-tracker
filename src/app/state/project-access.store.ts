@@ -3,7 +3,6 @@ import { patchState, signalStore, withComputed, withMethods, withState } from '@
 
 import { UserRole } from '@models';
 import { ProjectUserService } from '@services';
-// Relative, not '@utils': the barrel will hold guards that import '@state'.
 import {
   ProjectMemberships,
   ProjectPermissions,
@@ -12,7 +11,7 @@ import {
   needsAnalyticsLanding,
   resolveProjectPermissions,
   roleOf,
-} from '../utils/project-access.util';
+} from '@utils';
 
 import { ProjectsStore } from './projects.store';
 import { UserStore } from './user.store';
@@ -50,10 +49,21 @@ export const ProjectAccessStore = signalStore(
     },
   ),
   withMethods((store, projectUsers = inject(ProjectUserService)) => {
-    // Keyed by user so one user's pending request is never handed to another;
-    // `generation` lets clear() invalidate any request still in flight.
+    // Keyed by user so one user's pending request is never handed to another.
+    // `generation` bumps on every new request and on clear(), so only the
+    // latest request may patch state (a late reply for another user can't).
     let inFlight: { userId: string; promise: Promise<ProjectMemberships> } | null = null;
     let generation = 0;
+    // The stale-access warning is shown at most once until a refresh succeeds.
+    let staleWarningShown = false;
+
+    const sameMemberships = (a: ProjectMemberships, b: ProjectMemberships) => {
+      const keys = Object.keys(a);
+      return (
+        keys.length === Object.keys(b).length &&
+        keys.every((key) => Object.hasOwn(b, key) && a[key] === b[key])
+      );
+    };
 
     const permissionsFor = (projectId: string) =>
       resolveProjectPermissions(
@@ -74,7 +84,7 @@ export const ProjectAccessStore = signalStore(
       /** Always refetches so role changes apply without a re-login. */
       refresh(userId: string): Promise<ProjectMemberships> {
         if (inFlight?.userId === userId) return inFlight.promise;
-        const started = generation;
+        const started = ++generation;
         const entry = { userId, promise: undefined as unknown as Promise<ProjectMemberships> };
         entry.promise = (async () => {
           try {
@@ -86,7 +96,14 @@ export const ProjectAccessStore = signalStore(
                 memberships[row.projectId] = row.role as string;
               }
             }
-            if (started === generation) patchState(store, { memberships });
+            // Skip unchanged maps so derived project lists keep their identity.
+            if (
+              started === generation &&
+              !sameMemberships(memberships, store.memberships())
+            ) {
+              patchState(store, { memberships });
+            }
+            if (started === generation) staleWarningShown = false;
             return memberships;
           } finally {
             if (inFlight === entry) inFlight = null;
@@ -96,8 +113,16 @@ export const ProjectAccessStore = signalStore(
         return entry.promise;
       },
 
+      /** True the first time after a successful refresh (or clear()); false after. */
+      claimStaleWarning(): boolean {
+        if (staleWarningShown) return false;
+        staleWarningShown = true;
+        return true;
+      },
+
       clear: () => {
         generation++;
+        staleWarningShown = false;
         inFlight = null;
         patchState(store, { memberships: {} });
       },

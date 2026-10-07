@@ -45,11 +45,23 @@ const toEntry = (dto: EntryDto): TimeSheetEntry =>
 export class AnalyticsEntriesService {
   constructor(private http: HttpClient) {}
 
+  /** Entries for the given projects only; no projects means no entries (no request). */
   async findByProjectIds(projectIds: string[]): Promise<TimeSheetEntry[]> {
+    if (!projectIds.length) return [];
+    return this.fetchEntries({ projectIds: projectIds.join(',') });
+  }
+
+  async findAllVisible(): Promise<TimeSheetEntry[]> {
+    return this.fetchEntries();
+  }
+
+  private async fetchEntries(
+    params?: Record<string, string>,
+  ): Promise<TimeSheetEntry[]> {
     const response = await firstValueFrom(
       this.http.get<ApiResponse<EntryDto[]>>(this.url(), {
         headers: await this.headers(),
-        params: projectIds.length ? { projectIds: projectIds.join(',') } : undefined,
+        params,
       }),
     );
     return (response.data ?? []).map(toEntry);

@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { ActivatedRouteSnapshot, Router } from '@angular/router';
+import { ActivatedRouteSnapshot, Router, UrlTree } from '@angular/router';
 
 import { ToastService } from '@services';
 import { Store } from '@state';
@@ -20,12 +20,9 @@ export class AnalyticsGuard {
     private toast: ToastService,
   ) {}
 
-  async canActivate(route: ActivatedRouteSnapshot): Promise<boolean> {
-    const context = await loadAccessContext(this.store);
-    if (!context) {
-      this.router.navigate(['/login']);
-      return false;
-    }
+  async canActivate(route: ActivatedRouteSnapshot): Promise<boolean | UrlTree> {
+    const context = await loadAccessContext(this.store, this.toast);
+    if (!context) return this.router.createUrlTree(['/login']);
     const { memberships, platformAdmin } = context;
     if (platformAdmin) return true;
 
@@ -36,9 +33,8 @@ export class AnalyticsGuard {
     if (allowed) return true;
 
     if (projectId) this.toast.error('You do not have access to that project');
-    this.router.navigate([
+    return this.router.createUrlTree([
       needsAnalyticsLanding(memberships, false) ? '/analytics' : '/home',
     ]);
-    return false;
   }
 }
