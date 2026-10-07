@@ -79,6 +79,15 @@ describe('TimeSheetEntryComponent', () => {
     categories: ['Development', 'Meetings'],
   } as any as Project;
 
+  const allProjects = [
+    project,
+    projectWithFields,
+    projectWithOptionalBoolean,
+    projectWithRequiredBoolean,
+    projectBillableByDefault,
+    projectNonBillableByDefault,
+  ];
+
   let component: TimeSheetEntryModal;
   let fixture: ComponentFixture<TimeSheetEntryModal>;
   let activeModal: jasmine.SpyObj<NgbActiveModal>;
@@ -107,16 +116,8 @@ describe('TimeSheetEntryComponent', () => {
             user: {
               user: signal(regularUser),
             },
-            projects: {
-              projects: signal([
-                project,
-                projectWithFields,
-                projectWithOptionalBoolean,
-                projectWithRequiredBoolean,
-                projectBillableByDefault,
-                projectNonBillableByDefault,
-              ]),
-            },
+            projects: { projects: signal(allProjects) },
+            access: { logProjects: signal(allProjects) },
           },
         },
         {
@@ -444,8 +445,8 @@ describe('TimeSheetEntryComponent', () => {
   });
 });
 
-describe('TimeSheetEntryModal — admin project membership', () => {
-  const adminUser = { id: 'admin-user', role: UserRole.ADMIN } as User;
+describe('TimeSheetEntryModal — loggable projects', () => {
+  const adminUser = { id: 'admin-user', role: UserRole.USER } as User;
 
   const myProject = {
     id: 'my-project',
@@ -481,9 +482,8 @@ describe('TimeSheetEntryModal — admin project membership', () => {
           provide: Store,
           useValue: {
             user: { user: signal(adminUser) },
-            projects: {
-              projects: signal([myProject, otherProject]),
-            },
+            projects: { projects: signal([myProject, otherProject]) },
+            access: { logProjects: signal([myProject]) },
           },
         },
         {
@@ -507,7 +507,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
     }).compileComponents();
   });
 
-  it('only lists projects the admin is a member of', async () => {
+  it('only lists projects the user can log time on', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
     component.weekEntries = [];
@@ -519,7 +519,7 @@ describe('TimeSheetEntryModal — admin project membership', () => {
     expect(component.projects().map((p) => p.id)).toEqual([myProject.id]);
   });
 
-  it('still shows an existing entry\'s project even if the admin is not a member', async () => {
+  it('still shows an existing entry\'s project even if the user can no longer log time on it', async () => {
     fixture = TestBed.createComponent(TimeSheetEntryModal);
     component = fixture.componentInstance;
     component.weekEntries = [];
@@ -533,11 +533,12 @@ describe('TimeSheetEntryModal — admin project membership', () => {
     expect(component.projects().map((p) => p.id)).toContain(otherProject.id);
   });
 
-  it('shows an empty list when the admin has no assigned projects', async () => {
+  it('shows an empty list when the user can log time on no projects', async () => {
     TestBed.overrideProvider(Store, {
       useValue: {
         user: { user: signal(adminUser) },
         projects: { projects: signal([otherProject]) },
+        access: { logProjects: signal([]) },
       },
     });
     fixture = TestBed.createComponent(TimeSheetEntryModal);
