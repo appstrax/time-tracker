@@ -16,10 +16,9 @@ const NONE: ProjectPermissions = {
 
 /** A `Map`, not an object, so role strings like `'toString'` can't hit a prototype key. */
 const PERMISSIONS_BY_ROLE = new Map<string, ProjectPermissions>([
-  [ProjectUserRole.ADMIN, { logTime: true, viewAnalytics: false, approve: false }],
   [ProjectUserRole.CONTRIBUTOR, { logTime: true, viewAnalytics: false, approve: false }],
   [ProjectUserRole.VIEWER, { logTime: false, viewAnalytics: true, approve: false }],
-  [ProjectUserRole.APPROVER, { logTime: false, viewAnalytics: true, approve: true }],
+  [ProjectUserRole.MANAGER, { logTime: true, viewAnalytics: true, approve: true }],
 ]);
 
 /**
@@ -71,7 +70,7 @@ export function hasAnalyticsAccess(
   );
 }
 
-/** Viewer/approver-only users have nothing to log, so they start on analytics. */
+/** Viewer-only users have nothing to log, so they start on analytics. */
 export function needsAnalyticsLanding(
   memberships: ProjectMemberships,
   platformAdmin: boolean,

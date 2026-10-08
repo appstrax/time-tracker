@@ -58,10 +58,9 @@ describe('LogTimeGuard', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
-  it('denies an approver-only user', async () => {
-    setup({ p1: 'approver' });
-    expect(urlOf(await guard.canActivate())).toBe('/analytics');
-    expect(navigate).not.toHaveBeenCalled();
+  it('allows a manager-only user to log time', async () => {
+    setup({ p1: 'manager' });
+    expect(await guard.canActivate()).toBeTrue();
   });
 
   it('allows a user with no memberships', async () => {

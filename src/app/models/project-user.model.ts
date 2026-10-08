@@ -1,10 +1,9 @@
 import { Model } from '@appstrax/services/database';
 
 export enum ProjectUserRole {
-  ADMIN = 'admin',
   VIEWER = 'viewer',
   CONTRIBUTOR = 'contributor',
-  APPROVER = 'approver',
+  MANAGER = 'manager',
 }
 
 export class ProjectUser extends Model {

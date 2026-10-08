@@ -38,7 +38,7 @@ const toEntry = (dto: EntryDto): TimeSheetEntry =>
 
 /**
  * Server-scoped entry reads and approvals for the analytics pages. The API
- * decides which projects the caller may see, so viewers and approvers get
+ * decides which projects the caller may see, so viewers and managers get
  * every member's rows (the collection itself only returns a user's own).
  */
 @Injectable({ providedIn: 'root' })

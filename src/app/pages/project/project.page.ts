@@ -203,7 +203,7 @@ export class ProjectPage implements OnInit {
         const projectUser = new ProjectUser();
         projectUser.projectId = project.id;
         projectUser.userId = user.id;
-        projectUser.role = ProjectUserRole.ADMIN;
+        projectUser.role = ProjectUserRole.MANAGER;
         await this.projectUserService.save(projectUser);
       }
 

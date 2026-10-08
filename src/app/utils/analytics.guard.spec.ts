@@ -79,7 +79,7 @@ describe('AnalyticsGuard', () => {
   });
 
   it('allows the list when any membership grants analytics', async () => {
-    setup({ p1: 'contributor', p2: 'approver' });
+    setup({ p1: 'contributor', p2: 'manager' });
     expect(await guard.canActivate(route())).toBeTrue();
   });
 

@@ -17,21 +17,15 @@ describe('resolveProjectPermissions', () => {
     );
   });
 
-  it('lets a project admin log time only (label, no extra power)', () => {
-    expect(resolveProjectPermissions(ProjectUserRole.ADMIN, false)).toEqual(
-      { logTime: true, viewAnalytics: false, approve: false },
-    );
-  });
-
   it('lets a viewer view analytics only', () => {
     expect(resolveProjectPermissions(ProjectUserRole.VIEWER, false)).toEqual(
       { logTime: false, viewAnalytics: true, approve: false },
     );
   });
 
-  it('lets an approver view analytics and approve', () => {
-    expect(resolveProjectPermissions(ProjectUserRole.APPROVER, false)).toEqual(
-      { logTime: false, viewAnalytics: true, approve: true },
+  it('lets a manager log time, view analytics and approve', () => {
+    expect(resolveProjectPermissions(ProjectUserRole.MANAGER, false)).toEqual(
+      { logTime: true, viewAnalytics: true, approve: true },
     );
   });
 
@@ -57,13 +51,13 @@ describe('filterProjectsByPermission', () => {
   const memberships = {
     a: ProjectUserRole.CONTRIBUTOR,
     b: ProjectUserRole.VIEWER,
-    c: ProjectUserRole.APPROVER,
+    c: ProjectUserRole.MANAGER,
   };
 
   it('keeps only projects whose role grants the permission', () => {
     expect(
       filterProjectsByPermission(projects, memberships, false, 'logTime').map((p) => p.id),
-    ).toEqual(['a']);
+    ).toEqual(['a', 'c']);
     expect(
       filterProjectsByPermission(projects, memberships, false, 'viewAnalytics').map((p) => p.id),
     ).toEqual(['b', 'c']);
@@ -83,15 +77,16 @@ describe('filterProjectsByPermission', () => {
 });
 
 describe('needsAnalyticsLanding', () => {
-  it('is true for viewer-only and approver-only users', () => {
+  it('is true for viewer-only users', () => {
     expect(needsAnalyticsLanding({ a: ProjectUserRole.VIEWER }, false)).toBeTrue();
-    expect(
-      needsAnalyticsLanding({ a: ProjectUserRole.VIEWER, b: ProjectUserRole.APPROVER }, false),
-    ).toBeTrue();
   });
 
-  it('is false for contributors, mixed-role users, platform admins and users with no memberships', () => {
+  it('is false for contributors, managers, mixed-role users, platform admins and users with no memberships', () => {
     expect(needsAnalyticsLanding({ a: ProjectUserRole.CONTRIBUTOR }, false)).toBeFalse();
+    expect(needsAnalyticsLanding({ a: ProjectUserRole.MANAGER }, false)).toBeFalse();
+    expect(
+      needsAnalyticsLanding({ a: ProjectUserRole.VIEWER, b: ProjectUserRole.MANAGER }, false),
+    ).toBeFalse();
     expect(
       needsAnalyticsLanding({ a: ProjectUserRole.CONTRIBUTOR, b: ProjectUserRole.VIEWER }, false),
     ).toBeFalse();
@@ -123,14 +118,13 @@ describe('hasAnalyticsAccess', () => {
     expect(hasAnalyticsAccess({}, true)).toBeTrue();
   });
 
-  it('is true for viewer and approver memberships', () => {
+  it('is true for viewer and manager memberships', () => {
     expect(hasAnalyticsAccess({ a: 'viewer' }, false)).toBeTrue();
-    expect(hasAnalyticsAccess({ a: 'approver' }, false)).toBeTrue();
+    expect(hasAnalyticsAccess({ a: 'manager' }, false)).toBeTrue();
   });
 
-  it('is false for contributor-only, admin-only and empty memberships', () => {
+  it('is false for contributor-only and empty memberships', () => {
     expect(hasAnalyticsAccess({ a: 'contributor' }, false)).toBeFalse();
-    expect(hasAnalyticsAccess({ a: 'admin' }, false)).toBeFalse();
     expect(hasAnalyticsAccess({}, false)).toBeFalse();
   });
 });

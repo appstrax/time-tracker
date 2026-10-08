@@ -239,7 +239,7 @@ describe('ProjectAnalyticsPage', () => {
         const approved = component.entries().find((e) => e.approved)!;
         const pending = component.entries().find((e) => !e.approved)!;
         const day = component.days()[0];
-        // Positive controls: each call below would save for an approver.
+        // Positive controls: each call below would save for a manager.
         expect(approved).toBeDefined();
         expect(pending).toBeDefined();
         expect(day.entries.some((e) => !e.approved)).toBeTrue();
@@ -252,7 +252,7 @@ describe('ProjectAnalyticsPage', () => {
       });
     });
 
-    describe('as an approver', () => {
+    describe('as a manager', () => {
       beforeEach(loaded);
 
       it('renders approve/decline buttons', () => {

@@ -31,7 +31,7 @@ describe('ProjectAccessStore', () => {
   const rows = () => [
     row('a', ProjectUserRole.CONTRIBUTOR),
     row('b', ProjectUserRole.VIEWER),
-    row('c', ProjectUserRole.APPROVER),
+    row('c', ProjectUserRole.MANAGER),
   ];
 
   beforeEach(() => {
@@ -59,7 +59,7 @@ describe('ProjectAccessStore', () => {
 
   it('derives permissions from memberships', async () => {
     await store.refresh('me');
-    expect(store.logProjects().map((p) => p.id)).toEqual(['a']);
+    expect(store.logProjects().map((p) => p.id)).toEqual(['a', 'c']);
     expect(store.analyticsProjects().map((p) => p.id)).toEqual(['b', 'c']);
     expect(store.can('c', 'approve')).toBeTrue();
     expect(store.can('b', 'approve')).toBeFalse();
@@ -94,11 +94,11 @@ describe('ProjectAccessStore', () => {
   it('picks up a role change on the next refresh', async () => {
     await store.refresh('me');
     expect(store.can('b', 'approve')).toBeFalse();
-    findByUserId.and.resolveTo([row('b', ProjectUserRole.APPROVER)]);
+    findByUserId.and.resolveTo([row('b', ProjectUserRole.MANAGER)]);
     await store.refresh('me');
     expect(findByUserId).toHaveBeenCalledTimes(2);
     expect(store.can('b', 'approve')).toBeTrue();
-    expect(store.memberships()).toEqual({ b: ProjectUserRole.APPROVER });
+    expect(store.memberships()).toEqual({ b: ProjectUserRole.MANAGER });
   });
 
   it('keeps previous memberships on failure and retries next time', async () => {
@@ -108,7 +108,7 @@ describe('ProjectAccessStore', () => {
     expect(store.memberships()).toEqual({
       a: 'contributor',
       b: 'viewer',
-      c: 'approver',
+      c: 'manager',
     });
     findByUserId.and.resolveTo([row('a', ProjectUserRole.VIEWER)]);
     await store.refresh('me');
@@ -146,7 +146,7 @@ describe('ProjectAccessStore', () => {
     let releaseA!: (value: ProjectUser[]) => void;
     findByUserId.and.returnValues(
       new Promise<ProjectUser[]>((resolve) => (releaseA = resolve)),
-      Promise.resolve([row('b', ProjectUserRole.APPROVER)]),
+      Promise.resolve([row('b', ProjectUserRole.MANAGER)]),
     );
     const pendingA = store.refresh('userA');
     await store.refresh('userB');
@@ -155,7 +155,7 @@ describe('ProjectAccessStore', () => {
     // A's late response must not overwrite B's memberships.
     releaseA([row('a', ProjectUserRole.CONTRIBUTOR)]);
     await pendingA;
-    expect(store.memberships()).toEqual({ b: ProjectUserRole.APPROVER });
+    expect(store.memberships()).toEqual({ b: ProjectUserRole.MANAGER });
   });
 
   it('keeps the same memberships object when a refresh changes nothing', async () => {
@@ -175,12 +175,12 @@ describe('ProjectAccessStore', () => {
     const memberships = store.memberships();
     findByUserId.and.resolveTo([
       row('a', ProjectUserRole.CONTRIBUTOR),
-      row('b', ProjectUserRole.APPROVER),
-      row('c', ProjectUserRole.APPROVER),
+      row('b', ProjectUserRole.MANAGER),
+      row('c', ProjectUserRole.MANAGER),
     ]);
     await store.refresh('me');
     expect(store.memberships()).not.toBe(memberships);
-    expect(store.memberships()).toEqual({ a: 'contributor', b: 'approver', c: 'approver' });
+    expect(store.memberships()).toEqual({ a: 'contributor', b: 'manager', c: 'manager' });
   });
 
   describe('claimStaleWarning()', () => {
