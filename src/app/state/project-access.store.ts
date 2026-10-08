@@ -105,6 +105,16 @@ export const ProjectAccessStore = signalStore(
             }
             if (started === generation) staleWarningShown = false;
             return memberships;
+          } catch (error) {
+            // Fail closed: a role may have just been revoked, so a failed
+            // refresh must not leave a stale, possibly over-privileged
+            // membership set in place. Every permission check reads
+            // store.memberships(), so clearing it here denies logTime,
+            // viewAnalytics and approve everywhere until a refresh succeeds.
+            if (started === generation && !sameMemberships({}, store.memberships())) {
+              patchState(store, { memberships: {} });
+            }
+            throw error;
           } finally {
             if (inFlight === entry) inFlight = null;
           }

@@ -133,11 +133,15 @@ describe('AnalyticsGuard', () => {
       expect(navigate).not.toHaveBeenCalled();
       expect(console.error).toHaveBeenCalled();
       expect(toastWarning).toHaveBeenCalledOnceWith(
-        "Couldn't refresh your permissions. Using your last known access.",
+        "Couldn't refresh your permissions. Treating you as having no project access until this succeeds.",
       );
     });
 
-    it('uses the last good memberships when there are some', async () => {
+    // This mocks the store directly, so it only proves the guard faithfully
+    // reflects whatever store.access.memberships() reports. The real
+    // ProjectAccessStore now clears memberships on a failed refresh (see
+    // project-access.store.spec.ts), so this scenario can't occur in the app.
+    it('uses whatever the store currently reports for memberships', async () => {
       lastGood.and.returnValue({ p1: 'viewer' });
       expect(await guard.canActivate(route('p1'))).toBeTrue();
       expect(navigate).not.toHaveBeenCalled();

@@ -18,7 +18,8 @@ export class LogTimeGuard {
   async canActivate(): Promise<boolean | UrlTree> {
     const context = await loadAccessContext(this.store, this.toast);
     if (!context) return this.router.createUrlTree(['/login']);
-    // A failed membership fetch fails open: pages still filter by memberships.
+    // A failed membership fetch fails closed: memberships are cleared, so no
+    // project grants logTime until a refresh succeeds again.
 
     if (needsAnalyticsLanding(context.memberships, context.platformAdmin)) {
       return this.router.createUrlTree(['/analytics']);

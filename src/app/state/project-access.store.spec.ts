@@ -101,15 +101,13 @@ describe('ProjectAccessStore', () => {
     expect(store.memberships()).toEqual({ b: ProjectUserRole.MANAGER });
   });
 
-  it('keeps previous memberships on failure and retries next time', async () => {
+  it('fails closed: clears memberships on failure rather than keeping a stale, possibly revoked role', async () => {
     await store.refresh('me');
     findByUserId.and.rejectWith(new Error('boom'));
     await expectAsync(store.refresh('me')).toBeRejected();
-    expect(store.memberships()).toEqual({
-      a: 'contributor',
-      b: 'viewer',
-      c: 'manager',
-    });
+    expect(store.memberships()).toEqual({});
+    expect(store.can('c', 'approve')).toBeFalse();
+
     findByUserId.and.resolveTo([row('a', ProjectUserRole.VIEWER)]);
     await store.refresh('me');
     expect(store.memberships()).toEqual({ a: 'viewer' });

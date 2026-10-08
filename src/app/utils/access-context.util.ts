@@ -7,7 +7,7 @@ import { Store } from '@state';
 import { ProjectMemberships } from './project-access.util';
 
 export const STALE_ACCESS_MESSAGE =
-  "Couldn't refresh your permissions. Using your last known access.";
+  "Couldn't refresh your permissions. Treating you as having no project access until this succeeds.";
 
 export interface AccessContext {
   memberships: ProjectMemberships;
@@ -18,8 +18,10 @@ export interface AccessContext {
  * Resolves the signed-in user and refetches their project memberships.
  * Returns `null` when there is no authenticated user (the caller should send
  * them to '/login'). If only the membership fetch fails, the error is logged
- * and the store's last good memberships are used (empty if there were none),
- * so callers decide fail-open or fail-closed without ever redirecting to ''.
+ * and the store fails closed - it clears its memberships rather than keeping
+ * a possibly-revoked role in place - so every permission check denies until a
+ * refresh next succeeds, without ever redirecting to ''. `platformAdmin` is
+ * unaffected: it comes fresh from the auth user on every call, never cached.
  * The user is warned here only, at most once until a refresh next succeeds.
  */
 export async function loadAccessContext(

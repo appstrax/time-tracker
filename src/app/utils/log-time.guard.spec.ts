@@ -108,16 +108,20 @@ describe('LogTimeGuard', () => {
       spyOn(console, 'error');
     });
 
-    it('fails open with no previous memberships and never navigates to root', async () => {
+    it('fails closed with no previous memberships and never navigates to root', async () => {
       expect(await guard.canActivate()).toBeTrue();
       expect(navigate).not.toHaveBeenCalled();
       expect(console.error).toHaveBeenCalled();
       expect(toastWarning).toHaveBeenCalledOnceWith(
-        "Couldn't refresh your permissions. Using your last known access.",
+        "Couldn't refresh your permissions. Treating you as having no project access until this succeeds.",
       );
     });
 
-    it('falls back to the last good memberships', async () => {
+    // This mocks the store directly, so it only proves the guard faithfully
+    // reflects whatever store.access.memberships() reports. The real
+    // ProjectAccessStore now clears memberships on a failed refresh (see
+    // project-access.store.spec.ts), so this scenario can't occur in the app.
+    it('uses whatever the store currently reports for memberships', async () => {
       lastGood.and.returnValue({ p1: 'viewer' });
       expect(urlOf(await guard.canActivate())).toBe('/analytics');
       expect(navigate).not.toHaveBeenCalled();
