@@ -17,7 +17,7 @@ import { Subscription } from 'rxjs';
 import { AnalyticsFilter, DateRange, Project, Status, User } from '@models';
 import { TimeSheetFilterUtil, getUserDisplayName } from '@utils';
 
-import { formatDateInput } from '../../analytics-filter.util';
+import { formatDateInput, isProjectUserPairValid } from '../../analytics-filter.util';
 
 /** Pill filters (status, range, team member, category) synced to the URL query. */
 @Component({
@@ -70,16 +70,27 @@ export class AnalyticsFiltersComponent implements OnInit, OnDestroy {
   }
 
   public onUser(userId: string): void {
-    this.update({ userId: userId || undefined });
+    const { projectId } = this.filter();
+    // Drop a project the newly picked team member has no part in.
+    const keepProject = isProjectUserPairValid(
+      this.projectUserIds(),
+      projectId,
+      userId || undefined,
+    );
+    this.update({
+      userId: userId || undefined,
+      ...(keepProject ? {} : { projectId: undefined }),
+    });
   }
 
   public onProject(project: Project | null): void {
     const { userId } = this.filter();
     // Drop a team member who is not on the newly picked project.
-    const keepUser =
-      !project ||
-      !userId ||
-      !!this.projectUserIds().get(project.id)?.has(userId);
+    const keepUser = isProjectUserPairValid(
+      this.projectUserIds(),
+      project?.id,
+      userId,
+    );
     this.update({
       projectId: project?.id,
       ...(keepUser ? {} : { userId: undefined }),

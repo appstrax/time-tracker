@@ -71,6 +71,20 @@ export function buildProjectUserIds(
   return map;
 }
 
+/**
+ * Whether the project and team member filters can apply together. Either one
+ * missing, or a project that is not known, never conflicts.
+ */
+export function isProjectUserPairValid(
+  projectUserIds: Map<string, Set<string>>,
+  projectId: string | undefined,
+  userId: string | undefined,
+): boolean {
+  if (!projectId || !userId) return true;
+  const ids = projectUserIds.get(projectId);
+  return !ids || ids.has(userId);
+}
+
 /** Categories the selected team member has actually logged, sorted. */
 export function userCategoryOptions(
   entries: TimeSheetEntry[],

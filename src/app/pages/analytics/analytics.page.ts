@@ -1,6 +1,13 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import {
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
 import { TimeSheetEntryService, ToastService, UsersService } from '@services';
@@ -9,13 +16,14 @@ import {
   ProjectPreviewComponent,
 } from '@components';
 import { Store } from '@state';
-import { TimeSheetExportUtil } from '@utils';
+import { TimeSheetExportUtil, TimeSheetFilterUtil } from '@utils';
 
 import {
   buildProjectUserIds,
   filterAnalyticsEntries,
   narrowToProject,
   formatDateInput,
+  isProjectUserPairValid,
   scopeProjectsToUser,
 } from './analytics-filter.util';
 import {
@@ -45,6 +53,8 @@ export class AnalyticsPage implements OnInit {
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
+  private readonly route = inject(ActivatedRoute);
+  private readonly filterUtils = inject(TimeSheetFilterUtil);
 
   public readonly loading = signal(false);
 
@@ -101,6 +111,28 @@ export class AnalyticsPage implements OnInit {
       this.projects(),
     ),
   );
+
+  constructor() {
+    // A project and team member from a stale or edited URL that cannot apply
+    // together: drop the project. Waits for the entries, as a member who only
+    // logged time on a project is not known as one until they load.
+    effect(() => {
+      if (this.loading() || !this.projects().length) return;
+      const filter = this.filter();
+      if (
+        !isProjectUserPairValid(
+          this.projectUserIds(),
+          filter.projectId,
+          filter.userId,
+        )
+      ) {
+        this.filterUtils.updateQueryParams(this.route, {
+          ...filter,
+          projectId: undefined,
+        });
+      }
+    });
+  }
 
   public onFilterChange(filter: AnalyticsFilter): void {
     this.filter.set(filter);

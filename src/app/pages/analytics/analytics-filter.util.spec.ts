@@ -2,6 +2,7 @@ import { Project, TimeSheetEntry, User } from '@models';
 
 import {
   buildProjectUserIds,
+  isProjectUserPairValid,
   narrowToProject,
   scopeProjectsToUser,
   userCategoryOptions,
@@ -134,5 +135,23 @@ describe('buildProjectUserIds', () => {
     entry.userId = 'former';
     const map = buildProjectUserIds([project('a', ['u1'])], [entry]);
     expect([...(map.get('a') ?? [])]).toEqual(['u1', 'former']);
+  });
+});
+
+describe('isProjectUserPairValid', () => {
+  const ids = new Map([['a', new Set(['u1'])]]);
+
+  it('accepts a member of the project', () => {
+    expect(isProjectUserPairValid(ids, 'a', 'u1')).toBe(true);
+  });
+
+  it('rejects a member who is not on the project', () => {
+    expect(isProjectUserPairValid(ids, 'a', 'u2')).toBe(false);
+  });
+
+  it('never conflicts when either side or the project is missing', () => {
+    expect(isProjectUserPairValid(ids, undefined, 'u2')).toBe(true);
+    expect(isProjectUserPairValid(ids, 'a', undefined)).toBe(true);
+    expect(isProjectUserPairValid(ids, 'zzz', 'u2')).toBe(true);
   });
 });
