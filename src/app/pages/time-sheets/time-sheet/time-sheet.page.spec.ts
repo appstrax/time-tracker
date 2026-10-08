@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { patchState } from '@ngrx/signals';
 
-import { Project, TimeSheetEntry, User, UserRole } from '@models';
+import { Project, ProjectUserRole, TimeSheetEntry, User, UserRole } from '@models';
 import { Store } from '@state';
 import { clearStoredTimeSheetFilterProjectId } from '@utils';
 
@@ -160,26 +160,60 @@ describe('TimeSheetPage', () => {
     });
   });
 
-  describe('myProjects', () => {
-    function patchUserState(user: User | null): void {
-      patchState(store.user as never, { user });
+  describe('project access', () => {
+    function patchMemberships(memberships: Record<string, string>): void {
+      patchState(store.access as never, { memberships });
     }
 
-    it('matches the full project list for a non-admin user', () => {
-      const projectA = makeProject('project-a');
-      patchProjectsState({ projects: [projectA], fetchedAt: new Date() });
-      patchUserState({ id: 'user-1', role: UserRole.USER } as User);
+    function makeEntry(id: string, projectId: string): TimeSheetEntry {
+      const entry = new TimeSheetEntry();
+      entry.id = id;
+      entry.projectId = projectId;
+      entry.date = new Date();
+      return entry;
+    }
 
-      expect(component.myProjects().map((p) => p.id)).toEqual([projectA.id]);
+    function shownEntryIds(): string[] {
+      return [...component.entriesByDate().values()].flat().map((e) => e.id);
+    }
+
+    beforeEach(() => {
+      patchState(store.user as never, {
+        user: { id: 'user-1', role: UserRole.USER } as User,
+      });
+      patchProjectsState({
+        // 'left': a project the user no longer belongs to (no membership below).
+        projects: [makeProject('mine'), makeProject('watched'), makeProject('left')],
+        fetchedAt: new Date(),
+      });
+      patchMemberships({
+        mine: ProjectUserRole.CONTRIBUTOR,
+        watched: ProjectUserRole.VIEWER,
+      });
     });
 
-    it('narrows an admin to only their own project memberships', () => {
-      const mine = makeProject('mine', ['admin-1']);
-      const notMine = makeProject('not-mine', ['someone-else']);
-      patchProjectsState({ projects: [mine, notMine], fetchedAt: new Date() });
-      patchUserState({ id: 'admin-1', role: UserRole.ADMIN } as User);
+    it('offers only the projects the user can log time on in myProjects', () => {
+      expect(component.myProjects().map((p) => p.id)).toEqual(['mine']);
+    });
 
-      expect(component.myProjects().map((p) => p.id)).toEqual([mine.id]);
+    it('keeps the unfiltered project list for colour lookups', () => {
+      expect(component.projects().map((p) => p.id)).toEqual([
+        'mine',
+        'watched',
+        'left',
+      ]);
+    });
+
+    it('hides entries on a project where the user is restricted from logging time', () => {
+      component.weekEntries.set([makeEntry('e1', 'mine'), makeEntry('e2', 'watched')]);
+
+      expect(shownEntryIds()).toEqual(['e1']);
+    });
+
+    it('still shows entries on a project the user has left', () => {
+      component.weekEntries.set([makeEntry('e1', 'mine'), makeEntry('e3', 'left')]);
+
+      expect(shownEntryIds()).toEqual(['e1', 'e3']);
     });
   });
 });

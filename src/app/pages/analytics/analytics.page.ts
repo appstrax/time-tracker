@@ -3,7 +3,7 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, ToastService, UsersService } from '@services';
+import { AnalyticsEntriesService, ToastService, UsersService } from '@services';
 import {
   InsightsChartsComponent,
   ProjectPreviewComponent,
@@ -41,14 +41,14 @@ import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
 })
 export class AnalyticsPage implements OnInit {
   private readonly store = inject(Store);
-  private readonly entryService = inject(TimeSheetEntryService);
+  private readonly entryService = inject(AnalyticsEntriesService);
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
 
   public readonly loading = signal(false);
 
-  public readonly projects = this.store.projects.projects;
+  public readonly projects = this.store.access.analyticsProjects;
   public readonly entries = signal<TimeSheetEntry[]>([]);
   public readonly users = signal<User[]>([]);
   public readonly filter = signal<AnalyticsFilter>({});
@@ -122,12 +122,13 @@ export class AnalyticsPage implements OnInit {
     }
 
     try {
-      const projectIds = this.projects().map((project) => project.id);
-
-      if (projectIds.length) {
-        const entries = await this.entryService.findByProjectId(projectIds);
-        this.entries.set(entries);
-      }
+      // Admins see every project: skip the (possibly very long) id filter.
+      const entries = this.store.access.platformAdmin()
+        ? await this.entryService.findAllVisible()
+        : await this.entryService.findByProjectIds(
+            this.projects().map((project) => project.id),
+          );
+      this.entries.set(entries);
     } catch (error) {
       this.toast.error('Failed to fetch time sheet entries');
       this.entries.set([]);

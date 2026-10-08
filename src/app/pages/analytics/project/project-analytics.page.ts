@@ -1,4 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnDestroy,
@@ -12,7 +13,12 @@ import { Subscription } from 'rxjs';
 import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AnalyticsFilter, Project, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, ToastService, UsersService } from '@services';
+import {
+  AgentTokenService,
+  AnalyticsEntriesService,
+  ToastService,
+  UsersService,
+} from '@services';
 import { Store } from '@state';
 import {
   TimeSheetExportUtil,
@@ -60,7 +66,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
   private paramSubscription?: Subscription;
   private loadSeq = 0;
   private readonly store = inject(Store);
-  private readonly entryService = inject(TimeSheetEntryService);
+  private readonly entryService = inject(AnalyticsEntriesService);
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
@@ -87,6 +93,10 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
       'var(--color-primary)'
     );
   });
+
+  public readonly canApprove = computed(() =>
+    this.store.access.can(this.projectId(), 'approve'),
+  );
 
   public readonly usersById = computed(
     () => new Map(this.users().map((u) => [u.id, u])),
@@ -220,7 +230,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     }
     try {
       const projectId = this.projectId();
-      const entries = await this.entryService.findByProjectId([projectId]);
+      const entries = await this.entryService.findByProjectIds([projectId]);
       if (seq !== this.loadSeq) return;
       this.entries.set(entries);
       if (this.days().length && !this.expanded().size) {
@@ -306,15 +316,11 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     entries: TimeSheetEntry[],
     approved: boolean,
   ): Promise<void> {
-    if (!entries.length) return;
+    if (!this.canApprove() || !entries.length) return;
     this.busy.update((set) => new Set([...set, ...entries.map((e) => e.id)]));
     try {
       const results = await Promise.allSettled(
-        entries.map(async (entry) => {
-          const toSave = entry.clone();
-          toSave.approved = approved;
-          return this.entryService.save(toSave);
-        }),
+        entries.map((entry) => this.entryService.setApproved(entry.id, approved)),
       );
       const saved = results
         .filter(
@@ -334,9 +340,12 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
       if (failedCount) {
         await this.reloadEntriesAfterStatusError();
         const total = entries.length;
+        const firstFailure = results.find(
+          (r): r is PromiseRejectedResult => r.status === 'rejected',
+        );
         this.toast.error(
           failedCount === total
-            ? 'Error updating time entry status'
+            ? this.approvalErrorMessage(firstFailure?.reason)
             : `${failedCount} of ${total} time entries could not be updated. List refreshed from server.`,
         );
         return;
@@ -354,9 +363,17 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     }
   }
 
+  /** The API explains denials (e.g. a role that cannot approve); other errors stay generic. */
+  private approvalErrorMessage(reason: unknown): string {
+    const fallback = 'Error updating time entry status';
+    return reason instanceof HttpErrorResponse
+      ? AgentTokenService.readErrorMessage(reason, fallback)
+      : fallback;
+  }
+
   private async reloadEntriesAfterStatusError(): Promise<void> {
     try {
-      const fresh = await this.entryService.findByProjectId([this.projectId()]);
+      const fresh = await this.entryService.findByProjectIds([this.projectId()]);
       this.entries.set(fresh);
     } catch {
       this.toast.error('Failed to refresh time sheet entries');

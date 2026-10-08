@@ -50,6 +50,7 @@ describe('HomePage', () => {
   let findByUserAndDateRange: jasmine.Spy;
   let currentUser: WritableSignal<User | null>;
   let storeProjects: WritableSignal<Project[]>;
+  let logProjects: WritableSignal<Project[]>;
 
   beforeEach(async () => {
     const me = new User();
@@ -65,12 +66,14 @@ describe('HomePage', () => {
         makeEntry('e3', 'beta', 2, true),
       ]);
 
-    // An admin's store holds every project, including ones they aren't on.
+    // The store holds every project; access.logProjects is the loggable subset.
     storeProjects = signal<Project[]>([
       makeProject('alpha', ['me']),
       makeProject('beta', ['me']),
       makeProject('gamma', ['someone-else']),
     ]);
+
+    logProjects = signal<Project[]>([storeProjects()[0], storeProjects()[1]]);
 
     const storeStub = {
       user: { user: currentUser, loading: signal(false) },
@@ -79,6 +82,7 @@ describe('HomePage', () => {
         loading: signal(false),
         fetchedAt: signal<Date | null>(new Date()),
       },
+      access: { logProjects },
     };
 
     await TestBed.configureTestingModule({
@@ -114,21 +118,15 @@ describe('HomePage', () => {
     expect(component.rows().map((row) => row.id)).toEqual(['alpha', 'beta']);
   });
 
-  it('limits an admin to the projects they are assigned to', () => {
+  it('limits the list to the projects the user can log time on', () => {
     expect(component.projects().map((project) => project.id)).toEqual([
       'alpha',
       'beta',
     ]);
   });
 
-  it('lists every assigned project for a regular user, even with no time logged', () => {
-    // Non-admins get projects with empty `users`, and the store holds only
-    // their own projects, so nothing can be filtered by membership.
-    const user = new User();
-    user.id = 'me';
-    user.role = UserRole.USER;
-    currentUser.set(user);
-    storeProjects.set([makeProject('alpha', []), makeProject('delta', [])]);
+  it('lists every loggable project, even with no time logged', () => {
+    logProjects.set([makeProject('alpha', []), makeProject('delta', [])]);
 
     expect(component.projects().map((project) => project.id)).toEqual([
       'alpha',
@@ -150,7 +148,7 @@ describe('HomePage', () => {
   });
 
   it('leaves hours on a project outside the list out of the totals', () => {
-    // gamma is in the admin's store but they are not assigned to it.
+    // gamma is in the store but the user cannot log time on it (e.g. viewer).
     component.entries.update((entries) => [
       ...entries,
       makeEntry('e4', 'gamma', 4, true),
@@ -171,7 +169,7 @@ describe('HomePage', () => {
     expect(component.totals().total).toBe(6);
   });
 
-  it('keeps an admin’s project list steady while entries reload', () => {
+  it('keeps the project list steady while entries reload', () => {
     // The load effect empties the entries on every range change.
     component.entries.set([]);
     expect(component.projects().map((project) => project.id)).toEqual([

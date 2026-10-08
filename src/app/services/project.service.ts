@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import { CrudService } from '@appstrax/services/database';
+import { CrudService, OrderDirection } from '@appstrax/services/database';
 import { appstraxAuth, Operator } from '@appstrax/services/auth';
 
 import { UserRole } from '@models';
@@ -18,8 +18,12 @@ export class ProjectUserService extends CrudService<ProjectUser> {
     return res.data ?? [];
   }
 
+  /** Oldest first, so "first row wins" on duplicate rows is deterministic. */
   async findByUserId(userId: string): Promise<ProjectUser[]> {
-    const res = await this.find({ where: { userId } });
+    const res = await this.find({
+      where: { userId },
+      order: { createdAt: OrderDirection.ASC },
+    });
     return res.data ?? [];
   }
 
