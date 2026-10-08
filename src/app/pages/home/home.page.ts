@@ -11,6 +11,7 @@ import { TimeSheetFilterUtil, storeTimeSheetFilterProjectId } from '@utils';
 
 import {
   filterAnalyticsEntries,
+  narrowToProject,
   scopeProjectsToUser,
 } from '../analytics/analytics-filter.util';
 import {
@@ -68,11 +69,9 @@ export class HomePage {
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
   /** `projects` narrowed to the one picked in the dropdown, if any. */
-  public readonly visibleProjects = computed(() => {
-    const projectId = this.filter().projectId;
-    const all = this.projects();
-    return projectId ? all.filter((p) => p.id === projectId) : all;
-  });
+  public readonly visibleProjects = computed(() =>
+    narrowToProject(this.projects(), this.filter().projectId),
+  );
 
   /**
    * Entries on the listed projects only, as on the analytics page, so the KPIs

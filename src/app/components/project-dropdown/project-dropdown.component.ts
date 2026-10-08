@@ -15,7 +15,7 @@ import { FormsModule } from '@angular/forms';
 
 import { Project } from '@models';
 import { Store } from '@state';
-import { getProjectColor } from '@utils';
+import { ColorList, buildProjectColorMap } from '@utils';
 
 @Component({
   selector: 'app-project-dropdown',
@@ -42,6 +42,9 @@ export class ProjectDropdownComponent {
   projects = computed(
     () => this.projectsOverride() ?? this.store.projects.projects(),
   );
+  private readonly colorMap = computed(() =>
+    buildProjectColorMap(this.projects()),
+  );
   projectSearchTerm = signal('');
   filteredProjects = computed(() => {
     const term = this.projectSearchTerm().trim().toLowerCase();
@@ -62,7 +65,7 @@ export class ProjectDropdownComponent {
   ) {}
 
   resolveProjectColor(project: Project): string {
-    return getProjectColor(project.id, this.projects());
+    return this.colorMap().get(project.id) ?? ColorList.tagThemeVars[0];
   }
 
   shouldShowNullOption(): boolean {

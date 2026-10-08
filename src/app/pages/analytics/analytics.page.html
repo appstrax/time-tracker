@@ -14,7 +14,8 @@
     <div class="filter-row">
       <app-analytics-filters
         [showProject]="true"
-        [projects]="scopedProjects()"
+        [projects]="projects()"
+        [projectUserIds]="projectUserIds()"
         [users]="projectUsers()"
         (filterChange)="onFilterChange($event)"
       />
@@ -60,7 +61,7 @@
 
       <app-insights-charts
         [entries]="filteredEntries()"
-        [projects]="visibleProjects()"
+        [projects]="scopedProjects()"
       />
 
       <section class="project-list card-surface" aria-label="Projects">
@@ -90,7 +91,8 @@
             <a
               class="project-row"
               [routerLink]="['/analytics', row.id]"
-              queryParamsHandling="preserve"
+              [queryParams]="{ projectId: null }"
+              queryParamsHandling="merge"
             >
               <app-project-preview
                 class="cell-project"

@@ -36,6 +36,8 @@ export class AnalyticsFiltersComponent implements OnInit, OnDestroy {
   public readonly showUser = input(true);
   public readonly showProject = input(false);
   public readonly projects = input<Project[]>([]);
+  /** Team member ids per project id; picking a project drops a member outside it. */
+  public readonly projectUserIds = input<Map<string, Set<string>>>(new Map());
   public readonly categories = input<string[]>([]);
   public readonly showCategory = input(false);
 
@@ -75,7 +77,9 @@ export class AnalyticsFiltersComponent implements OnInit, OnDestroy {
     const { userId } = this.filter();
     // Drop a team member who is not on the newly picked project.
     const keepUser =
-      !project || !userId || (project.users ?? []).some((u) => u.id === userId);
+      !project ||
+      !userId ||
+      !!this.projectUserIds().get(project.id)?.has(userId);
     this.update({
       projectId: project?.id,
       ...(keepUser ? {} : { userId: undefined }),

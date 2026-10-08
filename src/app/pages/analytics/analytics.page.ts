@@ -12,7 +12,9 @@ import { Store } from '@state';
 import { TimeSheetExportUtil } from '@utils';
 
 import {
+  buildProjectUserIds,
   filterAnalyticsEntries,
+  narrowToProject,
   formatDateInput,
   scopeProjectsToUser,
 } from './analytics-filter.util';
@@ -61,20 +63,18 @@ export class AnalyticsPage implements OnInit {
   );
 
   /** `scopedProjects` narrowed to the project picked in the dropdown. */
-  public readonly visibleProjects = computed(() => {
-    const projectId = this.filter().projectId;
-    const scoped = this.scopedProjects();
-    return projectId ? scoped.filter((p) => p.id === projectId) : scoped;
-  });
+  public readonly visibleProjects = computed(() =>
+    narrowToProject(this.scopedProjects(), this.filter().projectId),
+  );
 
-  /** Team members to pick from: only the selected project's members, else everyone. */
+  public readonly projectUserIds = computed(() =>
+    buildProjectUserIds(this.projects(), this.entries()),
+  );
+
+  /** Team members to pick from: only the selected project's, else everyone. */
   public readonly projectUsers = computed(() => {
-    const projectId = this.filter().projectId;
-    const project = projectId
-      ? this.projects().find((p) => p.id === projectId)
-      : undefined;
-    if (!project) return this.users();
-    const memberIds = new Set((project.users ?? []).map((u) => u.id));
+    const memberIds = this.projectUserIds().get(this.filter().projectId ?? '');
+    if (!memberIds) return this.users();
     return this.users().filter((u) => memberIds.has(u.id));
   });
 

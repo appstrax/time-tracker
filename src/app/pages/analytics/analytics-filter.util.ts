@@ -39,6 +39,33 @@ export function scopeProjectsToUser(
   );
 }
 
+/** Narrows projects to the picked one; an unknown or empty id leaves them all. */
+export function narrowToProject(
+  projects: Project[],
+  projectId: string | undefined,
+): Project[] {
+  if (!projectId || !projects.some((p) => p.id === projectId)) return projects;
+  return projects.filter((p) => p.id === projectId);
+}
+
+/**
+ * Per project, the ids of the team members to offer: its current members plus
+ * anyone who logged time on it, so former members stay selectable.
+ */
+export function buildProjectUserIds(
+  projects: Project[],
+  entries: TimeSheetEntry[],
+): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
+  for (const project of projects) {
+    map.set(project.id, new Set((project.users ?? []).map((u) => u.id)));
+  }
+  for (const entry of entries) {
+    map.get(entry.projectId)?.add(entry.userId);
+  }
+  return map;
+}
+
 /** Categories the selected team member has actually logged, sorted. */
 export function userCategoryOptions(
   entries: TimeSheetEntry[],

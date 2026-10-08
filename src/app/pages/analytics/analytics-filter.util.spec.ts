@@ -1,6 +1,8 @@
 import { Project, TimeSheetEntry, User } from '@models';
 
 import {
+  buildProjectUserIds,
+  narrowToProject,
   scopeProjectsToUser,
   userCategoryOptions,
 } from './analytics-filter.util';
@@ -105,5 +107,28 @@ describe('userCategoryOptions', () => {
     expect(userCategoryOptions([entry('u2', 'Support')] as never, 'u1')).toEqual(
       [],
     );
+  });
+});
+
+describe('narrowToProject', () => {
+  const projects = [project('a', []), project('b', [])];
+
+  it('returns only the picked project', () => {
+    expect(narrowToProject(projects, 'b').map((p) => p.id)).toEqual(['b']);
+  });
+
+  it('ignores an empty or unknown id', () => {
+    expect(narrowToProject(projects, undefined)).toBe(projects);
+    expect(narrowToProject(projects, 'zzz')).toBe(projects);
+  });
+});
+
+describe('buildProjectUserIds', () => {
+  it('includes members and anyone who logged time on the project', () => {
+    const entry = new TimeSheetEntry();
+    entry.projectId = 'a';
+    entry.userId = 'former';
+    const map = buildProjectUserIds([project('a', ['u1'])], [entry]);
+    expect([...(map.get('a') ?? [])]).toEqual(['u1', 'former']);
   });
 });
