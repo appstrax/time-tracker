@@ -3,13 +3,20 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 
-import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
+import { InsightsChartsComponent, ProjectPreviewComponent, SearchInputComponent } from '@components';
 import { AnalyticsFilter, TimeSheetEntry } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
-import { TimeSheetFilterUtil, storeTimeSheetFilterProjectId } from '@utils';
+import {
+  TimeSheetFilterUtil,
+  filterProjectsByTerm,
+  storeTimeSheetFilterProjectId,
+} from '@utils';
 
-import { filterAnalyticsEntries } from '../analytics/analytics-filter.util';
+import {
+  filterAnalyticsEntries,
+  narrowToProject,
+} from '../analytics/analytics-filter.util';
 import {
   ProjectRow,
   buildProjectRows,
@@ -32,6 +39,7 @@ import {
     InsightsChartsComponent,
     MetricCardComponent,
     ProjectPreviewComponent,
+    SearchInputComponent,
   ],
 })
 export class HomePage {
@@ -53,12 +61,17 @@ export class HomePage {
   public readonly projects = computed(() => this.store.access.logProjects());
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
+  /** `projects` narrowed to the one picked in the dropdown, if any. */
+  public readonly visibleProjects = computed(() =>
+    narrowToProject(this.projects(), this.filter().projectId),
+  );
+
   /**
    * Entries on the listed projects only, as on the analytics page, so the KPIs
    * and charts always agree with the project rows.
    */
   public readonly filteredEntries = computed(() => {
-    const visibleIds = new Set(this.projects().map((p) => p.id));
+    const visibleIds = new Set(this.visibleProjects().map((p) => p.id));
     return filterAnalyticsEntries(this.entries(), this.filter()).filter((e) =>
       visibleIds.has(e.projectId),
     );
@@ -68,11 +81,15 @@ export class HomePage {
   );
   public readonly rows = computed<ProjectRow[]>(() =>
     buildProjectRows(
-      this.projects(),
+      this.visibleProjects(),
       this.filteredEntries(),
       [],
       this.store.projects.projects(),
     ),
+  );
+  public readonly projectSearch = signal('');
+  public readonly listedRows = computed(() =>
+    filterProjectsByTerm(this.rows(), this.projectSearch()),
   );
 
   private latestLoadId = 0;
