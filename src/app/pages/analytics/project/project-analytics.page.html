@@ -182,16 +182,15 @@
                     </span>
                     @if (canToggleBillable()) {
                       <button
+                        #billableTip="ngbTooltip"
                         type="button"
                         class="status-action entry-billable-button"
-                        [class.status-action--decline]="entry.billable"
-                        [class.status-action--approve]="!entry.billable"
                         [disabled]="isBusy(entry.id)"
-                        [ngbTooltip]="entry.billable ? 'Toggle non-billable' : 'Toggle billable'"
+                        [ngbTooltip]="entry.billable ? 'Billable' : 'Non-billable'"
                         container="body"
                         triggers="hover"
-                        [attr.aria-label]="entry.billable ? 'Toggle non-billable' : 'Toggle billable'"
-                        (click)="toggleBillable(entry)"
+                        [attr.aria-label]="entry.billable ? 'Billable' : 'Non-billable'"
+                        (click)="toggleBillable(entry, billableTip)"
                       >
                         <i
                           class="bi bi-cash-coin entry-billable-icon"

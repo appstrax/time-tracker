@@ -243,6 +243,30 @@ describe('ProjectAnalyticsPage', () => {
       ).toBeFalse();
     });
 
+    it('shows a success toast when marking an entry billable', async () => {
+      platformAdmin = true;
+      const toast = TestBed.inject(ToastService);
+      spyOn(toast, 'success');
+      const entry = component.entries().find((e) => e.id === 'e2')!;
+      entry.billable = false;
+
+      await component.toggleBillable(entry);
+
+      expect(toast.success).toHaveBeenCalledWith('Entry marked billable');
+    });
+
+    it('shows a success toast when marking an entry non-billable', async () => {
+      platformAdmin = true;
+      const toast = TestBed.inject(ToastService);
+      spyOn(toast, 'success');
+      const entry = component.entries().find((e) => e.id === 'e1')!;
+      expect(entry.billable).toBeTrue();
+
+      await component.toggleBillable(entry);
+
+      expect(toast.success).toHaveBeenCalledWith('Entry marked non-billable');
+    });
+
     it('shows an error toast when the update fails', async () => {
       platformAdmin = true;
       setBillable.and.rejectWith(new Error('nope'));

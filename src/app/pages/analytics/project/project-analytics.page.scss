@@ -257,30 +257,9 @@
   }
 }
 
-.status-action--approve:hover:not(:disabled),
-.status-action--approve:focus-visible {
-  color: #0b5f58;
-  background: #dcf3ef;
-}
-
-.status-action--decline:hover:not(:disabled),
-.status-action--decline:focus-visible {
-  color: #9b1c1c;
-  background: #fde8e8;
-}
-
-:host-context([data-theme='dark']) {
-  .status-action--approve:hover:not(:disabled),
-  .status-action--approve:focus-visible {
-    color: #5eead4;
-    background: color-mix(in srgb, #2dd4bf 18%, var(--color-surface));
-  }
-
-  .status-action--decline:hover:not(:disabled),
-  .status-action--decline:focus-visible {
-    color: #fca5a5;
-    background: color-mix(in srgb, #f87171 18%, var(--color-surface));
-  }
+.status-action:hover:not(:disabled),
+.status-action:focus-visible {
+  background: var(--color-border-strong);
 }
 
 @media (max-width: 991px) {
