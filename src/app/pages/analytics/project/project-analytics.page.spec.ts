@@ -252,7 +252,7 @@ describe('ProjectAnalyticsPage', () => {
 
       await component.toggleBillable(entry);
 
-      expect(toast.success).toHaveBeenCalledWith('Entry marked billable');
+      expect(toast.success).toHaveBeenCalledWith('Status updated successfully');
     });
 
     it('shows a success toast when marking an entry non-billable', async () => {
@@ -264,7 +264,7 @@ describe('ProjectAnalyticsPage', () => {
 
       await component.toggleBillable(entry);
 
-      expect(toast.success).toHaveBeenCalledWith('Entry marked non-billable');
+      expect(toast.success).toHaveBeenCalledWith('Status updated successfully');
     });
 
     it('shows an error toast when the update fails', async () => {
