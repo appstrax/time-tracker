@@ -190,6 +190,9 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
       average: dayCount ? total / dayCount : 0,
       dayCount,
       contributors: new Set(entries.map((e) => e.userId)).size,
+      billable: sum(entries.filter((e) => e.billable)),
+      approvedBillable: sum(entries.filter((e) => e.approved && e.billable)),
+      pendingBillable: sum(entries.filter((e) => !e.approved && e.billable)),
     };
   });
 
