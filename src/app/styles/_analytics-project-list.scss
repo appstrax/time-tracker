@@ -24,7 +24,7 @@
 .list-columns,
 .project-row {
   display: grid;
-  grid-template-columns: 2.6fr 1.6fr 1fr 1fr 1.1fr 28px;
+  grid-template-columns: 2.6fr 1.6fr 1fr 0.9fr 1fr 1.1fr 28px;
   gap: 1rem;
   align-items: center;
   padding: 0.875rem 1.25rem;
@@ -94,6 +94,11 @@
   font-size: 1rem;
 }
 
+.cell-billable {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
 .cell-team {
   display: inline-flex;
   padding-left: 8px;
@@ -141,6 +146,7 @@
   }
 
   .cell-approval,
+  .cell-billable,
   .cell-team,
   .cell-last {
     grid-column: 1 / -1;

@@ -12,4 +12,8 @@
       <span class="value-suffix">{{ valueSuffix() }}</span>
     }
   </div>
+
+  @if (subtitle()) {
+    <p class="metric-subtitle">{{ subtitle() }}</p>
+  }
 </article>

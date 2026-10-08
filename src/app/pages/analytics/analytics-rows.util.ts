@@ -14,6 +14,7 @@ export interface ProjectRow {
   contributors: string[];
   contributorCount: number;
   lastActivity: Date | null;
+  billableHours: number;
 }
 
 export interface EntryTotals {
@@ -22,6 +23,9 @@ export interface EntryTotals {
   pending: number;
   pendingCount: number;
   contributors: number;
+  billable: number;
+  approvedBillable: number;
+  pendingBillable: number;
 }
 
 function sumHours(entries: TimeSheetEntry[]): number {
@@ -37,6 +41,9 @@ export function summarizeEntries(entries: TimeSheetEntry[]): EntryTotals {
     pending,
     pendingCount: entries.filter((e) => !e.approved).length,
     contributors: new Set(entries.map((e) => e.userId)).size,
+    billable: sumHours(entries.filter((e) => e.billable)),
+    approvedBillable: sumHours(entries.filter((e) => e.approved && e.billable)),
+    pendingBillable: sumHours(entries.filter((e) => !e.approved && e.billable)),
   };
 }
 
@@ -69,7 +76,7 @@ export function buildProjectRows(
   return projects
     .map((project) => {
       const own = entries.filter((e) => e.projectId === project.id);
-      const { total, approved, pending } = summarizeEntries(own);
+      const { total, approved, pending, billable } = summarizeEntries(own);
       const userIds = [...new Set(own.map((e) => e.userId))];
       const latest = own.reduce<Date | null>(
         (max, e) => (!max || e.date > max ? e.date : max),
@@ -90,6 +97,7 @@ export function buildProjectRows(
           .map((id) => initials(usersById.get(id) ?? null)),
         contributorCount: userIds.length,
         lastActivity: latest,
+        billableHours: billable,
       };
     })
     .sort((a, b) => b.hours - a.hours);

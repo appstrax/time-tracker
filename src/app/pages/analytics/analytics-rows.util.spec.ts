@@ -15,6 +15,7 @@ function makeEntry(
   hours: number,
   approved: boolean,
   date = new Date(2026, 0, 15),
+  billable = true,
 ): TimeSheetEntry {
   const entry = new TimeSheetEntry();
   entry.projectId = projectId;
@@ -22,6 +23,7 @@ function makeEntry(
   entry.hours = hours;
   entry.approved = approved;
   entry.date = date;
+  entry.billable = billable;
   return entry;
 }
 
@@ -45,7 +47,29 @@ describe('summarizeEntries', () => {
       pending: 3.5,
       pendingCount: 2,
       contributors: 2,
+      billable: 6.5,
+      approvedBillable: 3,
+      pendingBillable: 3.5,
     });
+  });
+
+  it('sums only billable hours', () => {
+    const totals = summarizeEntries([
+      makeEntry('a', 'u1', 3, true, new Date(2026, 0, 15), true),
+      makeEntry('a', 'u1', 2, true, new Date(2026, 0, 15), false),
+    ]);
+    expect(totals.billable).toBe(3);
+  });
+
+  it('splits billable hours by approval status', () => {
+    const totals = summarizeEntries([
+      makeEntry('a', 'u1', 3, true, new Date(2026, 0, 15), true),
+      makeEntry('a', 'u1', 1, true, new Date(2026, 0, 15), false),
+      makeEntry('a', 'u1', 2, false, new Date(2026, 0, 15), true),
+      makeEntry('a', 'u1', 5, false, new Date(2026, 0, 15), false),
+    ]);
+    expect(totals.approvedBillable).toBe(3);
+    expect(totals.pendingBillable).toBe(2);
   });
 
   it('returns zeros for no entries', () => {
@@ -55,6 +79,9 @@ describe('summarizeEntries', () => {
       pending: 0,
       pendingCount: 0,
       contributors: 0,
+      billable: 0,
+      approvedBillable: 0,
+      pendingBillable: 0,
     });
   });
 });
@@ -101,6 +128,18 @@ describe('buildProjectRows', () => {
       [],
     );
     expect(row.lastActivity).toEqual(new Date(2026, 0, 20));
+  });
+
+  it('computes billable hours per project', () => {
+    const [row] = buildProjectRows(
+      [alpha],
+      [
+        makeEntry('alpha', 'u1', 3, true, new Date(2026, 0, 15), true),
+        makeEntry('alpha', 'u1', 1, true, new Date(2026, 0, 15), false),
+      ],
+      [],
+    );
+    expect(row.billableHours).toBe(3);
   });
 
   it('lists contributor initials and counts', () => {

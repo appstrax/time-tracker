@@ -98,6 +98,10 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     this.store.access.can(this.projectId(), 'approve'),
   );
 
+  public readonly canToggleBillable = computed(() =>
+    this.store.access.platformAdmin(),
+  );
+
   public readonly usersById = computed(
     () => new Map(this.users().map((u) => [u.id, u])),
   );
@@ -292,6 +296,26 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
   public async setApproved(entry: TimeSheetEntry, approved: boolean): Promise<void> {
     if (entry.approved === approved) return;
     await this.saveStatus([entry], approved);
+  }
+
+  public async toggleBillable(entry: TimeSheetEntry): Promise<void> {
+    if (!this.canToggleBillable()) return;
+    const billable = !entry.billable;
+    this.busy.update((set) => new Set([...set, entry.id]));
+    try {
+      const saved = await this.entryService.setBillable(entry.id, billable);
+      this.entries.update((list) =>
+        list.map((e) => (e.id === saved.id ? saved : e)),
+      );
+    } catch {
+      this.toast.error('Failed to update billable status');
+    } finally {
+      this.busy.update((set) => {
+        const next = new Set(set);
+        next.delete(entry.id);
+        return next;
+      });
+    }
   }
 
   public async approveDay(day: DayGroup): Promise<void> {
