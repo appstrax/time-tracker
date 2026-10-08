@@ -62,9 +62,11 @@ export class SideNavComponent implements AfterViewInit {
   async logout() {
     try {
       await appstraxAuth.logout();
+      this.store.access.clear();
       this.router.navigate(['/login']);
     } catch (error) {
       console.error('Logout error:', error);
+      this.store.access.clear();
       this.router.navigate(['/login']);
     }
   }

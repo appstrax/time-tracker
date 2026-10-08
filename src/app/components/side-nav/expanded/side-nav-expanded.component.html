@@ -11,47 +11,49 @@
   </div>
 
   <div class="menu">
-    <a
-      routerLink="/home"
-      routerLinkActive="active"
-      #homeActive="routerLinkActive"
-      class="menu-item"
-      ngbTooltip="Home"
-      [disableTooltip]="!compact"
-      placement="end"
-      container="body"
-      triggers="hover"
-    >
-      <span class="menu-item-icon" aria-hidden="true">
-        <i
-          class="bi"
-          [class.bi-house-door]="!homeActive.isActive"
-          [class.bi-house-door-fill]="homeActive.isActive"
-        ></i>
-      </span>
-      <span class="label nav-expandable-text">Home</span>
-    </a>
-    <a
-      routerLink="/time-sheet"
-      routerLinkActive="active"
-      #timeSheetActive="routerLinkActive"
-      class="menu-item"
-      ngbTooltip="Time Sheets"
-      [disableTooltip]="!compact"
-      placement="end"
-      container="body"
-      triggers="hover"
-    >
-      <span class="menu-item-icon" aria-hidden="true">
-        <i
-          class="bi"
-          [class.bi-stopwatch]="!timeSheetActive.isActive"
-          [class.bi-stopwatch-fill]="timeSheetActive.isActive"
-        ></i>
-      </span>
-      <span class="label nav-expandable-text">Time Sheets</span>
-    </a>
-    @if (admin()) {
+    @if (showLogTime()) {
+      <a
+        routerLink="/home"
+        routerLinkActive="active"
+        #homeActive="routerLinkActive"
+        class="menu-item"
+        ngbTooltip="Home"
+        [disableTooltip]="!compact"
+        placement="end"
+        container="body"
+        triggers="hover"
+      >
+        <span class="menu-item-icon" aria-hidden="true">
+          <i
+            class="bi"
+            [class.bi-house-door]="!homeActive.isActive"
+            [class.bi-house-door-fill]="homeActive.isActive"
+          ></i>
+        </span>
+        <span class="label nav-expandable-text">Home</span>
+      </a>
+      <a
+        routerLink="/time-sheet"
+        routerLinkActive="active"
+        #timeSheetActive="routerLinkActive"
+        class="menu-item"
+        ngbTooltip="Time Sheets"
+        [disableTooltip]="!compact"
+        placement="end"
+        container="body"
+        triggers="hover"
+      >
+        <span class="menu-item-icon" aria-hidden="true">
+          <i
+            class="bi"
+            [class.bi-stopwatch]="!timeSheetActive.isActive"
+            [class.bi-stopwatch-fill]="timeSheetActive.isActive"
+          ></i>
+        </span>
+        <span class="label nav-expandable-text">Time Sheets</span>
+      </a>
+    }
+    @if (showAnalytics()) {
       <a
         routerLink="/analytics"
         routerLinkActive="active"
@@ -72,7 +74,8 @@
         </span>
         <span class="label nav-expandable-text">Analytics</span>
       </a>
-
+    }
+    @if (admin()) {
       <a
         routerLink="/projects"
         routerLinkActive="active"

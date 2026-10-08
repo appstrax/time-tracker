@@ -67,8 +67,8 @@
 
 .days {
   // Shared column rhythm so day headers and their entries line up.
-  --day-columns: 24px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 2fr) 5.5rem
-    minmax(0, 12rem);
+  --day-columns: 24px minmax(0, 1.5fr) minmax(0, 1fr) minmax(0, 2fr) 1.75rem
+    5.5rem minmax(0, 12rem);
   --day-gutter: 0.5rem;
   // Width of the approve/decline pair, so the day action lines up above it.
   --day-action-slot: 3.75rem;
@@ -126,11 +126,11 @@
 }
 
 .day-total {
-  grid-column: 5;
+  grid-column: 6;
 }
 
 .day-toggle .status-pill {
-  grid-column: 6;
+  grid-column: 7;
   justify-self: start;
 }
 
@@ -169,7 +169,7 @@
 }
 
 .entry-hours {
-  grid-column: 5;
+  grid-column: 6;
 }
 
 .entry-who {
@@ -201,15 +201,30 @@
 }
 
 .entry-status {
-  grid-column: 6;
+  grid-column: 7;
   display: flex;
   align-items: center;
   gap: 0.625rem;
   flex-wrap: wrap;
 }
 
+.entry-billable-icon {
+  grid-column: 5;
+  justify-self: center;
+  font-size: 0.95rem;
+}
+
+.entry-billable-button {
+  grid-column: 5;
+  justify-self: center;
+
+  .entry-billable-icon {
+    font-size: inherit;
+  }
+}
+
 .status-actions {
-  grid-column: 7;
+  grid-column: 8;
   display: inline-flex;
   align-items: center;
   justify-content: flex-end;
@@ -242,30 +257,9 @@
   }
 }
 
-.status-action--approve:hover:not(:disabled),
-.status-action--approve:focus-visible {
-  color: #0b5f58;
-  background: #dcf3ef;
-}
-
-.status-action--decline:hover:not(:disabled),
-.status-action--decline:focus-visible {
-  color: #9b1c1c;
-  background: #fde8e8;
-}
-
-:host-context([data-theme='dark']) {
-  .status-action--approve:hover:not(:disabled),
-  .status-action--approve:focus-visible {
-    color: #5eead4;
-    background: color-mix(in srgb, #2dd4bf 18%, var(--color-surface));
-  }
-
-  .status-action--decline:hover:not(:disabled),
-  .status-action--decline:focus-visible {
-    color: #fca5a5;
-    background: color-mix(in srgb, #f87171 18%, var(--color-surface));
-  }
+.status-action:hover:not(:disabled),
+.status-action:focus-visible {
+  background: var(--color-border-strong);
 }
 
 @media (max-width: 991px) {
@@ -283,6 +277,8 @@
   .day-toggle .status-pill,
   .entry-who,
   .entry-category,
+  .entry-billable-icon,
+  .entry-billable-button,
   .entry-hours,
   .status-actions {
     grid-column: auto;

@@ -11,7 +11,6 @@ import {
 import { RouterModule } from '@angular/router';
 import { NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
-import { UserRole } from '@models';
 import { Store } from '@state';
 
 import { SideNavProfileCardComponent } from '../side-nav-profile-card/side-nav-profile-card.component';
@@ -33,7 +32,10 @@ export class SideNavExpandedComponent {
   @ViewChild(SideNavProfileCardComponent)
   private profileCard?: SideNavProfileCardComponent;
 
-  admin = computed(() => this.store.user.user()?.role === UserRole.ADMIN);
+  admin = computed(() => this.store.access.platformAdmin());
+
+  showLogTime = computed(() => !this.store.access.needsAnalyticsLanding());
+  showAnalytics = computed(() => this.store.access.hasAnalyticsAccess());
 
   constructor(private store: Store) {}
 

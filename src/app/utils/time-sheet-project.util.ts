@@ -1,19 +1,6 @@
-import { Project, User, UserRole } from '@models';
+import { Project } from '@models';
 
 import { ColorList } from './color-list';
-
-/** Projects a given user may log time against. Non-admins' projects are already
- * scoped server-side to their memberships; admins otherwise see every project,
- * so narrow those down to ones they're actually a member of. */
-export function filterAssignedProjects(
-  projects: Project[],
-  user: User | null | undefined,
-): Project[] {
-  if (user?.role !== UserRole.ADMIN) return projects;
-  return projects.filter((project) =>
-    project.users.some((member) => member.id === user.id),
-  );
-}
 
 /** The time sheet page's project filter. Absent means "all projects". The entry
  * modal has no persisted default of its own — it seeds from this filter. */

@@ -35,15 +35,6 @@ export class TimeSheetEntryService extends CrudService<TimeSheetEntry> {
     });
   }
 
-  public async findByProjectId(
-    projectIds: string[],
-  ): Promise<TimeSheetEntry[]> {
-    return this.findAllPages({
-      where: { projectId: { [Operator.IN]: projectIds } },
-      order: { createdAt: OrderDirection.ASC },
-    });
-  }
-
   /**
    * Fetches every row matching `query`. A single `find()` without `limit` only
    * returns the first API page (default 1000, ordered as requested), which

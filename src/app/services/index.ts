@@ -5,4 +5,5 @@ export * from './project.service';
 export * from './settings.service';
 export * from './time-sheet-entry.service';
 export * from './user.service';
+export * from './analytics-entries.service';
 export * from './agent-token.service';

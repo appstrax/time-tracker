@@ -1,14 +1,14 @@
 import { Model } from '@appstrax/services/database';
 
 export enum ProjectUserRole {
-  ADMIN = 'admin',
   VIEWER = 'viewer',
   CONTRIBUTOR = 'contributor',
-  APPROVER = 'approver',
+  MANAGER = 'manager',
 }
 
 export class ProjectUser extends Model {
   projectId: string = '';
   userId: string = '';
-  role: ProjectUserRole = ProjectUserRole.VIEWER;
+  /** Empty (no access) until a role is set explicitly; never default to a real role. */
+  role: ProjectUserRole | '' = '';
 }
