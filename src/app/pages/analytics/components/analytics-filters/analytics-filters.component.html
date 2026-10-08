@@ -48,6 +48,17 @@
     </select>
   </label>
 
+  @if (showProject()) {
+    <app-project-dropdown
+      class="project-filter"
+      [projects]="projects()"
+      [selectedProject]="selectedProject()"
+      [allowNull]="true"
+      [nullOptionLabel]="'All projects'"
+      [compact]="true"
+      (projectSelected)="onProject($event)"
+    />
+  }
   @if (showUser()) {
     <label class="pill">
       <span class="pill-label">Team member</span>

@@ -10,6 +10,8 @@
     <div class="filter-row">
       <app-analytics-filters
         [showUser]="false"
+        [showProject]="true"
+        [projects]="projects()"
         (filterChange)="onFilterChange($event)"
       />
       <span class="result-count">
@@ -59,7 +61,7 @@
 
       <app-insights-charts
         [entries]="filteredEntries()"
-        [projects]="projects()"
+        [projects]="visibleProjects()"
       />
 
       <section
@@ -72,7 +74,13 @@
         </header>
 
         @if (!rows().length) {
-          <p class="empty-card">No projects available.</p>
+          <p class="empty-card">
+            {{
+              filter().projectId
+                ? 'No hours on this project.'
+                : 'No projects available.'
+            }}
+          </p>
         } @else {
           <div class="list-columns" aria-hidden="true">
             <span>Project</span>

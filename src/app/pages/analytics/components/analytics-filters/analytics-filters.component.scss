@@ -48,3 +48,51 @@
 .pill select option {
   color: initial;
 }
+
+.project-filter {
+  display: flex;
+  align-items: center;
+  min-width: 11rem;
+  max-width: min(22rem, 48vw);
+  height: 40px;
+
+  ::ng-deep .project-dropdown--compact {
+    height: 40px;
+  }
+
+  ::ng-deep .form-group {
+    margin-bottom: 0;
+  }
+
+  ::ng-deep .project-dropdown--compact .dropdown-toggle {
+    min-height: 40px;
+    height: 40px;
+    max-height: 40px;
+    padding: 0 0.85rem;
+    border: 1px solid var(--color-border-strong);
+    border-radius: var(--radius-control, 8px);
+    background: var(--color-surface);
+    color: var(--text-primary);
+    font-size: 14px;
+    font-weight: 700;
+    box-shadow: none;
+  }
+
+  ::ng-deep .project-dropdown--compact .dropdown-toggle:hover,
+  ::ng-deep .project-dropdown--compact .dropdown-toggle:focus,
+  ::ng-deep .project-dropdown--compact .dropdown-toggle:active {
+    border-color: color-mix(
+      in srgb,
+      var(--color-primary) 45%,
+      var(--color-border)
+    );
+    background: var(--color-surface);
+    box-shadow: 0 0 0 0.2rem
+      color-mix(in srgb, var(--color-primary) 14%, transparent);
+  }
+
+  ::ng-deep .project-dropdown-chevron {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+  }
+}

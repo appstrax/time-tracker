@@ -67,12 +67,19 @@ export class HomePage {
   });
   public readonly hasProjects = computed(() => this.projects().length > 0);
 
+  /** `projects` narrowed to the one picked in the dropdown, if any. */
+  public readonly visibleProjects = computed(() => {
+    const projectId = this.filter().projectId;
+    const all = this.projects();
+    return projectId ? all.filter((p) => p.id === projectId) : all;
+  });
+
   /**
    * Entries on the listed projects only, as on the analytics page, so the KPIs
    * and charts always agree with the project rows.
    */
   public readonly filteredEntries = computed(() => {
-    const visibleIds = new Set(this.projects().map((p) => p.id));
+    const visibleIds = new Set(this.visibleProjects().map((p) => p.id));
     return filterAnalyticsEntries(this.entries(), this.filter()).filter((e) =>
       visibleIds.has(e.projectId),
     );
@@ -82,7 +89,7 @@ export class HomePage {
   );
   public readonly rows = computed<ProjectRow[]>(() =>
     buildProjectRows(
-      this.projects(),
+      this.visibleProjects(),
       this.filteredEntries(),
       [],
       this.store.projects.projects(),

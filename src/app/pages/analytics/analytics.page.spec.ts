@@ -126,4 +126,26 @@ describe('AnalyticsPage', () => {
     expect(component.rows()).toEqual([]);
     expect(component.totals().total).toBe(0);
   });
+
+  it('narrows rows, entries and totals to the selected project', () => {
+    component.filter.set({ projectId: 'beta' });
+    expect(component.rows().map((row) => row.id)).toEqual(['beta']);
+    expect(component.filteredEntries().map((entry) => entry.id)).toEqual([
+      'e2',
+    ]);
+    expect(component.totals().total).toBe(5);
+  });
+
+  it('offers only the selected project’s members as team members', () => {
+    component.filter.set({ projectId: 'alpha' });
+    expect(component.projectUsers().map((user) => user.id)).toEqual(['u1']);
+  });
+
+  it('offers every team member when no project is selected', () => {
+    component.filter.set({});
+    expect(component.projectUsers().map((user) => user.id)).toEqual([
+      'u1',
+      'u2',
+    ]);
+  });
 });
