@@ -2,10 +2,13 @@
   class="project-dropdown form-group"
   [class.show]="isProjectDropdownOpen"
   [class.project-dropdown--compact]="compact"
+  [class.project-dropdown--embedded]="embedded"
 >
     <button
       type="button"
-      class="btn btn-outline-dark dropdown-toggle w-100 d-flex align-items-center justify-content-between"
+      class="btn btn-outline-dark dropdown-toggle d-flex align-items-center"
+      [class.w-100]="!embedded"
+      [class.justify-content-between]="!embedded"
       [class.form-select]="!compact"
       (click)="toggleProjectDropdown($event)"
       [disabled]="disabled"
