@@ -37,11 +37,10 @@ export class AuthErrorUtil {
         return 'Unexpected error';
       case 'sso_account_domain_not_allowed':
         return (
-          'This Google account is not allowed for this app. Sign in with your work Google account, ' +
-          'or ask your administrator if you need access.'
+          'This Google account is not allowed for this app. Sign in with your work account.'
         );
       case 'ssoRequired':
-        return 'This account must sign in with Google. Use Continue with Google below.';
+        return 'This account must sign in with Google SSO.';
       case 'access_denied':
         return 'Google sign-in was cancelled. Try again, or sign in with email and password if your account allows it.';
       case 'oauth_failed':
