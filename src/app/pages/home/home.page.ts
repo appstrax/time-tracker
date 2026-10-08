@@ -3,11 +3,15 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 
-import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
+import { InsightsChartsComponent, ProjectPreviewComponent, SearchInputComponent } from '@components';
 import { AnalyticsFilter, TimeSheetEntry, UserRole } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
-import { TimeSheetFilterUtil, storeTimeSheetFilterProjectId } from '@utils';
+import {
+  TimeSheetFilterUtil,
+  filterProjectsByTerm,
+  storeTimeSheetFilterProjectId,
+} from '@utils';
 
 import {
   filterAnalyticsEntries,
@@ -36,6 +40,7 @@ import {
     InsightsChartsComponent,
     MetricCardComponent,
     ProjectPreviewComponent,
+    SearchInputComponent,
   ],
 })
 export class HomePage {
@@ -93,6 +98,10 @@ export class HomePage {
       [],
       this.store.projects.projects(),
     ),
+  );
+  public readonly projectSearch = signal('');
+  public readonly listedRows = computed(() =>
+    filterProjectsByTerm(this.rows(), this.projectSearch()),
   );
 
   private latestLoadId = 0;

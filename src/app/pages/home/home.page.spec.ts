@@ -114,6 +114,14 @@ describe('HomePage', () => {
     expect(component.rows().map((row) => row.id)).toEqual(['alpha', 'beta']);
   });
 
+  it('filters the project list by the search term without changing the totals', () => {
+    component.projectSearch.set('alpha');
+
+    expect(component.listedRows().map((row) => row.id)).toEqual(['alpha']);
+    expect(component.rows().map((row) => row.id)).toEqual(['alpha', 'beta']);
+    expect(component.totals().total).toBe(6);
+  });
+
   it('limits an admin to the projects they are assigned to', () => {
     expect(component.projects().map((project) => project.id)).toEqual([
       'alpha',

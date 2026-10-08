@@ -14,9 +14,14 @@ import { TimeSheetEntryService, ToastService, UsersService } from '@services';
 import {
   InsightsChartsComponent,
   ProjectPreviewComponent,
+  SearchInputComponent,
 } from '@components';
 import { Store } from '@state';
-import { TimeSheetExportUtil, TimeSheetFilterUtil } from '@utils';
+import {
+  TimeSheetExportUtil,
+  TimeSheetFilterUtil,
+  filterProjectsByTerm,
+} from '@utils';
 
 import {
   buildProjectUserIds,
@@ -43,6 +48,7 @@ import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
     InsightsChartsComponent,
     MetricCardComponent,
     ProjectPreviewComponent,
+    SearchInputComponent,
   ],
   templateUrl: './analytics.page.html',
   styleUrl: './analytics.page.scss',
@@ -110,6 +116,10 @@ export class AnalyticsPage implements OnInit {
       this.users(),
       this.projects(),
     ),
+  );
+  public readonly projectSearch = signal('');
+  public readonly listedRows = computed(() =>
+    filterProjectsByTerm(this.rows(), this.projectSearch()),
   );
 
   constructor() {

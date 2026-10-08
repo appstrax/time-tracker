@@ -89,6 +89,47 @@
   min-width: 0;
 }
 
+.project-dropdown--compact.project-dropdown--embedded {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+
+  .project-dropdown-selection {
+    flex: 0 1 auto;
+  }
+
+  .dropdown-toggle {
+    width: auto;
+    max-width: 100%;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    padding: 0 0.15rem 0 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    gap: 0.35rem;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+
+  .dropdown-toggle:hover,
+  .dropdown-toggle:focus,
+  .dropdown-toggle:active,
+  .dropdown-toggle:focus-visible {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+
+  .dropdown-menu {
+    left: 0;
+    right: auto;
+  }
+}
+
 .project-dropdown .dropdown-toggle::after {
   display: none;
 }

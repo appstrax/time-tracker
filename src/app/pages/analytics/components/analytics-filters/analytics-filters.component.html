@@ -49,15 +49,18 @@
   </label>
 
   @if (showProject()) {
-    <app-project-dropdown
-      class="project-filter"
-      [projects]="projects()"
-      [selectedProject]="selectedProject()"
-      [allowNull]="true"
-      [nullOptionLabel]="'All projects'"
-      [compact]="true"
-      (projectSelected)="onProject($event)"
-    />
+    <label class="pill project-filter">
+      <span class="pill-label">Projects</span>
+      <app-project-dropdown
+        [projects]="projects()"
+        [selectedProject]="selectedProject()"
+        [allowNull]="true"
+        [nullOptionLabel]="'All projects'"
+        [compact]="true"
+        [embedded]="true"
+        (projectSelected)="onProject($event)"
+      />
+    </label>
   }
   @if (showUser()) {
     <label class="pill">

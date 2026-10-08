@@ -29,6 +29,8 @@ export class ProjectDropdownComponent {
   @Input() allowNull: boolean = false;
   @Input() nullOptionLabel = 'Select a project';
   @Input() compact: boolean = false;
+  /** Sits inside a filter pill: no border or fill of its own. */
+  @Input() embedded: boolean = false;
 
   @Output() projectSelected = new EventEmitter<Project | null>();
 

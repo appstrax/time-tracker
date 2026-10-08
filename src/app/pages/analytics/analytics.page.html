@@ -67,7 +67,12 @@
       <section class="project-list card-surface" aria-label="Projects">
         <header class="list-head">
           <h2>Projects</h2>
-          <span>Sorted by hours</span>
+          <app-search-input
+            class="list-search"
+            ariaLabel="Search projects"
+            placeholder="Search projects…"
+            [(value)]="projectSearch"
+          />
         </header>
 
         @if (!rows().length) {
@@ -78,6 +83,10 @@
                 : 'No projects available.'
             }}
           </p>
+        } @else if (!listedRows().length) {
+          <p class="empty-card">
+            No projects match "{{ projectSearch().trim() }}".
+          </p>
         } @else {
           <div class="list-columns" aria-hidden="true">
             <span>Project</span>
@@ -87,7 +96,7 @@
             <span>Last activity</span>
             <span></span>
           </div>
-          @for (row of rows(); track row.id) {
+          @for (row of listedRows(); track row.id) {
             <a
               class="project-row"
               [routerLink]="['/analytics', row.id]"
