@@ -118,4 +118,26 @@ describe('AnalyticsEntriesService', () => {
     );
     await expectAsync(promise).toBeRejected();
   });
+
+  it('PUTs billable status and returns the mapped entry', async () => {
+    const promise = service.setBillable('e1', false);
+    const req = await nextRequest(`${base}/e1/billable`);
+    expect(req.request.method).toBe('PUT');
+    expect(req.request.body).toEqual({ billable: false });
+    expect(req.request.headers.get('Authorization')).toBe('Bearer tok');
+    req.flush({ data: { ...dto('e1'), billable: false }, meta: {} });
+
+    const entry = await promise;
+    expect(entry instanceof TimeSheetEntry).toBeTrue();
+    expect(entry.billable).toBeFalse();
+  });
+
+  it('propagates billable update errors', async () => {
+    const promise = service.setBillable('e1', true);
+    (await nextRequest(`${base}/e1/billable`)).flush(
+      { message: 'Forbidden' },
+      { status: 403, statusText: 'Forbidden' },
+    );
+    await expectAsync(promise).toBeRejected();
+  });
 });

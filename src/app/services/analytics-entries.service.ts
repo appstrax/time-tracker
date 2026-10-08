@@ -81,6 +81,20 @@ export class AnalyticsEntriesService {
     return toEntry(response.data);
   }
 
+  async setBillable(
+    entryId: string,
+    billable: boolean,
+  ): Promise<TimeSheetEntry> {
+    const response = await firstValueFrom(
+      this.http.put<ApiResponse<EntryDto>>(
+        `${this.url()}/${encodeURIComponent(entryId)}/billable`,
+        { billable },
+        { headers: await this.headers() },
+      ),
+    );
+    return toEntry(response.data);
+  }
+
   private url(): string {
     return `${environment.apiUrl}/api/entries`;
   }

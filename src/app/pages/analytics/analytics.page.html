@@ -38,6 +38,7 @@
           label="Total hours"
           [value]="(totals().total | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().billable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-clock-history text-primary"
           [compact]="true"
         />
@@ -45,6 +46,7 @@
           label="Approved"
           [value]="(totals().approved | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().approvedBillable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-check2-circle text-success"
           [compact]="true"
         />
@@ -52,6 +54,7 @@
           label="Pending review"
           [value]="(totals().pending | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().pendingBillable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-hourglass-split text-warning"
           [compact]="true"
         />
@@ -89,6 +92,7 @@
             <span>Project</span>
             <span>Approval</span>
             <span>Hours</span>
+            <span>Billable</span>
             <span>Team</span>
             <span>Last activity</span>
             <span></span>
@@ -122,6 +126,9 @@
                 </small>
               </span>
               <b class="cell-hours">{{ row.hours | number: '1.0-1' }} h</b>
+              <span class="cell-billable">
+                {{ row.billableHours | number: '1.0-1' }} h
+              </span>
               <span class="cell-team">
                 @for (initials of row.contributors; track $index) {
                   <i class="member">{{ initials }}</i>

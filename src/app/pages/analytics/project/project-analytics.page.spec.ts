@@ -49,10 +49,15 @@ describe('ProjectAnalyticsPage', () => {
   let setApproved: jasmine.Spy<
     (id: string, approved: boolean) => Promise<TimeSheetEntry>
   >;
+  let setBillable: jasmine.Spy<
+    (id: string, billable: boolean) => Promise<TimeSheetEntry>
+  >;
   let canApprove: boolean;
+  let platformAdmin: boolean;
 
   beforeEach(async () => {
     canApprove = true;
+    platformAdmin = false;
     setApproved = jasmine
       .createSpy('setApproved')
       .and.callFake(async (id: string, approved: boolean) => {
@@ -63,6 +68,18 @@ describe('ProjectAnalyticsPage', () => {
           makeEntry('e4', 'u1', 'Development', 'alpha', false),
         ].find((e) => e.id === id)!;
         found.approved = approved;
+        return found;
+      });
+    setBillable = jasmine
+      .createSpy('setBillable')
+      .and.callFake(async (id: string, billable: boolean) => {
+        const found = [
+          makeEntry('e1', 'u1', 'Development'),
+          makeEntry('e2', 'u2', 'Support'),
+          makeEntry('e3', 'exmember', 'Admin'),
+          makeEntry('e4', 'u1', 'Development', 'alpha', false),
+        ].find((e) => e.id === id)!;
+        found.billable = billable;
         return found;
       });
     paramMap$ = new BehaviorSubject(convertToParamMap({ projectId: 'alpha' }));
@@ -95,6 +112,7 @@ describe('ProjectAnalyticsPage', () => {
         analyticsProjects: signal<Project[]>([alpha]),
         can: (_projectId: string, action: string) =>
           action === 'approve' && canApprove,
+        platformAdmin: () => platformAdmin,
       },
     };
 
@@ -118,7 +136,7 @@ describe('ProjectAnalyticsPage', () => {
         },
         {
           provide: AnalyticsEntriesService,
-          useValue: { findByProjectIds, setApproved },
+          useValue: { findByProjectIds, setApproved, setBillable },
         },
         {
           provide: UsersService,
@@ -192,6 +210,76 @@ describe('ProjectAnalyticsPage', () => {
     expect(component.filter()).toEqual({});
     expect(component.entries().map((e) => e.id)).toEqual(['b1']);
     expect(findByProjectIds).toHaveBeenCalledWith(['beta']);
+  });
+
+  describe('billable toggle gating', () => {
+    it('is false for a non-admin', () => {
+      platformAdmin = false;
+      expect(component.canToggleBillable()).toBeFalse();
+    });
+
+    it('is true for a platform admin', () => {
+      platformAdmin = true;
+      expect(component.canToggleBillable()).toBeTrue();
+    });
+
+    it('does nothing when called by a non-admin', async () => {
+      platformAdmin = false;
+      const entry = component.entries().find((e) => e.id === 'e1')!;
+      await component.toggleBillable(entry);
+      expect(setBillable).not.toHaveBeenCalled();
+    });
+
+    it('flips the entry billable flag via the service when an admin toggles it', async () => {
+      platformAdmin = true;
+      const entry = component.entries().find((e) => e.id === 'e1')!;
+      expect(entry.billable).toBeTrue();
+
+      await component.toggleBillable(entry);
+
+      expect(setBillable).toHaveBeenCalledOnceWith('e1', false);
+      expect(
+        component.entries().find((e) => e.id === 'e1')!.billable,
+      ).toBeFalse();
+    });
+
+    it('shows a success toast when marking an entry billable', async () => {
+      platformAdmin = true;
+      const toast = TestBed.inject(ToastService);
+      spyOn(toast, 'success');
+      const entry = component.entries().find((e) => e.id === 'e2')!;
+      entry.billable = false;
+
+      await component.toggleBillable(entry);
+
+      expect(toast.success).toHaveBeenCalledWith('Status updated successfully');
+    });
+
+    it('shows a success toast when marking an entry non-billable', async () => {
+      platformAdmin = true;
+      const toast = TestBed.inject(ToastService);
+      spyOn(toast, 'success');
+      const entry = component.entries().find((e) => e.id === 'e1')!;
+      expect(entry.billable).toBeTrue();
+
+      await component.toggleBillable(entry);
+
+      expect(toast.success).toHaveBeenCalledWith('Status updated successfully');
+    });
+
+    it('shows an error toast when the update fails', async () => {
+      platformAdmin = true;
+      setBillable.and.rejectWith(new Error('nope'));
+      const toast = TestBed.inject(ToastService);
+      spyOn(toast, 'error');
+      const entry = component.entries().find((e) => e.id === 'e1')!;
+
+      await component.toggleBillable(entry);
+
+      expect(toast.error).toHaveBeenCalledWith(
+        'Failed to update billable status',
+      );
+    });
   });
 
   describe('approval gating', () => {

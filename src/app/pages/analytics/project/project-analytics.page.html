@@ -180,6 +180,37 @@
                     <span class="entry-description">
                       {{ entry.description || 'No description' }}
                     </span>
+                    @if (canToggleBillable()) {
+                      <button
+                        #billableTip="ngbTooltip"
+                        type="button"
+                        class="status-action entry-billable-button"
+                        [disabled]="isBusy(entry.id)"
+                        [ngbTooltip]="entry.billable ? 'Billable' : 'Non-billable'"
+                        container="body"
+                        triggers="hover"
+                        [attr.aria-label]="entry.billable ? 'Billable' : 'Non-billable'"
+                        (click)="toggleBillable(entry, billableTip)"
+                      >
+                        <i
+                          class="bi bi-cash-coin entry-billable-icon"
+                          [class.text-success]="entry.billable"
+                          [class.text-danger]="!entry.billable"
+                          aria-hidden="true"
+                        ></i>
+                      </button>
+                    } @else {
+                      <i
+                        class="bi bi-cash-coin entry-billable-icon"
+                        [class.text-success]="entry.billable"
+                        [class.text-danger]="!entry.billable"
+                        role="img"
+                        [attr.aria-label]="entry.billable ? 'Billable' : 'Non-billable'"
+                        [ngbTooltip]="entry.billable ? 'Billable' : 'Non-billable'"
+                        container="body"
+                        triggers="hover"
+                      ></i>
+                    }
                     <b class="entry-hours">{{ entry.hours | number: '1.0-2' }} h</b>
                     <span class="entry-status">
                       <span

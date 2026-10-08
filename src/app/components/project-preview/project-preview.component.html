@@ -13,6 +13,13 @@
   <img [src]="logoUrl" alt="Project logo" class="project-preview-logo" />
   }
 
+  @if (billable) {
+  <span class="billable-badge" title="Billable by default">
+    <i class="bi bi-cash-coin" aria-hidden="true"></i>
+    <span class="visually-hidden">Billable by default</span>
+  </span>
+  }
+
   <div class="project-preview-body">
     <div class="project-preview-name">{{ name || namePlaceholder }}</div>
     <p class="project-preview-description">
