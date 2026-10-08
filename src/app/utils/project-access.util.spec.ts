@@ -36,6 +36,13 @@ describe('resolveProjectPermissions', () => {
     }
   });
 
+  it('grants nothing for the removed project-admin and renamed approver roles until data is migrated', () => {
+    const none = { logTime: false, viewAnalytics: false, approve: false };
+    for (const role of ['admin', 'approver']) {
+      expect(resolveProjectPermissions(role, false)).toEqual(none);
+    }
+  });
+
   it('gives a platform admin analytics and approval everywhere, log time only as a member', () => {
     expect(resolveProjectPermissions(undefined, true)).toEqual(
       { logTime: false, viewAnalytics: true, approve: true },
@@ -126,6 +133,11 @@ describe('hasAnalyticsAccess', () => {
   it('is false for contributor-only and empty memberships', () => {
     expect(hasAnalyticsAccess({ a: 'contributor' }, false)).toBeFalse();
     expect(hasAnalyticsAccess({}, false)).toBeFalse();
+  });
+
+  it('is false for unmigrated legacy admin/approver rows until data is migrated', () => {
+    expect(hasAnalyticsAccess({ a: 'admin' }, false)).toBeFalse();
+    expect(hasAnalyticsAccess({ a: 'approver' }, false)).toBeFalse();
   });
 });
 

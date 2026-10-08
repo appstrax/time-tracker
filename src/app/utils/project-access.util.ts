@@ -14,7 +14,15 @@ const NONE: ProjectPermissions = {
   approve: false,
 };
 
-/** A `Map`, not an object, so role strings like `'toString'` can't hit a prototype key. */
+/**
+ * A `Map`, not an object, so role strings like `'toString'` can't hit a prototype key.
+ *
+ * Breaking change: the former `'admin'` and `'approver'` project roles are
+ * not in this map. Any `project-users` row still storing those values
+ * resolves to no permissions (hidden nav, blocked guards, empty pickers)
+ * until `time-tracker-api/scripts/migrate-project-roles.ts` is run against
+ * that environment - run it immediately after deploying the API.
+ */
 const PERMISSIONS_BY_ROLE = new Map<string, ProjectPermissions>([
   [ProjectUserRole.CONTRIBUTOR, { logTime: true, viewAnalytics: false, approve: false }],
   [ProjectUserRole.VIEWER, { logTime: false, viewAnalytics: true, approve: false }],
