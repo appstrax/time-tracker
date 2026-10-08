@@ -121,6 +121,10 @@ describe('narrowToProject', () => {
     expect(narrowToProject(projects, undefined)).toBe(projects);
     expect(narrowToProject(projects, 'zzz')).toBe(projects);
   });
+
+  it('returns none for a known project outside the scoped list', () => {
+    expect(narrowToProject([projects[0]], 'b', projects)).toEqual([]);
+  });
 });
 
 describe('buildProjectUserIds', () => {

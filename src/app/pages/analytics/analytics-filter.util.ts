@@ -39,12 +39,17 @@ export function scopeProjectsToUser(
   );
 }
 
-/** Narrows projects to the picked one; an unknown or empty id leaves them all. */
+/**
+ * Narrows projects to the picked one. An empty id, or one that is not in
+ * `known` (the list the dropdown offers), leaves them all. A known project
+ * outside `projects` yields none, e.g. one the selected member has no part in.
+ */
 export function narrowToProject(
   projects: Project[],
   projectId: string | undefined,
+  known: Project[] = projects,
 ): Project[] {
-  if (!projectId || !projects.some((p) => p.id === projectId)) return projects;
+  if (!projectId || !known.some((p) => p.id === projectId)) return projects;
   return projects.filter((p) => p.id === projectId);
 }
 

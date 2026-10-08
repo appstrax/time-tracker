@@ -64,7 +64,11 @@ export class AnalyticsPage implements OnInit {
 
   /** `scopedProjects` narrowed to the project picked in the dropdown. */
   public readonly visibleProjects = computed(() =>
-    narrowToProject(this.scopedProjects(), this.filter().projectId),
+    narrowToProject(
+      this.scopedProjects(),
+      this.filter().projectId,
+      this.projects(),
+    ),
   );
 
   public readonly projectUserIds = computed(() =>
