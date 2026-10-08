@@ -3,8 +3,8 @@
   box-shadow: var(--shadow-card);
   width: 100%;
   padding: 0.5rem 1.75rem 0.75rem;
-  margin-top: 1rem;
-  margin-bottom: 1.5rem;
+  margin-top: 0rem;
+  margin-bottom: 0rem;
   background-color: var(--color-surface);
 
   hr {
@@ -28,7 +28,6 @@
   }
 
   .btn {
-    min-height: 44px;
     border-radius: var(--radius-control, 8px);
     font-weight: 700;
   }
@@ -92,11 +91,8 @@
 .tile-visual.dark .tile-header { background: #333; }
 .tile-visual.dark .tile-body { background: #111; }
 
-.tile-visual.system .tile-header { background: linear-gradient(90deg, #bfa25a 0%, #8e793b 100%); }
-.tile-visual.system .tile-body { background: #111; }
-
-.tile-visual.custom .tile-header { background: var(--color-primary); }
-.tile-visual.custom .tile-body { background: var(--color-bg); }
+.tile-visual.system .tile-header { background: linear-gradient(90deg, #f0f0f0 50%, #333 50%); }
+.tile-visual.system .tile-body { background: linear-gradient(90deg, #ffffff 50%, #111 50%); }
 
 .theme-tile input[type='radio']:checked + .tile-visual {
   outline: 2px solid var(--color-primary);
@@ -128,7 +124,4 @@
 .form-switch .form-check-input:checked {
   background-color: var(--color-primary);
 }
-
-.custom-theme-editor .form-label { font-weight: 500; }
-
 

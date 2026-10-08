@@ -3,15 +3,19 @@ import { Component, computed, effect, inject, signal } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Params, RouterLink } from '@angular/router';
 
-import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
-import { AnalyticsFilter, TimeSheetEntry, UserRole } from '@models';
+import { InsightsChartsComponent, ProjectPreviewComponent, SearchInputComponent } from '@components';
+import { AnalyticsFilter, TimeSheetEntry } from '@models';
 import { TimeSheetEntryService, ToastService } from '@services';
 import { Store } from '@state';
-import { TimeSheetFilterUtil, storeTimeSheetFilterProjectId } from '@utils';
+import {
+  TimeSheetFilterUtil,
+  filterProjectsByTerm,
+  storeTimeSheetFilterProjectId,
+} from '@utils';
 
 import {
   filterAnalyticsEntries,
-  scopeProjectsToUser,
+  narrowToProject,
 } from '../analytics/analytics-filter.util';
 import {
   ProjectRow,
@@ -35,6 +39,7 @@ import {
     InsightsChartsComponent,
     MetricCardComponent,
     ProjectPreviewComponent,
+    SearchInputComponent,
   ],
 })
 export class HomePage {
@@ -52,27 +57,21 @@ export class HomePage {
   public readonly hasLoaded = signal(false);
   public readonly entries = signal<TimeSheetEntry[]>([]);
   public readonly filter = signal<AnalyticsFilter>({});
-  /**
-   * Projects the signed-in user is assigned to, including ones with no time
-   * logged yet. A regular user's store already holds only their projects, and
-   * their `users` lists are not populated, so only admins, whose store holds
-   * every project, need scoping. It goes by assignment alone, not entries, so
-   * the list does not change while a new date range loads.
-   */
-  public readonly projects = computed(() => {
-    const all = this.store.projects.projects();
-    const user = this.store.user.user();
-    if (user?.role !== UserRole.ADMIN) return all;
-    return scopeProjectsToUser(all, user.id, []);
-  });
+  /** Projects the user can log time on, including ones with no time logged yet. */
+  public readonly projects = computed(() => this.store.access.logProjects());
   public readonly hasProjects = computed(() => this.projects().length > 0);
+
+  /** `projects` narrowed to the one picked in the dropdown, if any. */
+  public readonly visibleProjects = computed(() =>
+    narrowToProject(this.projects(), this.filter().projectId),
+  );
 
   /**
    * Entries on the listed projects only, as on the analytics page, so the KPIs
    * and charts always agree with the project rows.
    */
   public readonly filteredEntries = computed(() => {
-    const visibleIds = new Set(this.projects().map((p) => p.id));
+    const visibleIds = new Set(this.visibleProjects().map((p) => p.id));
     return filterAnalyticsEntries(this.entries(), this.filter()).filter((e) =>
       visibleIds.has(e.projectId),
     );
@@ -82,11 +81,15 @@ export class HomePage {
   );
   public readonly rows = computed<ProjectRow[]>(() =>
     buildProjectRows(
-      this.projects(),
+      this.visibleProjects(),
       this.filteredEntries(),
       [],
       this.store.projects.projects(),
     ),
+  );
+  public readonly projectSearch = signal('');
+  public readonly listedRows = computed(() =>
+    filterProjectsByTerm(this.rows(), this.projectSearch()),
   );
 
   private latestLoadId = 0;

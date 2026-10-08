@@ -43,8 +43,22 @@
       </div>
     </section>
   } @else {
+    <app-search-input
+      class="project-search"
+      ariaLabel="Search projects"
+      placeholder="Search projects…"
+      [(value)]="searchTerm"
+    />
+
+    @if (!filteredProjects().length) {
+      <section class="state-card">
+        <h2>No matching projects</h2>
+        <p>No projects match "{{ searchTerm().trim() }}".</p>
+      </section>
+    }
+
     <section class="project-grid" aria-label="Projects">
-      @for (project of projects(); track project.id) {
+      @for (project of filteredProjects(); track project.id) {
         <article
           class="project-card"
           tabindex="0"
@@ -59,6 +73,7 @@
             [color]="projectColor(project)"
             [name]="project.name"
             [description]="project.description"
+            [billable]="project.billable"
           />
           <div class="project-card-footer">
             <div

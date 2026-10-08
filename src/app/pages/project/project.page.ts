@@ -1,3 +1,4 @@
+import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 import { FormsModule } from '@angular/forms';
 import { Component, OnInit, computed, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
@@ -32,7 +33,13 @@ function sameColorSources(left: Project[], right: Project[]): boolean {
   templateUrl: './project.page.html',
   styleUrls: ['./project.page.scss'],
   standalone: true,
-  imports: [FormsModule, RouterModule, ProjectUsersComponent, ProjectPreviewComponent],
+  imports: [
+    FormsModule,
+    RouterModule,
+    NgbTooltipModule,
+    ProjectUsersComponent,
+    ProjectPreviewComponent,
+  ],
 })
 export class ProjectPage implements OnInit {
   readonly project = signal(new Project());
@@ -196,7 +203,7 @@ export class ProjectPage implements OnInit {
         const projectUser = new ProjectUser();
         projectUser.projectId = project.id;
         projectUser.userId = user.id;
-        projectUser.role = ProjectUserRole.ADMIN;
+        projectUser.role = ProjectUserRole.MANAGER;
         await this.projectUserService.save(projectUser);
       }
 
@@ -244,6 +251,51 @@ export class ProjectPage implements OnInit {
       this.logoPreviewUrl.set(reader.result as string);
     };
     reader.readAsDataURL(file);
+  }
+
+  public async removeLogo(fileInput: HTMLInputElement): Promise<void> {
+    if (this.isPersisting()) {
+      return;
+    }
+
+    this.error.set('');
+
+    if (this.logoFile()) {
+      fileInput.value = '';
+      this.logoFile.set(null);
+      this.logoPreviewUrl.set(this.project().logoUrl || null);
+      return;
+    }
+
+    if (!this.editing() || !this.project().id || !this.savedCoreSnapshot.logoUrl) {
+      this.logoPreviewUrl.set(null);
+      return;
+    }
+
+    if (!this.beginPersist('core')) {
+      return;
+    }
+
+    try {
+      const submitted = this.buildProjectForLogoRemoval();
+      const project = await this.projectService.save(submitted);
+
+      this.project.set(
+        this.mergeProjectAfterSave(project, {
+          ...this.liveEditOverrides(submitted),
+          logoUrl: project.logoUrl,
+        }),
+      );
+      this.logoPreviewUrl.set(null);
+      this.syncPersistedSnapshots(project);
+      await this.refreshProjectsStore();
+      this.toast.success('Logo removed', 'Success');
+    } catch (error: any) {
+      this.error.set(error.message);
+      this.toast.error(error.message || 'Failed to remove logo', 'Error');
+    } finally {
+      this.endPersist();
+    }
   }
 
   public isCoreFormValid(): boolean {
@@ -526,6 +578,20 @@ export class ProjectPage implements OnInit {
     payload.color = this.savedCoreSnapshot.color;
     payload.billable = this.savedCoreSnapshot.billable;
     payload.categories = [...this.savedCoreSnapshot.categories];
+
+    return payload;
+  }
+
+  private buildProjectForLogoRemoval(): Project {
+    const payload = Object.assign(new Project(), this.project());
+
+    payload.name = this.savedCoreSnapshot.name;
+    payload.description = this.savedCoreSnapshot.description;
+    payload.logoUrl = '';
+    payload.color = this.savedCoreSnapshot.color;
+    payload.billable = this.savedCoreSnapshot.billable;
+    payload.categories = [...this.savedCoreSnapshot.categories];
+    payload.fields = this.parseSavedFields().map((field) => ({ ...field }));
 
     return payload;
   }

@@ -1,6 +1,9 @@
 import { Project, TimeSheetEntry, User } from '@models';
 
 import {
+  buildProjectUserIds,
+  isProjectUserPairValid,
+  narrowToProject,
   scopeProjectsToUser,
   userCategoryOptions,
 } from './analytics-filter.util';
@@ -105,5 +108,50 @@ describe('userCategoryOptions', () => {
     expect(userCategoryOptions([entry('u2', 'Support')] as never, 'u1')).toEqual(
       [],
     );
+  });
+});
+
+describe('narrowToProject', () => {
+  const projects = [project('a', []), project('b', [])];
+
+  it('returns only the picked project', () => {
+    expect(narrowToProject(projects, 'b').map((p) => p.id)).toEqual(['b']);
+  });
+
+  it('ignores an empty or unknown id', () => {
+    expect(narrowToProject(projects, undefined)).toBe(projects);
+    expect(narrowToProject(projects, 'zzz')).toBe(projects);
+  });
+
+  it('returns none for a known project outside the scoped list', () => {
+    expect(narrowToProject([projects[0]], 'b', projects)).toEqual([]);
+  });
+});
+
+describe('buildProjectUserIds', () => {
+  it('includes members and anyone who logged time on the project', () => {
+    const entry = new TimeSheetEntry();
+    entry.projectId = 'a';
+    entry.userId = 'former';
+    const map = buildProjectUserIds([project('a', ['u1'])], [entry]);
+    expect([...(map.get('a') ?? [])]).toEqual(['u1', 'former']);
+  });
+});
+
+describe('isProjectUserPairValid', () => {
+  const ids = new Map([['a', new Set(['u1'])]]);
+
+  it('accepts a member of the project', () => {
+    expect(isProjectUserPairValid(ids, 'a', 'u1')).toBe(true);
+  });
+
+  it('rejects a member who is not on the project', () => {
+    expect(isProjectUserPairValid(ids, 'a', 'u2')).toBe(false);
+  });
+
+  it('never conflicts when either side or the project is missing', () => {
+    expect(isProjectUserPairValid(ids, undefined, 'u2')).toBe(true);
+    expect(isProjectUserPairValid(ids, 'a', undefined)).toBe(true);
+    expect(isProjectUserPairValid(ids, 'zzz', 'u2')).toBe(true);
   });
 });

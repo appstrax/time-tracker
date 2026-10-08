@@ -229,18 +229,14 @@
               <div class="custom-date-range">
                 <div class="custom-date-field">
                   <label class="form-label">Start</label>
-                  <input
-                    type="date"
-                    class="form-control"
+                  <app-date-input
                     [ngModel]="formatDate(filter().start)"
                     (ngModelChange)="onCustomStartDateChange($event)"
                   />
                 </div>
                 <div class="custom-date-field">
                   <label class="form-label">End</label>
-                  <input
-                    type="date"
-                    class="form-control"
+                  <app-date-input
                     [ngModel]="formatDate(filter().end)"
                     (ngModelChange)="onCustomEndDateChange($event)"
                   />

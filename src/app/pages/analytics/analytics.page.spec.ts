@@ -3,7 +3,7 @@ import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 
 import { Project, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, UsersService } from '@services';
+import { AnalyticsEntriesService, UsersService } from '@services';
 import { Store } from '@state';
 
 import { AnalyticsPage } from './analytics.page';
@@ -42,19 +42,40 @@ function makeEntry(
 describe('AnalyticsPage', () => {
   let component: AnalyticsPage;
   let fixture: ComponentFixture<AnalyticsPage>;
+  let findByProjectIds: jasmine.Spy<
+    (ids: string[]) => Promise<TimeSheetEntry[]>
+  >;
+  let findAllVisible: jasmine.Spy<() => Promise<TimeSheetEntry[]>>;
 
   const alpha = makeProject('alpha', ['u1']);
   const beta = makeProject('beta', ['u2']);
   /** u1 logged time here but is no longer a member. */
   const gamma = makeProject('gamma', ['u2']);
+  /** Exists in the project list but is not one the user may view analytics for. */
+  const hidden = makeProject('hidden', ['u9']);
 
-  beforeEach(async () => {
+  async function createPage(platformAdmin: boolean): Promise<void> {
     const storeStub = {
       projects: {
-        projects: signal<Project[]>([alpha, beta, gamma]),
+        projects: signal<Project[]>([alpha, beta, gamma, hidden]),
         fetchedAt: signal<Date | null>(new Date()),
       },
+      access: {
+        analyticsProjects: signal<Project[]>([alpha, beta, gamma]),
+        platformAdmin: signal(platformAdmin),
+        can: () => false,
+      },
     };
+    findByProjectIds = jasmine
+      .createSpy('findByProjectIds')
+      .and.callFake(async () => [
+        makeEntry('e1', 'alpha', 'u1', 3),
+        makeEntry('e2', 'beta', 'u2', 5),
+        makeEntry('e3', 'gamma', 'u1', 1),
+      ]);
+    findAllVisible = jasmine
+      .createSpy('findAllVisible')
+      .and.callFake(async () => [makeEntry('e1', 'alpha', 'u1', 3)]);
 
     await TestBed.configureTestingModule({
       imports: [AnalyticsPage],
@@ -63,13 +84,10 @@ describe('AnalyticsPage', () => {
         provideRouter([]),
         { provide: Store, useValue: storeStub },
         {
-          provide: TimeSheetEntryService,
+          provide: AnalyticsEntriesService,
           useValue: {
-            findByProjectId: async () => [
-              makeEntry('e1', 'alpha', 'u1', 3),
-              makeEntry('e2', 'beta', 'u2', 5),
-              makeEntry('e3', 'gamma', 'u1', 1),
-            ],
+            findByProjectIds,
+            findAllVisible,
           },
         },
         {
@@ -83,10 +101,32 @@ describe('AnalyticsPage', () => {
     component = fixture.componentInstance;
     fixture.detectChanges();
     await fixture.whenStable();
-  });
+  }
+
+  beforeEach(() => createPage(false));
 
   it('should create', () => {
     expect(component).toBeTruthy();
+  });
+
+  it('lists and fetches entries only for the analytics projects', () => {
+    component.filter.set({});
+    expect(component.rows().map((row) => row.id)).not.toContain('hidden');
+    expect(findByProjectIds).toHaveBeenCalledOnceWith(['alpha', 'beta', 'gamma']);
+    expect(findAllVisible).not.toHaveBeenCalled();
+  });
+
+  describe('as a platform admin', () => {
+    beforeEach(async () => {
+      TestBed.resetTestingModule();
+      await createPage(true);
+    });
+
+    it('fetches every visible entry without a projectIds filter', () => {
+      expect(findAllVisible).toHaveBeenCalledTimes(1);
+      expect(findByProjectIds).not.toHaveBeenCalled();
+      expect(component.entries().map((entry) => entry.id)).toEqual(['e1']);
+    });
   });
 
   it('lists every project when no team member is selected', () => {
@@ -125,5 +165,27 @@ describe('AnalyticsPage', () => {
     component.filter.set({ userId: 'u3' });
     expect(component.rows()).toEqual([]);
     expect(component.totals().total).toBe(0);
+  });
+
+  it('narrows rows, entries and totals to the selected project', () => {
+    component.filter.set({ projectId: 'beta' });
+    expect(component.rows().map((row) => row.id)).toEqual(['beta']);
+    expect(component.filteredEntries().map((entry) => entry.id)).toEqual([
+      'e2',
+    ]);
+    expect(component.totals().total).toBe(5);
+  });
+
+  it('offers only the selected project’s members as team members', () => {
+    component.filter.set({ projectId: 'alpha' });
+    expect(component.projectUsers().map((user) => user.id)).toEqual(['u1']);
+  });
+
+  it('offers every team member when no project is selected', () => {
+    component.filter.set({});
+    expect(component.projectUsers().map((user) => user.id)).toEqual([
+      'u1',
+      'u2',
+    ]);
   });
 });

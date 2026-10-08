@@ -13,7 +13,10 @@
 
     <div class="filter-row">
       <app-analytics-filters
-        [users]="users()"
+        [showProject]="true"
+        [projects]="scopedProjects()"
+        [projectUserIds]="projectUserIds()"
+        [users]="projectUsers()"
         (filterChange)="onFilterChange($event)"
       />
       <span class="result-count">
@@ -31,6 +34,7 @@
           label="Total hours"
           [value]="(totals().total | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().billable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-clock-history text-primary"
           [compact]="true"
         />
@@ -38,6 +42,7 @@
           label="Approved"
           [value]="(totals().approved | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().approvedBillable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-check2-circle text-success"
           [compact]="true"
         />
@@ -45,6 +50,7 @@
           label="Pending review"
           [value]="(totals().pending | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().pendingBillable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-hourglass-split text-warning"
           [compact]="true"
         />
@@ -58,13 +64,18 @@
 
       <app-insights-charts
         [entries]="filteredEntries()"
-        [projects]="visibleProjects()"
+        [projects]="scopedProjects()"
       />
 
       <section class="project-list card-surface" aria-label="Projects">
         <header class="list-head">
           <h2>Projects</h2>
-          <span>Sorted by hours</span>
+          <app-search-input
+            class="list-search"
+            ariaLabel="Search projects"
+            placeholder="Search projects…"
+            [(value)]="projectSearch"
+          />
         </header>
 
         @if (!rows().length) {
@@ -75,20 +86,26 @@
                 : 'No projects available.'
             }}
           </p>
+        } @else if (!listedRows().length) {
+          <p class="empty-card">
+            No projects match "{{ projectSearch().trim() }}".
+          </p>
         } @else {
           <div class="list-columns" aria-hidden="true">
             <span>Project</span>
             <span>Approval</span>
             <span>Hours</span>
+            <span>Billable</span>
             <span>Team</span>
             <span>Last activity</span>
             <span></span>
           </div>
-          @for (row of rows(); track row.id) {
+          @for (row of listedRows(); track row.id) {
             <a
               class="project-row"
               [routerLink]="['/analytics', row.id]"
-              queryParamsHandling="preserve"
+              [queryParams]="{ projectId: null }"
+              queryParamsHandling="merge"
             >
               <app-project-preview
                 class="cell-project"
@@ -113,6 +130,9 @@
                 </small>
               </span>
               <b class="cell-hours">{{ row.hours | number: '1.0-1' }} h</b>
+              <span class="cell-billable">
+                {{ row.billableHours | number: '1.0-1' }} h
+              </span>
               <span class="cell-team">
                 @for (initials of row.contributors; track $index) {
                   <i class="member">{{ initials }}</i>

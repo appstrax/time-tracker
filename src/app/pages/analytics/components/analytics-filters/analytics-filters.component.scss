@@ -3,6 +3,7 @@
 }
 
 .filters {
+  --filter-control-height: 40px;
   display: flex;
   flex-wrap: wrap;
   gap: 0.625rem;
@@ -13,7 +14,10 @@
   display: inline-flex;
   align-items: center;
   gap: 0.5rem;
-  min-height: 40px;
+  box-sizing: border-box;
+  height: var(--filter-control-height);
+  min-height: var(--filter-control-height);
+  max-height: var(--filter-control-height);
   padding: 0 0.5rem 0 0.875rem;
   border: 1px solid var(--color-border-strong);
   border-radius: var(--radius-control);
@@ -33,13 +37,18 @@
 }
 
 .pill select,
-.pill input {
+.pill ::ng-deep .date-input.bare .date-input-field {
   border: none;
   background: transparent;
   color: var(--text-primary);
   font: inherit;
   font-weight: 700;
-  min-height: 38px;
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  margin: 0;
+  line-height: 1;
   padding: 0 0.25rem;
   outline: none;
   cursor: pointer;
@@ -48,4 +57,15 @@
 
 .pill select option {
   color: initial;
+}
+
+.project-filter {
+  app-project-dropdown {
+    display: inline-flex;
+    align-items: center;
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 14rem;
+    height: auto;
+  }
 }

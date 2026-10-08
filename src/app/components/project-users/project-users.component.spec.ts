@@ -122,14 +122,14 @@ describe('ProjectUsersComponent', () => {
   it('adds the user the dialog returns, with the chosen role', async () => {
     await createComponent();
     stubModalResult(
-      Promise.resolve({ user: grace, role: ProjectUserRole.APPROVER }),
+      Promise.resolve({ user: grace, role: ProjectUserRole.MANAGER }),
     );
 
     await component.onAddUserClick();
 
     const [savedProjectUser] = projectUserService.save.calls.mostRecent().args;
     expect(savedProjectUser.userId).toBe('user-2');
-    expect(savedProjectUser.role).toBe(ProjectUserRole.APPROVER);
+    expect(savedProjectUser.role).toBe(ProjectUserRole.MANAGER);
     expect(component.members().length).toBe(1);
     expect(toast.success).toHaveBeenCalledWith('Project user added', 'Success');
   });

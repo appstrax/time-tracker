@@ -3,6 +3,13 @@
   position: relative;
 }
 
+.project-color-dot {
+  flex-shrink: 0;
+  width: 0.6rem;
+  height: 0.6rem;
+  border-radius: 50%;
+}
+
 .project-dropdown--compact {
   margin-bottom: 0;
   height: 100%;
@@ -18,17 +25,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
-  }
-
-  .proj-thumb,
-  .proj-thumb-fallback {
-    width: 1.25rem;
-    height: 1.25rem;
-    border-radius: 0.35rem;
-  }
-
-  .proj-thumb-fallback {
-    font-size: 0.75rem;
   }
 
   .project-dropdown-selection {
@@ -93,6 +89,47 @@
   min-width: 0;
 }
 
+.project-dropdown--compact.project-dropdown--embedded {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+
+  .project-dropdown-selection {
+    flex: 0 1 auto;
+  }
+
+  .dropdown-toggle {
+    width: auto;
+    max-width: 100%;
+    min-height: 0;
+    height: auto;
+    max-height: none;
+    padding: 0 0.15rem 0 0;
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    gap: 0.35rem;
+    line-height: 1;
+    color: var(--text-primary);
+  }
+
+  .dropdown-toggle:hover,
+  .dropdown-toggle:focus,
+  .dropdown-toggle:active,
+  .dropdown-toggle:focus-visible {
+    border: none;
+    background: transparent;
+    color: var(--text-primary);
+    box-shadow: none;
+  }
+
+  .dropdown-menu {
+    left: 0;
+    right: auto;
+  }
+}
+
 .project-dropdown .dropdown-toggle::after {
   display: none;
 }
@@ -149,35 +186,6 @@
     );
     box-shadow: 0 0 0 0.2rem rgba(59, 130, 246, 0.12);
   }
-}
-
-.proj-thumb {
-  width: 24px;
-  height: 24px;
-  object-fit: cover;
-  border-radius: 8px;
-  flex-shrink: 0;
-  transition: transform 0.2s ease;
-}
-
-.proj-thumb:hover {
-  transform: scale(1.05);
-}
-
-.proj-thumb-fallback {
-  font-size: 16px;
-  width: 24px;
-  height: 24px;
-  border-radius: 8px;
-  background-color: var(--color-border);
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  color: var(--text-muted);
-  transition:
-    background-color 0.2s ease,
-    transform 0.2s ease;
 }
 
 .project-dropdown .dropdown-item {

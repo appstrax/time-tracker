@@ -1,4 +1,5 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
+import { HttpErrorResponse } from '@angular/common/http';
 import {
   Component,
   OnDestroy,
@@ -9,10 +10,15 @@ import {
 } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { Subscription } from 'rxjs';
-import { NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
+import { NgbTooltip, NgbTooltipModule } from '@ng-bootstrap/ng-bootstrap';
 
 import { AnalyticsFilter, Project, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, ToastService, UsersService } from '@services';
+import {
+  AgentTokenService,
+  AnalyticsEntriesService,
+  ToastService,
+  UsersService,
+} from '@services';
 import { Store } from '@state';
 import {
   TimeSheetExportUtil,
@@ -60,7 +66,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
   private paramSubscription?: Subscription;
   private loadSeq = 0;
   private readonly store = inject(Store);
-  private readonly entryService = inject(TimeSheetEntryService);
+  private readonly entryService = inject(AnalyticsEntriesService);
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
@@ -76,7 +82,9 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
   private firstLoad = true;
 
   public readonly project = computed<Project | null>(
-    () => this.store.projects.projects().find((p) => p.id === this.projectId()) ?? null,
+    () =>
+      this.store.projects.projects().find((p) => p.id === this.projectId()) ??
+      null,
   );
 
   public readonly color = computed(() => {
@@ -87,6 +95,14 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
       'var(--color-primary)'
     );
   });
+
+  public readonly canApprove = computed(() =>
+    this.store.access.can(this.projectId(), 'approve'),
+  );
+
+  public readonly canToggleBillable = computed(() =>
+    this.store.access.platformAdmin(),
+  );
 
   public readonly usersById = computed(
     () => new Map(this.users().map((u) => [u.id, u])),
@@ -174,11 +190,16 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
       average: dayCount ? total / dayCount : 0,
       dayCount,
       contributors: new Set(entries.map((e) => e.userId)).size,
+      billable: sum(entries.filter((e) => e.billable)),
+      approvedBillable: sum(entries.filter((e) => e.approved && e.billable)),
+      pendingBillable: sum(entries.filter((e) => !e.approved && e.billable)),
     };
   });
 
   public readonly allExpanded = computed(
-    () => this.days().length > 0 && this.days().every((d) => this.expanded().has(d.key)),
+    () =>
+      this.days().length > 0 &&
+      this.days().every((d) => this.expanded().has(d.key)),
   );
 
   public ngOnInit(): void {
@@ -220,7 +241,7 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     }
     try {
       const projectId = this.projectId();
-      const entries = await this.entryService.findByProjectId([projectId]);
+      const entries = await this.entryService.findByProjectIds([projectId]);
       if (seq !== this.loadSeq) return;
       this.entries.set(entries);
       if (this.days().length && !this.expanded().size) {
@@ -279,9 +300,44 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     return this.busy().has(id);
   }
 
-  public async setApproved(entry: TimeSheetEntry, approved: boolean): Promise<void> {
+  public async setApproved(
+    entry: TimeSheetEntry,
+    approved: boolean,
+  ): Promise<void> {
     if (entry.approved === approved) return;
     await this.saveStatus([entry], approved);
+  }
+
+  public async toggleBillable(
+    entry: TimeSheetEntry,
+    tooltip?: NgbTooltip,
+  ): Promise<void> {
+    if (!this.canToggleBillable()) return;
+    const billable = !entry.billable;
+    this.busy.update((set) => new Set([...set, entry.id]));
+    try {
+      const saved = await this.entryService.setBillable(entry.id, billable);
+      this.entries.update((list) =>
+        list.map((e) => (e.id === saved.id ? saved : e)),
+      );
+      this.toast.success('Status updated successfully');
+      // The tooltip caches its content at open time; refresh it so a mouse
+      // that never left the button still sees the new Billable/Non-billable text.
+      if (tooltip?.isOpen()) {
+        setTimeout(() => {
+          tooltip.close();
+          tooltip.open();
+        });
+      }
+    } catch {
+      this.toast.error('Failed to update billable status');
+    } finally {
+      this.busy.update((set) => {
+        const next = new Set(set);
+        next.delete(entry.id);
+        return next;
+      });
+    }
   }
 
   public async approveDay(day: DayGroup): Promise<void> {
@@ -306,15 +362,13 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     entries: TimeSheetEntry[],
     approved: boolean,
   ): Promise<void> {
-    if (!entries.length) return;
+    if (!this.canApprove() || !entries.length) return;
     this.busy.update((set) => new Set([...set, ...entries.map((e) => e.id)]));
     try {
       const results = await Promise.allSettled(
-        entries.map(async (entry) => {
-          const toSave = entry.clone();
-          toSave.approved = approved;
-          return this.entryService.save(toSave);
-        }),
+        entries.map((entry) =>
+          this.entryService.setApproved(entry.id, approved),
+        ),
       );
       const saved = results
         .filter(
@@ -326,17 +380,18 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
 
       if (saved.length) {
         const byId = new Map(saved.map((e) => [e.id, e]));
-        this.entries.update((list) =>
-          list.map((e) => byId.get(e.id) ?? e),
-        );
+        this.entries.update((list) => list.map((e) => byId.get(e.id) ?? e));
       }
 
       if (failedCount) {
         await this.reloadEntriesAfterStatusError();
         const total = entries.length;
+        const firstFailure = results.find(
+          (r): r is PromiseRejectedResult => r.status === 'rejected',
+        );
         this.toast.error(
           failedCount === total
-            ? 'Error updating time entry status'
+            ? this.approvalErrorMessage(firstFailure?.reason)
             : `${failedCount} of ${total} time entries could not be updated. List refreshed from server.`,
         );
         return;
@@ -354,9 +409,19 @@ export class ProjectAnalyticsPage implements OnInit, OnDestroy {
     }
   }
 
+  /** The API explains denials (e.g. a role that cannot approve); other errors stay generic. */
+  private approvalErrorMessage(reason: unknown): string {
+    const fallback = 'Error updating time entry status';
+    return reason instanceof HttpErrorResponse
+      ? AgentTokenService.readErrorMessage(reason, fallback)
+      : fallback;
+  }
+
   private async reloadEntriesAfterStatusError(): Promise<void> {
     try {
-      const fresh = await this.entryService.findByProjectId([this.projectId()]);
+      const fresh = await this.entryService.findByProjectIds([
+        this.projectId(),
+      ]);
       this.entries.set(fresh);
     } catch {
       this.toast.error('Failed to refresh time sheet entries');

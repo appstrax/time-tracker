@@ -44,6 +44,7 @@
           label="Total hours"
           [value]="(totals().total | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().billable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-clock-history text-primary"
           [compact]="true"
         />
@@ -51,6 +52,7 @@
           label="Approved"
           [value]="(totals().approved | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().approvedBillable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-check2-circle text-success"
           [compact]="true"
         />
@@ -58,6 +60,7 @@
           label="Pending review"
           [value]="(totals().pending | number: '1.0-1') ?? ''"
           valueSuffix="h"
+          [subtitle]="(totals().pendingBillable | number: '1.0-1') + ' h billable'"
           iconClass="bi bi-hourglass-split text-warning"
           [compact]="true"
         />
@@ -116,44 +119,16 @@
                 </span>
               </button>
               <span class="day-actions">
-                @if (day.allApproved) {
-                  <button
-                    type="button"
-                    class="status-action status-action--decline"
-                    [disabled]="isDayBusy(day)"
-                    ngbTooltip="Undo day approval"
-                    container="body"
-                    triggers="hover"
-                    aria-label="Undo day approval"
-                    (click)="declineDay(day)"
-                  >
-                    <i
-                      class="bi bi-arrow-counterclockwise"
-                      aria-hidden="true"
-                    ></i>
-                  </button>
-                } @else {
-                  <button
-                    type="button"
-                    class="status-action status-action--approve"
-                    [disabled]="isDayBusy(day)"
-                    ngbTooltip="Approve day"
-                    container="body"
-                    triggers="hover"
-                    aria-label="Approve day"
-                    (click)="approveDay(day)"
-                  >
-                    <i class="bi bi-calendar2-check" aria-hidden="true"></i>
-                  </button>
-                  @if (day.pending !== day.entries.length) {
+                @if (canApprove()) {
+                  @if (day.allApproved) {
                     <button
                       type="button"
                       class="status-action status-action--decline"
                       [disabled]="isDayBusy(day)"
-                      ngbTooltip="Undo approvals for day"
+                      ngbTooltip="Undo day approval"
                       container="body"
                       triggers="hover"
-                      aria-label="Undo approvals for day"
+                      aria-label="Undo day approval"
                       (click)="declineDay(day)"
                     >
                       <i
@@ -161,6 +136,36 @@
                         aria-hidden="true"
                       ></i>
                     </button>
+                  } @else {
+                    <button
+                      type="button"
+                      class="status-action status-action--approve"
+                      [disabled]="isDayBusy(day)"
+                      ngbTooltip="Approve day"
+                      container="body"
+                      triggers="hover"
+                      aria-label="Approve day"
+                      (click)="approveDay(day)"
+                    >
+                      <i class="bi bi-calendar2-check" aria-hidden="true"></i>
+                    </button>
+                    @if (day.pending !== day.entries.length) {
+                      <button
+                        type="button"
+                        class="status-action status-action--decline"
+                        [disabled]="isDayBusy(day)"
+                        ngbTooltip="Undo approvals for day"
+                        container="body"
+                        triggers="hover"
+                        aria-label="Undo approvals for day"
+                        (click)="declineDay(day)"
+                      >
+                        <i
+                          class="bi bi-arrow-counterclockwise"
+                          aria-hidden="true"
+                        ></i>
+                      </button>
+                    }
                   }
                 }
               </span>
@@ -178,6 +183,37 @@
                     <span class="entry-description">
                       {{ entry.description || 'No description' }}
                     </span>
+                    @if (canToggleBillable()) {
+                      <button
+                        #billableTip="ngbTooltip"
+                        type="button"
+                        class="status-action entry-billable-button"
+                        [disabled]="isBusy(entry.id)"
+                        [ngbTooltip]="entry.billable ? 'Billable' : 'Non-billable'"
+                        container="body"
+                        triggers="hover"
+                        [attr.aria-label]="entry.billable ? 'Billable' : 'Non-billable'"
+                        (click)="toggleBillable(entry, billableTip)"
+                      >
+                        <i
+                          class="bi bi-cash-coin entry-billable-icon"
+                          [class.text-success]="entry.billable"
+                          [class.text-danger]="!entry.billable"
+                          aria-hidden="true"
+                        ></i>
+                      </button>
+                    } @else {
+                      <i
+                        class="bi bi-cash-coin entry-billable-icon"
+                        [class.text-success]="entry.billable"
+                        [class.text-danger]="!entry.billable"
+                        role="img"
+                        [attr.aria-label]="entry.billable ? 'Billable' : 'Non-billable'"
+                        [ngbTooltip]="entry.billable ? 'Billable' : 'Non-billable'"
+                        container="body"
+                        triggers="hover"
+                      ></i>
+                    }
                     <b class="entry-hours">{{ entry.hours | number: '1.0-2' }} h</b>
                     <span class="entry-status">
                       <span
@@ -188,42 +224,44 @@
                         {{ entry.approved ? 'Approved' : 'Pending' }}
                       </span>
                     </span>
-                    <span
-                      class="status-actions"
-                      role="group"
-                      aria-label="Approval status"
-                    >
-                      @if (entry.approved) {
-                        <button
-                          type="button"
-                          class="status-action status-action--decline"
-                          [disabled]="isBusy(entry.id)"
-                          ngbTooltip="Undo approval"
-                          container="body"
-                          triggers="hover"
-                          aria-label="Undo approval"
-                          (click)="setApproved(entry, false)"
-                        >
-                          <i
-                            class="bi bi-arrow-counterclockwise"
-                            aria-hidden="true"
-                          ></i>
-                        </button>
-                      } @else {
-                        <button
-                          type="button"
-                          class="status-action status-action--approve"
-                          [disabled]="isBusy(entry.id)"
-                          ngbTooltip="Approve"
-                          container="body"
-                          triggers="hover"
-                          aria-label="Approve"
-                          (click)="setApproved(entry, true)"
-                        >
-                          <i class="bi bi-check-lg" aria-hidden="true"></i>
-                        </button>
-                      }
-                    </span>
+                    @if (canApprove()) {
+                      <span
+                        class="status-actions"
+                        role="group"
+                        aria-label="Approval status"
+                      >
+                        @if (entry.approved) {
+                          <button
+                            type="button"
+                            class="status-action status-action--decline"
+                            [disabled]="isBusy(entry.id)"
+                            ngbTooltip="Undo approval"
+                            container="body"
+                            triggers="hover"
+                            aria-label="Undo approval"
+                            (click)="setApproved(entry, false)"
+                          >
+                            <i
+                              class="bi bi-arrow-counterclockwise"
+                              aria-hidden="true"
+                            ></i>
+                          </button>
+                        } @else {
+                          <button
+                            type="button"
+                            class="status-action status-action--approve"
+                            [disabled]="isBusy(entry.id)"
+                            ngbTooltip="Approve"
+                            container="body"
+                            triggers="hover"
+                            aria-label="Approve"
+                            (click)="setApproved(entry, true)"
+                          >
+                            <i class="bi bi-check-lg" aria-hidden="true"></i>
+                          </button>
+                        }
+                      </span>
+                    }
                   </li>
                 }
               </ul>

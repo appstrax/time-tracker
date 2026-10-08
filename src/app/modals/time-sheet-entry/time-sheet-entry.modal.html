@@ -90,6 +90,21 @@
             {{ formatHours(timeSheetEntry.hours) }}
           </div>
         </div>
+
+        <label class="toggle-switch" for="billable">
+          <input
+            type="checkbox"
+            class="toggle-switch__input"
+            id="billable"
+            name="billable"
+            [(ngModel)]="timeSheetEntry.billable"
+            [disabled]="timeSheetEntry.approved"
+          />
+          <span class="toggle-switch__track">
+            <span class="toggle-switch__thumb"></span>
+          </span>
+          <span class="toggle-switch__label">Billable</span>
+        </label>
       </div>
     </div>
 
@@ -108,23 +123,6 @@
           [disabled]="timeSheetEntry.approved"
         ></textarea>
       </div>
-    </div>
-
-    <div class="form-group">
-      <label class="toggle-switch" for="billable">
-        <input
-          type="checkbox"
-          class="toggle-switch__input"
-          id="billable"
-          name="billable"
-          [(ngModel)]="timeSheetEntry.billable"
-          [disabled]="timeSheetEntry.approved"
-        />
-        <span class="toggle-switch__track">
-          <span class="toggle-switch__thumb"></span>
-        </span>
-        <span class="toggle-switch__label">Billable</span>
-      </label>
     </div>
 
     @if (projectFields.length) {
@@ -163,10 +161,8 @@
                   />
                 }
                 @case ('date') {
-                  <input
-                    type="date"
-                    class="form-control"
-                    [id]="'field-' + field.key"
+                  <app-date-input
+                    [inputId]="'field-' + field.key"
                     [ngModel]="getFieldValue(field.key)"
                     (ngModelChange)="setFieldValue(field.key, $event)"
                     [disabled]="timeSheetEntry.approved"

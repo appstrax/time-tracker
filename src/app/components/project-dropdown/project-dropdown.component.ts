@@ -15,6 +15,7 @@ import { FormsModule } from '@angular/forms';
 
 import { Project } from '@models';
 import { Store } from '@state';
+import { ColorList, buildProjectColorMap } from '@utils';
 
 @Component({
   selector: 'app-project-dropdown',
@@ -28,6 +29,8 @@ export class ProjectDropdownComponent {
   @Input() allowNull: boolean = false;
   @Input() nullOptionLabel = 'Select a project';
   @Input() compact: boolean = false;
+  /** Sits inside a filter pill: no border or fill of its own. */
+  @Input() embedded: boolean = false;
 
   @Output() projectSelected = new EventEmitter<Project | null>();
 
@@ -40,6 +43,9 @@ export class ProjectDropdownComponent {
 
   projects = computed(
     () => this.projectsOverride() ?? this.store.projects.projects(),
+  );
+  private readonly colorMap = computed(() =>
+    buildProjectColorMap(this.projects()),
   );
   projectSearchTerm = signal('');
   filteredProjects = computed(() => {
@@ -59,6 +65,10 @@ export class ProjectDropdownComponent {
     private store: Store,
     private elementRef: ElementRef<HTMLElement>,
   ) {}
+
+  resolveProjectColor(project: Project): string {
+    return this.colorMap().get(project.id) ?? ColorList.tagThemeVars[0];
+  }
 
   shouldShowNullOption(): boolean {
     if (!this.allowNull) {

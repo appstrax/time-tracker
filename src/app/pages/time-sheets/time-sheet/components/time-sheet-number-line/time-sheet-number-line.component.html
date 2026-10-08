@@ -23,12 +23,19 @@
       let-category="category"
       let-description="description"
       let-duration="duration"
+      let-approved="approved"
     >
       <div class="timeline-entry-tooltip-content">
         <strong>{{ project }}</strong>
         <span>{{ category }}</span>
         <span>{{ description }}</span>
         <span>{{ duration }}</span>
+        @if (approved) {
+          <span class="timeline-entry-tooltip-approved">
+            <i class="bi bi-lock-fill" aria-hidden="true"></i>
+            Approved
+          </span>
+        }
       </div>
     </ng-template>
 
@@ -42,6 +49,7 @@
         [style.width.%]="segment.widthPercent"
         [style.background-color]="segment.backgroundColor"
         [class.timeline-block-disabled]="disabled() || segment.locked"
+        [class.timeline-block-approved]="segment.locked"
         [attr.aria-disabled]="disabled() || segment.locked || null"
         [ngbTooltip]="entryTooltip"
         [tooltipContext]="segment.tooltipContext"

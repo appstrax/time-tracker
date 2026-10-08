@@ -188,14 +188,22 @@ $nav-width-transition: $nav-width-transition-duration ease-out;
     font-size: 1rem;
     opacity: 0.85;
   }
+
+  &:hover,
+  &:focus,
+  &:active,
+  &.active {
+    color: var(--text-primary);
+    background-color: var(--color-primary-soft);
+  }
 }
 
 .profile-dropdown-item--danger {
-  color: #dc3545;
+  color: var(--color-danger);
 
   &:hover,
   &:focus {
-    color: #dc3545;
-    background: color-mix(in srgb, #dc3545 10%, transparent);
+    color: var(--color-danger);
+    background: color-mix(in srgb, var(--color-danger) 10%, transparent);
   }
 }

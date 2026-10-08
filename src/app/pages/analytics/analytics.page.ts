@@ -1,16 +1,34 @@
 import { DatePipe, DecimalPipe } from '@angular/common';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import {
+  Component,
+  OnInit,
+  computed,
+  effect,
+  inject,
+  signal,
+} from '@angular/core';
+import { ActivatedRoute, RouterLink } from '@angular/router';
 
 import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
-import { TimeSheetEntryService, ToastService, UsersService } from '@services';
-import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
+import { AnalyticsEntriesService, ToastService, UsersService } from '@services';
+import {
+  InsightsChartsComponent,
+  ProjectPreviewComponent,
+  SearchInputComponent,
+} from '@components';
 import { Store } from '@state';
-import { TimeSheetExportUtil } from '@utils';
+import {
+  TimeSheetExportUtil,
+  TimeSheetFilterUtil,
+  filterProjectsByTerm,
+} from '@utils';
 
 import {
+  buildProjectUserIds,
   filterAnalyticsEntries,
+  narrowToProject,
   formatDateInput,
+  isProjectUserPairValid,
   scopeProjectsToUser,
 } from './analytics-filter.util';
 import {
@@ -30,20 +48,23 @@ import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
     InsightsChartsComponent,
     MetricCardComponent,
     ProjectPreviewComponent,
+    SearchInputComponent,
   ],
   templateUrl: './analytics.page.html',
   styleUrl: './analytics.page.scss',
 })
 export class AnalyticsPage implements OnInit {
   private readonly store = inject(Store);
-  private readonly entryService = inject(TimeSheetEntryService);
+  private readonly entryService = inject(AnalyticsEntriesService);
   private readonly toast = inject(ToastService);
   private readonly usersService = inject(UsersService);
   private readonly exportUtil = inject(TimeSheetExportUtil);
+  private readonly route = inject(ActivatedRoute);
+  private readonly filterUtils = inject(TimeSheetFilterUtil);
 
   public readonly loading = signal(false);
 
-  public readonly projects = this.store.projects.projects;
+  public readonly projects = this.store.access.analyticsProjects;
   public readonly entries = signal<TimeSheetEntry[]>([]);
   public readonly users = signal<User[]>([]);
   public readonly filter = signal<AnalyticsFilter>({});
@@ -53,9 +74,29 @@ export class AnalyticsPage implements OnInit {
    * when nobody is selected). Scoped against the unfiltered entries so changing
    * the date range never makes a project vanish from the list.
    */
-  public readonly visibleProjects = computed(() =>
+  public readonly scopedProjects = computed(() =>
     scopeProjectsToUser(this.projects(), this.filter().userId, this.entries()),
   );
+
+  /** `scopedProjects` narrowed to the project picked in the dropdown. */
+  public readonly visibleProjects = computed(() =>
+    narrowToProject(
+      this.scopedProjects(),
+      this.filter().projectId,
+      this.projects(),
+    ),
+  );
+
+  public readonly projectUserIds = computed(() =>
+    buildProjectUserIds(this.projects(), this.entries()),
+  );
+
+  /** Team members to pick from: only the selected project's, else everyone. */
+  public readonly projectUsers = computed(() => {
+    const memberIds = this.projectUserIds().get(this.filter().projectId ?? '');
+    if (!memberIds) return this.users();
+    return this.users().filter((u) => memberIds.has(u.id));
+  });
 
   public readonly filteredEntries = computed(() => {
     const visibleIds = new Set(this.visibleProjects().map((p) => p.id));
@@ -76,6 +117,32 @@ export class AnalyticsPage implements OnInit {
       this.projects(),
     ),
   );
+  public readonly projectSearch = signal('');
+  public readonly listedRows = computed(() =>
+    filterProjectsByTerm(this.rows(), this.projectSearch()),
+  );
+
+  constructor() {
+    // A project and team member from a stale or edited URL that cannot apply
+    // together: drop the project. Waits for the entries, as a member who only
+    // logged time on a project is not known as one until they load.
+    effect(() => {
+      if (this.loading() || !this.projects().length) return;
+      const filter = this.filter();
+      if (
+        !isProjectUserPairValid(
+          this.projectUserIds(),
+          filter.projectId,
+          filter.userId,
+        )
+      ) {
+        this.filterUtils.updateQueryParams(this.route, {
+          ...filter,
+          projectId: undefined,
+        });
+      }
+    });
+  }
 
   public onFilterChange(filter: AnalyticsFilter): void {
     this.filter.set(filter);
@@ -111,12 +178,13 @@ export class AnalyticsPage implements OnInit {
     }
 
     try {
-      const projectIds = this.projects().map((project) => project.id);
-
-      if (projectIds.length) {
-        const entries = await this.entryService.findByProjectId(projectIds);
-        this.entries.set(entries);
-      }
+      // Admins see every project: skip the (possibly very long) id filter.
+      const entries = this.store.access.platformAdmin()
+        ? await this.entryService.findAllVisible()
+        : await this.entryService.findByProjectIds(
+            this.projects().map((project) => project.id),
+          );
+      this.entries.set(entries);
     } catch (error) {
       this.toast.error('Failed to fetch time sheet entries');
       this.entries.set([]);

@@ -40,15 +40,9 @@
   text-transform: uppercase;
 }
 
-.metric-pill {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.4rem;
-  padding: 0.45rem 0.85rem;
-  border-radius: 6px;
-  background: var(--color-primary-soft);
-  color: var(--color-primary);
-  font-weight: 600;
+.metric-note {
+  color: var(--text-muted);
+  font-size: 0.9rem;
   white-space: nowrap;
 }
 

@@ -14,7 +14,7 @@
       </div>
 
       @if (editing()) {
-      <span class="metric-pill">
+      <span class="metric-note">
         {{ projectUsersCount() }} {{ projectUsersCount() === 1 ? 'member' :
         'members' }}
       </span>
@@ -89,59 +89,78 @@
           </div>
 
           <div class="logo-color-row">
-          <div class="form-group">
-            <label>Project logo</label>
-            <div class="logo-upload-row">
-              <button
-                type="button"
-                class="btn btn-outline-secondary"
-                (click)="logoFileInput.click()"
-              >
-                <i class="bi bi-image me-2"></i>
-                {{ logoPreviewUrl() ? 'Change logo' : 'Choose logo' }}
-              </button>
+            <div class="form-group">
+              <label>Project logo</label>
+              <div class="logo-upload-row">
+                <button
+                  type="button"
+                  class="btn btn-outline-secondary"
+                  (click)="logoFileInput.click()"
+                >
+                  <i class="bi bi-image me-2"></i>
+                  {{ logoPreviewUrl() ? 'Change logo' : 'Choose logo' }}
+                </button>
 
-              @if (logoFile()) {
-              <span class="file-pill">{{ logoFile()?.name }}</span>
+                <span
+                  class="d-inline-block"
+                  [ngbTooltip]="
+                    !logoPreviewUrl() ? 'No image to remove' : null
+                  "
+                  container="body"
+                  triggers="hover"
+                >
+                  <button
+                    type="button"
+                    class="btn btn-outline-danger"
+                    [disabled]="isPersisting() || !logoPreviewUrl()"
+                    (click)="removeLogo(logoFileInput)"
+                  >
+                    <i class="bi bi-trash me-2"></i>
+                    Remove logo
+                  </button>
+                </span>
+
+                <!-- @if (logoFile()) {
+              <span class="file-note">{{ logoFile()?.name }}</span>
               } @else if (logoPreviewUrl()) {
-              <span class="file-pill">Existing logo</span>
+              <span class="file-note">Existing logo</span>
               } @else {
-              <span class="file-pill muted">Optional</span>
-              }
+              <span class="file-note">Optional</span>
+              } -->
+              </div>
+              <input
+                #logoFileInput
+                type="file"
+                id="logoFile"
+                name="logoFile"
+                accept="image/*"
+                class="d-none"
+                (change)="onLogoSelected($event)"
+              />
             </div>
-            <input
-              #logoFileInput
-              type="file"
-              id="logoFile"
-              name="logoFile"
-              accept="image/*"
-              class="d-none"
-              (change)="onLogoSelected($event)"
-            />
-          </div>
 
-          <fieldset class="color-fieldset">
-            <legend>Project colour</legend>
-            <div class="color-swatches">
-              @for (option of colorOptions; track option.value) {
-              <label
-                class="color-swatch"
-                [class.selected]="option.value === displayColor()"
-                [style.background-color]="option.value"
-              >
-                <input
-                  class="visually-hidden"
-                  type="radio"
-                  name="projectColor"
-                  [value]="option.value"
-                  [checked]="option.value === displayColor()"
-                  (change)="updateProjectColor(option.value)"
-                />
-                <span class="visually-hidden">{{ option.label }}</span>
-              </label>
-              }
-            </div>
-          </fieldset>
+            <fieldset class="color-fieldset">
+              <legend>Project colour</legend>
+              <div class="color-swatches">
+                @for (option of colorOptions; track option.value) {
+                <label
+                  class="color-swatch"
+                  [class.selected]="option.value === displayColor()"
+                  [style.background-color]="option.value"
+                >
+                  <input
+                    class="visually-hidden"
+                    type="radio"
+                    name="projectColor"
+                    [value]="option.value"
+                    [checked]="option.value === displayColor()"
+                    (change)="updateProjectColor(option.value)"
+                  />
+                  <span class="visually-hidden">{{ option.label }}</span>
+                </label>
+                }
+              </div>
+            </fieldset>
           </div>
 
           <div class="form-check form-switch">
@@ -165,54 +184,52 @@
       </section>
 
       <div class="project-side-column">
-      <aside class="preview-card">
-        <div class="card-header">
-          <div>
-            <h2 class="eyebrow">Preview</h2>
-            <p>
-              Keep the essentials tidy so teammates recognize the project
-              instantly.
-            </p>
+        <aside class="preview-card">
+          <div class="card-header">
+            <div>
+              <h2 class="eyebrow">Preview</h2>
+              <p>
+                Keep the essentials tidy so teammates recognize the project
+                instantly.
+              </p>
+            </div>
           </div>
-        </div>
 
-        <div class="project-preview-tile">
-          <app-project-preview
-            [logoUrl]="logoPreviewUrl()"
-            [color]="displayColor()"
-            [name]="project().name"
-            [description]="project().description"
-            namePlaceholder="Your project name"
-            descriptionPlaceholder="Add a short description to help teammates understand the project at a glance."
-          />
-        </div>
+          <div class="project-preview-tile">
+            <app-project-preview
+              [logoUrl]="logoPreviewUrl()"
+              [color]="displayColor()"
+              [name]="project().name"
+              [description]="project().description"
+              namePlaceholder="Your project name"
+              descriptionPlaceholder="Add a short description to help teammates understand the project at a glance."
+            />
+          </div>
 
-        <div class="preview-points">
-          <div class="preview-point">
-            <i class="bi bi-check2-circle"></i>
-            <span
+          <div class="preview-points">
+            <div class="preview-point">
+              <i class="bi bi-check2-circle"></i>
+              <span>
+                Clear project details help teammates find the right workspace
+                quickly.</span
               >
-              Clear project details help teammates find the right workspace
-              quickly.</span
-            >
+            </div>
+            <div class="preview-point">
+              <i class="bi bi-people"></i>
+              <span
+                >Project user management becomes available once the project
+                already exists.</span
+              >
+            </div>
+            <div class="preview-point">
+              <i class="bi bi-shield-check"></i>
+              <span
+                >Assign the right role so contributors only see the access they
+                need.</span
+              >
+            </div>
           </div>
-          <div class="preview-point">
-            <i class="bi bi-people"></i>
-            <span
-              >Project user management becomes available once the project
-              already exists.</span
-            >
-          </div>
-          <div class="preview-point">
-            <i class="bi bi-shield-check"></i>
-            <span
-              >Assign the right role so contributors only see the access they
-              need.</span
-            >
-          </div>
-        </div>
-      </aside>
-
+        </aside>
       </div>
     </div>
 
@@ -276,9 +293,7 @@
       <div class="alert alert-danger categories-error mb-3">
         {{ categoriesError() }}
       </div>
-      }
-
-      @if (!project().categories.length) {
+      } @if (!project().categories.length) {
       <p class="text-muted mb-0">
         No categories configured. Time capture will suggest categories from
         recent entries on the week view. Users can always type their own
@@ -496,6 +511,5 @@
       </div>
       }
     </section>
-
   </div>
 </div>

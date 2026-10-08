@@ -73,13 +73,13 @@ describe('AddProjectUserModal', () => {
 
   it('closes with the chosen user and role', () => {
     component.onUserSelect(ada);
-    component.role.set(ProjectUserRole.APPROVER);
+    component.role.set(ProjectUserRole.MANAGER);
 
     component.onAddClick();
 
     expect(activeModal.close).toHaveBeenCalledWith({
       user: ada,
-      role: ProjectUserRole.APPROVER,
+      role: ProjectUserRole.MANAGER,
     });
   });
 

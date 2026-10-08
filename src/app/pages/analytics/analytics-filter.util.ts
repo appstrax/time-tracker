@@ -39,6 +39,52 @@ export function scopeProjectsToUser(
   );
 }
 
+/**
+ * Narrows projects to the picked one. An empty id, or one that is not in
+ * `known` (the list the dropdown offers), leaves them all. A known project
+ * outside `projects` yields none, e.g. one the selected member has no part in.
+ */
+export function narrowToProject(
+  projects: Project[],
+  projectId: string | undefined,
+  known: Project[] = projects,
+): Project[] {
+  if (!projectId || !known.some((p) => p.id === projectId)) return projects;
+  return projects.filter((p) => p.id === projectId);
+}
+
+/**
+ * Per project, the ids of the team members to offer: its current members plus
+ * anyone who logged time on it, so former members stay selectable.
+ */
+export function buildProjectUserIds(
+  projects: Project[],
+  entries: TimeSheetEntry[],
+): Map<string, Set<string>> {
+  const map = new Map<string, Set<string>>();
+  for (const project of projects) {
+    map.set(project.id, new Set((project.users ?? []).map((u) => u.id)));
+  }
+  for (const entry of entries) {
+    map.get(entry.projectId)?.add(entry.userId);
+  }
+  return map;
+}
+
+/**
+ * Whether the project and team member filters can apply together. Either one
+ * missing, or a project that is not known, never conflicts.
+ */
+export function isProjectUserPairValid(
+  projectUserIds: Map<string, Set<string>>,
+  projectId: string | undefined,
+  userId: string | undefined,
+): boolean {
+  if (!projectId || !userId) return true;
+  const ids = projectUserIds.get(projectId);
+  return !ids || ids.has(userId);
+}
+
 /** Categories the selected team member has actually logged, sorted. */
 export function userCategoryOptions(
   entries: TimeSheetEntry[],

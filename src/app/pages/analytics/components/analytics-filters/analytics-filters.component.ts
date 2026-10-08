@@ -1,7 +1,10 @@
+import { DateInputComponent } from '../../../../components/date-input/date-input.component';
+import { ProjectDropdownComponent } from '../../../../components/project-dropdown/project-dropdown.component';
 import {
   Component,
   OnDestroy,
   OnInit,
+  computed,
   inject,
   input,
   output,
@@ -11,16 +14,16 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute } from '@angular/router';
 import { Subscription } from 'rxjs';
 
-import { AnalyticsFilter, DateRange, Status, User } from '@models';
+import { AnalyticsFilter, DateRange, Project, Status, User } from '@models';
 import { TimeSheetFilterUtil, getUserDisplayName } from '@utils';
 
-import { formatDateInput } from '../../analytics-filter.util';
+import { formatDateInput, isProjectUserPairValid } from '../../analytics-filter.util';
 
 /** Pill filters (status, range, team member, category) synced to the URL query. */
 @Component({
   selector: 'app-analytics-filters',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, DateInputComponent, ProjectDropdownComponent],
   templateUrl: './analytics-filters.component.html',
   styleUrl: './analytics-filters.component.scss',
 })
@@ -31,11 +34,18 @@ export class AnalyticsFiltersComponent implements OnInit, OnDestroy {
 
   public readonly users = input<User[]>([]);
   public readonly showUser = input(true);
+  public readonly showProject = input(false);
+  public readonly projects = input<Project[]>([]);
+  /** Team member ids per project id; picking a project drops a member outside it. */
+  public readonly projectUserIds = input<Map<string, Set<string>>>(new Map());
   public readonly categories = input<string[]>([]);
   public readonly showCategory = input(false);
 
   public readonly filterChange = output<AnalyticsFilter>();
   public readonly filter = signal<AnalyticsFilter>({});
+  public readonly selectedProject = computed(
+    () => this.projects().find((p) => p.id === this.filter().projectId) ?? null,
+  );
 
   public ngOnInit(): void {
     this.subscription = this.route.queryParams.subscribe((params) => {
@@ -60,7 +70,31 @@ export class AnalyticsFiltersComponent implements OnInit, OnDestroy {
   }
 
   public onUser(userId: string): void {
-    this.update({ userId: userId || undefined });
+    const { projectId } = this.filter();
+    // Drop a project the newly picked team member has no part in.
+    const keepProject = isProjectUserPairValid(
+      this.projectUserIds(),
+      projectId,
+      userId || undefined,
+    );
+    this.update({
+      userId: userId || undefined,
+      ...(keepProject ? {} : { projectId: undefined }),
+    });
+  }
+
+  public onProject(project: Project | null): void {
+    const { userId } = this.filter();
+    // Drop a team member who is not on the newly picked project.
+    const keepUser = isProjectUserPairValid(
+      this.projectUserIds(),
+      project?.id,
+      userId,
+    );
+    this.update({
+      projectId: project?.id,
+      ...(keepUser ? {} : { userId: undefined }),
+    });
   }
 
   public onCategory(category: string): void {

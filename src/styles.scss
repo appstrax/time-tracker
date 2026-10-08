@@ -106,6 +106,30 @@ select:-webkit-autofill {
   transition: background-color 5000s ease-in-out 0s; /* mask default yellow */
 }
 
+/* Alerts */
+.alert-danger {
+  display: flex;
+  align-items: center;
+  gap: 0.625rem;
+  padding: 0.75rem 0.875rem;
+  border: none;
+  border-left: 3px solid var(--color-danger);
+  border-radius: var(--radius-control);
+  background: var(--color-danger-soft);
+  color: var(--text-primary);
+  font-size: 0.875rem;
+  line-height: 1.5;
+}
+
+.alert-danger::before {
+  content: "\f332";
+  font-family: "bootstrap-icons";
+  font-size: 1rem;
+  line-height: 1;
+  color: var(--color-danger);
+  flex-shrink: 0;
+}
+
 /* Theming tokens */
 :root {
   /* Semantic colors */
@@ -137,6 +161,9 @@ select:-webkit-autofill {
   --tag-purple: #7c3aed;
   --tag-amber: #d97706;
   --tag-rose: #e11d48;
+
+  --color-danger: #c0312c;
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 10%, var(--color-surface));
 
   /* Map legacy vars to tokens for compatibility */
   --primary-color: var(--color-primary);
@@ -180,6 +207,9 @@ select:-webkit-autofill {
   --tag-purple: #a78bfa;
   --tag-amber: #fbbf24;
   --tag-rose: #fb7185;
+
+  --color-danger: #ff8a80;
+  --color-danger-soft: color-mix(in srgb, var(--color-danger) 14%, var(--color-surface));
 
   --primary-color: var(--color-primary);
   --primary-color-light: color-mix(
@@ -445,6 +475,14 @@ select:-webkit-autofill {
   font-weight: 700;
 }
 
+.timeline-entry-tooltip-approved {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  margin-top: 0.15rem;
+  font-weight: 700;
+}
+
 /* Themed global scrollbar */
 html {
   scrollbar-width: thin;
@@ -617,6 +655,10 @@ textarea.form-control[disabled] {
   background-color: rgba(255, 255, 255, 0.1);
 }
 
+[data-theme="dark"] .modal-header .btn-close {
+  filter: invert(1);
+}
+
 @supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
   .modal-backdrop.time-sheet-entry-backdrop.show {
     /* Bootstrap dims via opacity on an opaque bg, which paints over (and hides)
@@ -625,5 +667,114 @@ textarea.form-control[disabled] {
     background-color: rgba(0, 0, 0, 0.45);
     backdrop-filter: blur(4px);
     -webkit-backdrop-filter: blur(4px);
+  }
+}
+
+// ng-bootstrap datepicker popup (rendered in <body>, so it must be global)
+.ngb-dp-body.app-datepicker,
+ngb-datepicker.app-datepicker {
+  --ngb-dp-radius: 10px;
+  padding: 0.5rem;
+  border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-card);
+  background: var(--color-surface);
+  color: var(--text-primary);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.18);
+  z-index: 2000;
+
+  .ngb-dp-header,
+  .ngb-dp-month-name {
+    background: transparent;
+    color: var(--text-primary);
+    font-weight: 700;
+  }
+
+  .ngb-dp-navigation-select .form-select {
+    background-color: var(--color-surface);
+    color: var(--text-primary);
+    border-color: var(--color-border-strong);
+  }
+
+  .ngb-dp-arrow-btn {
+    color: var(--text-muted);
+    &:hover {
+      color: var(--color-primary);
+    }
+  }
+
+  .ngb-dp-weekday {
+    color: var(--text-muted);
+    font-style: normal;
+    font-weight: 600;
+  }
+
+  .ngb-dp-week {
+    background: transparent;
+  }
+
+  .ngb-dp-day,
+  .ngb-dp-weekday,
+  .ngb-dp-week-number {
+    width: 2.25rem;
+    height: 2.25rem;
+    line-height: 2.25rem;
+  }
+
+  .ngb-dp-day > div {
+    border-radius: var(--ngb-dp-radius);
+  }
+
+  .ngb-dp-day > div:hover {
+    background: var(--color-primary-soft);
+  }
+
+  .btn-light {
+    color: var(--text-primary);
+  }
+
+  .bg-primary {
+    background-color: var(--color-primary) !important;
+    color: var(--color-primary-contrast) !important;
+  }
+
+  .text-muted {
+    color: var(--text-muted) !important;
+  }
+
+  // Custom day cell used by the week selector
+  .app-dp-day {
+    display: block;
+    text-align: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    line-height: 2.25rem;
+    cursor: pointer;
+    border-radius: 0;
+
+    &.in-week {
+      background: var(--color-primary-soft);
+      color: var(--text-primary);
+    }
+    &.hover-week:not(.in-week) {
+      background: color-mix(in srgb, var(--color-primary) 10%, transparent);
+    }
+    &.hover-week.in-week {
+      background: color-mix(in srgb, var(--color-primary) 22%, var(--color-surface));
+    }
+    &.today,
+    &.today.in-week,
+    &.today.hover-week,
+    &.today.hover-week.in-week {
+      background: var(--color-primary);
+      color: var(--color-primary-contrast);
+      font-weight: 800;
+    }
+    &.outside {
+      opacity: 0.45;
+    }
+    &.disabled {
+      opacity: 0.3;
+      pointer-events: none;
+    }
   }
 }
