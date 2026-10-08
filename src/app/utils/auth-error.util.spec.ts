@@ -2,6 +2,10 @@ import { AuthErrors, AuthStatus } from '@appstrax/services/auth';
 
 import { AuthErrorUtil } from './auth-error.util';
 
+const SSO_DOMAIN_NOT_ALLOWED_MESSAGE =
+  'This Google account is not allowed for this app. Sign in with your work account.';
+const SSO_REQUIRED_MESSAGE = 'This account must sign in with Google SSO.';
+
 describe('AuthErrorUtil', () => {
   let util: AuthErrorUtil;
 
@@ -10,11 +14,13 @@ describe('AuthErrorUtil', () => {
   });
 
   it('maps SSO domain restriction to readable copy', () => {
-    expect(util.getMessage('sso_account_domain_not_allowed')).toContain('work Google account');
+    expect(util.getMessage('sso_account_domain_not_allowed')).toBe(
+      SSO_DOMAIN_NOT_ALLOWED_MESSAGE,
+    );
   });
 
-  it('maps ssoRequired to Continue with Google guidance', () => {
-    expect(util.getMessage('ssoRequired')).toContain('Continue with Google');
+  it('maps ssoRequired to Google SSO guidance', () => {
+    expect(util.getMessage('ssoRequired')).toBe(SSO_REQUIRED_MESSAGE);
   });
 
   it('maps password login errors from AuthErrors', () => {
@@ -50,8 +56,8 @@ describe('AuthErrorUtil', () => {
   });
 
   it('reads nested API error shapes', () => {
-    expect(
-      util.getMessage({ error: { message: 'ssoRequired' } }),
-    ).toContain('Continue with Google');
+    expect(util.getMessage({ error: { message: 'ssoRequired' } })).toBe(
+      SSO_REQUIRED_MESSAGE,
+    );
   });
 });
