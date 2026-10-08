@@ -27,6 +27,7 @@ function makeEntry(
   category: string,
   projectId = 'alpha',
   approved = true,
+  billable = true,
 ): TimeSheetEntry {
   const entry = new TimeSheetEntry();
   entry.id = id;
@@ -36,6 +37,7 @@ function makeEntry(
   entry.hours = 1;
   entry.date = new Date(2026, 0, 15);
   entry.approved = approved;
+  entry.billable = billable;
   return entry;
 }
 
@@ -210,6 +212,22 @@ describe('ProjectAnalyticsPage', () => {
     expect(component.filter()).toEqual({});
     expect(component.entries().map((e) => e.id)).toEqual(['b1']);
     expect(findByProjectIds).toHaveBeenCalledWith(['beta']);
+  });
+
+  describe('totals billable breakdown', () => {
+    it('splits billable hours by approval status', () => {
+      component.filter.set({});
+      component.entries.set([
+        makeEntry('e5', 'u1', 'Development', 'alpha', true, true),
+        makeEntry('e6', 'u1', 'Development', 'alpha', true, false),
+        makeEntry('e7', 'u1', 'Development', 'alpha', false, true),
+        makeEntry('e8', 'u1', 'Development', 'alpha', false, false),
+      ]);
+
+      expect(component.totals().billable).toBe(2);
+      expect(component.totals().approvedBillable).toBe(1);
+      expect(component.totals().pendingBillable).toBe(1);
+    });
   });
 
   describe('billable toggle gating', () => {
