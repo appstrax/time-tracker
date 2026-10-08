@@ -1,19 +1,28 @@
 import { CommonModule } from '@angular/common';
-import { Component, computed, inject, OnInit } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { Router, RouterModule } from '@angular/router';
 
 import { Project } from '@models';
 import { ToastService } from '@services';
 import { Store } from '@state';
-import { ProjectPreviewComponent } from '@components';
-import { buildProjectColorMap, getProjectColor } from '@utils';
+import { ProjectPreviewComponent, SearchInputComponent } from '@components';
+import {
+  buildProjectColorMap,
+  filterProjectsByTerm,
+  getProjectColor,
+} from '@utils';
 
 @Component({
   selector: 'app-projects',
   templateUrl: './projects.page.html',
   styleUrls: ['./projects.page.scss'],
   standalone: true,
-  imports: [CommonModule, RouterModule, ProjectPreviewComponent],
+  imports: [
+    CommonModule,
+    RouterModule,
+    ProjectPreviewComponent,
+    SearchInputComponent,
+  ],
 })
 export class ProjectsPage implements OnInit {
   private readonly store = inject(Store);
@@ -23,6 +32,10 @@ export class ProjectsPage implements OnInit {
   public readonly loading = this.store.projects.loading;
   public readonly loaded = computed(() => !!this.store.projects.fetchedAt());
   public readonly projects = this.store.projects.projects;
+  public readonly searchTerm = signal('');
+  public readonly filteredProjects = computed(() =>
+    filterProjectsByTerm(this.projects(), this.searchTerm()),
+  );
   public readonly projectColorById = computed(() =>
     buildProjectColorMap(this.projects()),
   );

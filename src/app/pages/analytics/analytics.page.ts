@@ -4,9 +4,13 @@ import { RouterLink } from '@angular/router';
 
 import { AnalyticsFilter, TimeSheetEntry, User } from '@models';
 import { AnalyticsEntriesService, ToastService, UsersService } from '@services';
-import { InsightsChartsComponent, ProjectPreviewComponent } from '@components';
+import {
+  InsightsChartsComponent,
+  ProjectPreviewComponent,
+  SearchInputComponent,
+} from '@components';
 import { Store } from '@state';
-import { TimeSheetExportUtil } from '@utils';
+import { TimeSheetExportUtil, filterProjectsByTerm } from '@utils';
 
 import {
   filterAnalyticsEntries,
@@ -30,6 +34,7 @@ import { AnalyticsFiltersComponent, MetricCardComponent } from './components';
     InsightsChartsComponent,
     MetricCardComponent,
     ProjectPreviewComponent,
+    SearchInputComponent,
   ],
   templateUrl: './analytics.page.html',
   styleUrl: './analytics.page.scss',
@@ -47,6 +52,7 @@ export class AnalyticsPage implements OnInit {
   public readonly entries = signal<TimeSheetEntry[]>([]);
   public readonly users = signal<User[]>([]);
   public readonly filter = signal<AnalyticsFilter>({});
+  public readonly searchTerm = signal('');
 
   /**
    * Projects the selected team member is in or has logged time on (all of them
@@ -68,13 +74,18 @@ export class AnalyticsPage implements OnInit {
     summarizeEntries(this.filteredEntries()),
   );
 
-  public readonly rows = computed<ProjectRow[]>(() =>
+  private readonly allRows = computed<ProjectRow[]>(() =>
     buildProjectRows(
       this.visibleProjects(),
       this.filteredEntries(),
       this.users(),
       this.projects(),
     ),
+  );
+
+  /** Project rows narrowed by the search box; charts and totals are unaffected. */
+  public readonly rows = computed(() =>
+    filterProjectsByTerm(this.allRows(), this.searchTerm()),
   );
 
   public onFilterChange(filter: AnalyticsFilter): void {
