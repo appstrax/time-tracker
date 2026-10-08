@@ -14,7 +14,7 @@
     <div class="filter-row">
       <app-analytics-filters
         [showProject]="true"
-        [projects]="projects()"
+        [projects]="scopedProjects()"
         [projectUserIds]="projectUserIds()"
         [users]="projectUsers()"
         (filterChange)="onFilterChange($event)"
